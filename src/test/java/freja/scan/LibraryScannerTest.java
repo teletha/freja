@@ -20,6 +20,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BooleanSupplier;
 
 import javax.imageio.ImageIO;
@@ -85,6 +86,80 @@ class LibraryScannerTest {
             assertEquals(2, library.photos(PhotoFilter.all()).size());
 
             assertTrue(folder.photoCount() >= 0);
+        }
+    }
+
+    @Test
+    void scansManyImagesAndRepeatsWithoutDuplicates() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("many"));
+        for (int i = 0; i < 120; i++) {
+            image(root.resolve(String.format("%03d.png", i)), 16, 12, Color.CYAN);
+        }
+
+        try (Library library = new Library(temp.resolve("library.db")); LibraryScanner scanner = new LibraryScanner(library)) {
+            scanner.start(false);
+            scanner.addFolder(root);
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(60)), "initial bulk scan did not finish");
+            assertEquals(120, library.photos(PhotoFilter.all()).size());
+
+            // The repeat scan reads catalog stamps in bulk and touches unchanged rows in batches.
+            scanner.scanAll();
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(60)), "repeat bulk scan did not finish");
+            assertEquals(120, library.photos(PhotoFilter.all()).size());
+            for (Photo photo : library.photos(PhotoFilter.all())) {
+                assertTrue(library.thumbnail(photo.id()).isPresent());
+            }
+        }
+    }
+
+    @Test
+    void reportsDirectoriesRatherThanFileNamesDuringScan() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("named"));
+        Path child = Files.createDirectories(root.resolve("child"));
+        for (int i = 0; i < 40; i++) {
+            image(child.resolve(String.format("%03d.png", i)), 16, 12, Color.CYAN);
+        }
+        List<String> messages = new CopyOnWriteArrayList<>();
+
+        try (Library library = new Library(temp.resolve("library.db")); LibraryScanner scanner = new LibraryScanner(library)) {
+            scanner.addListener(new LibraryScanner.Listener() {
+                @Override
+                public void onStateChanged(LibraryScanner.State state) {
+                    if (state.scanning()) {
+                        messages.add(state.message());
+                    }
+                }
+            });
+            scanner.start(false);
+            scanner.addFolder(root);
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(30)), "scan did not finish");
+
+            assertFalse(messages.isEmpty(), "no progress state was published");
+            for (String message : messages) {
+                assertNotNull(message);
+                assertFalse(message.contains(".png"), "a file name leaked into the status message: " + message);
+            }
+        }
+    }
+
+    @Test
+    void reportsHowLongTheScanTook() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("timed"));
+        image(root.resolve("one.png"), 32, 24, Color.RED);
+
+        try (Library library = new Library(temp.resolve("library.db")); LibraryScanner scanner = new LibraryScanner(library)) {
+            assertTrue(LibraryScanner.State.IDLE.elapsed().isZero());
+            scanner.start(false);
+            scanner.addFolder(root);
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(30)), "initial scan did not finish");
+
+            LibraryScanner.State state = scanner.state();
+            assertFalse(state.scanning());
+            assertTrue(state.elapsed().toNanos() > 0, "a finished scan must report its duration");
+
+            scanner.scanAll();
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(30)), "repeat scan did not finish");
+            assertTrue(scanner.state().elapsed().toNanos() > 0);
         }
     }
 

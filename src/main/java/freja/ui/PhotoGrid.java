@@ -32,7 +32,9 @@ import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -95,6 +97,9 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private String stickyKey;
 
+    /** Suppresses folder-change notifications while a resize rebuilds the virtual layout. */
+    private boolean suppressStickyNotification;
+
     private JScrollPane scrollPane;
 
     private int thumbSize = 190;
@@ -105,7 +110,13 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private int totalHeight;
 
+    /** The lead selection, used by the inspector and the keyboard. */
     private int selectedIndex = -1;
+
+    private final Set<Integer> selectedIndices = new HashSet<>();
+
+    /** Where a Shift-click range starts. */
+    private int anchorIndex = -1;
 
     private int hoverIndex = -1;
 
@@ -116,6 +127,15 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     };
 
     private BiConsumer<Photo, Point> onContextMenu = (photo, point) -> {
+    };
+
+    private Consumer<Long> onStickyFolder = folderId -> {
+    };
+
+    private Consumer<List<Photo>> onRemove = photos -> {
+    };
+
+    private Consumer<List<Photo>> onDeleteFromDisk = photos -> {
     };
 
     /** One visual row, either a date header or a row of cells. */
@@ -148,8 +168,21 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 }
                 int index = indexAt(event.getPoint());
                 if (index >= 0) {
-                    selectIndex(index, true);
-                    if (SwingUtilities.isRightMouseButton(event) || event.isPopupTrigger()) {
+                    boolean popup = SwingUtilities.isRightMouseButton(event) || event.isPopupTrigger();
+                    boolean control = event.isControlDown() || event.isMetaDown();
+                    if (popup && selectedIndices.contains(index)) {
+                        // Clicking a already-selected item with the right button must keep the
+                        // whole selection so the context menu can act on all of it.
+                    } else if (event.isShiftDown() && anchorIndex >= 0) {
+                        selectRange(anchorIndex, index, control);
+                    } else if (control && !popup) {
+                        toggleIndex(index);
+                        anchorIndex = index;
+                    } else {
+                        selectIndex(index, true);
+                        anchorIndex = index;
+                    }
+                    if (popup) {
                         onContextMenu.accept(photos.get(index), event.getPoint());
                     }
                 } else if (SwingUtilities.isLeftMouseButton(event)) {
@@ -192,13 +225,45 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent event) {
-                relayout();
+                preserveStickyFolder();
             }
         });
 
         addMouseWheelListener(this::handleMouseWheel);
 
         installKeys();
+    }
+
+    /**
+     * A resize changes the column count, which moves every section header. Keep the same folder at
+     * the top of the viewport so the sidebar selection does not jump to a different folder.
+     */
+    private void preserveStickyFolder() {
+        String key = stickyKey;
+        LayoutRow before = key == null ? null : headerFor(key);
+        int offset = before == null ? 0 : getVisibleRect().y - before.y();
+        suppressStickyNotification = true;
+        try {
+            relayout();
+        } finally {
+            suppressStickyNotification = false;
+        }
+        if (before != null) {
+            LayoutRow after = headerFor(key);
+            if (after != null) {
+                JScrollPane pane = scrollPane;
+                if (pane == null) {
+                    pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+                }
+                if (pane != null) {
+                    JScrollBar bar = pane.getVerticalScrollBar();
+                    int destination = Math.max(bar.getMinimum(),
+                            Math.min(bar.getMaximum() - bar.getVisibleAmount(), after.y() + offset));
+                    bar.setValue(destination);
+                }
+            }
+            stickyKey = key;
+        }
     }
 
     @Override
@@ -268,6 +333,22 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         } : listener;
     }
 
+    public void setOnRemove(Consumer<List<Photo>> listener) {
+        this.onRemove = listener == null ? photos -> {
+        } : listener;
+    }
+
+    public void setOnDeleteFromDisk(Consumer<List<Photo>> listener) {
+        this.onDeleteFromDisk = listener == null ? photos -> {
+        } : listener;
+    }
+
+    /** Receives the folder whose header is currently sticky at the top of the viewport. */
+    public void setOnStickyFolder(Consumer<Long> listener) {
+        this.onStickyFolder = listener == null ? folderId -> {
+        } : listener;
+    }
+
     /**
      * Replaces the visible photos.
      *
@@ -286,20 +367,33 @@ public final class PhotoGrid extends JComponent implements Scrollable {
      * @param sections the folder sections in display order, including empty folders
      */
     public void setPhotos(List<Photo> photos, GroupMode grouping, List<Folder> sections) {
-        long selectedId = selectedPhoto() == null ? -1 : selectedPhoto().id();
+        Set<Long> selectedIds = new HashSet<>();
+        for (int index : selectedIndices) {
+            if (index >= 0 && index < photos.size()) {
+                selectedIds.add(photos.get(index).id());
+            }
+        }
+        long leadId = selectedPhoto() == null ? -1 : selectedPhoto().id();
         this.photos = List.copyOf(photos);
         this.grouping = grouping;
         this.sections = List.copyOf(sections);
+        selectedIndices.clear();
         int restored = -1;
-        if (selectedId >= 0) {
-            for (int i = 0; i < this.photos.size(); i++) {
-                if (this.photos.get(i).id() == selectedId) {
-                    restored = i;
-                    break;
+        int first = -1;
+        for (int i = 0; i < this.photos.size(); i++) {
+            long id = this.photos.get(i).id();
+            if (selectedIds.contains(id)) {
+                selectedIndices.add(i);
+                if (first < 0) {
+                    first = i;
                 }
             }
+            if (id == leadId) {
+                restored = i;
+            }
         }
-        selectedIndex = restored;
+        selectedIndex = selectedIndices.contains(restored) ? restored : first;
+        anchorIndex = selectedIndex;
         hoverIndex = -1;
         relayout();
         repaint();
@@ -334,6 +428,15 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     /**
+     * Returns every selected photo in display order.
+     *
+     * @return the selected photos, or an empty list
+     */
+    public List<Photo> selectedPhotos() {
+        return selectedIndices.stream().sorted().map(photos::get).toList();
+    }
+
+    /**
      * Selects a photo by identity and scrolls it into view.
      *
      * @param photo a photo
@@ -363,8 +466,10 @@ public final class PhotoGrid extends JComponent implements Scrollable {
      * Clears the selection.
      */
     public void clearSelection() {
-        if (selectedIndex >= 0) {
+        if (!selectedIndices.isEmpty()) {
+            selectedIndices.clear();
             selectedIndex = -1;
+            anchorIndex = -1;
             onSelection.accept(null);
             repaint();
         }
@@ -383,14 +488,76 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         if (index < 0 || index >= photos.size()) {
             return;
         }
-        if (selectedIndex != index) {
-            selectedIndex = index;
+        boolean changed = selectedIndex != index || selectedIndices.size() != 1 || !selectedIndices.contains(index);
+        selectedIndices.clear();
+        selectedIndices.add(index);
+        selectedIndex = index;
+        anchorIndex = index;
+        if (changed) {
             repaint();
         }
         if (notify) {
             onSelection.accept(photos.get(index));
         }
         scrollTo(index);
+    }
+
+    /** Adds or removes one item, as a Ctrl-click does. */
+    private void toggleIndex(int index) {
+        if (index < 0 || index >= photos.size()) {
+            return;
+        }
+        if (selectedIndices.remove(index)) {
+            if (selectedIndex == index) {
+                selectedIndex = selectedIndices.stream().sorted().mapToInt(Integer::intValue).findFirst().orElse(-1);
+            }
+        } else {
+            selectedIndices.add(index);
+            selectedIndex = index;
+        }
+        onSelection.accept(selectedPhoto());
+        repaint(index);
+        scrollTo(index);
+    }
+
+    /** Selects the span between two items, as a Shift-click does. */
+    private void selectRange(int from, int to, boolean additive) {
+        if (from < 0 || to < 0 || from >= photos.size() || to >= photos.size()) {
+            return;
+        }
+        if (!additive) {
+            selectedIndices.clear();
+        }
+        int start = Math.min(from, to);
+        int end = Math.max(from, to);
+        for (int i = start; i <= end; i++) {
+            selectedIndices.add(i);
+        }
+        selectedIndex = to;
+        anchorIndex = from;
+        onSelection.accept(photos.get(to));
+        repaint();
+        scrollTo(to);
+    }
+
+    private void selectAll() {
+        if (photos.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < photos.size(); i++) {
+            selectedIndices.add(i);
+        }
+        selectedIndex = photos.size() - 1;
+        anchorIndex = 0;
+        onSelection.accept(photos.get(selectedIndex));
+        repaint();
+    }
+
+    private void repaint(int index) {
+        Rectangle bounds = cellRect(index);
+        if (bounds != null) {
+            repaint(bounds);
+        }
     }
 
     private void setHover(int index) {
@@ -410,12 +577,23 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     private void installKeys() {
-        bind("LEFT", () -> move(-1));
-        bind("RIGHT", () -> move(1));
-        bind("UP", () -> move(-columns));
-        bind("DOWN", () -> move(columns));
-        bind("HOME", () -> selectIndex(0, true));
-        bind("END", () -> selectIndex(photos.size() - 1, true));
+        bind("LEFT", () -> move(-1, false));
+        bind("RIGHT", () -> move(1, false));
+        bind("UP", () -> move(-columns, false));
+        bind("DOWN", () -> move(columns, false));
+        bind("shift LEFT", () -> move(-1, true));
+        bind("shift RIGHT", () -> move(1, true));
+        bind("shift UP", () -> move(-columns, true));
+        bind("shift DOWN", () -> move(columns, true));
+        bind("control A", this::selectAll);
+        bind("meta A", this::selectAll);
+        bind("ESCAPE", this::clearSelection);
+        bind("DELETE", () -> deleteSelected(false));
+        bind("shift DELETE", () -> deleteSelected(true));
+        bind("HOME", () -> moveTo(0, false));
+        bind("END", () -> moveTo(photos.size() - 1, false));
+        bind("shift END", () -> moveTo(photos.size() - 1, true));
+        bind("shift HOME", () -> moveTo(0, true));
         bind("ENTER", () -> {
             if (selectedPhoto() != null) {
                 onOpen.accept(selectedPhoto());
@@ -428,6 +606,18 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         });
     }
 
+    private void deleteSelected(boolean fromDisk) {
+        List<Photo> targets = selectedPhotos();
+        if (targets.isEmpty()) {
+            return;
+        }
+        if (fromDisk) {
+            onDeleteFromDisk.accept(targets);
+        } else {
+            onRemove.accept(targets);
+        }
+    }
+
     private void bind(String key, Runnable action) {
         getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(key), key);
         getActionMap().put(key, new AbstractAction() {
@@ -438,15 +628,20 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         });
     }
 
-    private void move(int delta) {
-        int next;
-        if (selectedIndex < 0) {
-            next = photos.isEmpty() ? -1 : 0;
-        } else {
-            next = Math.max(0, Math.min(photos.size() - 1, selectedIndex + delta));
+    private void move(int delta, boolean extend) {
+        int base = selectedIndex < 0 ? 0 : selectedIndex;
+        moveTo(Math.max(0, Math.min(photos.size() - 1, base + delta)), extend);
+    }
+
+    private void moveTo(int index, boolean extend) {
+        if (index < 0 || index >= photos.size()) {
+            return;
         }
-        if (next >= 0) {
-            selectIndex(next, true);
+        if (extend && anchorIndex >= 0) {
+            selectRange(anchorIndex, index, false);
+        } else {
+            selectIndex(index, true);
+            anchorIndex = index;
         }
     }
 
@@ -459,41 +654,53 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     /**
-     * Scrolls to the header of a folder section. Long distances jump directly; short distances
-     * animate.
+     * Scrolls to the header of a folder section. Sections at most three positions away in the
+     * display order animate; anything further jumps directly.
      *
      * @param folderId the folder identifier
+     * @return true when the folder has a section in the current layout
      */
-    public void scrollToFolder(long folderId) {
+    public boolean scrollToFolder(long folderId) {
         String key = Long.toString(folderId);
         int target = -1;
+        int targetOrder = -1;
+        int currentOrder = -1;
+        int order = -1;
         for (LayoutRow row : rows) {
-            if (row.header() && key.equals(row.groupKey())) {
+            if (!row.header() || row.groupKey() == null) {
+                continue;
+            }
+            order++;
+            if (key.equals(row.groupKey())) {
                 target = row.y();
-                break;
+                targetOrder = order;
+            }
+            if (row.groupKey().equals(stickyKey)) {
+                currentOrder = order;
             }
         }
         if (target < 0) {
-            return;
+            return false;
         }
         JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
         if (pane == null) {
-            return;
+            return true;
         }
         pane.validate();
         JScrollBar bar = pane.getVerticalScrollBar();
         int minimum = bar.getMinimum();
         int maximum = Math.max(minimum, bar.getMaximum() - bar.getVisibleAmount());
         int destination = Math.max(minimum, Math.min(maximum, target));
-        int distance = Math.abs(destination - bar.getValue());
-        int smoothLimit = Math.max(320, bar.getVisibleAmount() * 3 / 2);
-        if (distance > smoothLimit) {
-            // A long jump is easier to follow when it lands immediately.
+        // Neighbouring sections animate; anything further is a jump. Folder order is the measure,
+        // not pixels: a section can hold hundreds of photos and still be only one step away.
+        boolean nearby = currentOrder >= 0 && targetOrder >= 0 && Math.abs(targetOrder - currentOrder) <= 3;
+        if (nearby) {
+            scrollBarTo(bar, destination);
+        } else {
             stopScrollAnimation();
             bar.setValue(destination);
-        } else {
-            scrollBarTo(bar, destination);
         }
+        return true;
     }
 
     private void animateToVisible(Rectangle bounds) {
@@ -754,12 +961,23 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     private void updateSticky(int top) {
+        if (suppressStickyNotification) {
+            return;
+        }
         if (grouping != GroupMode.FOLDER || rows.isEmpty()) {
             stickyKey = null;
             return;
         }
         LayoutRow current = currentFolderHeader(top);
-        stickyKey = current == null ? null : current.groupKey();
+        String key = current == null ? null : current.groupKey();
+        boolean changed = key == null ? stickyKey != null : !key.equals(stickyKey);
+        stickyKey = key;
+        if (changed && key != null) {
+            try {
+                onStickyFolder.accept(Long.parseLong(key));
+            } catch (NumberFormatException ignored) {
+            }
+        }
     }
 
     private LayoutRow currentFolderHeader(int top) {
@@ -843,7 +1061,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     private void paintHeader(Graphics2D g, LayoutRow row, int y, boolean sticky) {
-        int x = Math.max(OUTER, gridLeft);
+        // Headers start at the outer edge, independent of how the thumbnail grid is centred.
+        int x = OUTER;
         int center = y + HEADER_HEIGHT / 2;
         boolean folderHeader = grouping == GroupMode.FOLDER;
         if (sticky) {
@@ -855,36 +1074,33 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.fillRect(0, y + HEADER_HEIGHT, getWidth(), 2);
         }
 
-        if (folderHeader) {
-            g.setColor(Theme.ACCENT);
-            g.fill(new RoundRectangle2D.Float(x - 12, center - 15, 3, 30, 2, 2));
-            Icons.folder(18, Theme.ACCENT).paintIcon(this, g, x, center - 9);
-        } else {
+        if (!folderHeader) {
             Icons.clock(17, Theme.MUTED).paintIcon(this, g, x, center - 9);
         }
-        int textX = x + 26;
-        int titleBaseline = y + 29;
+        int textX = folderHeader ? x : x + 26;
+        int titleBaseline = y + 27;
         Font titleFont = Theme.font(Font.BOLD, 16);
         g.setFont(titleFont);
         g.setColor(Theme.TEXT);
         FontMetrics titleMetrics = g.getFontMetrics();
-        String title = truncate(row.title(), titleMetrics, Math.max(80, getWidth() - textX - 150));
+        String title = truncate(row.title(), titleMetrics, Math.max(80, getWidth() - textX - OUTER));
         g.drawString(title, textX, titleBaseline);
-        int badgeX = textX + titleMetrics.stringWidth(title) + 10;
 
+        // The count and the date range sit on a second line under the title, not beside it.
         String count = row.count() + "枚";
         g.setFont(Theme.font(Font.BOLD, 10));
         FontMetrics countMetrics = g.getFontMetrics();
         int badgeWidth = countMetrics.stringWidth(count) + 14;
+        int metaBaseline = y + 47;
         g.setColor(Theme.ACCENT_SOFT);
-        g.fill(new RoundRectangle2D.Float(badgeX, y + 15, badgeWidth, 20, 10, 10));
+        g.fill(new RoundRectangle2D.Float(textX, metaBaseline - 13, badgeWidth, 18, 9, 9));
         g.setColor(Theme.ACCENT_DARK);
-        g.drawString(count, badgeX + 7, y + 29);
+        g.drawString(count, textX + 7, metaBaseline);
 
         if (row.note() != null) {
             g.setFont(Theme.font(Font.PLAIN, 11));
             g.setColor(Theme.MUTED);
-            g.drawString(row.note(), badgeX + badgeWidth + 10, y + 29);
+            g.drawString(row.note(), textX + badgeWidth + 10, metaBaseline);
         }
 
         int lineStart = textX;
@@ -903,7 +1119,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         int cardX = cell.x + padding;
         int cardY = cell.y + padding;
         int cardSize = thumbSize;
-        boolean selected = index == selectedIndex;
+        boolean selected = selectedIndices.contains(index);
         boolean hovered = index == hoverIndex;
 
         // Card background and shadow.

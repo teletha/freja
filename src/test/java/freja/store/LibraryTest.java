@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -185,6 +186,19 @@ class LibraryTest {
     }
 
     @Test
+    void foldersAreOrderedByNameRatherThanPath() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("order"));
+        Path zPathFirst = Files.createDirectories(root.resolve("a").resolve("zzz"));
+        Path aPathSecond = Files.createDirectories(root.resolve("b").resolve("aaa"));
+
+        try (Library library = new Library(temp.resolve("library.db"))) {
+            library.addFolder(zPathFirst);
+            library.addFolder(aPathSecond);
+            assertEquals(List.of("aaa", "zzz"), library.folders().stream().map(Folder::name).toList());
+        }
+    }
+
+    @Test
     void olderThumbnailsAreDiscardedForRegeneration() throws Exception {
         Path folder = Files.createDirectories(temp.resolve("photos"));
         Path file = Files.write(folder.resolve("photo.jpg"), new byte[] {1});
@@ -207,6 +221,30 @@ class LibraryTest {
         try (Library library = new Library(database)) {
             assertTrue(library.thumbnail(id).isEmpty());
             assertFalse(library.isCurrent(PathUtil.key(file), size, modified));
+        }
+    }
+
+    @Test
+    void oldPipelineThumbnailsAreRegeneratedOnNextScan() throws Exception {
+        Path folder = Files.createDirectories(temp.resolve("old-thumbs"));
+        Path file = Files.write(folder.resolve("photo.jpg"), new byte[] {1});
+        Path database = temp.resolve("thumbs.db");
+        long id;
+        try (Library library = new Library(database)) {
+            Folder added = library.addFolder(folder);
+            PhotoImporter.AnalyzedPhoto analyzed = new PhotoImporter.AnalyzedPhoto(10, 10, 1, Exif.Data.EMPTY, new byte[] {1}, 10, 10);
+            id = library.savePhoto(added.id(), file, 1, 1234, analyzed, null);
+        }
+
+        // A library written by the previous pipeline has revision 7. Its WebP thumbnail is still
+        // usable, so it is kept until the scanner decodes the file and replaces it.
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath()); Statement statement = connection.createStatement()) {
+            statement.executeUpdate("UPDATE photos SET thumbnail_revision=7 WHERE id=" + id);
+        }
+
+        try (Library library = new Library(database)) {
+            assertTrue(library.thumbnail(id).isPresent());
+            assertFalse(library.isCurrent(PathUtil.key(file), 1, 1234));
         }
     }
 }

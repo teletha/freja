@@ -10,6 +10,7 @@
 package freja.store;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -124,6 +125,28 @@ public final class Exif {
      */
     public static Data read(Path file) {
         try (DataInputStream in = new DataInputStream(new BufferedInputStream(Files.newInputStream(file), 64 * 1024))) {
+            return scan(in);
+        } catch (IOException | RuntimeException e) {
+            return Data.EMPTY;
+        }
+    }
+
+    /**
+     * Reads the EXIF block from an in-memory JPEG, which is what a scan already has after reading
+     * the file for decoding. It avoids opening the same file a second time.
+     *
+     * @param data a complete JPEG file
+     * @return the metadata, or {@link Data#EMPTY} when there is no usable EXIF block
+     */
+    public static Data read(byte[] data) {
+        if (data == null || data.length < 2) {
+            return Data.EMPTY;
+        }
+        return scan(new DataInputStream(new ByteArrayInputStream(data)));
+    }
+
+    private static Data scan(DataInputStream in) {
+        try {
             if (in.readUnsignedShort() != 0xFFD8) {
                 return Data.EMPTY;
             }

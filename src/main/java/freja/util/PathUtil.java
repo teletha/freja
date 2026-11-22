@@ -45,6 +45,21 @@ public final class PathUtil {
     }
 
     /**
+     * Builds a key for a file below a root whose key is already known. This avoids re-resolving and
+     * re-normalizing every absolute path in a large directory walk.
+     *
+     * @param rootKey the normalized key of the containing root
+     * @param root the containing root, as handed to the walk
+     * @param file a file below the root
+     * @return the same key {@link #key(Path)} would return for the file
+     */
+    public static String key(String rootKey, Path root, Path file) {
+        String relative = root.relativize(file).toString();
+        String key = rootKey.endsWith(SEPARATOR) ? rootKey + relative : rootKey + SEPARATOR + relative;
+        return File.separatorChar == '\\' ? key.toLowerCase(Locale.ROOT) : key;
+    }
+
+    /**
      * Normalizes the path for storage and display.
      *
      * @param path a file system path

@@ -29,12 +29,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,6 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import freja.model.Folder;
 import freja.model.Photo;
 import freja.store.Library;
+import freja.store.Library.FileStamp;
 import freja.store.PhotoImporter;
 import freja.util.PathUtil;
 
@@ -59,9 +61,9 @@ public final class LibraryScanner implements AutoCloseable {
 
     /** A snapshot of the scanner state for the status bar. */
     public record State(boolean scanning, boolean watching, int total, int processed, int imported, int errors,
-            String message) {
+            String message, Duration elapsed) {
 
-        public static final State IDLE = new State(false, false, 0, 0, 0, 0, "");
+        public static final State IDLE = new State(false, false, 0, 0, 0, 0, "", Duration.ZERO);
     }
 
     /** Receives scanner events. Methods may be called from a background thread. */
@@ -80,9 +82,11 @@ public final class LibraryScanner implements AutoCloseable {
     /** How often a full sweep runs when watching is enabled. */
     private static final long SWEEP_MINUTES = 5;
 
-    /** A file waiting to be decoded and the folder which contains it. */
-    private record PendingFile(Path path, long folderId) {
-    }
+    /** How many path keys are sent to SQLite in one touch statement. */
+    private static final int TOUCH_BATCH = 400;
+
+    /** How many photo rows share one commit during a scan. */
+    private static final int SAVE_BATCH = 100;
 
     private final Library library;
 
@@ -96,7 +100,19 @@ public final class LibraryScanner implements AutoCloseable {
 
     private final ConcurrentHashMap<Long, Folder> folders = new ConcurrentHashMap<>();
 
+    private final ConcurrentHashMap<String, Folder> foldersByKey = new ConcurrentHashMap<>();
+
+    /** Keeps the directory walk from queueing the whole library for decoding at once. */
+    private final Semaphore importPermits;
+
+    private final Object importMonitor = new Object();
+
+    private int activeImports;
+
     private final Set<String> importing = ConcurrentHashMap.newKeySet();
+
+    /** Decoded photos waiting for a grouped commit; watch events bypass this queue. */
+    private final ConcurrentLinkedQueue<Library.PhotoSave> pendingSaves = new ConcurrentLinkedQueue<>();
 
     private final ConcurrentHashMap<Long, String> activeTokens = new ConcurrentHashMap<>();
 
@@ -132,6 +148,12 @@ public final class LibraryScanner implements AutoCloseable {
 
     private volatile boolean scanning;
 
+    /** When the current scan started, in nanoseconds, or 0 when none is running. */
+    private volatile long scanStartedNanos;
+
+    /** How long the last completed scan took, kept for the completion message. */
+    private volatile long lastElapsedNanos;
+
     private volatile boolean watching;
 
     private volatile String message = "";
@@ -149,8 +171,9 @@ public final class LibraryScanner implements AutoCloseable {
      */
     public LibraryScanner(Library library) {
         this.library = library;
-        int threads = Math.max(2, Math.min(6, Runtime.getRuntime().availableProcessors() / 2));
+        int threads = Math.max(2, Math.min(12, Runtime.getRuntime().availableProcessors() - 1));
         this.importers = Executors.newFixedThreadPool(threads, runnable -> daemon(runnable, "freja-import"));
+        this.importPermits = new Semaphore(threads * 2);
     }
 
     /**
@@ -221,7 +244,7 @@ public final class LibraryScanner implements AutoCloseable {
      */
     public Folder addFolder(Path directory) {
         Folder folder = library.addFolder(directory);
-        folders.put(folder.id(), folder);
+        remember(folder);
         if (watching) {
             scheduler.execute(() -> registerTree(folder.path()));
         }
@@ -242,6 +265,7 @@ public final class LibraryScanner implements AutoCloseable {
                 unregisterTree(folder.path());
             }
             folders.entrySet().removeIf(entry -> PathUtil.contains(folder.path(), entry.getValue().path()));
+            foldersByKey.entrySet().removeIf(entry -> PathUtil.contains(folder.path(), Path.of(entry.getKey())));
         }
         library.removeFolder(folderId);
         notifyChanged(true);
@@ -275,7 +299,7 @@ public final class LibraryScanner implements AutoCloseable {
         Path parent = photo.path().getParent();
         if (parent != null && Files.isDirectory(parent)) {
             owner = library.ensureFolder(parent);
-            folders.put(owner.id(), owner);
+            remember(owner);
         }
         requestImport(owner == null ? photo.folderId() : owner.id(), photo.path());
     }
@@ -286,7 +310,9 @@ public final class LibraryScanner implements AutoCloseable {
      * @return the scanner state
      */
     public State state() {
-        return new State(scanning, watching, total.get(), processed.get(), imported.get(), errors.get(), message);
+        long nanos = scanning && scanStartedNanos > 0 ? System.nanoTime() - scanStartedNanos : lastElapsedNanos;
+        return new State(scanning, watching, total.get(), processed.get(), imported.get(), errors.get(), message,
+                Duration.ofNanos(Math.max(0, nanos)));
     }
 
     /**
@@ -313,9 +339,16 @@ public final class LibraryScanner implements AutoCloseable {
 
     private void refreshFolders() {
         folders.clear();
+        foldersByKey.clear();
         for (Folder folder : library.folders()) {
             folders.put(folder.id(), folder);
+            foldersByKey.put(PathUtil.key(folder.path()), folder);
         }
+    }
+
+    private void remember(Folder folder) {
+        folders.put(folder.id(), folder);
+        foldersByKey.put(PathUtil.key(folder.path()), folder);
     }
 
     private void requestScan() {
@@ -357,6 +390,8 @@ public final class LibraryScanner implements AutoCloseable {
                     continue;
                 }
                 scanning = true;
+                scanStartedNanos = System.nanoTime();
+                lastElapsedNanos = 0;
                 total.set(0);
                 processed.set(0);
                 imported.set(0);
@@ -370,6 +405,8 @@ public final class LibraryScanner implements AutoCloseable {
                     }
                     scanFolderInternal(folder);
                 }
+                lastElapsedNanos = System.nanoTime() - scanStartedNanos;
+                scanStartedNanos = 0;
                 scanning = false;
                 message = lastError == null ? "" : lastError;
                 publishState(true);
@@ -379,6 +416,10 @@ public final class LibraryScanner implements AutoCloseable {
             lastError = "スキャンに失敗しました: " + e.getMessage();
             errors.incrementAndGet();
         } finally {
+            if (scanStartedNanos > 0) {
+                lastElapsedNanos = System.nanoTime() - scanStartedNanos;
+                scanStartedNanos = 0;
+            }
             scanning = false;
             scanTaskRunning.set(false);
             publishState(true);
@@ -397,7 +438,10 @@ public final class LibraryScanner implements AutoCloseable {
         }
         String token = library.beginScan(folder.id());
         activeTokens.put(folder.id(), token);
-        Map<String, Long> owners = new HashMap<>();
+        String rootKey = PathUtil.key(root);
+        Map<Path, Long> owners = new HashMap<>();
+        Map<String, FileStamp> stamps = library.currentFiles(root);
+        Map<Long, List<String>> unchanged = new HashMap<>();
         Set<Long> visited = new HashSet<>();
         Set<Long> candidates = new HashSet<>();
         for (Folder known : folders.values()) {
@@ -405,7 +449,6 @@ public final class LibraryScanner implements AutoCloseable {
                 candidates.add(known.id());
             }
         }
-        List<PendingFile> changed = new ArrayList<>();
         AtomicBoolean walkFinished = new AtomicBoolean(true);
         message = folder.name() + " をスキャン中";
         publishState(true);
@@ -413,10 +456,17 @@ public final class LibraryScanner implements AutoCloseable {
             Files.walkFileTree(root, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                    Folder managed = library.ensureFolder(dir);
-                    folders.put(managed.id(), managed);
+                    // Reports the directory the walk is in, not the individual file being decoded.
+                    message = PathUtil.folderName(dir) + " をスキャン中";
+                    // Almost every directory is already known from refreshFolders(). Reusing that
+                    // entry avoids a SELECT with a COUNT subquery per directory of the tree.
+                    Folder managed = foldersByKey.get(PathUtil.key(dir));
+                    if (managed == null) {
+                        managed = library.ensureFolder(dir);
+                    }
+                    remember(managed);
                     visited.add(managed.id());
-                    owners.put(PathUtil.key(dir), managed.id());
+                    owners.put(dir, managed.id());
                     if (watching) {
                         register(dir);
                     }
@@ -429,15 +479,17 @@ public final class LibraryScanner implements AutoCloseable {
                         return FileVisitResult.CONTINUE;
                     }
                     total.incrementAndGet();
-                    long ownerId = owners.getOrDefault(PathUtil.key(file.getParent()), folder.id());
-                    String key = PathUtil.key(file);
+                    long ownerId = owners.getOrDefault(file.getParent(), folder.id());
+                    String key = PathUtil.key(rootKey, root, file);
                     try {
-                        if (library.isCurrent(key, attrs.size(), attrs.lastModifiedTime().toMillis())) {
-                            library.touch(key, token, ownerId);
+                        FileStamp stamp = stamps.remove(key);
+                        if (stamp != null && stamp.size() == attrs.size()
+                                && stamp.modifiedAt() == attrs.lastModifiedTime().toMillis()) {
+                            unchanged.computeIfAbsent(ownerId, ignored -> new ArrayList<>()).add(key);
                             processed.incrementAndGet();
                             publishState(false);
                         } else {
-                            changed.add(new PendingFile(file, ownerId));
+                            submitImport(ownerId, file, token, attrs);
                         }
                     } catch (RuntimeException e) {
                         errors.incrementAndGet();
@@ -465,18 +517,12 @@ public final class LibraryScanner implements AutoCloseable {
                 }
             });
 
-            List<Future<?>> imports = new ArrayList<>(changed.size());
-            for (PendingFile pending : changed) {
-                if (closed.get()) {
-                    break;
-                }
-                imports.add(importers.submit(() -> importFile(pending.folderId(), pending.path(), token)));
-            }
-            for (Future<?> future : imports) {
-                try {
-                    future.get();
-                } catch (Exception e) {
-                    errors.incrementAndGet();
+            awaitImports();
+            drainAllSaves();
+            for (Map.Entry<Long, List<String>> entry : unchanged.entrySet()) {
+                List<String> keys = entry.getValue();
+                for (int from = 0; from < keys.size(); from += TOUCH_BATCH) {
+                    library.touchBatch(keys.subList(from, Math.min(from + TOUCH_BATCH, keys.size())), token, entry.getKey());
                 }
             }
             if (walkFinished.get() && !closed.get()) {
@@ -486,6 +532,7 @@ public final class LibraryScanner implements AutoCloseable {
                     int removed = library.deleteFolders(candidates);
                     if (removed > 0) {
                         folders.keySet().removeAll(candidates);
+                        foldersByKey.values().removeIf(candidates::contains);
                         notifyChanged(true);
                     }
                 }
@@ -498,6 +545,100 @@ public final class LibraryScanner implements AutoCloseable {
             activeTokens.remove(folder.id());
             processed.set(total.get());
             publishState(true);
+        }
+    }
+
+    /**
+     * Queues one decode while the directory walk continues. The semaphore keeps only a bounded
+     * number of files in flight; the monitor lets the scan wait for every queued decode before it
+     * prunes rows that were not seen.
+     */
+    private void submitImport(long folderId, Path file, String token, BasicFileAttributes attrs) {
+        if (closed.get()) {
+            return;
+        }
+        try {
+            importPermits.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+        synchronized (importMonitor) {
+            activeImports++;
+        }
+        try {
+            importers.submit(() -> {
+                try {
+                    importFile(folderId, file, token, attrs);
+                } catch (RuntimeException e) {
+                    errors.incrementAndGet();
+                    lastError = e.getMessage();
+                } finally {
+                    releaseImport();
+                }
+            });
+        } catch (RuntimeException e) {
+            releaseImport();
+            errors.incrementAndGet();
+            lastError = e.getMessage();
+        }
+    }
+
+    private void releaseImport() {
+        importPermits.release();
+        synchronized (importMonitor) {
+            activeImports--;
+            importMonitor.notifyAll();
+        }
+    }
+
+    private void awaitImports() {
+        synchronized (importMonitor) {
+            while (activeImports > 0 && !closed.get()) {
+                try {
+                    importMonitor.wait(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }
+    }
+
+    private void recordSave(long folderId, Path file, long size, long modified,
+            PhotoImporter.AnalyzedPhoto analyzed, String effectiveToken, String scanToken) {
+        Library.PhotoSave save = new Library.PhotoSave(folderId, file, size, modified, analyzed, effectiveToken);
+        if (scanToken == null) {
+            // A watch event is a single write; a transaction of its own is cheaper than a batch.
+            library.savePhoto(save);
+            return;
+        }
+        pendingSaves.add(save);
+        if (pendingSaves.size() >= SAVE_BATCH) {
+            drainSaves();
+        }
+    }
+
+    private void drainSaves() {
+        List<Library.PhotoSave> batch = new ArrayList<>(SAVE_BATCH);
+        Library.PhotoSave next;
+        while (batch.size() < SAVE_BATCH && (next = pendingSaves.poll()) != null) {
+            batch.add(next);
+        }
+        if (batch.isEmpty()) {
+            return;
+        }
+        try {
+            library.savePhotoBatch(batch);
+        } catch (RuntimeException e) {
+            errors.incrementAndGet();
+            lastError = e.getMessage();
+        }
+    }
+
+    private void drainAllSaves() {
+        while (!pendingSaves.isEmpty()) {
+            drainSaves();
         }
     }
 
@@ -522,6 +663,13 @@ public final class LibraryScanner implements AutoCloseable {
     }
 
     private void importFile(long folderId, Path file, String token) {
+        importFile(folderId, file, token, null);
+    }
+
+    /**
+     * @param supplied attributes already read by the directory walk, or null for a watch event
+     */
+    private void importFile(long folderId, Path file, String token, BasicFileAttributes supplied) {
         if (closed.get() || !PathUtil.isImage(file)) {
             return;
         }
@@ -531,23 +679,30 @@ public final class LibraryScanner implements AutoCloseable {
         }
         busy.incrementAndGet();
         try {
-            BasicFileAttributes before = Files.readAttributes(file, BasicFileAttributes.class);
+            BasicFileAttributes before = supplied != null ? supplied : Files.readAttributes(file, BasicFileAttributes.class);
             if (!before.isRegularFile()) {
                 return;
             }
             long size = before.size();
             long modified = before.lastModifiedTime().toMillis();
             String effectiveToken = token != null ? token : activeTokenFor(file);
-            if (library.isCurrent(key, size, modified)) {
+            // A scan has already compared the catalog stamp; only watch events need this check.
+            if (supplied == null && library.isCurrent(key, size, modified)) {
                 library.touch(key, effectiveToken, folderId);
                 return;
             }
-            message = file.getFileName() + " を読み込み中";
+            // During a scan the directory walk owns the message. Only a watch event has no walk to
+            // describe it, so name the containing directory rather than the individual file.
+            if (!scanning) {
+                Path parent = file.getParent();
+                String directory = parent == null ? file.getFileName().toString() : PathUtil.folderName(parent);
+                message = directory + " をスキャン中";
+            }
             PhotoImporter.AnalyzedPhoto analyzed;
             try {
-                analyzed = PhotoImporter.analyze(file);
+                analyzed = PhotoImporter.analyze(file, modified);
             } catch (IOException e) {
-                library.savePhoto(folderId, file, size, modified, null, effectiveToken);
+                recordSave(folderId, file, size, modified, null, effectiveToken, token);
                 errors.incrementAndGet();
                 lastError = e.getMessage();
                 notifyChanged(false);
@@ -559,7 +714,7 @@ public final class LibraryScanner implements AutoCloseable {
                 requestImport(folderId, file);
                 return;
             }
-            library.savePhoto(folderId, file, size, modified, analyzed, effectiveToken);
+            recordSave(folderId, file, size, modified, analyzed, effectiveToken, token);
             imported.incrementAndGet();
             notifyChanged(false);
         } catch (IOException | RuntimeException e) {
@@ -577,6 +732,13 @@ public final class LibraryScanner implements AutoCloseable {
      * Finds the token of an active scan whose root contains the file.
      */
     private String activeTokenFor(Path file) {
+        Path parent = file.getParent();
+        if (parent != null) {
+            Folder owner = foldersByKey.get(PathUtil.key(parent));
+            if (owner != null) {
+                return activeTokens.get(owner.id());
+            }
+        }
         String token = null;
         int length = -1;
         for (Map.Entry<Long, String> entry : activeTokens.entrySet()) {
@@ -698,7 +860,7 @@ public final class LibraryScanner implements AutoCloseable {
             boolean known = folders.values().stream().anyMatch(value -> PathUtil.key(value.path()).equals(key));
             if (!known) {
                 Folder managed = library.ensureFolder(path);
-                folders.put(managed.id(), managed);
+                remember(managed);
                 if (watching) {
                     registerTree(path);
                 }
@@ -710,7 +872,7 @@ public final class LibraryScanner implements AutoCloseable {
                 Path parent = path.getParent();
                 if (parent != null && Files.isDirectory(parent)) {
                     folder = library.ensureFolder(parent);
-                    folders.put(folder.id(), folder);
+                    remember(folder);
                 }
                 importFile(folder.id(), path, null);
             }
@@ -722,6 +884,10 @@ public final class LibraryScanner implements AutoCloseable {
                 removedPhotos = library.deleteUnder(folder.id(), path);
                 removedFolders = library.removeAutoFoldersUnder(path);
             }
+            if (removedFolders > 0) {
+                folders.entrySet().removeIf(entry -> PathUtil.contains(path, entry.getValue().path()));
+                foldersByKey.entrySet().removeIf(entry -> PathUtil.contains(path, Path.of(entry.getKey())));
+            }
             if (deleted || removedPhotos > 0 || removedFolders > 0) {
                 notifyChanged(true);
             }
@@ -729,6 +895,19 @@ public final class LibraryScanner implements AutoCloseable {
     }
 
     private Optional<Folder> folderFor(Path path) {
+        // The exact directory wins, matching the longest-containing-folder fallback below. Files
+        // are not folders, so their parent is the usual fast path.
+        Folder exact = foldersByKey.get(PathUtil.key(path));
+        if (exact != null) {
+            return Optional.of(exact);
+        }
+        Path parent = path.getParent();
+        if (parent != null) {
+            Folder owner = foldersByKey.get(PathUtil.key(parent));
+            if (owner != null) {
+                return Optional.of(owner);
+            }
+        }
         Folder best = null;
         int bestLength = -1;
         for (Folder folder : folders.values()) {
@@ -768,12 +947,9 @@ public final class LibraryScanner implements AutoCloseable {
         if (watchService == null) {
             return;
         }
-        Path normalized;
-        try {
-            normalized = directory.toRealPath();
-        } catch (IOException e) {
-            normalized = directory.toAbsolutePath().normalize();
-        }
+        // Resolving every directory through toRealPath() costs one filesystem call per folder.
+        // The walk already hands us absolute, normalized paths, so that call is unnecessary here.
+        Path normalized = directory.toAbsolutePath().normalize();
         if (!watchedPaths.add(normalized)) {
             return;
         }

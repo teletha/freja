@@ -98,7 +98,8 @@ public final class Freja {
                     library.close();
                 }
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Freja を起動できません。\n\n" + e.getMessage() + "\n\nライブラリ: " + location, "Freja", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Freja を起動できません。\n\n" + e
+                        .getMessage() + "\n\nライブラリ: " + location, "Freja", JOptionPane.ERROR_MESSAGE);
             }
         });
     }

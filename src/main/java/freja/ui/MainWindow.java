@@ -20,9 +20,12 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -73,6 +76,7 @@ import freja.model.PhotoFilter;
 import freja.model.PhotoFilter.SortOrder;
 import freja.scan.LibraryScanner;
 import freja.store.Library;
+import freja.util.PathUtil;
 
 /**
  * The main application window.
@@ -84,6 +88,12 @@ public final class MainWindow extends JFrame {
     private static final String SORT_PREFERENCE = "view.sortOrder";
 
     private static final String LAST_FOLDER_PREFERENCE = "folder.lastDirectory";
+
+    private static final String SELECTED_FOLDER_PREFERENCE = "view.selectedFolderPath";
+
+    private static final String SIDEBAR_DIVIDER_PREFERENCE = "view.sidebarDivider";
+
+    private static final String INSPECTOR_VISIBLE_PREFERENCE = "view.inspectorVisible";
 
     private final Library library;
 
@@ -117,9 +127,16 @@ public final class MainWindow extends JFrame {
 
     private final JCheckBoxMenuItem darkModeItem = new JCheckBoxMenuItem("ダークモード", Theme.isDark());
 
+    private final JCheckBoxMenuItem inspectorItem = new JCheckBoxMenuItem("インスペクター", true);
+
     private JButton themeButton;
 
     private javax.swing.JSplitPane split;
+
+    private javax.swing.JSplitPane sidebarSplit;
+
+    /** Read before the split pane fires initial layout events that would overwrite the preference. */
+    private int savedSidebarDivider;
 
     private final Timer refreshTimer;
 
@@ -135,6 +152,8 @@ public final class MainWindow extends JFrame {
 
     private boolean refreshScheduled;
 
+    private volatile boolean scanning;
+
     private boolean updatingSort;
 
     private boolean scrollToSelectedFolder;
@@ -144,7 +163,7 @@ public final class MainWindow extends JFrame {
         this.library = library;
         this.scanner = scanner;
         this.cache = new ThumbnailCache(library);
-        this.inspector = new PhotoInspector(cache);
+        this.inspector = new PhotoInspector();
         this.grid = new PhotoGrid(cache);
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -165,12 +184,19 @@ public final class MainWindow extends JFrame {
         scanner.addListener(new LibraryScanner.Listener() {
             @Override
             public void onStateChanged(LibraryScanner.State state) {
+                scanning = state.scanning();
                 SwingUtilities.invokeLater(() -> applyState(state));
             }
 
             @Override
             public void onLibraryChanged() {
                 cache.retryMissing();
+                // A full refresh loads and sorts every row on the EDT. During an initial scan that
+                // would be repeated for every batch of imports; progress is already shown by
+                // applyState, so wait for the completion notification instead.
+                if (scanning) {
+                    return;
+                }
                 SwingUtilities.invokeLater(MainWindow.this::scheduleRefresh);
             }
         });
@@ -183,12 +209,12 @@ public final class MainWindow extends JFrame {
         });
 
         applyState(scanner.state());
+        restoreSelectedFolder();
         refreshAll();
     }
 
     private void buildUi() {
         setLayout(new BorderLayout());
-        add(sidebar, BorderLayout.WEST);
 
         JPanel main = new JPanel(new BorderLayout());
         main.add(toolbar(), BorderLayout.NORTH);
@@ -214,7 +240,24 @@ public final class MainWindow extends JFrame {
         split.setContinuousLayout(true);
         main.add(split, BorderLayout.CENTER);
         main.add(statusBar(), BorderLayout.SOUTH);
-        add(main, BorderLayout.CENTER);
+
+        sidebar.setMinimumSize(new Dimension(180, 0));
+        main.setMinimumSize(new Dimension(420, 0));
+        sidebarSplit = new javax.swing.JSplitPane(javax.swing.JSplitPane.HORIZONTAL_SPLIT, sidebar, main);
+        sidebarSplit.setBorder(null);
+        sidebarSplit.setDividerSize(5);
+        sidebarSplit.setResizeWeight(0.0);
+        sidebarSplit.setContinuousLayout(true);
+        sidebarSplit.setBackground(Theme.BORDER);
+        savedSidebarDivider = PREFERENCES.getInt(SIDEBAR_DIVIDER_PREFERENCE, 246);
+        sidebarSplit.addPropertyChangeListener(javax.swing.JSplitPane.DIVIDER_LOCATION_PROPERTY, event -> {
+            int location = sidebarSplit.getDividerLocation();
+            // The initial layout reports 0. Persisting that would destroy the saved position.
+            if (location > 0 && sidebarSplit.isShowing()) {
+                PREFERENCES.putInt(SIDEBAR_DIVIDER_PREFERENCE, location);
+            }
+        });
+        add(sidebarSplit, BorderLayout.CENTER);
 
         setJMenuBar(menuBar());
     }
@@ -241,15 +284,22 @@ public final class MainWindow extends JFrame {
         bar.add(rescan);
         bar.add(Box.createHorizontalStrut(14));
 
-        JPanel searchBox = new JPanel(new BorderLayout(6, 0));
-        searchBox.setOpaque(false);
-        searchBox.add(new JLabel(Icons.search(15, Theme.MUTED)), BorderLayout.WEST);
-        search.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ファイル名・フォルダ名・カメラ・キャプションを検索");
+        // Swing beeps when Backspace/Delete is pressed on an empty text field.
+        search.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent event) {
+                if (search.getText().isEmpty()
+                        && (event.getKeyCode() == KeyEvent.VK_BACK_SPACE || event.getKeyCode() == KeyEvent.VK_DELETE)) {
+                    event.consume();
+                }
+            }
+        });
+        search.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(15, Theme.MUTED));
+        search.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "検索");
         search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         search.setPreferredSize(new Dimension(300, 31));
         search.setMaximumSize(new Dimension(360, 31));
-        searchBox.add(search, BorderLayout.CENTER);
-        bar.add(searchBox);
+        bar.add(search);
         bar.add(Box.createHorizontalGlue());
 
         sort.setRenderer(sortRenderer());
@@ -397,6 +447,9 @@ public final class MainWindow extends JFrame {
             search.selectAll();
         }));
         view.addSeparator();
+        inspectorItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
+        inspectorItem.addActionListener(event -> setInspectorVisible(inspectorItem.isSelected()));
+        view.add(inspectorItem);
         darkModeItem.setAccelerator(KeyStroke.getKeyStroke("control shift D"));
         darkModeItem.addActionListener(event -> setDarkMode(darkModeItem.isSelected()));
         view.add(darkModeItem);
@@ -456,6 +509,14 @@ public final class MainWindow extends JFrame {
         });
 
         grid.setOnSelection(this::showInspector);
+        grid.setOnStickyFolder(folderId -> {
+            // Following the sticky header keeps the sidebar in sync while the grid is scrolled.
+            sidebar.selectFolderSilently(folderId);
+            mode = Sidebar.Mode.FOLDER;
+            this.folderId = folderId;
+        });
+        grid.setOnRemove(this::removeFromLibrary);
+        grid.setOnDeleteFromDisk(this::deleteFromDisk);
         grid.setOnOpen(this::openViewer);
         grid.setOnContextMenu(this::showPhotoMenu);
 
@@ -521,14 +582,30 @@ public final class MainWindow extends JFrame {
         });
     }
 
+    /** Shows or hides the details panel and remembers the choice. */
+    private void setInspectorVisible(boolean visible) {
+        inspectorItem.setSelected(visible);
+        inspector.setVisible(visible);
+        if (split.getWidth() > 0) {
+            split.setDividerLocation(visible ? Math.max(0, split.getWidth() - 308) : split.getWidth());
+        }
+        split.revalidate();
+        split.repaint();
+        PREFERENCES.putBoolean(INSPECTOR_VISIBLE_PREFERENCE, visible);
+    }
+
     /**
      * Starts the background scanner.
      */
     public void start() {
         scanner.start();
         SwingUtilities.invokeLater(() -> {
+            if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && savedSidebarDivider > 0) {
+                sidebarSplit.setDividerLocation(Math.max(180, savedSidebarDivider));
+            }
             if (split != null && split.getWidth() > 0) {
-                split.setDividerLocation(0.78);
+                inspectorItem.setSelected(PREFERENCES.getBoolean(INSPECTOR_VISIBLE_PREFERENCE, true));
+                setInspectorVisible(inspectorItem.isSelected());
             }
         });
     }
@@ -624,11 +701,51 @@ public final class MainWindow extends JFrame {
     }
 
     private void selectMode(Sidebar.Mode mode, long folderId) {
+        if (this.mode == mode && this.folderId == folderId) {
+            return;
+        }
+        boolean folderToFolder = this.mode == Sidebar.Mode.FOLDER && mode == Sidebar.Mode.FOLDER && folderId >= 0;
         this.mode = mode;
         this.folderId = folderId;
         this.scrollToSelectedFolder = mode == Sidebar.Mode.FOLDER && folderId >= 0;
+        if (this.scrollToSelectedFolder) {
+            rememberSelectedFolder(folderId);
+        }
         applySortForCurrentView();
+        if (folderToFolder && grid.scrollToFolder(folderId)) {
+            // The grid already contains every folder section. Moving between them only needs a
+            // scroll; reloading and re-sorting the whole library would land one step behind the click.
+            scrollToSelectedFolder = false;
+            return;
+        }
         refreshAll();
+    }
+
+    /** Remembers the last selected folder by path, so a rebuilt catalog can still resolve it. */
+    private void rememberSelectedFolder(long id) {
+        library.folder(id).ifPresent(folder -> PREFERENCES.put(SELECTED_FOLDER_PREFERENCE, folder.path().toString()));
+    }
+
+    /** Restores the folder selected before the previous launch, when it still exists. */
+    private void restoreSelectedFolder() {
+        String path = PREFERENCES.get(SELECTED_FOLDER_PREFERENCE, "");
+        if (path.isBlank()) {
+            return;
+        }
+        try {
+            String key = PathUtil.key(Path.of(path));
+            for (Folder folder : library.folders()) {
+                if (PathUtil.key(folder.path()).equals(key)) {
+                    mode = Sidebar.Mode.FOLDER;
+                    folderId = folder.id();
+                    scrollToSelectedFolder = true;
+                    applySortForCurrentView();
+                    return;
+                }
+            }
+        } catch (RuntimeException e) {
+            // A stale or malformed preference is simply ignored; the library view stays as it was.
+        }
     }
 
     private void applySortForCurrentView() {
@@ -651,47 +768,119 @@ public final class MainWindow extends JFrame {
     }
 
     private void showPhotoMenu(Photo photo, java.awt.Point point) {
+        List<Photo> selected = grid.selectedPhotos();
+        List<Photo> targets = selected.size() > 1 && selected.contains(photo) ? selected : List.of(photo);
+        String suffix = targets.size() > 1 ? " (" + targets.size() + "枚)" : "";
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem open = new JMenuItem("開く");
-        open.addActionListener(event -> openViewer(photo));
+        JMenuItem open = new JMenuItem("開く" + suffix);
+        open.addActionListener(event -> openViewer(photo, targets));
         menu.add(open);
-        JMenuItem favorite = new JMenuItem(photo.favorite() ? "お気に入りから外す" : "お気に入りに追加");
-        favorite.addActionListener(event -> setFavorite(photo, !photo.favorite()));
+        JMenuItem favorite = new JMenuItem((photo.favorite() ? "お気に入りから外す" : "お気に入りに追加") + suffix);
+        favorite.addActionListener(event -> setFavorites(targets, !photo.favorite()));
         menu.add(favorite);
         menu.addSeparator();
         JMenuItem reveal = new JMenuItem("エクスプローラーで表示");
         reveal.addActionListener(event -> reveal(photo.path()));
         menu.add(reveal);
-        JMenuItem reimport = new JMenuItem("再読み込み");
+        JMenuItem reimport = new JMenuItem("再読み込み" + suffix);
         reimport.addActionListener(event -> {
             cache.clear();
-            scanner.reimport(photo);
-            statusMessage.setText(photo.fileName() + " を再読み込みしています…");
+            for (Photo target : targets) {
+                scanner.reimport(target);
+            }
+            statusMessage.setText(targets.size() + " 枚を再読み込みしています…");
         });
         menu.add(reimport);
         menu.addSeparator();
-        JMenuItem remove = new JMenuItem("ライブラリから削除");
-        remove.addActionListener(event -> {
-            int answer = JOptionPane.showConfirmDialog(this, photo.fileName() + " をライブラリから削除します。\n写真ファイル自体は削除されません。", "写真を削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (answer == JOptionPane.OK_OPTION) {
-                library.deletePhoto(photo.id());
-                inspectorPhoto = null;
-                inspector.show(null);
-                refreshAll();
-            }
-        });
+        JMenuItem remove = new JMenuItem("ライブラリから削除" + suffix);
+        remove.addActionListener(event -> removeFromLibrary(targets));
         menu.add(remove);
+        JMenuItem deleteFromDisk = new JMenuItem("ディスクから削除" + suffix);
+        deleteFromDisk.addActionListener(event -> deleteFromDisk(targets));
+        menu.add(deleteFromDisk);
         menu.show(grid, point.x, point.y);
     }
 
+    /** Removes catalog entries only; the files on disk are left alone. */
+    private void removeFromLibrary(List<Photo> photos) {
+        if (photos.isEmpty()) {
+            return;
+        }
+        String description = photos.size() > 1
+                ? photos.size() + " 枚の写真をライブラリから削除します。"
+                : photos.get(0).fileName() + " をライブラリから削除します。";
+        int answer = JOptionPane.showConfirmDialog(this,
+                description + "\n写真ファイル自体は削除されません。",
+                "写真を削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (answer != JOptionPane.OK_OPTION) {
+            return;
+        }
+        for (Photo photo : photos) {
+            library.deletePhoto(photo.id());
+        }
+        inspectorPhoto = null;
+        inspector.show(null);
+        refreshAll();
+    }
+
+    /** Removes the original files as well as their catalog entries. Cannot be undone. */
+    private void deleteFromDisk(List<Photo> photos) {
+        if (photos.isEmpty()) {
+            return;
+        }
+        String description = photos.size() > 1
+                ? photos.size() + " 枚の画像ファイルをディスクから完全に削除します。"
+                : photos.get(0).fileName() + " をディスクから完全に削除します。";
+        int answer = JOptionPane.showConfirmDialog(this,
+                description + "\n\nこの操作は取り消せません。ライブラリからも削除されます。",
+                "ディスクから削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (answer != JOptionPane.OK_OPTION) {
+            return;
+        }
+        int deleted = 0;
+        int failed = 0;
+        for (Photo photo : photos) {
+            try {
+                if (Files.deleteIfExists(photo.path())) {
+                    library.deletePhoto(photo.id());
+                    deleted++;
+                } else {
+                    failed++;
+                }
+            } catch (Exception e) {
+                failed++;
+            }
+        }
+        inspectorPhoto = null;
+        inspector.show(null);
+        refreshAll();
+        statusMessage.setText(failed == 0
+                ? deleted + " 枚をディスクから削除しました"
+                : deleted + " 枚を削除し、" + failed + " 枚は削除できませんでした");
+    }
+
+    private void setFavorites(List<Photo> photos, boolean favorite) {
+        for (Photo photo : photos) {
+            library.setFavorite(photo.id(), favorite);
+        }
+        Photo lead = photos.isEmpty() ? null : photos.get(0).withFavorite(favorite);
+        inspectorPhoto = lead;
+        inspector.show(lead);
+        refreshAll();
+    }
+
     private void openViewer(Photo photo) {
+        openViewer(photo, grid.photos());
+    }
+
+    private void openViewer(Photo photo, List<Photo> selection) {
         if (photo == null) {
             return;
         }
         if (viewer != null && viewer.isDisplayable()) {
             viewer.dispose();
         }
-        List<Photo> photos = grid.photos();
+        List<Photo> photos = selection == null || selection.isEmpty() ? grid.photos() : selection;
         if (photos.isEmpty()) {
             photos = List.of(photo);
         }
@@ -783,12 +972,6 @@ public final class MainWindow extends JFrame {
         try {
             List<Folder> folders = library.folders();
             LibraryStats stats = library.stats();
-            if (mode == Sidebar.Mode.FOLDER && folders.stream().noneMatch(folder -> folder.id() == folderId)) {
-                mode = Sidebar.Mode.ALL;
-                folderId = -1;
-                scrollToSelectedFolder = false;
-                applySortForCurrentView();
-            }
             PhotoFilter filter = switch (mode) {
             case ALL, FOLDER -> PhotoFilter.all();
             case FAVORITES -> PhotoFilter.favorites();
@@ -798,25 +981,32 @@ public final class MainWindow extends JFrame {
             filter = filter.withSort(order).withSearch(search.getText());
 
             List<Photo> photos = library.photos(filter);
+            List<Folder> visibleFolders = folders.stream().filter(folder -> folder.photoCount() > 0).toList();
+            if (filter.search() != null && !filter.search().isBlank()) {
+                java.util.Set<Long> matched = new java.util.HashSet<>();
+                for (Photo photo : photos) {
+                    matched.add(photo.folderId());
+                }
+                visibleFolders = folders.stream().filter(folder -> matched.contains(folder.id())).toList();
+            }
+            if (mode == Sidebar.Mode.FOLDER && visibleFolders.stream().noneMatch(folder -> folder.id() == folderId)) {
+                mode = Sidebar.Mode.ALL;
+                folderId = -1;
+                scrollToSelectedFolder = false;
+                applySortForCurrentView();
+            }
             PhotoGrid.GroupMode grouping;
             List<Folder> sections = List.of();
             if (mode == Sidebar.Mode.ALL || mode == Sidebar.Mode.FOLDER) {
-                if (filter.search() == null) {
-                    sections = folders;
-                } else {
-                    java.util.Set<Long> matched = new java.util.HashSet<>();
-                    for (Photo photo : photos) {
-                        matched.add(photo.folderId());
-                    }
-                    sections = folders.stream().filter(folder -> matched.contains(folder.id())).toList();
-                }
+                sections = visibleFolders;
                 photos = orderByFolder(photos, sections, mode == Sidebar.Mode.FOLDER);
                 grouping = PhotoGrid.GroupMode.FOLDER;
             } else {
                 grouping = filter.groupsByDate() ? PhotoGrid.GroupMode.DATE : PhotoGrid.GroupMode.NONE;
             }
             grid.setPhotos(photos, grouping, sections);
-            sidebar.setData(stats, folders, mode, folderId);
+            // Only folders with a matching photo are shown while searching.
+            sidebar.setData(stats, visibleFolders, mode, folderId);
             statusCount.setText(stats.photos() + " 枚  ·  " + Photo.formatSize(stats.bytes()));
             setTitle("Freja — " + stats.photos() + " 枚の写真");
 
@@ -906,6 +1096,7 @@ public final class MainWindow extends JFrame {
             if (state.total() > 0) {
                 detail += "  (" + state.processed() + " / " + state.total() + ")";
             }
+            detail += "  ·  " + formatDuration(state.elapsed());
             statusMessage.setText(shorten(detail, 110));
         } else {
             progress.setIndeterminate(false);
@@ -913,11 +1104,31 @@ public final class MainWindow extends JFrame {
             if (state.errors() > 0) {
                 statusMessage.setText(state.message() == null || state.message().isBlank() ? state.errors() + " 件のファイルを読み込めませんでした" : shorten(state.message(), 110));
             } else if (state.imported() > 0) {
-                statusMessage.setText(state.imported() + " 枚の写真を更新しました");
+                statusMessage.setText(state.imported() + " 枚の写真を更新しました  (" + formatDuration(state.elapsed()) + ")");
+            } else if (!state.elapsed().isZero()) {
+                statusMessage.setText("スキャン完了  (" + formatDuration(state.elapsed()) + ")");
             } else {
                 statusMessage.setText("準備完了");
             }
         }
+    }
+
+    /** Renders a scan duration in a form that stays readable from milliseconds to hours. */
+    private static String formatDuration(java.time.Duration duration) {
+        long millis = duration.toMillis();
+        if (millis < 1000) {
+            return millis + "ms";
+        }
+        long seconds = millis / 1000;
+        if (seconds < 60) {
+            return (millis / 100) / 10 + "." + (millis / 100) % 10 + "秒";
+        }
+        long minutes = seconds / 60;
+        long rest = seconds % 60;
+        if (minutes < 60) {
+            return minutes + "分" + rest + "秒";
+        }
+        return minutes / 60 + "時間" + minutes % 60 + "分";
     }
 
     private static String shorten(String text, int max) {
@@ -962,6 +1173,9 @@ public final class MainWindow extends JFrame {
         PREFERENCES.putInt("view.thumbSize", zoom.getValue());
         if (mode != Sidebar.Mode.FOLDER) {
             PREFERENCES.put(SORT_PREFERENCE, (sort.getSelectedItem() instanceof SortOrder order ? order : SortOrder.NAME).name());
+        }
+        if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && sidebarSplit.getDividerLocation() > 0) {
+            PREFERENCES.putInt(SIDEBAR_DIVIDER_PREFERENCE, sidebarSplit.getDividerLocation());
         }
         PREFERENCES.putBoolean("window.maximized", (getExtendedState() & MAXIMIZED_BOTH) != 0);
         if ((getExtendedState() & MAXIMIZED_BOTH) == 0) {

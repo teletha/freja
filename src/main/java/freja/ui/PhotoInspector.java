@@ -9,31 +9,22 @@
  */
 package freja.ui;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -65,8 +56,6 @@ public final class PhotoInspector extends JPanel {
 
         void onCaption(Photo photo, String caption);
     }
-
-    private final Preview preview;
 
     private final JLabel fileName = new JLabel();
 
@@ -120,24 +109,16 @@ public final class PhotoInspector extends JPanel {
 
     private boolean updating;
 
-    public PhotoInspector(ThumbnailCache cache) {
+    public PhotoInspector() {
         setLayout(new BorderLayout());
         setBackground(Theme.SURFACE);
         setPreferredSize(new Dimension(308, 600));
         setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, Theme.BORDER));
 
-        preview = new Preview(cache);
-        preview.setPreferredSize(new Dimension(300, 238));
-        preview.setMinimumSize(new Dimension(200, 150));
-        preview.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
-        preview.setAlignmentX(LEFT_ALIGNMENT);
-
         JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(Theme.SURFACE);
         body.setBorder(BorderFactory.createEmptyBorder(14, 16, 18, 16));
-        body.add(preview);
-        body.add(Box.createVerticalStrut(14));
 
         fileName.setFont(Theme.font(Font.BOLD, 16));
         fileName.setForeground(Theme.TEXT);
@@ -345,7 +326,6 @@ public final class PhotoInspector extends JPanel {
         } finally {
             updating = false;
         }
-        preview.show(photo);
         revalidate();
         repaint();
     }
@@ -469,73 +449,4 @@ public final class PhotoInspector extends JPanel {
         return text.substring(0, side) + "…" + text.substring(text.length() - side);
     }
 
-    /**
-     * Paints the selected thumbnail with rounded corners and a soft shadow.
-     */
-    private static final class Preview extends JComponent {
-
-        private final ThumbnailCache cache;
-
-        private Photo photo;
-
-        Preview(ThumbnailCache cache) {
-            this.cache = cache;
-            setOpaque(false);
-        }
-
-        void show(Photo photo) {
-            this.photo = photo;
-            if (photo != null) {
-                cache.request(photo.id(), photo.modifiedAt(), this::repaint);
-            }
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics graphics) {
-            Graphics2D g = (Graphics2D) graphics.create();
-            try {
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                int width = getWidth();
-                int height = getHeight();
-                int inset = 2;
-                Shape frame = new RoundRectangle2D.Float(inset, inset + 2, width - inset * 2, height - inset * 2 - 2, 14, 14);
-                g.setColor(new Color(0, 0, 0, 12));
-                g.fill(new RoundRectangle2D.Float(inset, inset + 5, width - inset * 2, height - inset * 2 - 2, 14, 14));
-                g.setColor(Theme.BACKGROUND);
-                g.fill(frame);
-                BufferedImage image = photo == null ? null : cache.get(photo.id(), photo.modifiedAt());
-                if (image == null) {
-                    if (photo != null) {
-                        cache.request(photo.id(), photo.modifiedAt(), this::repaint);
-                    }
-                    Icons.image(46, Theme.FAINT).paintIcon(this, g, width / 2 - 23, height / 2 - 32);
-                    g.setFont(Theme.font(Font.PLAIN, 12));
-                    g.setColor(Theme.MUTED);
-                    String text = photo == null ? "写真を選択" : "読み込み中…";
-                    int textWidth = g.getFontMetrics().stringWidth(text);
-                    g.drawString(text, (width - textWidth) / 2, height / 2 + 32);
-                } else {
-                    Shape oldClip = g.getClip();
-                    g.setClip(frame);
-                    double scale = Math.min((double) (width - 16) / image.getWidth(), (double) (height - 16) / image.getHeight());
-                    int w = (int) Math.round(image.getWidth() * scale);
-                    int h = (int) Math.round(image.getHeight() * scale);
-                    g.drawImage(image, (width - w) / 2, (height - h) / 2, w, h, null);
-                    g.setClip(oldClip);
-                    if (photo.favorite()) {
-                        g.setColor(new Color(255, 255, 255, 230));
-                        g.fill(new java.awt.geom.Ellipse2D.Float(width - 40, 10, 28, 28));
-                        Icons.star(18, Theme.GOLD, true).paintIcon(this, g, width - 35, 15);
-                    }
-                }
-                g.setColor(Theme.BORDER);
-                g.setStroke(new BasicStroke(1f));
-                g.draw(frame);
-            } finally {
-                g.dispose();
-            }
-        }
-    }
 }

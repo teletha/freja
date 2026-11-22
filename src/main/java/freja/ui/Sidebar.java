@@ -9,17 +9,22 @@
  */
 package freja.ui;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -82,7 +87,10 @@ public final class Sidebar extends JPanel {
 
     private final Map<Long, NavRow> folderComponents = new HashMap<>();
 
-    private final JLabel footer = new JLabel();
+    /** Folder identifiers in display order, for arrow-key navigation. */
+    private final List<Long> folderOrder = new ArrayList<>();
+
+    private final JLabel folderCount = new JLabel();
 
     private Listener listener = new Listener() {
         @Override
@@ -126,39 +134,56 @@ public final class Sidebar extends JPanel {
         top.setBorder(BorderFactory.createEmptyBorder(18, 16, 8, 16));
         top.add(brand());
         top.add(Box.createVerticalStrut(18));
-        top.add(sectionLabel("ライブラリ"));
+        // BoxLayout keeps centring a bare JLabel / nested panel even with LEFT_ALIGNMENT. Wrapping
+        // them in a stretching BorderLayout panel pins both to the sidebar's left edge.
+        JPanel libraryHeader = new JPanel(new BorderLayout());
+        libraryHeader.setOpaque(false);
+        libraryHeader.add(sectionLabel("ライブラリ"), BorderLayout.CENTER);
+        top.add(libraryHeader);
         top.add(Box.createVerticalStrut(6));
         rows.setOpaque(false);
         rows.setLayout(new BoxLayout(rows, BoxLayout.Y_AXIS));
         rows.add(all);
-        rows.add(Box.createVerticalStrut(2));
+        rows.add(leftStrut(2));
         rows.add(favorites);
-        rows.add(Box.createVerticalStrut(2));
+        rows.add(leftStrut(2));
         rows.add(recent);
-        top.add(rows);
+        JPanel rowsHolder = new JPanel(new BorderLayout());
+        rowsHolder.setOpaque(false);
+        rowsHolder.add(rows, BorderLayout.CENTER);
+        top.add(rowsHolder);
         top.add(Box.createVerticalStrut(18));
         top.add(folderHeader());
         add(top, BorderLayout.NORTH);
 
-        folderRows.setOpaque(false);
+        folderRows.setOpaque(true);
+        folderRows.setBackground(Theme.SIDEBAR);
+        folderRows.setAlignmentX(JComponent.LEFT_ALIGNMENT);
         folderRows.setLayout(new BoxLayout(folderRows, BoxLayout.Y_AXIS));
-        folderRows.setBorder(BorderFactory.createEmptyBorder(6, 8, 12, 8));
-        JPanel folderHolder = new JPanel(new BorderLayout());
-        folderHolder.setOpaque(false);
+        // Match the library rows' horizontal inset so both groups line up at the same x.
+        folderRows.setBorder(BorderFactory.createEmptyBorder(6, 16, 12, 16));
+        JPanel folderHolder = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                // Let the viewport define the width. Otherwise a long folder name makes the view
+                // wider than the sidebar and the count at the right edge gets clipped away.
+                size.width = 0;
+                return size;
+            }
+        };
+        folderHolder.setOpaque(true);
+        folderHolder.setBackground(Theme.SIDEBAR);
         folderHolder.add(folderRows, BorderLayout.NORTH);
         JScrollPane scroll = new JScrollPane(folderHolder);
         scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
+        scroll.setOpaque(true);
+        scroll.setBackground(Theme.SIDEBAR);
+        scroll.getViewport().setOpaque(true);
+        scroll.getViewport().setBackground(Theme.SIDEBAR);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(28);
         add(scroll, BorderLayout.CENTER);
-
-        footer.setOpaque(false);
-        footer.setForeground(Theme.MUTED);
-        footer.setFont(Theme.font(Font.PLAIN, 11));
-        footer.setBorder(BorderFactory.createEmptyBorder(8, 18, 16, 18));
-        add(footer, BorderLayout.SOUTH);
 
         all.addMouseListener(rowListener(() -> select(Mode.ALL, -1)));
         favorites.addMouseListener(rowListener(() -> select(Mode.FAVORITES, -1)));
@@ -210,7 +235,13 @@ public final class Sidebar extends JPanel {
     private JComponent folderHeader() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
-        panel.add(sectionLabel("フォルダ"), BorderLayout.CENTER);
+        JPanel heading = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        heading.setOpaque(false);
+        heading.add(sectionLabel("フォルダ"));
+        folderCount.setFont(Theme.font(Font.PLAIN, 11));
+        folderCount.setForeground(Theme.MUTED);
+        heading.add(folderCount);
+        panel.add(heading, BorderLayout.CENTER);
         JButton add = new JButton(Icons.plus(14, Theme.MUTED));
         add.setFocusable(false);
         add.setOpaque(false);
@@ -222,10 +253,19 @@ public final class Sidebar extends JPanel {
         return panel;
     }
 
+    private static JComponent leftStrut(int height) {
+        JComponent strut = (JComponent) Box.createVerticalStrut(height);
+        strut.setAlignmentX(LEFT_ALIGNMENT);
+        return strut;
+    }
+
     private JLabel sectionLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(Theme.font(Font.BOLD, 11));
         label.setForeground(Theme.MUTED);
+        // A bare JLabel in a BoxLayout keeps the default CENTER alignment. Match the folder header,
+        // which stretches full width and therefore reads as left aligned.
+        label.setAlignmentX(JComponent.LEFT_ALIGNMENT);
         return label;
     }
 
@@ -247,6 +287,46 @@ public final class Sidebar extends JPanel {
         listener.onSelect(mode, folderId);
     }
 
+    /** Scrolls the sidebar so the given folder row is visible. */
+    private void revealFolder(long id) {
+        javax.swing.JComponent row = folderComponents.get(id);
+        if (row != null) {
+            // The rectangle must be in the scroll container's coordinate system.
+            folderRows.scrollRectToVisible(new Rectangle(row.getX(), row.getY(), row.getWidth(), row.getHeight()));
+        }
+    }
+
+    /** Highlights a folder from outside without feeding a selection event back to the window. */
+    public void selectFolderSilently(long id) {
+        if (mode == Mode.FOLDER && folderId == id) {
+            return;
+        }
+        mode = Mode.FOLDER;
+        folderId = id;
+        updateSelection();
+        revealFolder(id);
+    }
+
+    /** Moves the selection by one folder in display order. Only used while a folder row has focus. */
+    private void moveFolderSelection(int delta) {
+        if (folderOrder.isEmpty()) {
+            return;
+        }
+        int index = mode == Mode.FOLDER ? folderOrder.indexOf(folderId) : -1;
+        int next = index < 0 ? (delta > 0 ? 0 : folderOrder.size() - 1) : index + delta;
+        if (next < 0 || next >= folderOrder.size()) {
+            return;
+        }
+        long target = folderOrder.get(next);
+        // Select first, then move focus. Requesting focus before the selection lets rapid key
+        // repeats leave focus one row behind the selected one.
+        select(Mode.FOLDER, target);
+        NavRow row = folderComponents.get(target);
+        if (row != null) {
+            row.requestFocusInWindow();
+        }
+    }
+
     /**
      * Replaces the navigation data.
      *
@@ -261,34 +341,51 @@ public final class Sidebar extends JPanel {
         all.setCount(stats.photos());
         favorites.setCount(stats.favorites());
         recent.setCount(stats.recent());
-        footer.setText(stats.photos() + " 枚  ·  " + freja.model.Photo.formatSize(stats.bytes()));
+        folderCount.setText(String.valueOf(folders.size()));
 
+        Long focused = null;
+        for (var entry : folderComponents.entrySet()) {
+            if (entry.getValue().isFocusOwner()) {
+                focused = entry.getKey();
+                break;
+            }
+        }
         folderRows.removeAll();
         folderComponents.clear();
+        folderOrder.clear();
         for (Folder folder : folders) {
             NavRow row = new NavRow(folder.name(), Icons.folder(17, Theme.MUTED));
             row.setToolTipText(folder.path().toString() + (folder.explicit() ? "" : "  (自動検出)"));
             row.setCount(folder.photoCount());
-            row.addMouseListener(rowListener(() -> select(Mode.FOLDER, folder.id())));
+            row.addMouseListener(rowListener(() -> {
+                row.requestFocusInWindow();
+                select(Mode.FOLDER, folder.id());
+            }));
+            row.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent event) {
+                    if (event.getKeyCode() == KeyEvent.VK_UP || event.getKeyCode() == KeyEvent.VK_DOWN) {
+                        event.consume();
+                        moveFolderSelection(event.getKeyCode() == KeyEvent.VK_UP ? -1 : 1);
+                    }
+                }
+            });
             row.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent event) {
-                    if (event.isPopupTrigger() || event.getButton() == MouseEvent.BUTTON3) {
-                        showFolderMenu(row, folder, event);
-                    }
+                    maybeShowFolderMenu(row, folder, event);
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent event) {
-                    if (event.isPopupTrigger()) {
-                        showFolderMenu(row, folder, event);
-                    }
+                    maybeShowFolderMenu(row, folder, event);
                 }
             });
             row.setAlignmentX(LEFT_ALIGNMENT);
             folderRows.add(row);
-            folderRows.add(Box.createVerticalStrut(2));
+            folderRows.add(leftStrut(2));
             folderComponents.put(folder.id(), row);
+            folderOrder.add(folder.id());
         }
         if (folders.isEmpty()) {
             JLabel empty = new JLabel("登録されたフォルダはありません");
@@ -299,8 +396,24 @@ public final class Sidebar extends JPanel {
             folderRows.add(empty);
         }
         updateSelection();
+        if (mode == Mode.FOLDER) {
+            revealFolder(folderId);
+        }
+        if (focused != null) {
+            NavRow row = folderComponents.get(focused);
+            if (row != null) {
+                row.requestFocusInWindow();
+            }
+        }
         folderRows.revalidate();
         folderRows.repaint();
+    }
+
+    /** isPopupTrigger is platform specific: only one of press/release reports it for a click. */
+    private void maybeShowFolderMenu(NavRow row, Folder folder, MouseEvent event) {
+        if (event.isPopupTrigger()) {
+            showFolderMenu(row, folder, event);
+        }
     }
 
     private void showFolderMenu(NavRow row, Folder folder, MouseEvent event) {
@@ -341,6 +454,48 @@ public final class Sidebar extends JPanel {
         for (var entry : folderComponents.entrySet()) {
             entry.getValue().setSelected(mode == Mode.FOLDER && entry.getKey() == folderId);
         }
+        // Repaint the whole strip as well: rapid key repeats can otherwise leave stale highlight
+        // pixels from rows that scrolled past in the meantime.
+        folderRows.repaint();
+    }
+
+    /** A title that shrinks with an ellipsis so the count always stays at the right edge. */
+    private static final class TitleLabel extends JLabel {
+
+        TitleLabel(String text) {
+            super(text);
+            setHorizontalAlignment(SwingConstants.LEFT);
+            // Without this, a long folder name's minimum width pushes the count out of the row.
+            setMinimumSize(new Dimension(0, 0));
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            String text = getText();
+            if (text == null || text.isEmpty()) {
+                return;
+            }
+            // A plain Graphics has no text hints; BasicLabelUI normally supplies them. Without
+            // these, the truncated title renders noticeably thinner than the other labels.
+            Graphics2D g = (Graphics2D) graphics.create();
+            try {
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                FontMetrics metrics = g.getFontMetrics();
+                String shown = text;
+                if (metrics.stringWidth(shown) > getWidth()) {
+                    while (shown.length() > 1 && metrics.stringWidth(shown + "…") > getWidth()) {
+                        shown = shown.substring(0, shown.length() - 1);
+                    }
+                    shown += "…";
+                }
+                g.setColor(getForeground());
+                int baseline = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+                g.drawString(shown, 0, baseline);
+            } finally {
+                g.dispose();
+            }
+        }
     }
 
     /**
@@ -348,7 +503,7 @@ public final class Sidebar extends JPanel {
      */
     private static final class NavRow extends JPanel {
 
-        private final JLabel title;
+        private final TitleLabel title;
 
         private final JLabel count = new JLabel();
 
@@ -357,7 +512,11 @@ public final class Sidebar extends JPanel {
         private boolean hovered;
 
         NavRow(String text, javax.swing.Icon icon) {
-            setOpaque(false);
+            // Opaque so a deselected row erases its own highlight. With transparent rows, repeated
+            // arrow-key selection left the previous rows' accent paint behind.
+            setOpaque(true);
+            setBackground(Theme.SIDEBAR);
+            setFocusable(true);
             setLayout(new BorderLayout(9, 0));
             setBorder(BorderFactory.createEmptyBorder(9, 11, 9, 11));
             setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
@@ -365,7 +524,7 @@ public final class Sidebar extends JPanel {
             setAlignmentX(LEFT_ALIGNMENT);
             JLabel graphic = new JLabel(icon);
             add(graphic, BorderLayout.WEST);
-            title = new JLabel(text);
+            title = new TitleLabel(text);
             title.setFont(Theme.font(Font.PLAIN, 13));
             title.setForeground(Theme.TEXT);
             add(title, BorderLayout.CENTER);
@@ -395,14 +554,14 @@ public final class Sidebar extends JPanel {
         void setSelected(boolean value) {
             if (selected != value) {
                 selected = value;
-                title.setFont(Theme.font(value ? Font.BOLD : Font.PLAIN, 13));
-                title.setForeground(value ? Theme.ACCENT_DARK : Theme.TEXT);
                 repaint();
             }
         }
 
         @Override
         protected void paintComponent(Graphics graphics) {
+            // Erase this row's previous paint before drawing the current state.
+            super.paintComponent(graphics);
             Graphics2D g = (Graphics2D) graphics.create();
             try {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -410,15 +569,9 @@ public final class Sidebar extends JPanel {
                     g.setColor(selected ? Theme.ACCENT_SOFT : Theme.HOVER);
                     g.fill(new RoundRectangle2D.Float(1, 1, getWidth() - 2, getHeight() - 2, 9, 9));
                 }
-                if (selected) {
-                    g.setColor(Theme.ACCENT);
-                    g.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                    g.drawLine(2, 9, 2, getHeight() - 9);
-                }
             } finally {
                 g.dispose();
             }
-            super.paintComponent(graphics);
         }
     }
 }

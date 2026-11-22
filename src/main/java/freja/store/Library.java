@@ -21,7 +21,10 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -45,8 +48,25 @@ public final class Library implements AutoCloseable {
     /** How far back the "recent" view reaches. */
     private static final long RECENT_WINDOW = 30L * 24 * 60 * 60 * 1000;
 
+    /**
+     * Bumped whenever thumbnail generation changes. Rows below this revision are decoded again by
+     * the next scan, which is how existing libraries pick up a new thumbnail pipeline.
+     */
+    private static final int THUMBNAIL_REVISION = 8;
+
     /** A thumbnail stored in the database. */
     public record Thumbnail(byte[] data, int width, int height) {
+    }
+
+    /** The file attributes a scan compares against the catalog. */
+    public record FileStamp(long size, long modifiedAt) {
+    }
+
+    /** A string greater than every possible path key sharing the same prefix. */
+    private static final String KEY_MAX = new String(Character.toChars(Character.MAX_CODE_POINT));
+
+    private static String upperBound(String prefix) {
+        return prefix + KEY_MAX;
     }
 
     /** Raised when a database operation fails. */
@@ -144,7 +164,7 @@ public final class Library implements AutoCloseable {
                         favorite INTEGER NOT NULL DEFAULT 0,
                         rating INTEGER NOT NULL DEFAULT 0,
                         caption TEXT,
-                        thumbnail_revision INTEGER NOT NULL DEFAULT 4,
+                        thumbnail_revision INTEGER NOT NULL DEFAULT 8,
                         imported_at INTEGER NOT NULL,
                         scan_token TEXT
                     )
@@ -337,7 +357,7 @@ public final class Library implements AutoCloseable {
     /**
      * Returns all registered folders with their photo counts.
      *
-     * @return the folders ordered by path
+     * @return the folders ordered by name, with the path as a tie-breaker
      */
     public synchronized List<Folder> folders() {
         String sql = """
@@ -345,7 +365,7 @@ public final class Library implements AutoCloseable {
                 FROM folders f
                 LEFT JOIN photos p ON p.folder_id = f.id
                 GROUP BY f.id
-                ORDER BY f.path COLLATE NOCASE
+                ORDER BY f.name COLLATE NOCASE, f.path COLLATE NOCASE
                 """;
         try (Statement statement = connection.createStatement(); ResultSet results = statement.executeQuery(sql)) {
             List<Folder> folders = new ArrayList<>();
@@ -416,10 +436,10 @@ public final class Library implements AutoCloseable {
         }
         String key = PathUtil.key(found.get().path());
         String prefix = PathUtil.prefix(key);
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE path_key=? OR substr(path_key,1,?)=?")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE path_key=? OR (path_key>=? AND path_key<?)")) {
             statement.setString(1, key);
-            statement.setInt(2, prefix.length());
-            statement.setString(3, prefix);
+            statement.setString(2, prefix);
+            statement.setString(3, upperBound(prefix));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new LibraryException("Failed to remove the folder", e);
@@ -436,10 +456,10 @@ public final class Library implements AutoCloseable {
     public synchronized int removeAutoFoldersUnder(Path path) {
         String key = PathUtil.key(path);
         String prefix = PathUtil.prefix(key);
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE explicit=0 AND (path_key=? OR substr(path_key,1,?)=?)")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE explicit=0 AND (path_key=? OR (path_key>=? AND path_key<?))")) {
             statement.setString(1, key);
-            statement.setInt(2, prefix.length());
-            statement.setString(3, prefix);
+            statement.setString(2, prefix);
+            statement.setString(3, upperBound(prefix));
             return statement.executeUpdate();
         } catch (SQLException e) {
             throw new LibraryException("Failed to remove folders below " + path, e);
@@ -491,9 +511,9 @@ public final class Library implements AutoCloseable {
                     sql.append(" AND 1 = 0");
                 } else {
                     String prefix = PathUtil.prefix(PathUtil.key(Path.of(folderPath)));
-                    sql.append(" AND substr(p.path_key,1,?)=?");
-                    parameters.add(prefix.length());
+                    sql.append(" AND p.path_key >= ? AND p.path_key < ?");
                     parameters.add(prefix);
+                    parameters.add(upperBound(prefix));
                 }
             } else {
                 sql.append(" AND p.folder_id = ?");
@@ -621,15 +641,72 @@ public final class Library implements AutoCloseable {
      * @return true when the catalog row is current
      */
     public synchronized boolean isCurrent(String key, long size, long modifiedAt) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM photos WHERE path_key=? AND byte_size=? AND modified_at=? AND thumbnail_revision>=4")) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM photos WHERE path_key=? AND byte_size=? AND modified_at=? AND thumbnail_revision>=?")) {
             statement.setString(1, key);
             statement.setLong(2, size);
             statement.setLong(3, modifiedAt);
+            statement.setInt(4, THUMBNAIL_REVISION);
             try (ResultSet results = statement.executeQuery()) {
                 return results.next();
             }
         } catch (SQLException e) {
             throw new LibraryException("Failed to test the catalog entry", e);
+        }
+    }
+
+    /**
+     * Loads every up-to-date file under a scan root in one query so the scanner can compare stamps
+     * in memory instead of issuing one {@code SELECT} per file.
+     *
+     * @param root the scanned directory tree
+     * @return the catalog stamp for each current photo, keyed by normalized path key
+     */
+    public synchronized Map<String, FileStamp> currentFiles(Path root) {
+        String prefix = PathUtil.prefix(PathUtil.key(root));
+        String sql = """
+                SELECT path_key, byte_size, modified_at FROM photos
+                WHERE thumbnail_revision >= ? AND path_key >= ? AND path_key < ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, THUMBNAIL_REVISION);
+            statement.setString(2, prefix);
+            statement.setString(3, upperBound(prefix));
+            Map<String, FileStamp> stamps = new HashMap<>();
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    stamps.put(results.getString(1), new FileStamp(results.getLong(2), results.getLong(3)));
+                }
+            }
+            return stamps;
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the catalog stamps for " + root, e);
+        }
+    }
+
+    /**
+     * Marks a group of catalog rows as seen by the current full scan. All keys must belong to the
+     * same folder, which lets one statement replace hundreds of individual updates.
+     *
+     * @param keys normalized path keys
+     * @param token the scan token
+     * @param folderId the folder containing the files
+     */
+    public synchronized void touchBatch(Collection<String> keys, String token, long folderId) {
+        if (keys.isEmpty() || token == null) {
+            return;
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(keys.size(), "?"));
+        String sql = "UPDATE photos SET scan_token=?, folder_id=? WHERE path_key IN (" + placeholders + ")";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, token);
+            statement.setLong(2, folderId);
+            int index = 3;
+            for (String key : keys) {
+                statement.setString(index++, key);
+            }
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to touch catalog entries", e);
         }
     }
 
@@ -708,10 +785,10 @@ public final class Library implements AutoCloseable {
      */
     public synchronized int finishScanTree(Path root, String token) {
         String prefix = PathUtil.prefix(PathUtil.key(root));
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE (scan_token IS NULL OR scan_token <> ?) AND substr(path_key,1,?)=?")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE (scan_token IS NULL OR scan_token <> ?) AND path_key >= ? AND path_key < ?")) {
             statement.setString(1, token);
-            statement.setInt(2, prefix.length());
-            statement.setString(3, prefix);
+            statement.setString(2, prefix);
+            statement.setString(3, upperBound(prefix));
             return statement.executeUpdate();
         } catch (SQLException e) {
             throw new LibraryException("Failed to finish the scan of " + root, e);
@@ -733,8 +810,13 @@ public final class Library implements AutoCloseable {
         }
     }
 
+    /** One catalog write waiting to be committed. */
+    public record PhotoSave(long folderId, Path file, long size, long modifiedAt,
+            PhotoImporter.AnalyzedPhoto analyzed, String token) {
+    }
+
     /**
-     * Inserts or updates a catalog row and its thumbnail.
+     * Inserts or updates a catalog row and its thumbnail in its own transaction.
      *
      * @param folderId the owning folder
      * @param file the image file
@@ -745,6 +827,67 @@ public final class Library implements AutoCloseable {
      * @return the photo identifier
      */
     public synchronized long savePhoto(long folderId, Path file, long size, long modifiedAt, PhotoImporter.AnalyzedPhoto analyzed, String token) {
+        return savePhoto(new PhotoSave(folderId, file, size, modifiedAt, analyzed, token));
+    }
+
+    /**
+     * Commits one write with its own transaction. Used by watch events, which are too sparse to
+     * justify a batch.
+     *
+     * @param save the write to perform
+     * @return the photo identifier
+     */
+    public synchronized long savePhoto(PhotoSave save) {
+        try {
+            connection.setAutoCommit(false);
+            long id = savePhotoInternal(save);
+            connection.commit();
+            return id;
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to save the photo: " + save.file(), e);
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Commits many writes in one transaction. An initial scan saves tens of thousands of photos,
+     * and one commit per photo is a substantial cost even in WAL mode.
+     *
+     * @param saves the writes to perform
+     */
+    public synchronized void savePhotoBatch(List<PhotoSave> saves) {
+        if (saves.isEmpty()) {
+            return;
+        }
+        try {
+            connection.setAutoCommit(false);
+            for (PhotoSave save : saves) {
+                savePhotoInternal(save);
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to save a batch of " + saves.size() + " photos", e);
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    private long savePhotoInternal(PhotoSave save) throws SQLException {
+        long folderId = save.folderId();
+        Path file = save.file();
+        long size = save.size();
+        long modifiedAt = save.modifiedAt();
+        PhotoImporter.AnalyzedPhoto analyzed = save.analyzed();
+        String token = save.token();
         Path normalized = PathUtil.normalize(file);
         String key = PathUtil.key(normalized);
         Exif.Data exif = analyzed == null ? Exif.Data.EMPTY : analyzed.exif();
@@ -752,8 +895,7 @@ public final class Library implements AutoCloseable {
         int width = analyzed == null ? 0 : analyzed.width();
         int height = analyzed == null ? 0 : analyzed.height();
         long now = System.currentTimeMillis();
-        try {
-            connection.setAutoCommit(false);
+        {
             long photoId;
             try (PreparedStatement find = connection.prepareStatement("SELECT id FROM photos WHERE path_key=?")) {
                 find.setString(1, key);
@@ -766,11 +908,12 @@ public final class Library implements AutoCloseable {
                         INSERT INTO photos(folder_id, path, path_key, file_name, extension, byte_size, modified_at,
                             width, height, captured_at, camera_make, camera_model, lens, exposure, aperture, iso,
                             focal_length, orientation, thumbnail_revision, imported_at, scan_token)
-                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,4,?,?)
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                         """, Statement.RETURN_GENERATED_KEYS)) {
                     bindCommon(insert, folderId, normalized, key, size, modifiedAt, exif, capturedAt, width, height);
-                    insert.setLong(19, now);
-                    insert.setString(20, token);
+                    insert.setInt(19, THUMBNAIL_REVISION);
+                    insert.setLong(20, now);
+                    insert.setString(21, token);
                     insert.executeUpdate();
                     try (ResultSet keys = insert.getGeneratedKeys()) {
                         keys.next();
@@ -782,7 +925,7 @@ public final class Library implements AutoCloseable {
                 try (PreparedStatement update = connection.prepareStatement("""
                         UPDATE photos SET folder_id=?, path=?, file_name=?, extension=?, byte_size=?, modified_at=?,
                             width=?, height=?, captured_at=?, camera_make=?, camera_model=?, lens=?, exposure=?,
-                            aperture=?, iso=?, focal_length=?, orientation=?, thumbnail_revision=4, scan_token=?
+                            aperture=?, iso=?, focal_length=?, orientation=?, thumbnail_revision=?, scan_token=?
                         WHERE id=?
                         """)) {
                     update.setLong(1, folderId);
@@ -802,8 +945,9 @@ public final class Library implements AutoCloseable {
                     setInteger(update, 15, exif.iso());
                     setDouble(update, 16, exif.focalLength());
                     update.setInt(17, exif.orientation());
-                    update.setString(18, token);
-                    update.setLong(19, photoId);
+                    update.setInt(18, THUMBNAIL_REVISION);
+                    update.setString(19, token);
+                    update.setLong(20, photoId);
                     update.executeUpdate();
                 }
             }
@@ -824,16 +968,7 @@ public final class Library implements AutoCloseable {
                     thumb.executeUpdate();
                 }
             }
-            connection.commit();
             return photoId;
-        } catch (SQLException e) {
-            rollback();
-            throw new LibraryException("Failed to save the photo: " + normalized, e);
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException ignored) {
-            }
         }
     }
 

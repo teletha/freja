@@ -26,8 +26,11 @@ stores the catalog in SQLite. Your original files are never moved or modified.
 * **SQLite catalog** — photos, folders, user ratings, favorites, captions and thumbnail blobs live
   in one portable database (`WAL` mode).
 * **Thumbnails and metadata** — decoded once by [imagify](https://github.com/teletha/imagify) and
-  stored as compact WebP thumbnails (maximum edge 320 px, quality 0.6) with transparency preserved.
-  Downscaling uses imagify's **Catmull-Rom (CATROM)** resampler.
+  stored as compact WebP thumbnails (maximum edge 220 px, quality 0.6) with transparency preserved.
+  JPEGs are decoded at a fraction of their size when imagify's native library supports DCT
+  scaling. Every format is then reduced progressively with Java2D and finished with imagify's
+  **Catmull-Rom (CATROM)** resampler on the small image, which avoids full-resolution temporary
+  arrays during scans.
   JPEG EXIF camera, lens, capture date, exposure, aperture, ISO,
   focal length and orientation are read without extra dependencies.
 * **Picasa-like browsing** — timeline groups, virtualized thumbnail grid, zoom slider,

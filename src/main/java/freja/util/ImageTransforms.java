@@ -154,6 +154,49 @@ public final class ImageTransforms {
     }
 
     /**
+     * Reduces an image to at most {@code maxSize} pixels on the longest edge with a cheap,
+     * progressive Java2D pass.
+     * <p>
+     * This is intended as a pre-pass before a high quality resampler. Running CATROM directly on a
+     * 12 MP photo allocates several large full-resolution arrays, while halving the image a few
+     * times first leaves only a few hundred pixels for the final filter. The aspect ratio and any
+     * real transparency are preserved.
+     * </p>
+     *
+     * @param source the decoded image
+     * @param maxSize the longest edge after this pass
+     * @return the reduced image, or the source when it is already small enough
+     */
+    public static BufferedImage downscale(BufferedImage source, int maxSize) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        if (maxSize <= 0 || (width <= maxSize && height <= maxSize)) {
+            return source;
+        }
+        int type = source.getColorModel().hasAlpha() ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+        BufferedImage current = source;
+        while (Math.max(width, height) > maxSize) {
+            int longest = Math.max(width, height);
+            int target = Math.max(maxSize, (longest + 1) / 2);
+            int nextWidth = Math.max(1, (int) Math.round(width * (double) target / longest));
+            int nextHeight = Math.max(1, (int) Math.round(height * (double) target / longest));
+            BufferedImage next = new BufferedImage(nextWidth, nextHeight, type);
+            Graphics2D graphics = next.createGraphics();
+            try {
+                graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+                graphics.drawImage(current, 0, 0, nextWidth, nextHeight, null);
+            } finally {
+                graphics.dispose();
+            }
+            current = next;
+            width = nextWidth;
+            height = nextHeight;
+        }
+        return current;
+    }
+
+    /**
      * Tests whether an image contains at least one pixel which is not fully opaque.
      * <p>
      * Decoders frequently return an ARGB image for an opaque source, so the presence of an alpha
