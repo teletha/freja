@@ -25,9 +25,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -35,11 +38,16 @@ import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
+import freja.model.Folder;
 import freja.model.Photo;
 
 /**
@@ -52,15 +60,22 @@ import freja.model.Photo;
  */
 public final class PhotoGrid extends JComponent implements Scrollable {
 
+    /** How the visible photos are divided by headers. */
+    public enum GroupMode {
+        NONE, DATE, FOLDER
+    }
+
     private static final int OUTER = 26;
 
     private static final int CELL_GAP = 18;
 
     private static final int LABEL_HEIGHT = 24;
 
-    private static final int HEADER_HEIGHT = 52;
+    private static final int HEADER_HEIGHT = 64;
 
     private static final int TOP = 8;
+
+    private static final DateTimeFormatter RANGE_DATE = DateTimeFormatter.ofPattern("yyyy/M/d");
 
     private final ThumbnailCache cache;
 
@@ -68,7 +83,19 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private final List<LayoutRow> rows = new ArrayList<>();
 
-    private boolean grouped = true;
+    private GroupMode grouping = GroupMode.DATE;
+
+    private List<Folder> sections = List.of();
+
+    private Timer scrollAnimator;
+
+    private JScrollBar animatedScrollBar;
+
+    private int scrollTarget;
+
+    private String stickyKey;
+
+    private JScrollPane scrollPane;
 
     private int thumbSize = 190;
 
@@ -92,7 +119,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     };
 
     /** One visual row, either a date header or a row of cells. */
-    private record LayoutRow(int y, int height, int[] indices, String title, String subtitle) {
+    private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey) {
 
         boolean header() {
             return indices.length == 0;
@@ -111,6 +138,14 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             @Override
             public void mousePressed(MouseEvent event) {
                 requestFocusInWindow();
+                int top = getVisibleRect().y;
+                if (grouping == GroupMode.FOLDER && stickyKey != null && event.getY() >= top && event.getY() < top + HEADER_HEIGHT) {
+                    try {
+                        scrollToFolder(Long.parseLong(stickyKey));
+                    } catch (NumberFormatException ignored) {
+                    }
+                    return;
+                }
                 int index = indexAt(event.getPoint());
                 if (index >= 0) {
                     selectIndex(index, true);
@@ -136,6 +171,12 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent event) {
+                int top = getVisibleRect().y;
+                if (grouping == GroupMode.FOLDER && stickyKey != null && event.getY() >= top && event.getY() < top + HEADER_HEIGHT) {
+                    setHover(-1);
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    return;
+                }
                 int index = indexAt(event.getPoint());
                 if (index != hoverIndex) {
                     setHover(index);
@@ -155,7 +196,61 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             }
         });
 
+        addMouseWheelListener(this::handleMouseWheel);
+
         installKeys();
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        installScrollListener();
+    }
+
+    private void installScrollListener() {
+        JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        if (pane == null) {
+            return;
+        }
+        if (scrollPane == pane) {
+            return;
+        }
+        scrollPane = pane;
+        // A sticky header cannot tolerate the viewport's blit optimization: old pixels, including
+        // a previously drawn header, can be shifted into the wrong place for one frame.
+        pane.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+    }
+
+    @Override
+    protected void processMouseWheelEvent(MouseWheelEvent event) {
+        handleMouseWheel(event);
+        if (!event.isConsumed()) {
+            super.processMouseWheelEvent(event);
+        }
+    }
+
+    private void handleMouseWheel(MouseWheelEvent event) {
+        if (event.isConsumed()) {
+            return;
+        }
+        JScrollPane pane = scrollPane;
+        if (pane == null) {
+            pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        }
+        if (pane == null) {
+            return;
+        }
+        JScrollBar bar = pane.getVerticalScrollBar();
+        int units = event.getUnitsToScroll();
+        if (units != 0) {
+            int base = scrollAnimator != null && animatedScrollBar == bar ? scrollTarget : bar.getValue();
+            int target = base + units * Math.max(1, bar.getUnitIncrement());
+            target = Math.max(bar.getMinimum(), Math.min(bar.getMaximum() - bar.getVisibleAmount(), target));
+            animatedScrollBar = bar;
+            scrollTarget = target;
+            animateScroll();
+            event.consume();
+        }
     }
 
     public void setOnSelection(Consumer<Photo> listener) {
@@ -177,12 +272,24 @@ public final class PhotoGrid extends JComponent implements Scrollable {
      * Replaces the visible photos.
      *
      * @param photos the photos
-     * @param grouped whether to insert date headers
+     * @param grouping how to divide the photos with headers
      */
-    public void setPhotos(List<Photo> photos, boolean grouped) {
+    public void setPhotos(List<Photo> photos, GroupMode grouping) {
+        setPhotos(photos, grouping, List.of());
+    }
+
+    /**
+     * Replaces the visible photos.
+     *
+     * @param photos the photos, ordered by folder when using {@link GroupMode#FOLDER}
+     * @param grouping how to divide the photos with headers
+     * @param sections the folder sections in display order, including empty folders
+     */
+    public void setPhotos(List<Photo> photos, GroupMode grouping, List<Folder> sections) {
         long selectedId = selectedPhoto() == null ? -1 : selectedPhoto().id();
         this.photos = List.copyOf(photos);
-        this.grouped = grouped;
+        this.grouping = grouping;
+        this.sections = List.copyOf(sections);
         int restored = -1;
         if (selectedId >= 0) {
             for (int i = 0; i < this.photos.size(); i++) {
@@ -347,7 +454,129 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         Rectangle bounds = cellRect(index);
         if (bounds != null) {
             bounds.grow(0, 12);
-            scrollRectToVisible(bounds);
+            animateToVisible(bounds);
+        }
+    }
+
+    /**
+     * Scrolls to the header of a folder section. Long distances jump directly; short distances
+     * animate.
+     *
+     * @param folderId the folder identifier
+     */
+    public void scrollToFolder(long folderId) {
+        String key = Long.toString(folderId);
+        int target = -1;
+        for (LayoutRow row : rows) {
+            if (row.header() && key.equals(row.groupKey())) {
+                target = row.y();
+                break;
+            }
+        }
+        if (target < 0) {
+            return;
+        }
+        JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        if (pane == null) {
+            return;
+        }
+        pane.validate();
+        JScrollBar bar = pane.getVerticalScrollBar();
+        int minimum = bar.getMinimum();
+        int maximum = Math.max(minimum, bar.getMaximum() - bar.getVisibleAmount());
+        int destination = Math.max(minimum, Math.min(maximum, target));
+        int distance = Math.abs(destination - bar.getValue());
+        int smoothLimit = Math.max(320, bar.getVisibleAmount() * 3 / 2);
+        if (distance > smoothLimit) {
+            // A long jump is easier to follow when it lands immediately.
+            stopScrollAnimation();
+            bar.setValue(destination);
+        } else {
+            scrollBarTo(bar, destination);
+        }
+    }
+
+    private void animateToVisible(Rectangle bounds) {
+        JScrollPane pane = scrollPane;
+        if (pane == null) {
+            pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        }
+        if (pane == null) {
+            return;
+        }
+        pane.validate();
+        JScrollBar bar = pane.getVerticalScrollBar();
+        Rectangle visible = getVisibleRect();
+        int destination = bar.getValue();
+        if (bounds.y < visible.y) {
+            destination += bounds.y - visible.y - 12;
+        } else if (bounds.y + bounds.height > visible.y + visible.height) {
+            destination += bounds.y + bounds.height - visible.y - visible.height + 12;
+        }
+        int minimum = bar.getMinimum();
+        int maximum = Math.max(minimum, bar.getMaximum() - bar.getVisibleAmount());
+        scrollBarTo(bar, Math.max(minimum, Math.min(maximum, destination)));
+    }
+
+    private void scrollBarTo(JScrollBar bar, int destination) {
+        animatedScrollBar = bar;
+        scrollTarget = destination;
+        animateScroll();
+    }
+
+    private void animateScroll() {
+        JScrollBar bar = animatedScrollBar;
+        if (bar == null) {
+            return;
+        }
+        if (bar.getValue() == scrollTarget) {
+            stopScrollAnimation();
+            return;
+        }
+        if (scrollAnimator != null) {
+            return;
+        }
+        scrollAnimator = new Timer(16, event -> {
+            JScrollBar targetBar = animatedScrollBar;
+            if (targetBar == null) {
+                stopScrollAnimation();
+                return;
+            }
+            int value = targetBar.getValue();
+            int diff = scrollTarget - value;
+            if (diff == 0) {
+                stopScrollAnimation();
+                return;
+            }
+            int movement;
+            if (Math.abs(diff) <= 3) {
+                movement = diff;
+            } else {
+                movement = (int) Math.round(diff * 0.32);
+                if (movement == 0) {
+                    movement = Integer.signum(diff);
+                }
+            }
+            int minimum = targetBar.getMinimum();
+            int maximum = Math.max(minimum, targetBar.getMaximum() - targetBar.getVisibleAmount());
+            scrollTarget = Math.max(minimum, Math.min(maximum, scrollTarget));
+            int next = Math.max(minimum, Math.min(maximum, value + movement));
+            targetBar.setValue(next);
+            if (next == scrollTarget) {
+                stopScrollAnimation();
+            }
+        });
+        scrollAnimator.setInitialDelay(0);
+        scrollAnimator.start();
+    }
+
+    private void stopScrollAnimation() {
+        if (scrollAnimator != null) {
+            scrollAnimator.stop();
+            scrollAnimator = null;
+        }
+        if (animatedScrollBar != null) {
+            scrollTarget = animatedScrollBar.getValue();
         }
     }
 
@@ -360,45 +589,89 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         gridLeft = Math.max(OUTER, (width - columns * cellWidth) / 2);
         int y = TOP;
 
-        if (photos.isEmpty()) {
+        if (photos.isEmpty() && !(grouping == GroupMode.FOLDER && !sections.isEmpty())) {
             totalHeight = Math.max(getParent() == null ? 300 : getParent().getHeight(), 300);
-        } else if (grouped) {
+        } else if (grouping == GroupMode.FOLDER) {
+            if (sections.isEmpty()) {
+                y = addPhotoRows(y, cellHeight, 0, photos.size());
+            } else {
+                int index = 0;
+                for (Folder section : sections) {
+                    int start = index;
+                    while (index < photos.size() && photos.get(index).folderId() == section.id()) {
+                        index++;
+                    }
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id())));
+                    y += HEADER_HEIGHT;
+                    y = addPhotoRows(y, cellHeight, start, index);
+                    y += 8;
+                }
+                if (index < photos.size()) {
+                    int start = index;
+                    index = photos.size();
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null));
+                    y += HEADER_HEIGHT;
+                    y = addPhotoRows(y, cellHeight, start, index);
+                    y += 8;
+                }
+            }
+            // Leave enough room below the last section so that selecting the final folder can put
+            // its header at the top of the viewport.
+            int viewport = getParent() == null ? 600 : Math.max(300, getParent().getHeight());
+            totalHeight = y + Math.max(24, viewport - HEADER_HEIGHT);
+        } else if (grouping == GroupMode.DATE) {
             int index = 0;
             while (index < photos.size()) {
-                String date = photos.get(index).dateLabel();
+                Photo first = photos.get(index);
+                String key = first.dateLabel();
                 int start = index;
                 index++;
-                while (index < photos.size() && date.equals(photos.get(index).dateLabel())) {
+                while (index < photos.size() && key.equals(photos.get(index).dateLabel())) {
                     index++;
                 }
-                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], date, (index - start) + "枚"));
+                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key));
                 y += HEADER_HEIGHT;
-                for (int from = start; from < index; from += columns) {
-                    int to = Math.min(index, from + columns);
-                    int[] indices = new int[to - from];
-                    for (int i = 0; i < indices.length; i++) {
-                        indices[i] = from + i;
-                    }
-                    rows.add(new LayoutRow(y, cellHeight, indices, null, null));
-                    y += cellHeight;
-                }
+                y = addPhotoRows(y, cellHeight, start, index);
                 y += 8;
             }
             totalHeight = y + 20;
         } else {
-            for (int from = 0; from < photos.size(); from += columns) {
-                int to = Math.min(photos.size(), from + columns);
-                int[] indices = new int[to - from];
-                for (int i = 0; i < indices.length; i++) {
-                    indices[i] = from + i;
-                }
-                rows.add(new LayoutRow(y, cellHeight, indices, null, null));
-                y += cellHeight;
-            }
+            y = addPhotoRows(y, cellHeight, 0, photos.size());
             totalHeight = y + 24;
         }
         setPreferredSize(new Dimension(width, Math.max(totalHeight, 300)));
         revalidate();
+    }
+
+    private int addPhotoRows(int y, int cellHeight, int from, int to) {
+        for (int start = from; start < to; start += columns) {
+            int end = Math.min(to, start + columns);
+            int[] indices = new int[end - start];
+            for (int i = 0; i < indices.length; i++) {
+                indices[i] = start + i;
+            }
+            rows.add(new LayoutRow(y, cellHeight, indices, null, 0, null, null));
+            y += cellHeight;
+        }
+        return y;
+    }
+
+    private String dateRange(int from, int to) {
+        LocalDate minimum = null;
+        LocalDate maximum = null;
+        for (int i = from; i < to; i++) {
+            LocalDate date = photos.get(i).capturedLocal().toLocalDate();
+            if (minimum == null || date.isBefore(minimum)) {
+                minimum = date;
+            }
+            if (maximum == null || date.isAfter(maximum)) {
+                maximum = date;
+            }
+        }
+        if (minimum == null) {
+            return null;
+        }
+        return minimum.equals(maximum) ? minimum.format(RANGE_DATE) : minimum.format(RANGE_DATE) + " – " + maximum.format(RANGE_DATE);
     }
 
     private int indexAt(Point point) {
@@ -446,7 +719,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.setColor(Theme.BACKGROUND);
             g.fillRect(0, 0, getWidth(), getHeight());
 
-            if (photos.isEmpty()) {
+            if (rows.isEmpty()) {
                 paintEmpty(g);
                 return;
             }
@@ -455,43 +728,171 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             if (clip == null) {
                 clip = new Rectangle(0, 0, getWidth(), getHeight());
             }
+            int top = getVisibleRect().y;
+            updateSticky(top);
+
             for (LayoutRow row : rows) {
                 if (row.y() + row.height() < clip.y || row.y() > clip.y + clip.height) {
                     continue;
                 }
                 if (row.header()) {
-                    paintHeader(g, row);
+                    if (grouping == GroupMode.FOLDER && stickyKey != null && stickyKey.equals(row.groupKey())) {
+                        continue;
+                    }
+                    paintHeader(g, row, row.y(), false);
                 } else {
                     for (int column = 0; column < row.indices().length; column++) {
                         paintCell(g, row.indices()[column], row, column);
                     }
                 }
             }
+
+            paintSticky(g, top);
         } finally {
             g.dispose();
         }
     }
 
-    private void paintHeader(Graphics2D g, LayoutRow row) {
-        int baseline = row.y() + 32;
-        Font titleFont = Theme.font(Font.BOLD, 15);
-        Font countFont = Theme.font(Font.PLAIN, 12);
+    private void updateSticky(int top) {
+        if (grouping != GroupMode.FOLDER || rows.isEmpty()) {
+            stickyKey = null;
+            return;
+        }
+        LayoutRow current = currentFolderHeader(top);
+        stickyKey = current == null ? null : current.groupKey();
+    }
+
+    private LayoutRow currentFolderHeader(int top) {
+        LayoutRow first = null;
+        LayoutRow passed = null;
+        for (LayoutRow row : rows) {
+            if (!row.header() || row.groupKey() == null) {
+                continue;
+            }
+            if (first == null) {
+                first = row;
+            }
+            if (row.y() <= top) {
+                passed = row;
+            } else {
+                break;
+            }
+        }
+        return passed == null ? first : passed;
+    }
+
+    private void paintSticky(Graphics2D g, int top) {
+        if (grouping != GroupMode.FOLDER || stickyKey == null) {
+            return;
+        }
+        LayoutRow current = headerFor(stickyKey);
+        if (current == null) {
+            return;
+        }
+
+        // CSS-like sticky headers are pushed by the next section header as it reaches the top.
+        // Drawing the current header at a geometric offset avoids painting a second, time-based
+        // copy of the previous header, which caused the flicker.
+        LayoutRow next = nextHeaderAfter(stickyKey);
+        int stickyY = top;
+        if (next != null && current.y() <= top) {
+            int distance = next.y() - top;
+            if (distance >= 0 && distance < HEADER_HEIGHT) {
+                stickyY = top - (HEADER_HEIGHT - distance);
+            }
+        }
+
+        java.awt.Shape clip = g.getClip();
+        try {
+            java.awt.Rectangle band = new java.awt.Rectangle(0, top, getWidth(), HEADER_HEIGHT);
+            if (clip != null) {
+                band = band.intersection(clip.getBounds());
+            }
+            if (band.isEmpty()) {
+                return;
+            }
+            g.setClip(band);
+            paintHeader(g, current, stickyY, true);
+        } finally {
+            g.setClip(clip);
+        }
+    }
+
+    private LayoutRow nextHeaderAfter(String key) {
+        boolean found = false;
+        for (LayoutRow row : rows) {
+            if (row.header() && row.groupKey() != null) {
+                if (found) {
+                    return row;
+                }
+                if (row.groupKey().equals(key)) {
+                    found = true;
+                }
+            }
+        }
+        return null;
+    }
+
+    private LayoutRow headerFor(String key) {
+        for (LayoutRow row : rows) {
+            if (row.header() && key.equals(row.groupKey())) {
+                return row;
+            }
+        }
+        return null;
+    }
+
+    private void paintHeader(Graphics2D g, LayoutRow row, int y, boolean sticky) {
+        int x = Math.max(OUTER, gridLeft);
+        int center = y + HEADER_HEIGHT / 2;
+        boolean folderHeader = grouping == GroupMode.FOLDER;
+        if (sticky) {
+            g.setColor(Theme.SURFACE);
+            g.fillRect(0, y, getWidth(), HEADER_HEIGHT);
+            g.setColor(Theme.BORDER);
+            g.fillRect(0, y + HEADER_HEIGHT - 1, getWidth(), 1);
+            g.setColor(new Color(0, 0, 0, 18));
+            g.fillRect(0, y + HEADER_HEIGHT, getWidth(), 2);
+        }
+
+        if (folderHeader) {
+            g.setColor(Theme.ACCENT);
+            g.fill(new RoundRectangle2D.Float(x - 12, center - 15, 3, 30, 2, 2));
+            Icons.folder(18, Theme.ACCENT).paintIcon(this, g, x, center - 9);
+        } else {
+            Icons.clock(17, Theme.MUTED).paintIcon(this, g, x, center - 9);
+        }
+        int textX = x + 26;
+        int titleBaseline = y + 29;
+        Font titleFont = Theme.font(Font.BOLD, 16);
         g.setFont(titleFont);
         g.setColor(Theme.TEXT);
-        FontMetrics metrics = g.getFontMetrics();
-        int x = Math.max(OUTER, gridLeft);
-        g.drawString(row.title(), x, baseline);
-        int titleWidth = metrics.stringWidth(row.title());
-        g.setFont(countFont);
-        g.setColor(Theme.MUTED);
+        FontMetrics titleMetrics = g.getFontMetrics();
+        String title = truncate(row.title(), titleMetrics, Math.max(80, getWidth() - textX - 150));
+        g.drawString(title, textX, titleBaseline);
+        int badgeX = textX + titleMetrics.stringWidth(title) + 10;
+
+        String count = row.count() + "枚";
+        g.setFont(Theme.font(Font.BOLD, 10));
         FontMetrics countMetrics = g.getFontMetrics();
-        g.drawString(row.subtitle(), x + titleWidth + 10, baseline);
-        int lineStart = x + titleWidth + 10 + countMetrics.stringWidth(row.subtitle()) + 14;
-        int lineEnd = getWidth() - OUTER;
-        if (lineEnd > lineStart) {
+        int badgeWidth = countMetrics.stringWidth(count) + 14;
+        g.setColor(Theme.ACCENT_SOFT);
+        g.fill(new RoundRectangle2D.Float(badgeX, y + 15, badgeWidth, 20, 10, 10));
+        g.setColor(Theme.ACCENT_DARK);
+        g.drawString(count, badgeX + 7, y + 29);
+
+        if (row.note() != null) {
+            g.setFont(Theme.font(Font.PLAIN, 11));
+            g.setColor(Theme.MUTED);
+            g.drawString(row.note(), badgeX + badgeWidth + 10, y + 29);
+        }
+
+        int lineStart = textX;
+        int lineEnd = Math.max(lineStart, getWidth() - OUTER);
+        if (!sticky) {
             g.setColor(Theme.BORDER);
             g.setStroke(new BasicStroke(1f));
-            g.drawLine(lineStart, baseline - 4, lineEnd, baseline - 4);
+            g.drawLine(lineStart, y + HEADER_HEIGHT - 1, lineEnd, y + HEADER_HEIGHT - 1);
         }
     }
 

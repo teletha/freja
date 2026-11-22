@@ -180,6 +180,9 @@ class LibraryScannerTest {
             assertEquals(child2Folder.id(), folderOf(photos, "two.png"));
             assertEquals(grandFolder.id(), folderOf(photos, "three.png"));
             assertEquals(1, library.photos(PhotoFilter.folder(child1Folder.id())).size());
+            assertEquals(1, library.photos(PhotoFilter.folder(rootFolder.id())).size());
+            assertEquals(4, library.photos(PhotoFilter.folderTree(rootFolder.id())).size());
+            assertEquals(2, library.photos(PhotoFilter.folderTree(child2Folder.id())).size());
 
             Path child3 = Files.createDirectories(root.resolve("child3"));
             image(child3.resolve("four.png"), 30, 20, Color.MAGENTA);
@@ -187,6 +190,7 @@ class LibraryScannerTest {
             assertTrue(scanner.awaitIdle(Duration.ofSeconds(30)), "discovery scan did not finish");
             assertEquals(6, library.folders().size());
             assertEquals(5, library.photos(PhotoFilter.all()).size());
+            assertEquals(5, library.photos(PhotoFilter.folderTree(rootFolder.id())).size());
 
             scanner.removeFolder(added.id());
             assertEquals(0, library.folders().size());

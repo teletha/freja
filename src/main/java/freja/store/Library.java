@@ -285,6 +285,17 @@ public final class Library implements AutoCloseable {
         return existing != null ? existing : insertFolder(normalized, key, false);
     }
 
+    private String folderPath(long folderId) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT path FROM folders WHERE id=?")) {
+            statement.setLong(1, folderId);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next() ? results.getString(1) : null;
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the folder path", e);
+        }
+    }
+
     private Folder findFolderByKey(String key) {
         String sql = """
                 SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit,
@@ -474,8 +485,20 @@ public final class Library implements AutoCloseable {
                 """);
         List<Object> parameters = new ArrayList<>();
         if (filter.folderId() != null) {
-            sql.append(" AND p.folder_id = ?");
-            parameters.add(filter.folderId());
+            if (filter.includeSubfolders()) {
+                String folderPath = folderPath(filter.folderId());
+                if (folderPath == null) {
+                    sql.append(" AND 1 = 0");
+                } else {
+                    String prefix = PathUtil.prefix(PathUtil.key(Path.of(folderPath)));
+                    sql.append(" AND substr(p.path_key,1,?)=?");
+                    parameters.add(prefix.length());
+                    parameters.add(prefix);
+                }
+            } else {
+                sql.append(" AND p.folder_id = ?");
+                parameters.add(filter.folderId());
+            }
         }
         if (filter.favoritesOnly()) {
             sql.append(" AND p.favorite = 1");

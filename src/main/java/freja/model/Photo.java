@@ -50,6 +50,24 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
     }
 
     /**
+     * Returns the display name of the folder which directly contains this photo.
+     *
+     * @return the last element of the folder path
+     */
+    public String folderLabel() {
+        if (folderPath == null || folderPath.isBlank()) {
+            return "";
+        }
+        try {
+            Path folder = Path.of(folderPath);
+            Path name = folder.getFileName();
+            return name == null ? folderPath : name.toString();
+        } catch (RuntimeException e) {
+            return folderPath;
+        }
+    }
+
+    /**
      * Returns the capture time in the local zone.
      *
      * @return the capture date and time

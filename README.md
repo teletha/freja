@@ -31,8 +31,10 @@ stores the catalog in SQLite. Your original files are never moved or modified.
   JPEG EXIF camera, lens, capture date, exposure, aperture, ISO,
   focal length and orientation are read without extra dependencies.
 * **Picasa-like browsing** — timeline groups, virtualized thumbnail grid, zoom slider,
-  filename/folder/camera/caption search, favorites, recent photos and star ratings. The grid only
-  loads the thumbnails that are visible.
+  filename/folder/camera/caption search, favorites, recent photos and star ratings. The library
+  view is one continuous list of folder sections in sidebar order, regardless of the real directory
+  hierarchy; selecting a folder scrolls to its rich, sticky header. Nearby jumps animate smoothly,
+  while long jumps land immediately. The grid only loads the thumbnails that are visible.
 * **Per-folder display order** — choose name order or date order for each folder independently.
   Name order is the default, and the choice is stored in SQLite with the folder.
 * **Full screen viewer** — keyboard navigation, zoom, pan, slideshow, and favorite toggling.

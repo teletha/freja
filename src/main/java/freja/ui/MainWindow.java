@@ -24,7 +24,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
@@ -133,6 +137,8 @@ public final class MainWindow extends JFrame {
 
     private boolean updatingSort;
 
+    private boolean scrollToSelectedFolder;
+
     public MainWindow(Library library, LibraryScanner scanner) {
         super("Freja");
         this.library = library;
@@ -192,6 +198,7 @@ public final class MainWindow extends JFrame {
         scroll.setBackground(Theme.BACKGROUND);
         scroll.getViewport().setBackground(Theme.BACKGROUND);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(42);
 
         JPanel content = new JPanel(new BorderLayout());
@@ -609,6 +616,7 @@ public final class MainWindow extends JFrame {
             if (mode == Sidebar.Mode.FOLDER && this.folderId == folderId) {
                 mode = Sidebar.Mode.ALL;
                 this.folderId = -1;
+                scrollToSelectedFolder = false;
                 applySortForCurrentView();
             }
             refreshAll();
@@ -618,6 +626,7 @@ public final class MainWindow extends JFrame {
     private void selectMode(Sidebar.Mode mode, long folderId) {
         this.mode = mode;
         this.folderId = folderId;
+        this.scrollToSelectedFolder = mode == Sidebar.Mode.FOLDER && folderId >= 0;
         applySortForCurrentView();
         refreshAll();
     }
@@ -777,19 +786,36 @@ public final class MainWindow extends JFrame {
             if (mode == Sidebar.Mode.FOLDER && folders.stream().noneMatch(folder -> folder.id() == folderId)) {
                 mode = Sidebar.Mode.ALL;
                 folderId = -1;
+                scrollToSelectedFolder = false;
                 applySortForCurrentView();
             }
             PhotoFilter filter = switch (mode) {
-            case ALL -> PhotoFilter.all();
+            case ALL, FOLDER -> PhotoFilter.all();
             case FAVORITES -> PhotoFilter.favorites();
             case RECENT -> PhotoFilter.recent();
-            case FOLDER -> PhotoFilter.folder(folderId);
             };
             SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
             filter = filter.withSort(order).withSearch(search.getText());
 
             List<Photo> photos = library.photos(filter);
-            grid.setPhotos(photos, filter.groupsByDate());
+            PhotoGrid.GroupMode grouping;
+            List<Folder> sections = List.of();
+            if (mode == Sidebar.Mode.ALL || mode == Sidebar.Mode.FOLDER) {
+                if (filter.search() == null) {
+                    sections = folders;
+                } else {
+                    java.util.Set<Long> matched = new java.util.HashSet<>();
+                    for (Photo photo : photos) {
+                        matched.add(photo.folderId());
+                    }
+                    sections = folders.stream().filter(folder -> matched.contains(folder.id())).toList();
+                }
+                photos = orderByFolder(photos, sections, mode == Sidebar.Mode.FOLDER);
+                grouping = PhotoGrid.GroupMode.FOLDER;
+            } else {
+                grouping = filter.groupsByDate() ? PhotoGrid.GroupMode.DATE : PhotoGrid.GroupMode.NONE;
+            }
+            grid.setPhotos(photos, grouping, sections);
             sidebar.setData(stats, folders, mode, folderId);
             statusCount.setText(stats.photos() + " 枚  ·  " + Photo.formatSize(stats.bytes()));
             setTitle("Freja — " + stats.photos() + " 枚の写真");
@@ -806,9 +832,49 @@ public final class MainWindow extends JFrame {
             } else {
                 centerCards.show(center, "grid");
             }
+
+            if (scrollToSelectedFolder && mode == Sidebar.Mode.FOLDER) {
+                scrollToSelectedFolder = false;
+                long target = folderId;
+                SwingUtilities.invokeLater(() -> grid.scrollToFolder(target));
+            }
         } catch (RuntimeException e) {
             statusMessage.setText("ライブラリを読み込めません: " + e.getMessage());
         }
+    }
+
+    private List<Photo> orderByFolder(List<Photo> photos, List<Folder> folders, boolean perFolderSort) {
+        if (photos.isEmpty()) {
+            return photos;
+        }
+        Map<Long, List<Photo>> grouped = new HashMap<>();
+        for (Photo photo : photos) {
+            grouped.computeIfAbsent(photo.folderId(), id -> new ArrayList<>()).add(photo);
+        }
+        List<Photo> ordered = new ArrayList<>(photos.size());
+        for (Folder folder : folders) {
+            List<Photo> list = grouped.remove(folder.id());
+            if (list != null) {
+                if (perFolderSort) {
+                    list.sort(comparator(folder.sort()));
+                }
+                ordered.addAll(list);
+            }
+        }
+        for (List<Photo> list : grouped.values()) {
+            ordered.addAll(list);
+        }
+        return ordered;
+    }
+
+    private Comparator<Photo> comparator(SortOrder order) {
+        Comparator<Photo> name = Comparator.comparing(Photo::fileName, String.CASE_INSENSITIVE_ORDER);
+        return switch (order) {
+        case NAME -> name.thenComparing(Comparator.comparingLong(Photo::capturedAt).reversed());
+        case DATE_OLDEST -> Comparator.comparingLong(Photo::capturedAt).thenComparing(name);
+        case SIZE -> Comparator.comparingLong(Photo::byteSize).reversed().thenComparing(name);
+        default -> Comparator.comparingLong(Photo::capturedAt).reversed().thenComparing(name);
+        };
     }
 
     private void showInspector(Photo photo) {

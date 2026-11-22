@@ -12,7 +12,8 @@ package freja.model;
 /**
  * A query against the photo library.
  */
-public record PhotoFilter(Long folderId, boolean favoritesOnly, boolean recentOnly, String search, SortOrder sort) {
+public record PhotoFilter(Long folderId, boolean includeSubfolders, boolean favoritesOnly, boolean recentOnly,
+        String search, SortOrder sort) {
 
     /** How a result set is ordered. */
     public enum SortOrder {
@@ -38,30 +39,35 @@ public record PhotoFilter(Long folderId, boolean favoritesOnly, boolean recentOn
 
     /** A filter showing every photo. */
     public static PhotoFilter all() {
-        return new PhotoFilter(null, false, false, null, SortOrder.NAME);
+        return new PhotoFilter(null, false, false, false, null, SortOrder.NAME);
     }
 
     /** A filter showing every photo in the given folder. */
     public static PhotoFilter folder(long folderId) {
-        return new PhotoFilter(folderId, false, false, null, SortOrder.NAME);
+        return new PhotoFilter(folderId, false, false, false, null, SortOrder.NAME);
+    }
+
+    /** A filter showing every photo in the given folder and its subfolders. */
+    public static PhotoFilter folderTree(long folderId) {
+        return new PhotoFilter(folderId, true, false, false, null, SortOrder.NAME);
     }
 
     /** A filter showing favorites. */
     public static PhotoFilter favorites() {
-        return new PhotoFilter(null, true, false, null, SortOrder.NAME);
+        return new PhotoFilter(null, false, true, false, null, SortOrder.NAME);
     }
 
     /** A filter showing recently imported photos. */
     public static PhotoFilter recent() {
-        return new PhotoFilter(null, false, true, null, SortOrder.NAME);
+        return new PhotoFilter(null, false, false, true, null, SortOrder.NAME);
     }
 
     public PhotoFilter withSort(SortOrder sort) {
-        return new PhotoFilter(folderId, favoritesOnly, recentOnly, search, sort);
+        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, search, sort);
     }
 
     public PhotoFilter withSearch(String search) {
-        return new PhotoFilter(folderId, favoritesOnly, recentOnly, search, sort);
+        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, search, sort);
     }
 
     /**
