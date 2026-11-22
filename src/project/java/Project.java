@@ -13,6 +13,7 @@ import static bee.api.License.*;
 public class Project extends bee.api.Project {
     {
         product("io.github.teletha", "freja", "1.0");
+        describe("A fast, local-first photo library for the desktop.");
         license(MIT);
         versionControlSystem("https://github.com/teletha/freja");
 
@@ -20,6 +21,7 @@ public class Project extends bee.api.Project {
         require("io.github.teletha", "psychopath");
         require("io.github.teletha", "imagify");
         require("com.formdev", "flatlaf");
+        require("org.xerial", "sqlite-jdbc");
         require("io.github.teletha", "antibug").atTest();
     }
 }

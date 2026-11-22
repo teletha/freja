@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: freja.Freja
+Enable-Native-Access: ALL-UNNAMED
+

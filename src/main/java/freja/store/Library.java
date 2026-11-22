@@ -1,0 +1,1053 @@
+/*
+ * Copyright (C) 2026 The FREJA Development Team
+ *
+ * Licensed under the MIT License (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *          https://opensource.org/licenses/MIT
+ */
+package freja.store;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import freja.model.Folder;
+import freja.model.LibraryStats;
+import freja.model.Photo;
+import freja.model.PhotoFilter;
+import freja.util.PathUtil;
+
+/**
+ * The SQLite-backed photo catalog.
+ * <p>
+ * A single connection is guarded by the intrinsic lock of this object. SQLite is fast enough for
+ * the reads the UI makes, and keeping one writer avoids {@code SQLITE_BUSY} between the scanner
+ * and the rest of the application. All thumbnails are stored in a separate table so browsing the
+ * catalog never reads megabyte-sized blobs by accident.
+ * </p>
+ */
+public final class Library implements AutoCloseable {
+
+    /** How far back the "recent" view reaches. */
+    private static final long RECENT_WINDOW = 30L * 24 * 60 * 60 * 1000;
+
+    /** A thumbnail stored in the database. */
+    public record Thumbnail(byte[] data, int width, int height) {
+    }
+
+    /** Raised when a database operation fails. */
+    public static class LibraryException extends RuntimeException {
+
+        public LibraryException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    private final Path database;
+
+    private final Connection connection;
+
+    /**
+     * Opens a library database, creating it when necessary.
+     *
+     * @param database the SQLite file, or {@code :memory:}
+     * @throws SQLException when the database cannot be opened
+     */
+    public Library(Path database) throws SQLException {
+        this.database = database;
+        try {
+            // Loading by name also works when the service descriptor of the driver is not visible,
+            // for example in an IDE that builds its classpath from an older project configuration.
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("The SQLite JDBC driver (org.xerial:sqlite-jdbc) is not on the classpath.", e);
+        }
+        if (!":memory:".equals(database.toString())) {
+            Path parent = database.toAbsolutePath().getParent();
+            if (parent != null) {
+                try {
+                    Files.createDirectories(parent);
+                } catch (IOException e) {
+                    throw new SQLException("Cannot create the library directory: " + parent, e);
+                }
+            }
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
+        } else {
+            this.connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+        }
+        initialize();
+    }
+
+    /**
+     * Returns the database file.
+     *
+     * @return the database location
+     */
+    public Path location() {
+        return database;
+    }
+
+    private void initialize() throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("PRAGMA journal_mode=WAL");
+            statement.execute("PRAGMA synchronous=NORMAL");
+            statement.execute("PRAGMA foreign_keys=ON");
+            statement.execute("PRAGMA busy_timeout=5000");
+            statement.execute("PRAGMA temp_store=MEMORY");
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS folders (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        path TEXT NOT NULL,
+                        path_key TEXT NOT NULL UNIQUE,
+                        name TEXT NOT NULL DEFAULT '',
+                        added_at INTEGER NOT NULL,
+                        last_scan_at INTEGER NOT NULL DEFAULT 0,
+                        sort_order TEXT NOT NULL DEFAULT 'NAME',
+                        explicit INTEGER NOT NULL DEFAULT 1
+                    )
+                    """);
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS photos (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+                        path TEXT NOT NULL,
+                        path_key TEXT NOT NULL UNIQUE,
+                        file_name TEXT NOT NULL,
+                        extension TEXT NOT NULL,
+                        byte_size INTEGER NOT NULL,
+                        modified_at INTEGER NOT NULL,
+                        width INTEGER NOT NULL DEFAULT 0,
+                        height INTEGER NOT NULL DEFAULT 0,
+                        captured_at INTEGER NOT NULL,
+                        camera_make TEXT,
+                        camera_model TEXT,
+                        lens TEXT,
+                        exposure TEXT,
+                        aperture REAL,
+                        iso INTEGER,
+                        focal_length REAL,
+                        orientation INTEGER NOT NULL DEFAULT 1,
+                        favorite INTEGER NOT NULL DEFAULT 0,
+                        rating INTEGER NOT NULL DEFAULT 0,
+                        caption TEXT,
+                        thumbnail_revision INTEGER NOT NULL DEFAULT 4,
+                        imported_at INTEGER NOT NULL,
+                        scan_token TEXT
+                    )
+                    """);
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS thumbnails (
+                        photo_id INTEGER PRIMARY KEY REFERENCES photos(id) ON DELETE CASCADE,
+                        width INTEGER NOT NULL,
+                        height INTEGER NOT NULL,
+                        data BLOB NOT NULL
+                    )
+                    """);
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS settings (
+                        key TEXT PRIMARY KEY,
+                        value TEXT NOT NULL
+                    )
+                    """);
+            statement.execute("CREATE INDEX IF NOT EXISTS photos_folder ON photos(folder_id, captured_at DESC)");
+            statement.execute("CREATE INDEX IF NOT EXISTS photos_captured ON photos(captured_at DESC)");
+            statement.execute("CREATE INDEX IF NOT EXISTS photos_name ON photos(file_name COLLATE NOCASE)");
+            statement.execute("CREATE INDEX IF NOT EXISTS photos_imported ON photos(imported_at DESC)");
+        }
+        ensureColumn("folders", "sort_order", "TEXT NOT NULL DEFAULT 'NAME'");
+        ensureColumn("folders", "explicit", "INTEGER NOT NULL DEFAULT 1");
+        ensureColumn("folders", "name", "TEXT NOT NULL DEFAULT ''");
+        ensureColumn("photos", "thumbnail_revision", "INTEGER NOT NULL DEFAULT 1");
+        backfillFolderNames();
+        migrateThumbnailRevision();
+    }
+
+    /**
+     * Fills the folder name of libraries created before names were stored separately.
+     */
+    private void backfillFolderNames() throws SQLException {
+        List<Long> ids = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        try (Statement statement = connection.createStatement(); ResultSet results = statement.executeQuery("SELECT id, path FROM folders WHERE name IS NULL OR name=''")) {
+            while (results.next()) {
+                ids.add(results.getLong("id"));
+                names.add(PathUtil.folderName(Path.of(results.getString("path"))));
+            }
+        }
+        if (ids.isEmpty()) {
+            return;
+        }
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET name=? WHERE id=?")) {
+            for (int i = 0; i < ids.size(); i++) {
+                statement.setString(1, names.get(i));
+                statement.setLong(2, ids.get(i));
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+
+    /**
+     * Drops thumbnails produced before the WebP thumbnail format was introduced. The next scan
+     * regenerates them.
+     */
+    private void migrateThumbnailRevision() throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("DELETE FROM thumbnails WHERE photo_id IN (SELECT id FROM photos WHERE thumbnail_revision < 4)");
+        }
+    }
+
+    /**
+     * Adds a column to an existing table when an older library is opened.
+     *
+     * @param table the table name, which is a compile-time constant here
+     * @param column the column name
+     * @param definition the column definition
+     */
+    private void ensureColumn(String table, String column, String definition) throws SQLException {
+        try (Statement statement = connection.createStatement(); ResultSet results = statement.executeQuery("PRAGMA table_info(" + table + ")")) {
+            while (results.next()) {
+                if (column.equalsIgnoreCase(results.getString("name"))) {
+                    return;
+                }
+            }
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+        }
+    }
+
+    /**
+     * Registers a directory.
+     * <p>
+     * Registering the same directory twice returns the existing entry. A directory below an
+     * already registered scan root is accepted as a managed folder; the root scan discovers those
+     * directories automatically, so selecting one in the dialog simply navigates to it. A new
+     * parent above an existing root is rejected because it would scan the same files twice.
+     * </p>
+     *
+     * @param path the directory
+     * @return the registered folder
+     */
+    public synchronized Folder addFolder(Path path) {
+        Path normalized = PathUtil.normalize(path);
+        if (!Files.isDirectory(normalized)) {
+            throw new IllegalArgumentException("Not a directory: " + normalized);
+        }
+        String key = PathUtil.key(normalized);
+        List<Folder> folders = folders();
+        for (Folder folder : folders) {
+            if (PathUtil.key(folder.path()).equals(key)) {
+                return folder;
+            }
+        }
+        for (Folder folder : folders) {
+            if (!folder.explicit()) {
+                continue;
+            }
+            String existing = PathUtil.key(folder.path());
+            if (key.startsWith(PathUtil.prefix(existing))) {
+                // The root scan already owns this directory. Register it as a managed folder so
+                // it has its own row even before the next scan walks the tree.
+                return insertFolder(normalized, key, false);
+            }
+            if (existing.startsWith(PathUtil.prefix(key))) {
+                throw new IllegalArgumentException("The folder overlaps an existing library folder: " + folder.path());
+            }
+        }
+        return insertFolder(normalized, key, true);
+    }
+
+    /**
+     * Registers a directory discovered by the scanner.
+     *
+     * @param path the directory
+     * @return the existing or newly created managed folder
+     */
+    public synchronized Folder ensureFolder(Path path) {
+        Path normalized = PathUtil.normalize(path);
+        String key = PathUtil.key(normalized);
+        Folder existing = findFolderByKey(key);
+        return existing != null ? existing : insertFolder(normalized, key, false);
+    }
+
+    private Folder findFolderByKey(String key) {
+        String sql = """
+                SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit,
+                       (SELECT COUNT(*) FROM photos p WHERE p.folder_id = f.id) AS photo_count
+                FROM folders f
+                WHERE f.path_key = ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, key);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next() ? mapFolder(results) : null;
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the folder: " + key, e);
+        }
+    }
+
+    private Folder insertFolder(Path normalized, String key, boolean explicit) throws LibraryException {
+        long now = System.currentTimeMillis();
+        String name = PathUtil.folderName(normalized);
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO folders(path, path_key, name, added_at, sort_order, explicit) VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, normalized.toString());
+            statement.setString(2, key);
+            statement.setString(3, name);
+            statement.setLong(4, now);
+            statement.setString(5, PhotoFilter.SortOrder.NAME.name());
+            statement.setInt(6, explicit ? 1 : 0);
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                keys.next();
+                return new Folder(keys.getLong(1), normalized, name, 0, now, 0, PhotoFilter.SortOrder.NAME, explicit);
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to add the folder: " + normalized, e);
+        }
+    }
+
+
+    /**
+     * Returns all registered folders with their photo counts.
+     *
+     * @return the folders ordered by path
+     */
+    public synchronized List<Folder> folders() {
+        String sql = """
+                SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit, COUNT(p.id) AS photo_count
+                FROM folders f
+                LEFT JOIN photos p ON p.folder_id = f.id
+                GROUP BY f.id
+                ORDER BY f.path COLLATE NOCASE
+                """;
+        try (Statement statement = connection.createStatement(); ResultSet results = statement.executeQuery(sql)) {
+            List<Folder> folders = new ArrayList<>();
+            while (results.next()) {
+                folders.add(mapFolder(results));
+            }
+            return folders;
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read folders", e);
+        }
+    }
+
+    private Folder mapFolder(ResultSet results) throws SQLException {
+        Path path = Path.of(results.getString("path"));
+        String name = results.getString("name");
+        if (name == null || name.isBlank()) {
+            name = PathUtil.folderName(path);
+        }
+        return new Folder(results.getLong("id"), path, name, results.getInt("photo_count"), results.getLong("added_at"), results.getLong("last_scan_at"), parseSort(results.getString("sort_order")), results.getInt("explicit") != 0);
+    }
+
+    private static PhotoFilter.SortOrder parseSort(String value) {
+        if (value != null) {
+            try {
+                return PhotoFilter.SortOrder.valueOf(value);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return PhotoFilter.SortOrder.NAME;
+    }
+
+    /**
+     * Stores the display order for one folder.
+     *
+     * @param folderId the folder identifier
+     * @param sort the display order
+     */
+    public synchronized void setFolderSort(long folderId, PhotoFilter.SortOrder sort) {
+        PhotoFilter.SortOrder value = sort == null ? PhotoFilter.SortOrder.NAME : sort;
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET sort_order=? WHERE id=?")) {
+            statement.setString(1, value.name());
+            statement.setLong(2, folderId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the folder display order", e);
+        }
+    }
+
+    /**
+     * Finds a registered folder by its database identifier.
+     *
+     * @param id a folder identifier
+     * @return the folder, if it exists
+     */
+    public synchronized Optional<Folder> folder(long id) {
+        return folders().stream().filter(folder -> folder.id() == id).findFirst();
+    }
+
+    /**
+     * Removes a folder and every catalog entry below it. Files on disk are not touched.
+     *
+     * @param folderId the folder identifier
+     */
+    public synchronized void removeFolder(long folderId) {
+        Optional<Folder> found = folder(folderId);
+        if (found.isEmpty()) {
+            return;
+        }
+        String key = PathUtil.key(found.get().path());
+        String prefix = PathUtil.prefix(key);
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE path_key=? OR substr(path_key,1,?)=?")) {
+            statement.setString(1, key);
+            statement.setInt(2, prefix.length());
+            statement.setString(3, prefix);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to remove the folder", e);
+        }
+    }
+
+    /**
+     * Removes managed folders below a directory which disappeared from disk. The explicit scan
+     * root is kept so a temporarily unavailable drive can be reconnected.
+     *
+     * @param path the deleted directory
+     * @return the number of removed folders
+     */
+    public synchronized int removeAutoFoldersUnder(Path path) {
+        String key = PathUtil.key(path);
+        String prefix = PathUtil.prefix(key);
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE explicit=0 AND (path_key=? OR substr(path_key,1,?)=?)")) {
+            statement.setString(1, key);
+            statement.setInt(2, prefix.length());
+            statement.setString(3, prefix);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to remove folders below " + path, e);
+        }
+    }
+
+    /**
+     * Removes managed folders which a scan no longer found.
+     *
+     * @param folderIds folder identifiers
+     * @return the number of removed folders
+     */
+    public synchronized int deleteFolders(java.util.Collection<Long> folderIds) {
+        if (folderIds.isEmpty()) {
+            return 0;
+        }
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE id=? AND explicit=0")) {
+            int count = 0;
+            for (long id : folderIds) {
+                statement.setLong(1, id);
+                if (statement.executeUpdate() > 0) {
+                    count++;
+                }
+            }
+            return count;
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to prune folders", e);
+        }
+    }
+
+    /**
+     * Returns photos matching a filter.
+     *
+     * @param filter the query
+     * @return matching photos in the requested order
+     */
+    public synchronized List<Photo> photos(PhotoFilter filter) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT p.*, f.path AS folder_path
+                FROM photos p
+                JOIN folders f ON f.id = p.folder_id
+                WHERE 1 = 1
+                """);
+        List<Object> parameters = new ArrayList<>();
+        if (filter.folderId() != null) {
+            sql.append(" AND p.folder_id = ?");
+            parameters.add(filter.folderId());
+        }
+        if (filter.favoritesOnly()) {
+            sql.append(" AND p.favorite = 1");
+        }
+        if (filter.recentOnly()) {
+            sql.append(" AND p.imported_at >= ?");
+            parameters.add(Instant.now().minus(RECENT_WINDOW, ChronoUnit.MILLIS).toEpochMilli());
+        }
+        if (filter.search() != null) {
+            String search = "%" + PathUtil.likeValue(filter.search()) + "%";
+            sql.append("""
+                     AND (p.file_name LIKE ? ESCAPE '\\'
+                       OR f.name LIKE ? ESCAPE '\\'
+                       OR p.caption LIKE ? ESCAPE '\\'
+                       OR p.camera_make LIKE ? ESCAPE '\\'
+                       OR p.camera_model LIKE ? ESCAPE '\\'
+                       OR p.lens LIKE ? ESCAPE '\\')
+                    """);
+            for (int i = 0; i < 6; i++) {
+                parameters.add(search);
+            }
+        }
+        sql.append(switch (filter.sort()) {
+        case DATE_OLDEST -> " ORDER BY p.captured_at ASC, p.file_name COLLATE NOCASE ASC";
+        case NAME -> " ORDER BY p.file_name COLLATE NOCASE ASC, p.captured_at DESC";
+        case SIZE -> " ORDER BY p.byte_size DESC, p.file_name COLLATE NOCASE ASC";
+        default -> " ORDER BY p.captured_at DESC, p.file_name COLLATE NOCASE ASC";
+        });
+
+        try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet results = statement.executeQuery()) {
+                List<Photo> photos = new ArrayList<>();
+                while (results.next()) {
+                    photos.add(mapPhoto(results));
+                }
+                return photos;
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read photos", e);
+        }
+    }
+
+    /**
+     * Finds a photo by identifier.
+     *
+     * @param id a photo identifier
+     * @return the photo, if it exists
+     */
+    public synchronized Optional<Photo> photo(long id) {
+        String sql = """
+                SELECT p.*, f.path AS folder_path
+                FROM photos p
+                JOIN folders f ON f.id = p.folder_id
+                WHERE p.id = ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next() ? Optional.of(mapPhoto(results)) : Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the photo", e);
+        }
+    }
+
+    /**
+     * Loads the thumbnail of a photo.
+     *
+     * @param photoId a photo identifier
+     * @return the thumbnail, if one has been generated
+     */
+    public synchronized Optional<Thumbnail> thumbnail(long photoId) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT width, height, data FROM thumbnails WHERE photo_id=?")) {
+            statement.setLong(1, photoId);
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return Optional.of(new Thumbnail(results.getBytes("data"), results.getInt("width"), results.getInt("height")));
+                }
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the thumbnail", e);
+        }
+    }
+
+    /**
+     * Returns aggregate counters.
+     *
+     * @return library statistics
+     */
+    public synchronized LibraryStats stats() {
+        long recentSince = Instant.now().minus(RECENT_WINDOW, ChronoUnit.MILLIS).toEpochMilli();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT COUNT(*) AS total,
+                       COALESCE(SUM(favorite), 0) AS favorites,
+                       COALESCE(SUM(CASE WHEN imported_at >= ? THEN 1 ELSE 0 END), 0) AS recent,
+                       COALESCE(SUM(byte_size), 0) AS bytes,
+                       (SELECT COUNT(*) FROM folders) AS folders
+                FROM photos
+                """)) {
+            statement.setLong(1, recentSince);
+            try (ResultSet results = statement.executeQuery()) {
+                results.next();
+                return new LibraryStats(results.getInt("total"), results.getInt("favorites"), results.getInt("recent"), results.getInt("folders"), results.getLong("bytes"));
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read statistics", e);
+        }
+    }
+
+    /**
+     * Tests whether a file is already cataloged with the given size and modification time.
+     *
+     * @param key a normalized path key
+     * @param size the file size
+     * @param modifiedAt the modification time
+     * @return true when the catalog row is current
+     */
+    public synchronized boolean isCurrent(String key, long size, long modifiedAt) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM photos WHERE path_key=? AND byte_size=? AND modified_at=? AND thumbnail_revision>=4")) {
+            statement.setString(1, key);
+            statement.setLong(2, size);
+            statement.setLong(3, modifiedAt);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next();
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to test the catalog entry", e);
+        }
+    }
+
+    /**
+     * Marks a catalog row as seen by the current full scan.
+     *
+     * @param key a normalized path key
+     * @param token the scan token
+     */
+    public synchronized void touch(String key, String token) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET scan_token=? WHERE path_key=?")) {
+            statement.setString(1, token);
+            statement.setString(2, key);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to touch the catalog entry", e);
+        }
+    }
+
+    /**
+     * Marks a row as seen and moves it to the folder which actually contains the file.
+     *
+     * @param key a normalized path key
+     * @param token the scan token, or null to leave the current token untouched
+     * @param folderId the folder containing the file
+     */
+    public synchronized void touch(String key, String token, long folderId) {
+        String sql = token == null ? "UPDATE photos SET folder_id=? WHERE path_key=?" : "UPDATE photos SET folder_id=?, scan_token=? WHERE path_key=?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, folderId);
+            if (token == null) {
+                statement.setString(2, key);
+            } else {
+                statement.setString(2, token);
+                statement.setString(3, key);
+            }
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the catalog entry", e);
+        }
+    }
+
+    /**
+     * Starts a full scan and returns its token.
+     *
+     * @param folderId the folder being scanned
+     * @return a token which must be passed back to {@link #finishScan(long, String)}
+     */
+    public synchronized String beginScan(long folderId) {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * Finishes a full scan and removes rows which were not seen.
+     *
+     * @param folderId the folder that was scanned
+     * @param token the token returned by {@link #beginScan(long)}
+     * @return the number of removed rows
+     */
+    public synchronized int finishScan(long folderId, String token) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE folder_id=? AND (scan_token IS NULL OR scan_token <> ?)")) {
+            statement.setLong(1, folderId);
+            statement.setString(2, token);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to finish the scan", e);
+        }
+    }
+
+    /**
+     * Finishes a recursive scan of a directory tree and removes rows which were not seen.
+     *
+     * @param root the scanned directory
+     * @param token the token returned by {@link #beginScan(long)}
+     * @return the number of removed rows
+     */
+    public synchronized int finishScanTree(Path root, String token) {
+        String prefix = PathUtil.prefix(PathUtil.key(root));
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE (scan_token IS NULL OR scan_token <> ?) AND substr(path_key,1,?)=?")) {
+            statement.setString(1, token);
+            statement.setInt(2, prefix.length());
+            statement.setString(3, prefix);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to finish the scan of " + root, e);
+        }
+    }
+
+    /**
+     * Records that a folder was scanned now.
+     *
+     * @param folderId the folder identifier
+     */
+    public synchronized void markFolderScanned(long folderId) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET last_scan_at=? WHERE id=?")) {
+            statement.setLong(1, System.currentTimeMillis());
+            statement.setLong(2, folderId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the folder", e);
+        }
+    }
+
+    /**
+     * Inserts or updates a catalog row and its thumbnail.
+     *
+     * @param folderId the owning folder
+     * @param file the image file
+     * @param size the file size at scan time
+     * @param modifiedAt the modification time at scan time
+     * @param analyzed the decoded metadata, or null for a file that could not be decoded
+     * @param token the current scan token, or null for a watch event
+     * @return the photo identifier
+     */
+    public synchronized long savePhoto(long folderId, Path file, long size, long modifiedAt, PhotoImporter.AnalyzedPhoto analyzed, String token) {
+        Path normalized = PathUtil.normalize(file);
+        String key = PathUtil.key(normalized);
+        Exif.Data exif = analyzed == null ? Exif.Data.EMPTY : analyzed.exif();
+        long capturedAt = analyzed == null ? modifiedAt : analyzed.capturedAt();
+        int width = analyzed == null ? 0 : analyzed.width();
+        int height = analyzed == null ? 0 : analyzed.height();
+        long now = System.currentTimeMillis();
+        try {
+            connection.setAutoCommit(false);
+            long photoId;
+            try (PreparedStatement find = connection.prepareStatement("SELECT id FROM photos WHERE path_key=?")) {
+                find.setString(1, key);
+                try (ResultSet results = find.executeQuery()) {
+                    photoId = results.next() ? results.getLong(1) : -1;
+                }
+            }
+            if (photoId < 0) {
+                try (PreparedStatement insert = connection.prepareStatement("""
+                        INSERT INTO photos(folder_id, path, path_key, file_name, extension, byte_size, modified_at,
+                            width, height, captured_at, camera_make, camera_model, lens, exposure, aperture, iso,
+                            focal_length, orientation, thumbnail_revision, imported_at, scan_token)
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,4,?,?)
+                        """, Statement.RETURN_GENERATED_KEYS)) {
+                    bindCommon(insert, folderId, normalized, key, size, modifiedAt, exif, capturedAt, width, height);
+                    insert.setLong(19, now);
+                    insert.setString(20, token);
+                    insert.executeUpdate();
+                    try (ResultSet keys = insert.getGeneratedKeys()) {
+                        keys.next();
+                        photoId = keys.getLong(1);
+                    }
+                }
+            } else {
+                // User-owned properties (favorite, rating, caption) are deliberately not touched.
+                try (PreparedStatement update = connection.prepareStatement("""
+                        UPDATE photos SET folder_id=?, path=?, file_name=?, extension=?, byte_size=?, modified_at=?,
+                            width=?, height=?, captured_at=?, camera_make=?, camera_model=?, lens=?, exposure=?,
+                            aperture=?, iso=?, focal_length=?, orientation=?, thumbnail_revision=4, scan_token=?
+                        WHERE id=?
+                        """)) {
+                    update.setLong(1, folderId);
+                    update.setString(2, normalized.toString());
+                    update.setString(3, normalized.getFileName().toString());
+                    update.setString(4, PathUtil.extension(normalized));
+                    update.setLong(5, size);
+                    update.setLong(6, modifiedAt);
+                    update.setInt(7, width);
+                    update.setInt(8, height);
+                    update.setLong(9, capturedAt);
+                    update.setString(10, exif.make());
+                    update.setString(11, exif.model());
+                    update.setString(12, exif.lens());
+                    update.setString(13, exif.exposure());
+                    setDouble(update, 14, exif.aperture());
+                    setInteger(update, 15, exif.iso());
+                    setDouble(update, 16, exif.focalLength());
+                    update.setInt(17, exif.orientation());
+                    update.setString(18, token);
+                    update.setLong(19, photoId);
+                    update.executeUpdate();
+                }
+            }
+            if (analyzed != null) {
+                try (PreparedStatement thumb = connection.prepareStatement("""
+                        INSERT INTO thumbnails(photo_id, width, height, data) VALUES(?,?,?,?)
+                        ON CONFLICT(photo_id) DO UPDATE SET width=excluded.width, height=excluded.height, data=excluded.data
+                        """)) {
+                    thumb.setLong(1, photoId);
+                    thumb.setInt(2, analyzed.thumbnailWidth());
+                    thumb.setInt(3, analyzed.thumbnailHeight());
+                    thumb.setBytes(4, analyzed.thumbnail());
+                    thumb.executeUpdate();
+                }
+            } else {
+                try (PreparedStatement thumb = connection.prepareStatement("DELETE FROM thumbnails WHERE photo_id=?")) {
+                    thumb.setLong(1, photoId);
+                    thumb.executeUpdate();
+                }
+            }
+            connection.commit();
+            return photoId;
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to save the photo: " + normalized, e);
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    private void bindCommon(PreparedStatement statement, long folderId, Path file, String key, long size, long modifiedAt, Exif.Data exif, long capturedAt, int width, int height) throws SQLException {
+        statement.setLong(1, folderId);
+        statement.setString(2, file.toString());
+        statement.setString(3, key);
+        statement.setString(4, file.getFileName().toString());
+        statement.setString(5, PathUtil.extension(file));
+        statement.setLong(6, size);
+        statement.setLong(7, modifiedAt);
+        statement.setInt(8, width);
+        statement.setInt(9, height);
+        statement.setLong(10, capturedAt);
+        statement.setString(11, exif.make());
+        statement.setString(12, exif.model());
+        statement.setString(13, exif.lens());
+        statement.setString(14, exif.exposure());
+        setDouble(statement, 15, exif.aperture());
+        setInteger(statement, 16, exif.iso());
+        setDouble(statement, 17, exif.focalLength());
+        statement.setInt(18, exif.orientation());
+    }
+
+    /**
+     * Marks a catalog row stale so the next scan decodes it again.
+     *
+     * @param photoId a photo identifier
+     */
+    public synchronized void invalidate(long photoId) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET byte_size=-1 WHERE id=?")) {
+            statement.setLong(1, photoId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to invalidate the photo", e);
+        }
+    }
+
+    /**
+     * Removes a photo from the catalog. The file on disk is not touched.
+     *
+     * @param photoId a photo identifier
+     */
+    public synchronized void deletePhoto(long photoId) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE id=?")) {
+            statement.setLong(1, photoId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to remove the photo", e);
+        }
+    }
+
+    /**
+     * Removes a catalog row by path.
+     *
+     * @param key a normalized path key
+     * @return true when a row was removed
+     */
+    public synchronized boolean deletePhoto(String key) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE path_key=?")) {
+            statement.setString(1, key);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to remove the photo", e);
+        }
+    }
+
+    /**
+     * Removes every photo under a directory which is no longer present.
+     *
+     * @param folderId the owning folder
+     * @param directory the deleted directory
+     * @return the number of removed rows
+     */
+    public synchronized int deleteUnder(long folderId, Path directory) {
+        String prefix = PathUtil.key(directory);
+        List<Long> ids = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT id, path_key FROM photos WHERE folder_id=?")) {
+            statement.setLong(1, folderId);
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    String key = results.getString("path_key");
+                    if (key.equals(prefix) || key.startsWith(PathUtil.prefix(prefix))) {
+                        ids.add(results.getLong("id"));
+                    }
+                }
+            }
+            try (PreparedStatement delete = connection.prepareStatement("DELETE FROM photos WHERE id=?")) {
+                for (long id : ids) {
+                    delete.setLong(1, id);
+                    delete.addBatch();
+                }
+                if (!ids.isEmpty()) {
+                    delete.executeBatch();
+                }
+            }
+            return ids.size();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to remove photos below " + directory, e);
+        }
+    }
+
+    /**
+     * Sets the favorite flag.
+     *
+     * @param photoId a photo identifier
+     * @param favorite the new value
+     */
+    public synchronized void setFavorite(long photoId, boolean favorite) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET favorite=? WHERE id=?")) {
+            statement.setInt(1, favorite ? 1 : 0);
+            statement.setLong(2, photoId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the favorite flag", e);
+        }
+    }
+
+    /**
+     * Sets the star rating.
+     *
+     * @param photoId a photo identifier
+     * @param rating a value from 0 to 5
+     */
+    public synchronized void setRating(long photoId, int rating) {
+        int value = Math.max(0, Math.min(5, rating));
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET rating=? WHERE id=?")) {
+            statement.setInt(1, value);
+            statement.setLong(2, photoId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the rating", e);
+        }
+    }
+
+    /**
+     * Sets the caption.
+     *
+     * @param photoId a photo identifier
+     * @param caption the caption, or null to clear it
+     */
+    public synchronized void setCaption(long photoId, String caption) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET caption=? WHERE id=?")) {
+            statement.setString(1, caption == null || caption.isBlank() ? null : caption.trim());
+            statement.setLong(2, photoId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the caption", e);
+        }
+    }
+
+    /**
+     * Reads an application setting.
+     *
+     * @param key the setting name
+     * @return the stored value, if any
+     */
+    public synchronized Optional<String> setting(String key) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT value FROM settings WHERE key=?")) {
+            statement.setString(1, key);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next() ? Optional.of(results.getString(1)) : Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the setting " + key, e);
+        }
+    }
+
+    /**
+     * Stores an application setting.
+     *
+     * @param key the setting name
+     * @param value the value
+     */
+    public synchronized void setting(String key, String value) {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                INSERT INTO settings(key, value) VALUES(?,?)
+                ON CONFLICT(key) DO UPDATE SET value=excluded.value
+                """)) {
+            statement.setString(1, key);
+            statement.setString(2, value);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to store the setting " + key, e);
+        }
+    }
+
+    private Photo mapPhoto(ResultSet results) throws SQLException {
+        Double aperture = nullableDouble(results, "aperture");
+        Double focalLength = nullableDouble(results, "focal_length");
+        Integer iso = nullableInteger(results, "iso");
+        return new Photo(results.getLong("id"), results.getLong("folder_id"), results.getString("folder_path"), Path.of(results.getString("path")), results.getString("file_name"), results.getString("extension"), results.getLong("byte_size"), results.getLong("modified_at"), results.getInt("width"), results.getInt("height"), results.getLong("captured_at"), results.getString("camera_make"), results.getString("camera_model"), results.getString("lens"), results.getString("exposure"), aperture, iso, focalLength, results.getInt("orientation"), results.getInt("favorite") != 0, results.getInt("rating"), results.getString("caption"), results.getLong("imported_at"));
+    }
+
+    private static Double nullableDouble(ResultSet results, String column) throws SQLException {
+        double value = results.getDouble(column);
+        return results.wasNull() ? null : value;
+    }
+
+    private static Integer nullableInteger(ResultSet results, String column) throws SQLException {
+        int value = results.getInt(column);
+        return results.wasNull() ? null : value;
+    }
+
+    private static void setDouble(PreparedStatement statement, int index, Double value) throws SQLException {
+        if (value == null) {
+            statement.setNull(index, java.sql.Types.REAL);
+        } else {
+            statement.setDouble(index, value);
+        }
+    }
+
+    private static void setInteger(PreparedStatement statement, int index, Integer value) throws SQLException {
+        if (value == null) {
+            statement.setNull(index, java.sql.Types.INTEGER);
+        } else {
+            statement.setInt(index, value);
+        }
+    }
+
+    private void rollback() {
+        try {
+            connection.rollback();
+        } catch (SQLException ignored) {
+        }
+    }
+
+    @Override
+    public synchronized void close() {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("PRAGMA optimize");
+            statement.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+        } catch (SQLException ignored) {
+        }
+        try {
+            connection.close();
+        } catch (SQLException ignored) {
+        }
+    }
+}
