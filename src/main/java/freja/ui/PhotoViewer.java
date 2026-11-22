@@ -11,7 +11,9 @@ package freja.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -26,6 +28,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -105,6 +109,8 @@ public final class PhotoViewer extends JDialog {
 
     private double panStartY;
 
+    private long lastWheelMove;
+
     private Listener listener = (photo, favorite) -> {
     };
 
@@ -113,11 +119,8 @@ public final class PhotoViewer extends JDialog {
         this.photos = List.copyOf(photos);
         this.index = Math.max(0, this.photos.indexOf(start));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setUndecorated(true);
         setBackground(Theme.VIEWER);
-        Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setSize(Math.max(720, Math.min(1280, screen.width - 80)), Math.max(480, Math.min(860, screen.height - 80)));
-        setLocationRelativeTo(owner);
-        setMinimumSize(new Dimension(720, 480));
         setLayout(new BorderLayout());
         getContentPane().setBackground(Theme.VIEWER);
 
@@ -163,7 +166,7 @@ public final class PhotoViewer extends JDialog {
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 7));
         footer.setBackground(Theme.VIEWER_PANEL);
-        JLabel help = new JLabel("← → で移動   ·   スクロールでズーム   ·   ドラッグで移動   ·   Space でスライドショー   ·   Esc で閉じる");
+        JLabel help = new JLabel("← → またはスクロールで移動   ·   ドラッグで移動   ·   + / - でズーム   ·   Space でスライドショー   ·   Esc で閉じる");
         help.setForeground(new Color(0x858B94));
         help.setFont(Theme.font(Font.PLAIN, 11));
         footer.add(help);
@@ -199,7 +202,7 @@ public final class PhotoViewer extends JDialog {
                 }
             }
         });
-        canvas.addMouseWheelListener(this::zoomWithWheel);
+        canvas.addMouseWheelListener(this::moveWithWheel);
         canvas.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent event) {
@@ -239,7 +242,9 @@ public final class PhotoViewer extends JDialog {
     public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener) {
         PhotoViewer viewer = new PhotoViewer(owner, photos, start);
         viewer.setListener(listener);
-        viewer.setVisible(true);
+        GraphicsDevice device = owner == null ? GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+                : owner.getGraphicsConfiguration().getDevice();
+        device.setFullScreenWindow(viewer);
         viewer.toFront();
         return viewer;
     }
@@ -291,7 +296,8 @@ public final class PhotoViewer extends JDialog {
         }
         index = next;
         photo = photos.get(index);
-        image = null;
+        // Keep the previous frame on screen until the next one is decoded; clearing it here makes
+        // every arrow press flash the viewer background.
         loading = true;
         error = null;
         fit = true;
@@ -306,9 +312,11 @@ public final class PhotoViewer extends JDialog {
             BufferedImage loaded = null;
             String failure = null;
             try {
-                BufferedImage decoded = Imagify.read(photo.path()).toBufferedImage();
+                // Read the bytes and let imagify detect the format from the header. A path-based
+                // read trusts the extension, which fails for files such as WebP stored as .jpg.
+                BufferedImage decoded = Imagify.read(Files.readAllBytes(photo.path())).toBufferedImage();
                 loaded = ImageTransforms.orient(decoded, photo.orientation());
-            } catch (RuntimeException | Error e) {
+            } catch (IOException | RuntimeException | Error e) {
                 failure = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
             }
             BufferedImage result = loaded;
@@ -391,11 +399,18 @@ public final class PhotoViewer extends JDialog {
         canvas.repaint();
     }
 
-    private void zoomWithWheel(MouseWheelEvent event) {
-        if (image == null) {
+    /** Wheel up goes to the previous photo, wheel down to the next one. */
+    private void moveWithWheel(MouseWheelEvent event) {
+        int rotation = event.getWheelRotation();
+        if (rotation == 0) {
             return;
         }
-        zoomBy(event.getWheelRotation() < 0 ? 1.12 : 1 / 1.12);
+        long now = System.currentTimeMillis();
+        if (now - lastWheelMove < 120) {
+            return;
+        }
+        lastWheelMove = now;
+        move(rotation < 0 ? -1 : 1);
     }
 
     private double fitScale() {
@@ -412,6 +427,13 @@ public final class PhotoViewer extends JDialog {
         slideshowTimer.stop();
         generation.incrementAndGet();
         loader.shutdownNow();
+        GraphicsConfiguration configuration = getGraphicsConfiguration();
+        if (configuration != null) {
+            GraphicsDevice device = configuration.getDevice();
+            if (device.getFullScreenWindow() == this) {
+                device.setFullScreenWindow(null);
+            }
+        }
         super.dispose();
     }
 
@@ -434,17 +456,15 @@ public final class PhotoViewer extends JDialog {
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 g.setColor(Theme.VIEWER);
                 g.fillRect(0, 0, getWidth(), getHeight());
-                if (loading) {
-                    paintCentered(g, "読み込み中…", Theme.FAINT);
-                    return;
-                }
-                if (error != null) {
-                    paintCentered(g, "画像を読み込めません", new Color(0xC9CDD3));
-                    paintCentered(g, error, new Color(0x777D86), 24);
-                    return;
-                }
                 if (image == null) {
-                    paintCentered(g, "写真を選択してください", Theme.FAINT);
+                    if (loading) {
+                        paintCentered(g, "読み込み中…", Theme.FAINT);
+                    } else if (error != null) {
+                        paintCentered(g, "画像を読み込めません", new Color(0xC9CDD3));
+                        paintCentered(g, error, new Color(0x777D86), 24);
+                    } else {
+                        paintCentered(g, "写真を選択してください", Theme.FAINT);
+                    }
                     return;
                 }
                 double scale = fit ? fitScale() : zoom;

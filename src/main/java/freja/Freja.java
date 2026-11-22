@@ -10,6 +10,11 @@
 package freja;
 
 import java.awt.GraphicsEnvironment;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +35,55 @@ public final class Freja {
     /** The product version. */
     public static final String VERSION = "1.0";
 
+    /** Loopback port used to detect an already running instance. */
+    private static final int INSTANCE_PORT = 45671;
+
+    private static volatile ServerSocket instanceSocket;
+
+    private static volatile MainWindow window;
+
     private Freja() {
+    }
+
+    /** Binds the instance port and watches for a newer process asking this one to exit. */
+    private static boolean claimInstance() {
+        try {
+            instanceSocket = new ServerSocket(INSTANCE_PORT, 1, InetAddress.getLoopbackAddress());
+            Thread watcher = new Thread(Freja::watchForNewerInstance, "freja-single-instance");
+            watcher.setDaemon(true);
+            watcher.start();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private static void watchForNewerInstance() {
+        try {
+            Socket request = instanceSocket.accept();
+            request.close();
+        } catch (IOException e) {
+            return;
+        }
+        SwingUtilities.invokeLater(() -> {
+            MainWindow current = window;
+            if (current != null) {
+                current.requestShutdown();
+            } else {
+                System.exit(0);
+            }
+        });
+    }
+
+    /** Asks the instance holding the port to shut down so this one can take over. */
+    private static void retireExistingInstance() {
+        try (Socket request = new Socket()) {
+            request.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), INSTANCE_PORT), 500);
+            request.getOutputStream().write('Q');
+            request.getOutputStream().flush();
+        } catch (IOException ignored) {
+            // The port may belong to an unrelated process; starting anyway is the safe fallback.
+        }
     }
 
     /**
@@ -75,6 +128,24 @@ public final class Freja {
             return;
         }
 
+        if (!claimInstance()) {
+            // A newer launch takes over: ask the old process to close, then take its port.
+            retireExistingInstance();
+            boolean reclaimed = false;
+            for (int attempt = 0; attempt < 30 && !reclaimed; attempt++) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                reclaimed = claimInstance();
+            }
+            if (!reclaimed) {
+                System.err.println("既存のインスタンスを終了できませんでした。");
+            }
+        }
+
         Path location = database == null ? defaultDatabase() : database;
         Theme.install();
 
@@ -84,7 +155,7 @@ public final class Freja {
             try {
                 library = new Library(location);
                 scanner = new LibraryScanner(library);
-                MainWindow window = new MainWindow(library, scanner);
+                window = new MainWindow(library, scanner);
                 window.setVisible(true);
                 window.start();
                 if (!folders.isEmpty()) {

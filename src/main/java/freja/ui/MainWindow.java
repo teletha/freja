@@ -20,6 +20,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -111,11 +113,13 @@ public final class MainWindow extends JFrame {
 
     private final JComboBox<SortOrder> sort = new JComboBox<>(SortOrder.values());
 
-    private final JSlider zoom = new JSlider(120, 300, 190);
+    private final JSlider zoom = new JSlider(120, 220, 170);
 
     private final JLabel statusMessage = new JLabel("準備完了");
 
     private final JLabel statusCount = new JLabel();
+
+    private final JLabel selectionInfo = new JLabel();
 
     private final JProgressBar progress = new JProgressBar();
 
@@ -353,7 +357,15 @@ public final class MainWindow extends JFrame {
         bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.BORDER), BorderFactory.createEmptyBorder(6, 14, 6, 14)));
         statusMessage.setFont(Theme.font(Font.PLAIN, 11));
         statusMessage.setForeground(Theme.MUTED);
-        bar.add(statusMessage, BorderLayout.CENTER);
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        left.setOpaque(false);
+        left.add(statusMessage);
+        bar.add(left, BorderLayout.WEST);
+
+        selectionInfo.setFont(Theme.font(Font.PLAIN, 11));
+        selectionInfo.setForeground(Theme.MUTED);
+        selectionInfo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        bar.add(selectionInfo, BorderLayout.CENTER);
 
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         right.setOpaque(false);
@@ -508,7 +520,10 @@ public final class MainWindow extends JFrame {
             }
         });
 
-        grid.setOnSelection(this::showInspector);
+        grid.setOnSelection(photo -> {
+            showInspector(photo);
+            updateSelectionInfo();
+        });
         grid.setOnStickyFolder(folderId -> {
             // Following the sticky header keeps the sidebar in sync while the grid is scrolled.
             sidebar.selectFolderSilently(folderId);
@@ -782,6 +797,9 @@ public final class MainWindow extends JFrame {
         JMenuItem reveal = new JMenuItem("エクスプローラーで表示");
         reveal.addActionListener(event -> reveal(photo.path()));
         menu.add(reveal);
+        JMenuItem copyPath = new JMenuItem("パスをコピー" + suffix);
+        copyPath.addActionListener(event -> copyPaths(targets));
+        menu.add(copyPath);
         JMenuItem reimport = new JMenuItem("再読み込み" + suffix);
         reimport.addActionListener(event -> {
             cache.clear();
@@ -911,6 +929,25 @@ public final class MainWindow extends JFrame {
         refreshAll();
     }
 
+    private void copyPaths(List<Photo> photos) {
+        if (photos.isEmpty()) {
+            return;
+        }
+        StringBuilder text = new StringBuilder();
+        for (Photo photo : photos) {
+            if (text.length() > 0) {
+                text.append(System.lineSeparator());
+            }
+            text.append(photo.path());
+        }
+        try {
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text.toString()), null);
+            statusMessage.setText(photos.size() > 1 ? photos.size() + " 枚のパスをコピーしました" : "パスをコピーしました");
+        } catch (Exception e) {
+            statusMessage.setText("パスをコピーできませんでした: " + e.getMessage());
+        }
+    }
+
     private void reveal(Path path) {
         try {
             Path target = java.nio.file.Files.isDirectory(path) ? path : path.getParent();
@@ -1008,6 +1045,7 @@ public final class MainWindow extends JFrame {
             // Only folders with a matching photo are shown while searching.
             sidebar.setData(stats, visibleFolders, mode, folderId);
             statusCount.setText(stats.photos() + " 枚  ·  " + Photo.formatSize(stats.bytes()));
+            updateSelectionInfo();
             setTitle("Freja — " + stats.photos() + " 枚の写真");
 
             Photo selected = grid.selectedPhoto();
@@ -1065,6 +1103,26 @@ public final class MainWindow extends JFrame {
         case SIZE -> Comparator.comparingLong(Photo::byteSize).reversed().thenComparing(name);
         default -> Comparator.comparingLong(Photo::capturedAt).reversed().thenComparing(name);
         };
+    }
+
+    /** Shows the selected file's details, or the aggregate of a multi-selection. */
+    private void updateSelectionInfo() {
+        List<Photo> selected = grid.selectedPhotos();
+        if (selected.isEmpty()) {
+            selectionInfo.setText("");
+            return;
+        }
+        if (selected.size() == 1) {
+            Photo photo = selected.get(0);
+            selectionInfo.setText(photo.fileName() + "  ·  " + photo.width() + "×" + photo.height()
+                    + "  ·  " + photo.capturedLabel() + "  ·  " + Photo.formatSize(photo.byteSize()));
+        } else {
+            long bytes = 0;
+            for (Photo photo : selected) {
+                bytes += photo.byteSize();
+            }
+            selectionInfo.setText(selected.size() + " 枚  ·  合計 " + Photo.formatSize(bytes));
+        }
     }
 
     private void showInspector(Photo photo) {
@@ -1159,7 +1217,7 @@ public final class MainWindow extends JFrame {
         if (PREFERENCES.getBoolean("window.maximized", false)) {
             setExtendedState(MAXIMIZED_BOTH);
         }
-        zoom.setValue(PREFERENCES.getInt("view.thumbSize", 190));
+        zoom.setValue(PREFERENCES.getInt("view.thumbSize", 170));
         grid.setThumbSize(zoom.getValue());
         try {
             sort.setSelectedItem(SortOrder.valueOf(PREFERENCES.get(SORT_PREFERENCE, SortOrder.NAME.name())));
@@ -1188,6 +1246,11 @@ public final class MainWindow extends JFrame {
             PREFERENCES.flush();
         } catch (Exception ignored) {
         }
+    }
+
+    /** Called when a newer instance takes over; shuts down on the event dispatch thread. */
+    public void requestShutdown() {
+        SwingUtilities.invokeLater(this::shutdown);
     }
 
     private void shutdown() {

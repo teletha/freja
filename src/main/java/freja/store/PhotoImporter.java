@@ -127,16 +127,9 @@ public final class PhotoImporter {
             BufferedImage image = decodeBytes(encoded, file);
             return new Decoded(image, image.getWidth(), image.getHeight(), exif);
         }
-        // EXIF lives in JPEG segments only, so other formats need no metadata pass at all.
-        BufferedImage image;
-        try {
-            image = Imagify.read(file).toBufferedImage();
-        } catch (RuntimeException | IOError | LinkageError e) {
-            throw new IOException("Unsupported or damaged image: " + file.getFileName(), e);
-        }
-        if (image == null || image.getWidth() <= 0 || image.getHeight() <= 0) {
-            throw new IOException("Image has no pixels: " + file.getFileName());
-        }
+        // EXIF lives in JPEG segments only, so other formats need no metadata pass. Reading the
+        // bytes lets imagify detect the real format from the header even if the extension lies.
+        BufferedImage image = decodeBytes(Files.readAllBytes(file), file);
         return new Decoded(image, image.getWidth(), image.getHeight(), Exif.Data.EMPTY);
     }
 

@@ -529,17 +529,8 @@ public final class Library implements AutoCloseable {
         }
         if (filter.search() != null) {
             String search = "%" + PathUtil.likeValue(filter.search()) + "%";
-            sql.append("""
-                     AND (p.file_name LIKE ? ESCAPE '\\'
-                       OR f.name LIKE ? ESCAPE '\\'
-                       OR p.caption LIKE ? ESCAPE '\\'
-                       OR p.camera_make LIKE ? ESCAPE '\\'
-                       OR p.camera_model LIKE ? ESCAPE '\\'
-                       OR p.lens LIKE ? ESCAPE '\\')
-                    """);
-            for (int i = 0; i < 6; i++) {
-                parameters.add(search);
-            }
+            sql.append(" AND f.name LIKE ? ESCAPE '\\'");
+            parameters.add(search);
         }
         sql.append(switch (filter.sort()) {
         case DATE_OLDEST -> " ORDER BY p.captured_at ASC, p.file_name COLLATE NOCASE ASC";

@@ -69,9 +69,9 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private static final int OUTER = 26;
 
-    private static final int CELL_GAP = 18;
+    private static final int CELL_GAP = 2;
 
-    private static final int LABEL_HEIGHT = 24;
+    private static final int CELL_PADDING = 6;
 
     private static final int HEADER_HEIGHT = 64;
 
@@ -102,7 +102,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private JScrollPane scrollPane;
 
-    private int thumbSize = 190;
+    private int thumbSize = 170;
 
     private int columns = 1;
 
@@ -138,8 +138,9 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private Consumer<List<Photo>> onDeleteFromDisk = photos -> {
     };
 
-    /** One visual row, either a date header or a row of cells. */
-    private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey) {
+    /** One visual row, either a date header or a row of cells with per-photo heights. */
+    private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey,
+            int[] cellHeights) {
 
         boolean header() {
             return indices.length == 0;
@@ -402,10 +403,10 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     /**
      * Sets the size of one thumbnail.
      *
-     * @param size the edge in pixels, from 120 to 300
+     * @param size the edge in pixels, from 120 to 220
      */
     public void setThumbSize(int size) {
-        int value = Math.max(120, Math.min(300, size));
+        int value = Math.max(120, Math.min(220, size));
         if (value == thumbSize) {
             return;
         }
@@ -790,8 +791,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private void relayout() {
         rows.clear();
         int width = Math.max(320, getWidth());
-        int cellWidth = thumbSize + CELL_GAP + 22;
-        int cellHeight = thumbSize + LABEL_HEIGHT + 22;
+        int cellWidth = thumbSize + CELL_GAP + CELL_PADDING * 2;
         columns = Math.max(1, (width - OUTER * 2) / cellWidth);
         gridLeft = Math.max(OUTER, (width - columns * cellWidth) / 2);
         int y = TOP;
@@ -800,7 +800,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             totalHeight = Math.max(getParent() == null ? 300 : getParent().getHeight(), 300);
         } else if (grouping == GroupMode.FOLDER) {
             if (sections.isEmpty()) {
-                y = addPhotoRows(y, cellHeight, 0, photos.size());
+                y = addPhotoRows(y, 0, photos.size());
             } else {
                 int index = 0;
                 for (Folder section : sections) {
@@ -808,17 +808,17 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                     while (index < photos.size() && photos.get(index).folderId() == section.id()) {
                         index++;
                     }
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id())));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id()), null));
                     y += HEADER_HEIGHT;
-                    y = addPhotoRows(y, cellHeight, start, index);
+                    y = addPhotoRows(y, start, index);
                     y += 8;
                 }
                 if (index < photos.size()) {
                     int start = index;
                     index = photos.size();
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null));
                     y += HEADER_HEIGHT;
-                    y = addPhotoRows(y, cellHeight, start, index);
+                    y = addPhotoRows(y, start, index);
                     y += 8;
                 }
             }
@@ -836,31 +836,51 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 while (index < photos.size() && key.equals(photos.get(index).dateLabel())) {
                     index++;
                 }
-                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key));
+                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key, null));
                 y += HEADER_HEIGHT;
-                y = addPhotoRows(y, cellHeight, start, index);
+                y = addPhotoRows(y, start, index);
                 y += 8;
             }
             totalHeight = y + 20;
         } else {
-            y = addPhotoRows(y, cellHeight, 0, photos.size());
+            y = addPhotoRows(y, 0, photos.size());
             totalHeight = y + 24;
         }
         setPreferredSize(new Dimension(width, Math.max(totalHeight, 300)));
         revalidate();
     }
 
-    private int addPhotoRows(int y, int cellHeight, int from, int to) {
+    /** Lays out a band of photos with a fixed width and aspect-ratio-dependent heights. */
+    private int addPhotoRows(int y, int from, int to) {
         for (int start = from; start < to; start += columns) {
             int end = Math.min(to, start + columns);
             int[] indices = new int[end - start];
+            int[] heights = new int[end - start];
+            int tallest = 0;
             for (int i = 0; i < indices.length; i++) {
                 indices[i] = start + i;
+                heights[i] = imageHeight(photos.get(start + i));
+                tallest = Math.max(tallest, heights[i]);
             }
-            rows.add(new LayoutRow(y, cellHeight, indices, null, 0, null, null));
-            y += cellHeight;
+            int height = tallest + CELL_PADDING * 2;
+            rows.add(new LayoutRow(y, height, indices, null, 0, null, null, heights));
+            y += height;
         }
         return y;
+    }
+
+    /**
+     * Landscape photos get a shorter cell so rows stay dense; portrait photos are capped at a
+     * square cell and are centred with gaps on the left and right.
+     */
+    private int imageHeight(Photo photo) {
+        int width = photo.width();
+        int height = photo.height();
+        if (width <= 0 || height <= 0) {
+            return thumbSize;
+        }
+        long scaled = Math.round((double) thumbSize * height / width);
+        return (int) Math.max(60, Math.min(thumbSize, scaled));
     }
 
     private String dateRange(int from, int to) {
@@ -911,9 +931,17 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     private Rectangle cellBounds(LayoutRow row, int column) {
-        int cellWidth = thumbSize + CELL_GAP + 22;
-        int cellHeight = thumbSize + LABEL_HEIGHT + 22;
-        return new Rectangle(gridLeft + column * cellWidth, row.y(), cellWidth, cellHeight);
+        int cellWidth = thumbSize + CELL_GAP + CELL_PADDING * 2;
+        int height = row.cellHeights() == null ? thumbSize : row.cellHeights()[column];
+        int tallest = 0;
+        if (row.cellHeights() != null) {
+            for (int candidate : row.cellHeights()) {
+                tallest = Math.max(tallest, candidate);
+            }
+        }
+        // A short landscape photo beside a portrait one is centred in the taller row.
+        int top = row.y() + CELL_PADDING + (tallest - height) / 2;
+        return new Rectangle(gridLeft + column * cellWidth + CELL_PADDING, top, thumbSize, height);
     }
 
     @Override
@@ -1115,29 +1143,19 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private void paintCell(Graphics2D g, int index, LayoutRow row, int column) {
         Photo photo = photos.get(index);
         Rectangle cell = cellBounds(row, column);
-        int padding = 11;
-        int cardX = cell.x + padding;
-        int cardY = cell.y + padding;
-        int cardSize = thumbSize;
+        int cardX = cell.x;
+        int cardY = cell.y;
+        int cardWidth = cell.width;
+        int cardHeight = cell.height;
         boolean selected = selectedIndices.contains(index);
         boolean hovered = index == hoverIndex;
 
-        // Card background and shadow.
-        RoundRectangle2D card = new RoundRectangle2D.Float(cardX, cardY, cardSize, cardSize, 14, 14);
-        if (selected || hovered) {
-            g.setColor(new Color(0, 0, 0, 10));
-            g.fill(new RoundRectangle2D.Float(cardX + 1, cardY + 3, cardSize, cardSize, 14, 14));
-        }
-        g.setColor(Theme.SURFACE);
-        g.fill(card);
-
-        Rectangle inner = new Rectangle(cardX + 3, cardY + 3, cardSize - 6, cardSize - 6);
+        // Thumbnails sit directly on the grid background; no card fill or shadow.
+        Rectangle inner = new Rectangle(cardX + 3, cardY + 3, cardWidth - 6, cardHeight - 6);
         BufferedImage image = cache.get(photo.id(), photo.modifiedAt());
         if (image == null) {
             cache.request(photo.id(), photo.modifiedAt(), this::repaint);
-            g.setColor(Theme.BACKGROUND);
-            g.fill(inner);
-            int iconSize = Math.min(38, cardSize / 3);
+            int iconSize = Math.min(38, cardWidth / 3);
             Icons.image(iconSize, Theme.FAINT).paintIcon(this, g, inner.x + (inner.width - iconSize) / 2, inner.y + (inner.height - iconSize) / 2);
         } else {
             double scale = Math.min((double) inner.width / image.getWidth(), (double) inner.height / image.getHeight());
@@ -1151,30 +1169,23 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         if (selected) {
             g.setColor(Theme.ACCENT);
             g.setStroke(new BasicStroke(2.4f));
-            g.draw(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardSize - 2, cardSize - 2, 13, 13));
+            g.draw(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 13, 13));
             g.setColor(Theme.ACCENT);
             g.fill(new Ellipse2D.Float(cardX + 8, cardY + 8, 24, 24));
             Icons.check(16, Color.WHITE).paintIcon(this, g, cardX + 12, cardY + 12);
         } else if (hovered) {
             g.setColor(new Color(0x2E, 0x6B, 0xE6, 90));
             g.setStroke(new BasicStroke(1.4f));
-            g.draw(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardSize - 2, cardSize - 2, 13, 13));
+            g.draw(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 13, 13));
         }
 
         if (photo.favorite()) {
             g.setColor(new Color(255, 255, 255, 225));
-            g.fill(new Ellipse2D.Float(cardX + cardSize - 34, cardY + 8, 26, 26));
-            Icons.star(17, Theme.GOLD, true).paintIcon(this, g, cardX + cardSize - 29, cardY + 13);
+            g.fill(new Ellipse2D.Float(cardX + cardWidth - 34, cardY + 8, 26, 26));
+            Icons.star(17, Theme.GOLD, true).paintIcon(this, g, cardX + cardWidth - 29, cardY + 13);
         }
 
-        String label = photo.fileName();
-        g.setFont(selected ? Theme.font(Font.BOLD, 12) : Theme.font(Font.PLAIN, 12));
-        g.setColor(selected ? Theme.ACCENT_DARK : Theme.TEXT);
-        FontMetrics metrics = g.getFontMetrics();
-        String text = truncate(label, metrics, cardSize);
-        int textX = cardX + (cardSize - metrics.stringWidth(text)) / 2;
-        int textY = cardY + cardSize + 17;
-        g.drawString(text, textX, textY);
+        // The file name is shown in the status bar, so the cell contains only the thumbnail.
     }
 
     private void paintEmpty(Graphics2D g) {

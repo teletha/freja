@@ -76,8 +76,9 @@ class LibraryTest {
             assertEquals(4, photo.rating());
             assertEquals("Summer trip", photo.caption());
             assertEquals(1, library.photos(PhotoFilter.favorites()).size());
-            assertEquals(1, library.photos(PhotoFilter.all().withSearch("Canon")).size());
-            assertEquals(1, library.photos(PhotoFilter.all().withSearch("trip")).size());
+            // Search matches folder names only, not camera or caption fields.
+            assertEquals(0, library.photos(PhotoFilter.all().withSearch("Canon")).size());
+            assertEquals(0, library.photos(PhotoFilter.all().withSearch("trip")).size());
             assertEquals(1, library.photos(PhotoFilter.all().withSearch("photos")).size());
             assertEquals(0, library.photos(PhotoFilter.all().withSearch("missing")).size());
             assertEquals(1, library.photos(PhotoFilter.folder(added.id())).size());

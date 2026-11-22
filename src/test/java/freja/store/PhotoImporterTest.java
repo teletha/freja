@@ -22,6 +22,7 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import imagify.ImageFormat;
 import imagify.Imagify;
 
 class PhotoImporterTest {
@@ -60,5 +61,24 @@ class PhotoImporterTest {
         BufferedImage decoded = Imagify.read(thumbnail).toBufferedImage();
         assertEquals(PhotoImporter.THUMBNAIL_SIZE, decoded.getWidth());
         assertEquals(165, decoded.getHeight());
+    }
+
+    @Test
+    void detectsTheRealFormatWhenTheExtensionIsWrong() throws Exception {
+        BufferedImage source = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = source.createGraphics();
+        try {
+            graphics.setColor(Color.CYAN);
+            graphics.fillRect(0, 0, 640, 480);
+        } finally {
+            graphics.dispose();
+        }
+        Path file = temp.resolve("mislabeled.jpg");
+        Files.write(file, Imagify.read(source).writeToBytes(ImageFormat.WEBP, 0.8));
+
+        PhotoImporter.AnalyzedPhoto analyzed = PhotoImporter.analyze(file);
+
+        assertEquals(640, analyzed.width());
+        assertEquals(480, analyzed.height());
     }
 }
