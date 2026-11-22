@@ -91,6 +91,8 @@ public final class PhotoViewer extends JDialog {
 
     private BufferedImage image;
 
+    private long loadedPhotoId = -1;
+
     private boolean loading;
 
     private String error;
@@ -116,6 +118,7 @@ public final class PhotoViewer extends JDialog {
 
     public PhotoViewer(Window owner, List<Photo> photos, Photo start) {
         super(owner, "Freja", ModalityType.MODELESS);
+        setIconImage(Icons.applicationImage());
         this.photos = List.copyOf(photos);
         this.index = Math.max(0, this.photos.indexOf(start));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -183,7 +186,7 @@ public final class PhotoViewer extends JDialog {
                 panStartX = panX;
                 panStartY = panY;
                 if (event.getClickCount() == 2) {
-                    toggleZoom();
+                    dispose();
                 }
             }
 
@@ -214,7 +217,21 @@ public final class PhotoViewer extends JDialog {
             }
         });
 
+        // Decode the first photo before the window is shown so it never flashes a placeholder.
+        photo = photos.isEmpty() ? null : photos.get(index);
+        if (photo != null) {
+            try {
+                image = loadImage(photo);
+                loadedPhotoId = photo.id();
+            } catch (IOException | RuntimeException | Error e) {
+                error = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
+            }
+        }
         showPhoto(index);
+    }
+
+    private static BufferedImage loadImage(Photo photo) throws IOException {
+        return ImageTransforms.orient(Imagify.read(Files.readAllBytes(photo.path())).toBufferedImage(), photo.orientation());
     }
 
     public void setListener(Listener listener) {
@@ -296,26 +313,31 @@ public final class PhotoViewer extends JDialog {
         }
         index = next;
         photo = photos.get(index);
+        boolean ready = image != null && loadedPhotoId == photo.id();
         // Keep the previous frame on screen until the next one is decoded; clearing it here makes
         // every arrow press flash the viewer background.
-        loading = true;
-        error = null;
+        loading = !ready;
+        if (ready) {
+            error = null;
+        }
         fit = true;
         zoom = 1;
         panX = 0;
         panY = 0;
         updateToolbar();
         canvas.repaint();
+        if (ready) {
+            return;
+        }
 
+        Photo target = photo;
+        long id = target.id();
         long token = generation.incrementAndGet();
         loader.execute(() -> {
             BufferedImage loaded = null;
             String failure = null;
             try {
-                // Read the bytes and let imagify detect the format from the header. A path-based
-                // read trusts the extension, which fails for files such as WebP stored as .jpg.
-                BufferedImage decoded = Imagify.read(Files.readAllBytes(photo.path())).toBufferedImage();
-                loaded = ImageTransforms.orient(decoded, photo.orientation());
+                loaded = loadImage(target);
             } catch (IOException | RuntimeException | Error e) {
                 failure = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
             }
@@ -328,6 +350,7 @@ public final class PhotoViewer extends JDialog {
                 loading = false;
                 error = message;
                 image = result;
+                loadedPhotoId = image == null ? -1 : id;
                 if (image != null) {
                     zoom = fitScale();
                 }
@@ -368,18 +391,6 @@ public final class PhotoViewer extends JDialog {
             slideshow.setIcon(Icons.pause(15, Theme.GOLD));
             slideshow.setToolTipText("スライドショーを停止");
         }
-    }
-
-    private void toggleZoom() {
-        if (fit) {
-            fit = false;
-            zoom = 1;
-            panX = 0;
-            panY = 0;
-        } else {
-            setFit();
-        }
-        canvas.repaint();
     }
 
     private void setFit() {

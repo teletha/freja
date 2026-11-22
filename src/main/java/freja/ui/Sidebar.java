@@ -17,6 +17,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
@@ -42,6 +43,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
@@ -70,6 +73,8 @@ public final class Sidebar extends JPanel {
 
         void onSortFolder(long folderId, SortOrder sort);
 
+        void onRenameFolder(long folderId);
+
         void onRemoveFolder(long folderId);
 
         void onRevealFolder(long folderId);
@@ -90,6 +95,8 @@ public final class Sidebar extends JPanel {
     /** Folder identifiers in display order, for arrow-key navigation. */
     private final List<Long> folderOrder = new ArrayList<>();
 
+    private JScrollPane folderScroll;
+
     private final JLabel folderCount = new JLabel();
 
     private Listener listener = new Listener() {
@@ -107,6 +114,10 @@ public final class Sidebar extends JPanel {
 
         @Override
         public void onSortFolder(long folderId, SortOrder sort) {
+        }
+
+        @Override
+        public void onRenameFolder(long folderId) {
         }
 
         @Override
@@ -144,9 +155,7 @@ public final class Sidebar extends JPanel {
         rows.setOpaque(false);
         rows.setLayout(new BoxLayout(rows, BoxLayout.Y_AXIS));
         rows.add(all);
-        rows.add(leftStrut(2));
         rows.add(favorites);
-        rows.add(leftStrut(2));
         rows.add(recent);
         JPanel rowsHolder = new JPanel(new BorderLayout());
         rowsHolder.setOpaque(false);
@@ -175,7 +184,8 @@ public final class Sidebar extends JPanel {
         folderHolder.setOpaque(true);
         folderHolder.setBackground(Theme.SIDEBAR);
         folderHolder.add(folderRows, BorderLayout.NORTH);
-        JScrollPane scroll = new JScrollPane(folderHolder);
+        folderScroll = new JScrollPane(folderHolder);
+        JScrollPane scroll = folderScroll;
         scroll.setBorder(null);
         scroll.setOpaque(true);
         scroll.setBackground(Theme.SIDEBAR);
@@ -251,12 +261,6 @@ public final class Sidebar extends JPanel {
         add.addActionListener(event -> listener.onAddFolder());
         panel.add(add, BorderLayout.EAST);
         return panel;
-    }
-
-    private static JComponent leftStrut(int height) {
-        JComponent strut = (JComponent) Box.createVerticalStrut(height);
-        strut.setAlignmentX(LEFT_ALIGNMENT);
-        return strut;
     }
 
     private JLabel sectionLabel(String text) {
@@ -343,6 +347,7 @@ public final class Sidebar extends JPanel {
         recent.setCount(stats.recent());
         folderCount.setText(String.valueOf(folders.size()));
 
+        int previousViewY = folderScroll == null ? 0 : folderScroll.getViewport().getViewPosition().y;
         Long focused = null;
         for (var entry : folderComponents.entrySet()) {
             if (entry.getValue().isFocusOwner()) {
@@ -383,7 +388,6 @@ public final class Sidebar extends JPanel {
             });
             row.setAlignmentX(LEFT_ALIGNMENT);
             folderRows.add(row);
-            folderRows.add(leftStrut(2));
             folderComponents.put(folder.id(), row);
             folderOrder.add(folder.id());
         }
@@ -396,17 +400,28 @@ public final class Sidebar extends JPanel {
             folderRows.add(empty);
         }
         updateSelection();
-        if (mode == Mode.FOLDER) {
-            revealFolder(folderId);
-        }
-        if (focused != null) {
-            NavRow row = folderComponents.get(focused);
-            if (row != null) {
-                row.requestFocusInWindow();
-            }
-        }
+        final Long focusedFolder = focused;
         folderRows.revalidate();
         folderRows.repaint();
+        // Rebuilding the rows briefly shrinks the view, which resets the viewport to the top.
+        // Restore the old position after layout, then only move if the selected row is out of view.
+        SwingUtilities.invokeLater(() -> {
+            if (folderScroll != null) {
+                JViewport viewport = folderScroll.getViewport();
+                int maximum = Math.max(0, viewport.getViewSize().height - viewport.getExtentSize().height);
+                int y = Math.max(0, Math.min(previousViewY, maximum));
+                viewport.setViewPosition(new Point(viewport.getViewPosition().x, y));
+            }
+            if (mode == Mode.FOLDER) {
+                revealFolder(folderId);
+            }
+            if (focusedFolder != null) {
+                NavRow row = folderComponents.get(focusedFolder);
+                if (row != null) {
+                    row.requestFocusInWindow();
+                }
+            }
+        });
     }
 
     /** isPopupTrigger is platform specific: only one of press/release reports it for a click. */
@@ -420,6 +435,7 @@ public final class Sidebar extends JPanel {
         JPopupMenu menu = new JPopupMenu();
         menu.add(sortMenu(folder));
         menu.addSeparator();
+        menu.add(item("名前を変更", () -> listener.onRenameFolder(folder.id())));
         menu.add(item("再スキャン", () -> listener.onRescanFolder(folder.id())));
         menu.add(item("エクスプローラーで開く", () -> listener.onRevealFolder(folder.id())));
         if (folder.explicit()) {
@@ -498,6 +514,12 @@ public final class Sidebar extends JPanel {
         }
     }
 
+    /** A stronger tint than ACCENT_SOFT so the selected row is obvious at a glance. */
+    private static Color selectedBackground() {
+        Color accent = Theme.ACCENT;
+        return new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 80);
+    }
+
     /**
      * A clickable navigation row.
      */
@@ -566,7 +588,7 @@ public final class Sidebar extends JPanel {
             try {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (selected || hovered) {
-                    g.setColor(selected ? Theme.ACCENT_SOFT : Theme.HOVER);
+                    g.setColor(selected ? selectedBackground() : Theme.HOVER);
                     g.fill(new RoundRectangle2D.Float(1, 1, getWidth() - 2, getHeight() - 2, 9, 9));
                 }
             } finally {

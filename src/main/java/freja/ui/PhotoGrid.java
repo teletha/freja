@@ -95,6 +95,12 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private int scrollTarget;
 
+    private int scrollStartValue;
+
+    private long scrollStartTime;
+
+    private int scrollDuration;
+
     private String stickyKey;
 
     /** Suppresses folder-change notifications while a resize rebuilds the virtual layout. */
@@ -312,9 +318,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             int base = scrollAnimator != null && animatedScrollBar == bar ? scrollTarget : bar.getValue();
             int target = base + units * Math.max(1, bar.getUnitIncrement());
             target = Math.max(bar.getMinimum(), Math.min(bar.getMaximum() - bar.getVisibleAmount(), target));
-            animatedScrollBar = bar;
-            scrollTarget = target;
-            animateScroll();
+            animateTo(bar, target);
             event.consume();
         }
     }
@@ -727,50 +731,41 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     private void scrollBarTo(JScrollBar bar, int destination) {
-        animatedScrollBar = bar;
-        scrollTarget = destination;
-        animateScroll();
+        animateTo(bar, destination);
     }
 
-    private void animateScroll() {
-        JScrollBar bar = animatedScrollBar;
+    /** Time-based cubic ease-out: a consistent, smooth glide regardless of the distance. */
+    private void animateTo(JScrollBar bar, int destination) {
         if (bar == null) {
             return;
         }
-        if (bar.getValue() == scrollTarget) {
+        int minimum = bar.getMinimum();
+        int maximum = Math.max(minimum, bar.getMaximum() - bar.getVisibleAmount());
+        int target = Math.max(minimum, Math.min(maximum, destination));
+        int start = bar.getValue();
+        if (start == target) {
             stopScrollAnimation();
             return;
         }
+        animatedScrollBar = bar;
+        scrollTarget = target;
+        scrollStartValue = start;
+        scrollStartTime = System.nanoTime();
+        scrollDuration = Math.max(160, Math.min(420, Math.abs(target - start) / 2 + 120));
         if (scrollAnimator != null) {
-            return;
+            scrollAnimator.stop();
         }
-        scrollAnimator = new Timer(16, event -> {
-            JScrollBar targetBar = animatedScrollBar;
-            if (targetBar == null) {
+        scrollAnimator = new Timer(10, event -> {
+            JScrollBar current = animatedScrollBar;
+            if (current == null) {
                 stopScrollAnimation();
                 return;
             }
-            int value = targetBar.getValue();
-            int diff = scrollTarget - value;
-            if (diff == 0) {
-                stopScrollAnimation();
-                return;
-            }
-            int movement;
-            if (Math.abs(diff) <= 3) {
-                movement = diff;
-            } else {
-                movement = (int) Math.round(diff * 0.32);
-                if (movement == 0) {
-                    movement = Integer.signum(diff);
-                }
-            }
-            int minimum = targetBar.getMinimum();
-            int maximum = Math.max(minimum, targetBar.getMaximum() - targetBar.getVisibleAmount());
-            scrollTarget = Math.max(minimum, Math.min(maximum, scrollTarget));
-            int next = Math.max(minimum, Math.min(maximum, value + movement));
-            targetBar.setValue(next);
-            if (next == scrollTarget) {
+            long elapsed = (System.nanoTime() - scrollStartTime) / 1_000_000L;
+            double progress = Math.min(1.0, (double) elapsed / scrollDuration);
+            double eased = 1 - Math.pow(1 - progress, 3);
+            current.setValue((int) Math.round(scrollStartValue + (scrollTarget - scrollStartValue) * eased));
+            if (progress >= 1.0) {
                 stopScrollAnimation();
             }
         });
@@ -822,10 +817,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                     y += 8;
                 }
             }
-            // Leave enough room below the last section so that selecting the final folder can put
-            // its header at the top of the viewport.
-            int viewport = getParent() == null ? 600 : Math.max(300, getParent().getHeight());
-            totalHeight = y + Math.max(24, viewport - HEADER_HEIGHT);
+            totalHeight = y + 24;
         } else if (grouping == GroupMode.DATE) {
             int index = 0;
             while (index < photos.size()) {
@@ -1154,9 +1146,9 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         Rectangle inner = new Rectangle(cardX + 3, cardY + 3, cardWidth - 6, cardHeight - 6);
         BufferedImage image = cache.get(photo.id(), photo.modifiedAt());
         if (image == null) {
+            // Request the thumbnail but draw no placeholder: a grey icon flashing before the real
+            // image is more distracting than an empty cell.
             cache.request(photo.id(), photo.modifiedAt(), this::repaint);
-            int iconSize = Math.min(38, cardWidth / 3);
-            Icons.image(iconSize, Theme.FAINT).paintIcon(this, g, inner.x + (inner.width - iconSize) / 2, inner.y + (inner.height - iconSize) / 2);
         } else {
             double scale = Math.min((double) inner.width / image.getWidth(), (double) inner.height / image.getHeight());
             int width = Math.max(1, (int) Math.round(image.getWidth() * scale));

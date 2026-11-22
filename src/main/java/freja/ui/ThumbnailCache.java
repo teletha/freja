@@ -33,7 +33,7 @@ import imagify.Imagify;
 final class ThumbnailCache implements AutoCloseable {
 
     /** Enough cells to cover a large window at the largest zoom with room to scroll. */
-    private static final int MAX_IMAGES = 240;
+    private static final int MAX_IMAGES = 600;
 
     private record Key(long photoId, long modifiedAt) {
     }

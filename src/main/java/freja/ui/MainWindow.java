@@ -164,6 +164,7 @@ public final class MainWindow extends JFrame {
 
     public MainWindow(Library library, LibraryScanner scanner) {
         super("Freja");
+        setIconImage(Icons.applicationImage());
         this.library = library;
         this.scanner = scanner;
         this.cache = new ThumbnailCache(library);
@@ -510,6 +511,11 @@ public final class MainWindow extends JFrame {
             }
 
             @Override
+            public void onRenameFolder(long folderId) {
+                renameFolder(folderId);
+            }
+
+            @Override
             public void onRemoveFolder(long folderId) {
                 removeFolder(folderId);
             }
@@ -640,6 +646,27 @@ public final class MainWindow extends JFrame {
             }
         }
         refreshAll();
+    }
+
+    /** Renames the sidebar label only; the directory on disk is never touched. */
+    private void renameFolder(long id) {
+        Folder folder = library.folder(id).orElse(null);
+        if (folder == null) {
+            return;
+        }
+        String name = (String) JOptionPane.showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane.QUESTION_MESSAGE,
+                null, null, folder.name());
+        if (name == null) {
+            return;
+        }
+        String trimmed = name.trim();
+        if (trimmed.isEmpty()) {
+            statusMessage.setText("フォルダ名を入力してください");
+            return;
+        }
+        library.renameFolder(id, trimmed);
+        refreshAll();
+        statusMessage.setText("フォルダ名を変更しました: " + trimmed);
     }
 
     private void chooseFolder() {

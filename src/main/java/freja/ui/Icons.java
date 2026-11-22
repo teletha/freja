@@ -14,7 +14,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -30,6 +33,56 @@ import javax.swing.Icon;
 public final class Icons {
 
     private Icons() {
+    }
+
+    /**
+     * The application image: a four-colour pinwheel with a small house at its centre, reminiscent
+     * of Picasa. Drawn once into a bitmap because windows need an {@link Image}, not an {@link Icon}.
+     *
+     * @return a 128x128 application image
+     */
+    public static Image applicationImage() {
+        int size = 128;
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+            Color[] colors = {
+                    new Color(0x2E6BE6), // blue
+                    new Color(0x3FAE6A), // green
+                    new Color(0xF2C53D), // yellow
+                    new Color(0xE4634F)  // red
+            };
+            for (int i = 0; i < colors.length; i++) {
+                AffineTransform original = g.getTransform();
+                g.rotate(i * Math.PI / 2, size / 2.0, size / 2.0);
+                Path2D petal = new Path2D.Double();
+                petal.moveTo(64, 64);
+                petal.curveTo(72, 42, 84, 22, 108, 26);
+                petal.curveTo(108, 48, 94, 62, 64, 64);
+                petal.closePath();
+                g.setColor(colors[i]);
+                g.fill(petal);
+                g.setTransform(original);
+            }
+            // A small white disc with a blue house in the middle.
+            g.setColor(new Color(0xF7F8FA));
+            g.fill(new Ellipse2D.Float(50, 50, 28, 28));
+            g.setColor(new Color(0x2E6BE6));
+            g.fill(new RoundRectangle2D.Float(58, 62, 12, 11, 1, 1));
+            Path2D roof = new Path2D.Double();
+            roof.moveTo(55, 63);
+            roof.lineTo(64, 54);
+            roof.lineTo(73, 63);
+            roof.closePath();
+            g.fill(roof);
+            g.setColor(new Color(0xF7F8FA));
+            g.fill(new RoundRectangle2D.Float(62, 67, 4, 6, 1, 1));
+        } finally {
+            g.dispose();
+        }
+        return image;
     }
 
     private abstract static class Vector implements Icon {

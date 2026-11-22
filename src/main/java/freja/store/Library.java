@@ -415,6 +415,26 @@ public final class Library implements AutoCloseable {
     }
 
     /**
+     * Changes a folder's display name. The directory on disk is not touched; the name stored here
+     * is what the sidebar and the grid headers show.
+     *
+     * @param folderId the folder identifier
+     * @param name the new display name
+     */
+    public synchronized void renameFolder(long folderId, String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("A folder name cannot be blank");
+        }
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET name=? WHERE id=?")) {
+            statement.setString(1, name.trim());
+            statement.setLong(2, folderId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to rename the folder", e);
+        }
+    }
+
+    /**
      * Finds a registered folder by its database identifier.
      *
      * @param id a folder identifier
