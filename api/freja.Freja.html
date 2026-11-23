@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="HB">
+		<header class="CB" date="2026-11-23">
+			<h1 class="K"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="m"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="n"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Y"></nav>
+		<article class="GB" id="Article">
+			<section class="T"><code class="t">freja</code>
+				<h2 class="Class KB"><code class="r">Freja</code></h2>
+				<div class="BB"></div><span class="A"><p>The application entry point.</p></span></section>
+			<section class="T" id="VERSION">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">VERSION</code><i class="P"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The product version.</p></span></section>
+			<section class="T" id="main(java.lang.String[])">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">main</code><code class="k">(<code array="fix"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">args</code>)</code><i class="P"><code>void</code></i></h2>
+				<table class="M">
+					<tr class="q">
+						<td><code array="fix"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">args</code></td>
+						<td><span><p>optional photo folders, plus <code>--library=&lt;path&gt;</code></p></span></td>
+					</tr>
+				</table><span class="A"><p>Starts the desktop application.</p></span></section>
+			<section class="T" id="defaultDatabase()">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">defaultDatabase</code><code class="k">()</code><i class="P"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
+				<table class="M">
+					<tr class="z">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></td>
+						<td><span><p>the SQLite file path</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the platform&apos;s default database location.</p></span></section>
+		</article>
+		<aside class="v">
+			<div class="i">
+				<h5 class="AB">Static Fields</h5>
+				<ul>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.Freja.html#VERSION">VERSION</a></code><i class="s"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+				</ul>
+				<h5 class="AB">Static Methods</h5>
+				<ul>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.Freja.html#main(java.lang.String[])">main</a></code><code class="k">(<code array="fix"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">args</code>)</code><i class="s"><code>void</code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.Freja.html#defaultDatabase()">defaultDatabase</a></code><code class="k">()</code><i class="s"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="e">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

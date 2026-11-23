@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="HB">
+		<header class="CB" date="2026-11-23">
+			<h1 class="K"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="m"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="n"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Y"></nav>
+		<article class="GB" id="Article">
+			<section class="T"><code class="t">freja.store</code>
+				<h2 class="Class KB"><code class="r">Exif</code></h2>
+				<div class="BB"></div><span class="A"><p>A small, dependency-free reader for the EXIF block of a JPEG file.</p><p>
+The application only needs a handful of tags, so this reads the TIFF structure directly instead
+of pulling in a general purpose metadata library. Anything malformed is treated as absent: a
+damaged camera file must never stop the library from being scanned.
+</p></span></section>
+			<section class="T" id="read(java.nio.file.Path)">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">read</code><code class="k">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="P"><code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html">Data</a></code></i></h2>
+				<table class="M">
+					<tr class="q">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
+						<td><span><p>an image file</p></span></td>
+					</tr>
+					<tr class="z">
+						<td><code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html">Data</a></code></td>
+						<td><span><p>the metadata, or <code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html#EMPTY">Data#EMPTY</a></code> when the file is not a JPEG or has no EXIF block</p></span></td>
+					</tr>
+				</table><span class="A"><p>Reads the EXIF block of a file.</p></span></section>
+			<section class="T" id="read(byte[])">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">read</code><code class="k">(<code array="fix">byte</code><code class="parameterName">data</code>)</code><i class="P"><code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html">Data</a></code></i></h2>
+				<table class="M">
+					<tr class="q">
+						<td><code array="fix">byte</code><code class="parameterName">data</code></td>
+						<td><span><p>a complete JPEG file</p></span></td>
+					</tr>
+					<tr class="z">
+						<td><code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html">Data</a></code></td>
+						<td><span><p>the metadata, or <code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html#EMPTY">Data#EMPTY</a></code> when there is no usable EXIF block</p></span></td>
+					</tr>
+				</table><span class="A"><p>Reads the EXIF block from an in-memory JPEG, which is what a scan already has after reading
+the file for decoding. It avoids opening the same file a second time.</p></span></section>
+		</article>
+		<aside class="v">
+			<div class="i">
+				<h5 class="AB">Static Methods</h5>
+				<ul>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.store.Exif.html#read(java.nio.file.Path)">read</a></code><code class="k">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="s"><code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html">Data</a></code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.store.Exif.html#read(byte[])">read</a></code><code class="k">(<code array="fix">byte</code><code class="parameterName">data</code>)</code><i class="s"><code><a aria-label="freja.store.Exif.Data" href="api/freja.store.Exif.Data.html">Data</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="e">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

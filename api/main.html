@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="HB">
+		<header class="CB" date="2026-11-23">
+			<h1 class="K"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="m"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="n"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Y"></nav>
+		<article class="GB" id="Article">
+			<div class="T">
+				<section class="A">
+					<h2>Freja API Overview</h2>
+					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
+					<section class="A">
+						<h4>🛠️ Interface</h4>
+						<table>
+							<tr>
+								<td><code><a href="api/freja.scan.LibraryScanner.Listener.html">LibraryScanner.Listener</a></code></td>
+								<td>Receives scanner events. Methods may be called from a background thread.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoInspector.Listener.html">PhotoInspector.Listener</a></code></td>
+								<td>User actions initiated from the inspector.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Sidebar.Listener.html">Sidebar.Listener</a></code></td>
+								<td>Callbacks for navigation actions.</td>
+							</tr>
+						</table>
+					</section>
+					<section class="A">
+						<h4>🛠️ Functional Interface</h4>
+						<table>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoViewer.Listener.html">PhotoViewer.Listener</a></code></td>
+								<td>Receives changes made while the viewer is open.</td>
+							</tr>
+						</table>
+					</section>
+					<section class="A">
+						<h4>🛠️ Class</h4>
+						<table>
+							<tr>
+								<td><code><a href="api/freja.util.PathUtil.html">PathUtil</a></code></td>
+								<td>Path normalization helpers shared by the database and the scanner.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.util.ImageTransforms.html">ImageTransforms</a></code></td>
+								<td>Pixel operations shared by thumbnail generation and the full screen viewer.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.scan.LibraryScanner.html">LibraryScanner</a></code></td>
+								<td>Keeps the catalog in sync with the folders on disk.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoInspector.html">PhotoInspector</a></code></td>
+								<td>The details panel shown next to the thumbnail grid.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Theme.html">Theme</a></code></td>
+								<td>The visual language of the application.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.MainWindow.html">MainWindow</a></code></td>
+								<td>The main application window.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Icons.html">Icons</a></code></td>
+								<td>Small vector icons drawn with Java2D, so the application does not depend on image assets or on
+emoji fonts.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
+								<td>A full screen photo viewer with zoom, pan, keyboard navigation and a slideshow.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoGrid.html">PhotoGrid</a></code></td>
+								<td>A virtualized, Picasa-like thumbnail grid.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Sidebar.html">Sidebar</a></code></td>
+								<td>The navigation sidebar.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
+								<td>The application entry point.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.PhotoImporter.html">PhotoImporter</a></code></td>
+								<td>Decodes an image once and produces everything the library stores about it.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Exif.html">Exif</a></code></td>
+								<td>A small, dependency-free reader for the EXIF block of a JPEG file.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Library.html">Library</a></code></td>
+								<td>The SQLite-backed photo catalog.</td>
+							</tr>
+						</table>
+					</section>
+					<section class="A">
+						<h4>🛠️ Enum</h4>
+						<table>
+							<tr>
+								<td><code><a href="api/freja.model.PhotoFilter.SortOrder.html">PhotoFilter.SortOrder</a></code></td>
+								<td>How a result set is ordered.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoGrid.GroupMode.html">PhotoGrid.GroupMode</a></code></td>
+								<td>How the visible photos are divided by headers.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Sidebar.Mode.html">Sidebar.Mode</a></code></td>
+								<td>The selected library view.</td>
+							</tr>
+						</table>
+					</section>
+					<section class="A">
+						<h4>🛠️ Record</h4>
+						<table>
+							<tr>
+								<td><code><a href="api/freja.scan.LibraryScanner.State.html">LibraryScanner.State</a></code></td>
+								<td>A snapshot of the scanner state for the status bar.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.LibraryStats.html">LibraryStats</a></code></td>
+								<td>Aggregate counters shown by the sidebar and status bar.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.PhotoFilter.html">PhotoFilter</a></code></td>
+								<td>A query against the photo library.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.Folder.html">Folder</a></code></td>
+								<td>A directory registered with the library.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.Tag.html">Tag</a></code></td>
+								<td>A label that can be attached to folders.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.Photo.html">Photo</a></code></td>
+								<td>One photo managed by the library.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.PhotoImporter.AnalyzedPhoto.html">PhotoImporter.AnalyzedPhoto</a></code></td>
+								<td>The result of inspecting one image file.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Exif.Data.html">Exif.Data</a></code></td>
+								<td>The parsed values. All fields are optional.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Library.PhotoSave.html">Library.PhotoSave</a></code></td>
+								<td>One catalog write waiting to be committed.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Library.FileStamp.html">Library.FileStamp</a></code></td>
+								<td>The file attributes a scan compares against the catalog.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Library.Thumbnail.html">Library.Thumbnail</a></code></td>
+								<td>A thumbnail stored in the database.</td>
+							</tr>
+						</table>
+					</section>
+				</section>
+			</div>
+		</article>
+		<aside class="v"></aside>
+		<footer class="e">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

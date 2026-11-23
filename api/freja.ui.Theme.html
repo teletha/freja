@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="HB">
+		<header class="CB" date="2026-11-23">
+			<h1 class="K"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="m"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="n"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Y"></nav>
+		<article class="GB" id="Article">
+			<section class="T"><code class="t">freja.ui</code>
+				<h2 class="Class KB"><code class="r">Theme</code></h2>
+				<div class="BB"></div><span class="A"><p>The visual language of the application.</p><p>
+The palette is expressed with dynamic colours, so every component which received a
+<code><a aria-label="freja.ui.Theme" href="api/freja.ui.Theme.html">Theme</a></code> colour is repainted with the new palette when the dark mode changes. FlatLaf
+updates the standard Swing components at the same time.
+</p></span></section>
+			<section class="T" id="BACKGROUND">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">BACKGROUND</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The application background.</p></span></section>
+			<section class="T" id="SURFACE">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">SURFACE</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The background of cards, panels and the toolbar.</p></span></section>
+			<section class="T" id="SIDEBAR">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">SIDEBAR</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The navigation sidebar background.</p></span></section>
+			<section class="T" id="BORDER">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">BORDER</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Hairline borders.</p></span></section>
+			<section class="T" id="TEXT">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">TEXT</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Primary text.</p></span></section>
+			<section class="T" id="MUTED">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">MUTED</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Secondary text.</p></span></section>
+			<section class="T" id="FAINT">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">FAINT</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Faint decorative text and icons.</p></span></section>
+			<section class="T" id="ACCENT">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">ACCENT</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The interactive accent.</p></span></section>
+			<section class="T" id="ACCENT_SOFT">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">ACCENT_SOFT</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The soft accent background used by selected rows.</p></span></section>
+			<section class="T" id="ACCENT_DARK">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">ACCENT_DARK</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The accent used for selected text.</p></span></section>
+			<section class="T" id="GOLD">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">GOLD</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Stars and favorites.</p></span></section>
+			<section class="T" id="DANGER">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">DANGER</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Errors and destructive actions.</p></span></section>
+			<section class="T" id="HOVER">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">HOVER</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>Hover background of neutral rows.</p></span></section>
+			<section class="T" id="VIEWER">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">VIEWER</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The full screen viewer background.</p></span></section>
+			<section class="T" id="VIEWER_PANEL">
+				<h2 class="f"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="r">VIEWER_PANEL</code><i class="P"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2><span class="A"><p>The full screen viewer toolbar and footer.</p></span></section>
+			<section class="T" id="install()">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">install</code><code class="k">()</code><i class="P"><code>void</code></i></h2><span class="A"><p>Installs the persisted look and feel.</p></span></section>
+			<section class="T" id="isDark()">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">isDark</code><code class="k">()</code><i class="P"><code>boolean</code></i></h2>
+				<table class="M">
+					<tr class="z">
+						<td><code>boolean</code></td>
+						<td><span><p>true when dark mode is active</p></span></td>
+					</tr>
+				</table><span class="A"><p>Tests whether dark mode is active.</p></span></section>
+			<section class="T" id="setDark(boolean)">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">setDark</code><code class="k">(<code>boolean</code><code class="parameterName">value</code>)</code><i class="P"><code>void</code></i></h2>
+				<table class="M">
+					<tr class="q">
+						<td><code>boolean</code><code class="parameterName">value</code></td>
+						<td><span><p>true for dark mode, false for light mode</p></span></td>
+					</tr>
+				</table><span class="A"><p>Changes the application theme.</p></span></section>
+			<section class="T" id="toggle()">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">toggle</code><code class="k">()</code><i class="P"><code>boolean</code></i></h2>
+				<table class="M">
+					<tr class="z">
+						<td><code>boolean</code></td>
+						<td><span><p>true when dark mode is now active</p></span></td>
+					</tr>
+				</table><span class="A"><p>Switches between light and dark mode.</p></span></section>
+			<section class="T" id="font(int,int)">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">font</code><code class="k">(<code>int</code><code class="parameterName">style</code>, <code>int</code><code class="parameterName">size</code>)</code><i class="P"><code><a aria-label="java.awt.Font 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Font.html">Font</a></code></i></h2>
+				<table class="M">
+					<tr class="q">
+						<td><code>int</code><code class="parameterName">style</code></td>
+						<td><span><p>the font style</p></span></td>
+					</tr>
+					<tr class="q">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td><span><p>the point size</p></span></td>
+					</tr>
+					<tr class="z">
+						<td><code><a aria-label="java.awt.Font 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Font.html">Font</a></code></td>
+						<td><span><p>a font which can render Japanese</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the application font.</p></span></section>
+			<section class="T" id="mix(java.awt.Color,java.awt.Color,double)">
+				<h2 class="f"><i class="PUBLIC STATIC"></i><code class="r">mix</code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">first</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">second</code>, <code>double</code><code class="parameterName">ratio</code>)</code><i class="P"><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></h2>
+				<table class="M">
+					<tr class="q">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">first</code></td>
+						<td><span><p>the first colour</p></span></td>
+					</tr>
+					<tr class="q">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">second</code></td>
+						<td><span><p>the second colour</p></span></td>
+					</tr>
+					<tr class="q">
+						<td><code>double</code><code class="parameterName">ratio</code></td>
+						<td><span><p>0 for the first colour, 1 for the second</p></span></td>
+					</tr>
+					<tr class="z">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></td>
+						<td><span><p>the mixed colour</p></span></td>
+					</tr>
+				</table><span class="A"><p>Blends two colours at call time.</p></span></section>
+		</article>
+		<aside class="v">
+			<div class="i">
+				<h5 class="AB">Static Fields</h5>
+				<ul>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#BACKGROUND">BACKGROUND</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#SURFACE">SURFACE</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#SIDEBAR">SIDEBAR</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#BORDER">BORDER</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#TEXT">TEXT</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#MUTED">MUTED</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#FAINT">FAINT</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#ACCENT">ACCENT</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#ACCENT_SOFT">ACCENT_SOFT</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#ACCENT_DARK">ACCENT_DARK</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#GOLD">GOLD</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#DANGER">DANGER</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#HOVER">HOVER</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#VIEWER">VIEWER</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+					<li class="IB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.ui.Theme.html#VIEWER_PANEL">VIEWER_PANEL</a></code><i class="s"><code class="return"><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+				</ul>
+				<h5 class="AB">Static Methods</h5>
+				<ul>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Theme.html#install()">install</a></code><code class="k">()</code><i class="s"><code>void</code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Theme.html#isDark()">isDark</a></code><code class="k">()</code><i class="s"><code>boolean</code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Theme.html#setDark(boolean)">setDark</a></code><code class="k">(<code>boolean</code><code class="parameterName">value</code>)</code><i class="s"><code>void</code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Theme.html#toggle()">toggle</a></code><code class="k">()</code><i class="s"><code>boolean</code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Theme.html#font(int,int)">font</a></code><code class="k">(<code>int</code><code class="parameterName">style</code>, <code>int</code><code class="parameterName">size</code>)</code><i class="s"><code><a aria-label="java.awt.Font 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Font.html">Font</a></code></i></li>
+					<li class="IB"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Theme.html#mix(java.awt.Color,java.awt.Color,double)">mix</a></code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">first</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">second</code>, <code>double</code><code class="parameterName">ratio</code>)</code><i class="s"><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="e">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>
