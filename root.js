@@ -11,6 +11,11 @@ const root = {
 	],
 	"types": [
 		{
+			"name": "SmartTags",
+			"packageName": "freja.util",
+			"type": "Class"
+		},
+		{
 			"name": "PathUtil",
 			"packageName": "freja.util",
 			"type": "Class"
