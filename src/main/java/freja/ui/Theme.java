@@ -154,7 +154,7 @@ public final class Theme {
         UIManager.put("Component.arc", 10);
         UIManager.put("Button.arc", 10);
         UIManager.put("TextComponent.arc", 10);
-        UIManager.put("ScrollBar.width", 11);
+        UIManager.put("ScrollBar.width", 8);
         UIManager.put("ScrollBar.thumbArc", 999);
         UIManager.put("ScrollBar.showButtons", false);
         UIManager.put("ScrollBar.trackArc", 999);

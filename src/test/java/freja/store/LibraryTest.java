@@ -248,4 +248,40 @@ class LibraryTest {
             assertFalse(library.isCurrent(PathUtil.key(file), 1, 1234));
         }
     }
+
+    @Test
+    void tagsCanBeAssignedRenamedFilteredAndRemoved() throws Exception {
+        Path first = Files.createDirectories(temp.resolve("tagged-first"));
+        Path second = Files.createDirectories(temp.resolve("tagged-second"));
+        Path a = Files.write(first.resolve("a.jpg"), new byte[] {1});
+        Path b = Files.write(second.resolve("b.jpg"), new byte[] {2});
+        PhotoImporter.AnalyzedPhoto analyzed = new PhotoImporter.AnalyzedPhoto(100, 100, 1, Exif.Data.EMPTY,
+                new byte[] {1}, 100, 100);
+        try (Library library = new Library(temp.resolve("tags.db"))) {
+            Folder f1 = library.addFolder(first);
+            Folder f2 = library.addFolder(second);
+            library.savePhoto(f1.id(), a, 1, 1, analyzed, null);
+            library.savePhoto(f2.id(), b, 1, 1, analyzed, null);
+
+            library.setFolderTags(f1.id(), List.of("旅行", "家族"));
+            library.setFolderTags(f2.id(), List.of("旅行"));
+
+            assertEquals(List.of("家族", "旅行"), library.folder(f1.id()).orElseThrow().tags());
+            long travel = library.tags().stream().filter(t -> t.name().equals("旅行")).findFirst().orElseThrow().id();
+            long family = library.tags().stream().filter(t -> t.name().equals("家族")).findFirst().orElseThrow().id();
+            assertEquals(2, library.tags().stream().filter(t -> t.id() == travel).findFirst().orElseThrow().folderCount());
+            assertEquals(2, library.photos(PhotoFilter.all().withTags(List.of(travel))).size());
+            assertEquals(1, library.photos(PhotoFilter.all().withTags(List.of(family))).size());
+            assertEquals(2, library.photos(PhotoFilter.all().withTags(List.of(travel, family))).size());
+
+            library.renameTag(family, "家族アルバム");
+            assertEquals("家族アルバム", library.tags().stream().filter(t -> t.id() == family).findFirst().orElseThrow().name());
+            assertEquals(2, library.bulkRenameTags(List.of(travel, family), "旅行", "旅行記"));
+            assertEquals("旅行記", library.tags().stream().filter(t -> t.id() == travel).findFirst().orElseThrow().name());
+
+            library.deleteTags(List.of(family));
+            assertEquals(List.of("旅行記"), library.folder(f1.id()).orElseThrow().tags());
+            assertTrue(library.tags().stream().noneMatch(t -> t.name().equals("家族アルバム")));
+        }
+    }
 }

@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
@@ -44,6 +45,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -182,6 +184,11 @@ public final class MainWindow extends JFrame {
     private boolean updatingSort;
 
     private boolean scrollToSelectedFolder;
+
+    /** Tag identifiers selected in the toolbar filter; empty means no tag restriction. */
+    private final List<Long> selectedTagIds = new ArrayList<>();
+
+    private JButton tagFilterButton;
 
     public MainWindow(Library library, LibraryScanner scanner) {
         super("Freja");
@@ -327,6 +334,13 @@ public final class MainWindow extends JFrame {
         search.setPreferredSize(new Dimension(300, 31));
         search.setMaximumSize(new Dimension(360, 31));
         bar.add(search);
+        bar.add(Box.createHorizontalStrut(6));
+
+        tagFilterButton = new JButton("タグ", Icons.tag(14, Theme.MUTED));
+        tagFilterButton.setFont(Theme.font(Font.PLAIN, 12));
+        tagFilterButton.setToolTipText("タグで絞り込む");
+        tagFilterButton.addActionListener(event -> showTagFilter());
+        bar.add(tagFilterButton);
         bar.add(Box.createHorizontalGlue());
 
         sort.setRenderer(sortRenderer());
@@ -481,6 +495,7 @@ public final class MainWindow extends JFrame {
             search.requestFocusInWindow();
             search.selectAll();
         }));
+        view.add(menuItem("タグを管理…", "control T", () -> new TagManager(this, library, this::tagsChanged).setVisible(true)));
         view.addSeparator();
         inspectorItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
         inspectorItem.addActionListener(event -> setInspectorVisible(inspectorItem.isSelected()));
@@ -546,6 +561,19 @@ public final class MainWindow extends JFrame {
             public void onRevealFolder(long folderId) {
                 library.folder(folderId).ifPresent(folder -> reveal(folder.path()));
             }
+
+            @Override
+            public void onEditFolderTags(long folderId) {
+                java.awt.Point point = sidebar.getMousePosition();
+                int x = point == null ? 24 : point.x;
+                int y = point == null ? 24 : point.y;
+                TagPicker.show(sidebar, x, y, library, folderId, MainWindow.this::tagsChanged);
+            }
+
+            @Override
+            public void onManageTags() {
+                new TagManager(MainWindow.this, library, MainWindow.this::tagsChanged).setVisible(true);
+            }
         });
 
         grid.setOnSelection(photo -> {
@@ -558,6 +586,8 @@ public final class MainWindow extends JFrame {
             mode = Sidebar.Mode.FOLDER;
             this.folderId = folderId;
         });
+        grid.setOnTagFolder((folderId, point) -> library.folder(folderId).ifPresent(folder ->
+                TagPicker.show(grid, point.x, point.y + 8, library, folderId, this::tagsChanged)));
         grid.setOnRemove(this::removeFromLibrary);
         grid.setOnDeleteFromDisk(this::deleteFromDisk);
         grid.setOnOpen(this::openViewer);
@@ -1047,6 +1077,126 @@ public final class MainWindow extends JFrame {
         setDarkMode(!Theme.isDark());
     }
 
+    /** Opens the toolbar popup for choosing which tags a photo's folder must carry. */
+    private void showTagFilter() {
+        List<freja.model.Tag> tags = library.tags();
+        JPopupMenu popup = new JPopupMenu();
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(Theme.SURFACE);
+        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 10, 12));
+        panel.setPreferredSize(new Dimension(300, 360));
+
+        JTextField filter = new JTextField();
+        filter.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED));
+        filter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "タグを検索");
+        panel.add(filter, BorderLayout.NORTH);
+
+        JPanel list = new JPanel();
+        list.setOpaque(false);
+        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
+        List<JPanel> rows = new ArrayList<>();
+        List<freja.model.Tag> rowTags = new ArrayList<>();
+        for (freja.model.Tag tag : tags) {
+            JCheckBox box = new JCheckBox(tag.name(), selectedTagIds.contains(tag.id()));
+            box.setOpaque(false);
+            box.setFont(Theme.font(Font.PLAIN, 13));
+            box.setForeground(Theme.TEXT);
+            box.addActionListener(event -> {
+                if (box.isSelected()) {
+                    selectedTagIds.add(tag.id());
+                } else {
+                    selectedTagIds.remove(tag.id());
+                }
+                updateTagFilterButton();
+                refreshAll();
+            });
+            JPanel row = new JPanel(new BorderLayout(8, 0));
+            row.setOpaque(false);
+            row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+            row.add(box, BorderLayout.CENTER);
+            JLabel count = new JLabel(tag.folderCount() + " フォルダ");
+            count.setFont(Theme.font(Font.PLAIN, 11));
+            count.setForeground(Theme.MUTED);
+            row.add(count, BorderLayout.EAST);
+            rows.add(row);
+            rowTags.add(tag);
+            list.add(row);
+        }
+        if (tags.isEmpty()) {
+            JLabel empty = new JLabel("タグはまだありません");
+            empty.setFont(Theme.font(Font.PLAIN, 12));
+            empty.setForeground(Theme.MUTED);
+            empty.setBorder(BorderFactory.createEmptyBorder(12, 4, 12, 4));
+            list.add(empty);
+        }
+        filter.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent event) {
+                applyFilter();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent event) {
+                applyFilter();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent event) {
+                applyFilter();
+            }
+
+            private void applyFilter() {
+                String query = filter.getText() == null ? "" : filter.getText().trim().toLowerCase(java.util.Locale.ROOT);
+                for (int i = 0; i < rows.size(); i++) {
+                    rows.get(i).setVisible(rowTags.get(i).name().toLowerCase(java.util.Locale.ROOT).contains(query));
+                }
+                list.revalidate();
+                list.repaint();
+            }
+        });
+
+        JScrollPane scroll = new JScrollPane(list);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        panel.add(scroll, BorderLayout.CENTER);
+
+        JButton clear = new JButton("選択を解除");
+        clear.setFont(Theme.font(Font.PLAIN, 12));
+        clear.setForeground(Theme.TEXT);
+        clear.setOpaque(false);
+        clear.setContentAreaFilled(false);
+        clear.setFocusPainted(false);
+        clear.setEnabled(!selectedTagIds.isEmpty());
+        clear.addActionListener(event -> {
+            selectedTagIds.clear();
+            updateTagFilterButton();
+            refreshAll();
+            popup.setVisible(false);
+        });
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        footer.setOpaque(false);
+        footer.add(clear);
+        panel.add(footer, BorderLayout.SOUTH);
+
+        popup.add(panel);
+        popup.show(tagFilterButton, 0, tagFilterButton.getHeight());
+        SwingUtilities.invokeLater(filter::requestFocusInWindow);
+    }
+
+    private void updateTagFilterButton() {
+        tagFilterButton.setText(selectedTagIds.isEmpty() ? "タグ" : "タグ (" + selectedTagIds.size() + ")");
+    }
+
+    /** Called after tags or folder assignments changed in one of the tag dialogs. */
+    private void tagsChanged() {
+        List<Long> existing = library.tags().stream().map(freja.model.Tag::id).toList();
+        selectedTagIds.removeIf(id -> !existing.contains(id));
+        updateTagFilterButton();
+        cache.retryMissing();
+        refreshAll();
+    }
+
     private void scheduleRefresh() {
         if (!refreshScheduled) {
             refreshScheduled = true;
@@ -1065,9 +1215,10 @@ public final class MainWindow extends JFrame {
         long requestedFolder = folderId;
         SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
         String searchText = search.getText();
+        List<Long> tagIds = List.copyOf(selectedTagIds);
         refresher.execute(() -> {
             try {
-                RefreshData data = loadView(requestedMode, requestedFolder, order, searchText);
+                RefreshData data = loadView(requestedMode, requestedFolder, order, searchText, tagIds);
                 SwingUtilities.invokeLater(() -> {
                     if (generation == refreshGeneration) {
                         applyRefresh(data);
@@ -1084,7 +1235,8 @@ public final class MainWindow extends JFrame {
     }
 
     /** Reads and sorts everything the current view needs. Never touches a Swing component. */
-    private RefreshData loadView(Sidebar.Mode requestedMode, long requestedFolder, SortOrder order, String searchText) {
+    private RefreshData loadView(Sidebar.Mode requestedMode, long requestedFolder, SortOrder order, String searchText,
+            List<Long> tagIds) {
         List<Folder> folders = library.folders();
         LibraryStats stats = library.stats();
         PhotoFilter filter = switch (requestedMode) {
@@ -1092,11 +1244,11 @@ public final class MainWindow extends JFrame {
         case FAVORITES -> PhotoFilter.favorites();
         case RECENT -> PhotoFilter.recent();
         };
-        filter = filter.withSort(order).withSearch(searchText);
+        filter = filter.withSort(order).withSearch(searchText).withTags(tagIds);
 
         List<Photo> photos = library.photos(filter);
         List<Folder> visibleFolders = folders.stream().filter(folder -> folder.photoCount() > 0).toList();
-        if (filter.search() != null && !filter.search().isBlank()) {
+        if (filter.search() != null || !filter.tagIds().isEmpty()) {
             java.util.Set<Long> matched = new java.util.HashSet<>();
             for (Photo photo : photos) {
                 matched.add(photo.folderId());

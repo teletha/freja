@@ -10,6 +10,7 @@
 package freja.model;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * A directory registered with the library.
@@ -20,5 +21,5 @@ import java.nio.file.Path;
  * </p>
  */
 public record Folder(long id, Path path, String name, int photoCount, long addedAt, long lastScanAt,
-        PhotoFilter.SortOrder sort, boolean explicit) {
+        PhotoFilter.SortOrder sort, boolean explicit, List<String> tags) {
 }

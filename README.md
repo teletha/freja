@@ -33,6 +33,7 @@ stores the catalog in SQLite. Your original files are never moved or modified.
   arrays during scans.
   JPEG EXIF camera, lens, capture date, exposure, aperture, ISO,
   focal length and orientation are read without extra dependencies.
+* **Folder tags** — attach any number of tags to folders, rename or remove them in bulk from the tag manager, and filter the library by tag from the toolbar.
 * **Picasa-like browsing** — timeline groups, virtualized thumbnail grid, zoom slider,
   folder-name search, favorites, recent photos and star ratings. The library
   view is one continuous list of folder sections in sidebar order, regardless of the real directory

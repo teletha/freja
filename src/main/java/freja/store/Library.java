@@ -23,15 +23,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import freja.model.Folder;
 import freja.model.LibraryStats;
 import freja.model.Photo;
 import freja.model.PhotoFilter;
+import freja.model.Tag;
 import freja.util.PathUtil;
 
 /**
@@ -71,6 +75,10 @@ public final class Library implements AutoCloseable {
 
     /** Raised when a database operation fails. */
     public static class LibraryException extends RuntimeException {
+
+        public LibraryException(String message) {
+            super(message);
+        }
 
         public LibraryException(String message, Throwable cause) {
             super(message, cause);
@@ -199,6 +207,19 @@ public final class Library implements AutoCloseable {
                         width INTEGER NOT NULL,
                         height INTEGER NOT NULL,
                         data BLOB NOT NULL
+                    )
+                    """);
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS tags (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL UNIQUE COLLATE NOCASE
+                    )
+                    """);
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS folder_tags (
+                        folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+                        tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+                        PRIMARY KEY (folder_id, tag_id)
                     )
                     """);
             statement.execute("""
@@ -350,7 +371,7 @@ public final class Library implements AutoCloseable {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, key);
             try (ResultSet results = statement.executeQuery()) {
-                return results.next() ? mapFolder(results) : null;
+                return results.next() ? mapFolder(results, connection) : null;
             }
         } catch (SQLException e) {
             throw new LibraryException("Failed to read the folder: " + key, e);
@@ -370,7 +391,7 @@ public final class Library implements AutoCloseable {
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 keys.next();
-                return new Folder(keys.getLong(1), normalized, name, 0, now, 0, PhotoFilter.SortOrder.NAME, explicit);
+                return new Folder(keys.getLong(1), normalized, name, 0, now, 0, PhotoFilter.SortOrder.NAME, explicit, List.of());
             }
         } catch (SQLException e) {
             throw new LibraryException("Failed to add the folder: " + normalized, e);
@@ -400,7 +421,7 @@ public final class Library implements AutoCloseable {
         try (Statement statement = reader.createStatement(); ResultSet results = statement.executeQuery(sql)) {
             List<Folder> folders = new ArrayList<>();
             while (results.next()) {
-                folders.add(mapFolder(results));
+                folders.add(mapFolder(results, reader));
             }
             return folders;
         } catch (SQLException e) {
@@ -408,13 +429,34 @@ public final class Library implements AutoCloseable {
         }
     }
 
-    private Folder mapFolder(ResultSet results) throws SQLException {
+    private Folder mapFolder(ResultSet results, Connection source) throws SQLException {
         Path path = Path.of(results.getString("path"));
         String name = results.getString("name");
         if (name == null || name.isBlank()) {
             name = PathUtil.folderName(path);
         }
-        return new Folder(results.getLong("id"), path, name, results.getInt("photo_count"), results.getLong("added_at"), results.getLong("last_scan_at"), parseSort(results.getString("sort_order")), results.getInt("explicit") != 0);
+        long folderId = results.getLong("id");
+        return new Folder(folderId, path, name, results.getInt("photo_count"), results.getLong("added_at"),
+                results.getLong("last_scan_at"), parseSort(results.getString("sort_order")),
+                results.getInt("explicit") != 0, folderTags(folderId, source));
+    }
+
+    private List<String> folderTags(long folderId, Connection source) throws SQLException {
+        String sql = """
+                SELECT t.name FROM tags t
+                JOIN folder_tags ft ON ft.tag_id = t.id
+                WHERE ft.folder_id = ? ORDER BY t.name COLLATE NOCASE
+                """;
+        try (PreparedStatement statement = source.prepareStatement(sql)) {
+            statement.setLong(1, folderId);
+            try (ResultSet results = statement.executeQuery()) {
+                List<String> tags = new ArrayList<>();
+                while (results.next()) {
+                    tags.add(results.getString(1));
+                }
+                return List.copyOf(tags);
+            }
+        }
     }
 
     private static PhotoFilter.SortOrder parseSort(String value) {
@@ -425,6 +467,220 @@ public final class Library implements AutoCloseable {
             }
         }
         return PhotoFilter.SortOrder.NAME;
+    }
+
+    /** Lists every tag with the number of folders carrying it. */
+    public List<Tag> tags() {
+        synchronized (readerLock) {
+            return tagsInternal();
+        }
+    }
+
+    private List<Tag> tagsInternal() {
+        String sql = """
+                SELECT t.id, t.name, COUNT(ft.folder_id) AS folder_count
+                FROM tags t LEFT JOIN folder_tags ft ON ft.tag_id = t.id
+                GROUP BY t.id ORDER BY t.name COLLATE NOCASE
+                """;
+        try (Statement statement = reader.createStatement(); ResultSet results = statement.executeQuery(sql)) {
+            List<Tag> tags = new ArrayList<>();
+            while (results.next()) {
+                tags.add(new Tag(results.getLong("id"), results.getString("name"), results.getInt("folder_count")));
+            }
+            return List.copyOf(tags);
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read tags", e);
+        }
+    }
+
+    /** Returns the names of the tags attached to one folder. */
+    public synchronized List<String> folderTags(long folderId) {
+        synchronized (readerLock) {
+            try {
+                return folderTags(folderId, connection);
+            } catch (SQLException e) {
+                throw new LibraryException("Failed to read folder tags", e);
+            }
+        }
+    }
+
+    /** Creates a tag. */
+    public synchronized long addTag(String name) {
+        String value = tagName(name);
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO tags(name) VALUES(?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, value);
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                return keys.next() ? keys.getLong(1) : -1;
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("A tag named '" + value + "' already exists", e);
+        }
+    }
+
+    /** Renames a tag; the name must remain unique. */
+    public synchronized void renameTag(long id, String name) {
+        String value = tagName(name);
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE tags SET name=? WHERE id=?")) {
+            statement.setString(1, value);
+            statement.setLong(2, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("A tag named '" + value + "' already exists", e);
+        }
+    }
+
+    /** Deletes tags everywhere; their folder assignments go with them. */
+    public synchronized void deleteTags(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        try {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM tags WHERE id=?")) {
+                for (Long id : ids) {
+                    statement.setLong(1, id);
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to delete tags", e);
+        } finally {
+            autoCommit(true);
+        }
+    }
+
+    /**
+     * Replaces a piece of the name in every selected tag. The whole operation is rejected when a
+     * result would be blank or collide with another tag, so a bulk edit never leaves a half-applied
+     * rename behind.
+     *
+     * @return how many tags were renamed
+     */
+    public synchronized int bulkRenameTags(Collection<Long> ids, String from, String to) {
+        if (from == null || from.isEmpty()) {
+            throw new IllegalArgumentException("置換する文字列を入力してください");
+        }
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        Set<Long> selected = new HashSet<>(ids);
+        List<Tag> current = tags();
+        Map<String, Long> others = new HashMap<>();
+        for (Tag tag : current) {
+            if (!selected.contains(tag.id())) {
+                others.put(tag.name().toLowerCase(Locale.ROOT), tag.id());
+            }
+        }
+        List<Tag> changes = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (Tag tag : current) {
+            if (!selected.contains(tag.id())) {
+                continue;
+            }
+            String next = tag.name().replace(from, to == null ? "" : to).trim();
+            if (next.isEmpty()) {
+                throw new IllegalArgumentException("名前が空になるタグがあります: " + tag.name());
+            }
+            String key = next.toLowerCase(Locale.ROOT);
+            if ((others.containsKey(key) && !selected.contains(others.get(key))) || !seen.add(key)) {
+                throw new LibraryException("タグ '" + next + "' は既に存在します");
+            }
+            changes.add(new Tag(tag.id(), next, 0));
+        }
+        try {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement("UPDATE tags SET name=? WHERE id=?")) {
+                for (Tag tag : changes) {
+                    statement.setString(1, tag.name());
+                    statement.setLong(2, tag.id());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to rename tags", e);
+        } finally {
+            autoCommit(true);
+        }
+        return changes.size();
+    }
+
+    /** Replaces the complete set of tags on a folder, creating tags that do not exist yet. */
+    public synchronized void setFolderTags(long folderId, Collection<String> names) {
+        List<String> values = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        if (names != null) {
+            for (String name : names) {
+                if (name == null || name.isBlank()) {
+                    continue;
+                }
+                String value = name.trim();
+                if (seen.add(value.toLowerCase(Locale.ROOT))) {
+                    values.add(value);
+                }
+            }
+        }
+        try {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folder_tags WHERE folder_id=?")) {
+                statement.setLong(1, folderId);
+                statement.executeUpdate();
+            }
+            for (String value : values) {
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "INSERT OR IGNORE INTO folder_tags(folder_id, tag_id) VALUES(?,?)")) {
+                    statement.setLong(1, folderId);
+                    statement.setLong(2, tagId(value));
+                    statement.executeUpdate();
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to update folder tags", e);
+        } finally {
+            autoCommit(true);
+        }
+    }
+
+    private long tagId(String name) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT id FROM tags WHERE name=?")) {
+            statement.setString(1, name);
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getLong(1);
+                }
+            }
+        }
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO tags(name) VALUES(?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, name);
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                return keys.next() ? keys.getLong(1) : -1;
+            }
+        }
+    }
+
+    private static String tagName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("タグ名を入力してください");
+        }
+        return name.trim();
+    }
+
+    private void autoCommit(boolean value) {
+        try {
+            connection.setAutoCommit(value);
+        } catch (SQLException ignored) {
+        }
     }
 
     /**
@@ -589,6 +845,14 @@ public final class Library implements AutoCloseable {
             String search = "%" + PathUtil.likeValue(filter.search()) + "%";
             sql.append(" AND f.name LIKE ? ESCAPE '\\'");
             parameters.add(search);
+        }
+        if (!filter.tagIds().isEmpty()) {
+            sql.append(" AND EXISTS (SELECT 1 FROM folder_tags ft WHERE ft.folder_id = p.folder_id AND ft.tag_id IN (");
+            for (int i = 0; i < filter.tagIds().size(); i++) {
+                sql.append(i == 0 ? "?" : ",?");
+                parameters.add(filter.tagIds().get(i));
+            }
+            sql.append("))");
         }
         sql.append(switch (filter.sort()) {
         case DATE_OLDEST -> " ORDER BY p.captured_at ASC, p.file_name COLLATE NOCASE ASC";

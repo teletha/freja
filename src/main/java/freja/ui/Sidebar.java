@@ -78,6 +78,10 @@ public final class Sidebar extends JPanel {
         void onRemoveFolder(long folderId);
 
         void onRevealFolder(long folderId);
+
+        void onEditFolderTags(long folderId);
+
+        void onManageTags();
     }
 
     private final JPanel rows = new JPanel();
@@ -126,6 +130,14 @@ public final class Sidebar extends JPanel {
 
         @Override
         public void onRevealFolder(long folderId) {
+        }
+
+        @Override
+        public void onEditFolderTags(long folderId) {
+        }
+
+        @Override
+        public void onManageTags() {
         }
     };
 
@@ -212,14 +224,20 @@ public final class Sidebar extends JPanel {
         folderCount.setForeground(Theme.MUTED);
         heading.add(folderCount);
         panel.add(heading, BorderLayout.CENTER);
-        JButton add = new JButton(Icons.plus(14, Theme.MUTED));
-        add.setFocusable(false);
-        add.setOpaque(false);
-        add.setContentAreaFilled(false);
-        add.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
-        add.setToolTipText("フォルダを追加");
-        add.addActionListener(event -> listener.onAddFolder());
-        panel.add(add, BorderLayout.EAST);
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        buttons.setOpaque(false);
+        JButton manage = new JButton("タグ", Icons.tag(13, Theme.MUTED));
+        manage.setFont(Theme.font(Font.PLAIN, 11));
+        manage.setFocusable(false);
+        manage.setOpaque(false);
+        manage.setContentAreaFilled(false);
+        manage.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+        manage.setToolTipText("タグを管理");
+        manage.addActionListener(event -> listener.onManageTags());
+        JButton add = iconButton(Icons.plus(14, Theme.MUTED), "フォルダを追加", () -> listener.onAddFolder());
+        buttons.add(manage);
+        buttons.add(add);
+        panel.add(buttons, BorderLayout.EAST);
         return panel;
     }
 
@@ -320,7 +338,8 @@ public final class Sidebar extends JPanel {
         folderOrder.clear();
         for (Folder folder : folders) {
             NavRow row = new NavRow(folder.name(), Icons.folder(17, Theme.MUTED));
-            row.setToolTipText(folder.path().toString() + (folder.explicit() ? "" : "  (自動検出)"));
+            String tags = folder.tags().isEmpty() ? "" : "\nタグ: " + String.join(", ", folder.tags());
+            row.setToolTipText(folder.path().toString() + (folder.explicit() ? "" : "  (自動検出)") + tags);
             row.setCount(folder.photoCount());
             row.addMouseListener(rowListener(() -> {
                 row.requestFocusInWindow();
@@ -396,6 +415,7 @@ public final class Sidebar extends JPanel {
         menu.add(sortMenu(folder));
         menu.addSeparator();
         menu.add(item("名前を変更", () -> listener.onRenameFolder(folder.id())));
+        menu.add(item("タグを編集…", () -> listener.onEditFolderTags(folder.id())));
         menu.add(item("再スキャン", () -> listener.onRescanFolder(folder.id())));
         menu.add(item("エクスプローラーで開く", () -> listener.onRevealFolder(folder.id())));
         if (folder.explicit()) {
@@ -415,6 +435,17 @@ public final class Sidebar extends JPanel {
             menu.add(item);
         }
         return menu;
+    }
+
+    private JButton iconButton(javax.swing.Icon icon, String tooltip, Runnable action) {
+        JButton button = new JButton(icon);
+        button.setFocusable(false);
+        button.setOpaque(false);
+        button.setContentAreaFilled(false);
+        button.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+        button.setToolTipText(tooltip);
+        button.addActionListener(event -> action.run());
+        return button;
     }
 
     private javax.swing.JMenuItem item(String text, Runnable action) {

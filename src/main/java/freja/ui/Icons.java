@@ -198,6 +198,27 @@ public final class Icons {
         };
     }
 
+    public static Icon tag(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float w = size;
+                Path2D.Float outline = new Path2D.Float();
+                outline.moveTo(w * 0.1, w * 0.12);
+                outline.lineTo(w * 0.54, w * 0.12);
+                outline.lineTo(w * 0.9, w * 0.48);
+                outline.quadTo(w * 0.95, w * 0.53, w * 0.9, w * 0.58);
+                outline.lineTo(w * 0.58, w * 0.9);
+                outline.quadTo(w * 0.53, w * 0.95, w * 0.48, w * 0.9);
+                outline.lineTo(w * 0.12, w * 0.54);
+                outline.closePath();
+                Area shape = new Area(outline);
+                shape.subtract(new Area(new Ellipse2D.Float(w * 0.22f, w * 0.24f, w * 0.13f, w * 0.13f)));
+                g.fill(shape);
+            }
+        };
+    }
+
     public static Icon grid(int size, Color color) {
         return new Vector(size, color) {
             @Override

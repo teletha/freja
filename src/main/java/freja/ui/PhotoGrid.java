@@ -138,6 +138,16 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private Consumer<Long> onStickyFolder = folderId -> {
     };
 
+    /** Receives the folder whose header's tag chip was clicked. */
+    private BiConsumer<Long, Point> onTagFolder = (folderId, point) -> {
+    };
+
+    /** Clickable areas of the tag chips painted in the current frame. */
+    private final List<TagHit> tagHits = new ArrayList<>();
+
+    private record TagHit(String folderKey, Rectangle bounds) {
+    }
+
     private Consumer<List<Photo>> onRemove = photos -> {
     };
 
@@ -146,7 +156,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     /** One visual row, either a date header or a row of cells with per-photo heights. */
     private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey,
-            int[] cellHeights) {
+            int[] cellHeights, List<String> tags) {
 
         boolean header() {
             return indices.length == 0;
@@ -165,6 +175,14 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             @Override
             public void mousePressed(MouseEvent event) {
                 requestFocusInWindow();
+                TagHit hit = tagHitAt(event.getPoint());
+                if (hit != null && SwingUtilities.isLeftMouseButton(event)) {
+                    try {
+                        onTagFolder.accept(Long.parseLong(hit.folderKey()), event.getPoint());
+                    } catch (NumberFormatException ignored) {
+                    }
+                    return;
+                }
                 int top = getVisibleRect().y;
                 if (grouping == GroupMode.FOLDER && stickyKey != null && event.getY() >= top && event.getY() < top + HEADER_HEIGHT) {
                     try {
@@ -211,6 +229,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent event) {
+                if (tagHitAt(event.getPoint()) != null) {
+                    setHover(-1);
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    return;
+                }
                 int top = getVisibleRect().y;
                 if (grouping == GroupMode.FOLDER && stickyKey != null && event.getY() >= top && event.getY() < top + HEADER_HEIGHT) {
                     setHover(-1);
@@ -351,6 +374,12 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     /** Receives the folder whose header is currently sticky at the top of the viewport. */
     public void setOnStickyFolder(Consumer<Long> listener) {
         this.onStickyFolder = listener == null ? folderId -> {
+        } : listener;
+    }
+
+    /** Receives the folder to open in the tag editor when its header chip is clicked. */
+    public void setOnTagFolder(BiConsumer<Long, Point> listener) {
+        this.onTagFolder = listener == null ? (folderId, point) -> {
         } : listener;
     }
 
@@ -803,7 +832,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                     while (index < photos.size() && photos.get(index).folderId() == section.id()) {
                         index++;
                     }
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id()), null));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id()), null, section.tags()));
                     y += HEADER_HEIGHT;
                     y = addPhotoRows(y, start, index);
                     y += 8;
@@ -811,7 +840,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 if (index < photos.size()) {
                     int start = index;
                     index = photos.size();
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null, List.of()));
                     y += HEADER_HEIGHT;
                     y = addPhotoRows(y, start, index);
                     y += 8;
@@ -828,7 +857,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 while (index < photos.size() && key.equals(photos.get(index).dateLabel())) {
                     index++;
                 }
-                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key, null));
+                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key, null, List.of()));
                 y += HEADER_HEIGHT;
                 y = addPhotoRows(y, start, index);
                 y += 8;
@@ -855,7 +884,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 tallest = Math.max(tallest, heights[i]);
             }
             int height = tallest + CELL_PADDING * 2;
-            rows.add(new LayoutRow(y, height, indices, null, 0, null, null, heights));
+            rows.add(new LayoutRow(y, height, indices, null, 0, null, null, heights, List.of()));
             y += height;
         }
         return y;
@@ -945,6 +974,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g.setColor(Theme.BACKGROUND);
             g.fillRect(0, 0, getWidth(), getHeight());
+            tagHits.clear();
 
             if (rows.isEmpty()) {
                 paintEmpty(g);
@@ -1080,6 +1110,86 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         return null;
     }
 
+    /** Draws a folder's tags as chips on the metadata line, stopping with an ellipsis when full. */
+    private void paintTagChips(Graphics2D g, String folderKey, List<String> tags, int x, int baseline, int available) {
+        Font font = Theme.font(Font.BOLD, 11);
+        g.setFont(font);
+        FontMetrics metrics = g.getFontMetrics();
+        int gap = 6;
+        int chipHeight = 20;
+        int chipY = baseline - 14;
+        String addText = "+ タグ";
+        int addWidth = metrics.stringWidth(addText) + 16;
+        int drawn = 0;
+        int used = 0;
+        for (String tag : tags) {
+            int width = metrics.stringWidth(tag) + 24;
+            int leading = drawn == 0 ? 0 : gap;
+            if (used + leading + width + addWidth > available) {
+                break;
+            }
+            int chipX = x + used + leading;
+            Color color = TagColors.of(tag);
+            g.setColor(color);
+            g.fill(new RoundRectangle2D.Float(chipX, chipY, width, chipHeight, 10, 10));
+            int iconSize = 11;
+            Icons.tag(iconSize, Color.WHITE).paintIcon(this, g, chipX + 6, chipY + (chipHeight - iconSize) / 2);
+            g.setColor(Color.WHITE);
+            g.drawString(tag, chipX + 20, baseline);
+            used += leading + width;
+            drawn++;
+        }
+        if (drawn < tags.size()) {
+            int leading = drawn == 0 ? 0 : gap;
+            g.setColor(Theme.MUTED);
+            g.drawString("…", x + used + leading, baseline);
+            used += leading + metrics.stringWidth("…") + 8;
+        }
+        // A permanent "add" chip makes tagging a one-click action from the header itself.
+        if (used + addWidth <= available) {
+            int addX = x + used + (used == 0 ? 0 : gap);
+            g.setColor(Theme.SURFACE);
+            g.fill(new RoundRectangle2D.Float(addX, chipY, addWidth, chipHeight, 10, 10));
+            g.setColor(Theme.ACCENT);
+            g.setStroke(new BasicStroke(1.2f));
+            g.draw(new RoundRectangle2D.Float(addX, chipY, addWidth, chipHeight, 10, 10));
+            g.setStroke(new BasicStroke(1f));
+            g.drawString(addText, addX + 8, baseline);
+            used = addX + addWidth - x;
+        }
+        // The whole metadata line is the click target, not just the visible chips: this keeps the
+        // "+ タグ" affordance clickable even when there is not enough room to draw every chip.
+        tagHits.add(new TagHit(folderKey, new Rectangle(x, chipY, available, chipHeight)));
+    }
+
+    private TagHit tagHitAt(Point point) {
+        for (TagHit hit : tagHits) {
+            if (hit.bounds().contains(point)) {
+                return hit;
+            }
+        }
+        // Fallback for frames whose hit rectangles have not been painted yet: derive the metadata
+        // line from the current layout so a click is never silently lost.
+        FontMetrics countMetrics = getFontMetrics(Theme.font(Font.BOLD, 10));
+        for (LayoutRow row : rows) {
+            if (!row.header() || row.groupKey() == null) {
+                continue;
+            }
+            int y = row.y();
+            int chipY = y + 47 - 14;
+            if (point.y < chipY || point.y >= chipY + 20) {
+                continue;
+            }
+            int badgeWidth = countMetrics.stringWidth(row.count() + "枚") + 14;
+            int from = OUTER + badgeWidth + 10;
+            if (point.x >= from && point.x <= getWidth() - OUTER) {
+                return new TagHit(row.groupKey(), new Rectangle(from, chipY, getWidth() - OUTER - from, 20));
+            }
+        }
+        return null;
+    }
+
+
     private void paintHeader(Graphics2D g, LayoutRow row, int y, boolean sticky) {
         // Headers start at the outer edge, independent of how the thumbnail grid is centred.
         int x = OUTER;
@@ -1101,12 +1211,13 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         int titleBaseline = y + 27;
         Font titleFont = Theme.font(Font.BOLD, 16);
         g.setFont(titleFont);
-        g.setColor(Theme.TEXT);
         FontMetrics titleMetrics = g.getFontMetrics();
-        String title = truncate(row.title(), titleMetrics, Math.max(80, getWidth() - textX - OUTER));
+        int available = Math.max(80, getWidth() - textX - OUTER);
+        g.setColor(Theme.TEXT);
+        String title = truncate(row.title(), titleMetrics, available);
         g.drawString(title, textX, titleBaseline);
 
-        // The count and the date range sit on a second line under the title, not beside it.
+        // All metadata — count, date range and folder tags — sits on one line under the title.
         String count = row.count() + "枚";
         g.setFont(Theme.font(Font.BOLD, 10));
         FontMetrics countMetrics = g.getFontMetrics();
@@ -1117,10 +1228,20 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         g.setColor(Theme.ACCENT_DARK);
         g.drawString(count, textX + 7, metaBaseline);
 
-        if (row.note() != null) {
-            g.setFont(Theme.font(Font.PLAIN, 11));
+        int metaX = textX + badgeWidth + 10;
+        int metaRight = getWidth() - OUTER;
+        if (row.note() != null && metaRight - metaX > 30) {
+            Font noteFont = Theme.font(Font.PLAIN, 11);
+            g.setFont(noteFont);
+            FontMetrics noteMetrics = g.getFontMetrics();
+            int room = metaRight - metaX;
+            String note = truncate(row.note(), noteMetrics, room);
             g.setColor(Theme.MUTED);
-            g.drawString(row.note(), textX + badgeWidth + 10, metaBaseline);
+            g.drawString(note, metaX, metaBaseline);
+            metaX += Math.min(noteMetrics.stringWidth(row.note()), room) + 10;
+        }
+        if (folderHeader && row.groupKey() != null && metaRight - metaX > 24) {
+            paintTagChips(g, row.groupKey(), row.tags(), metaX, metaBaseline, metaRight - metaX);
         }
 
         int lineStart = textX;
