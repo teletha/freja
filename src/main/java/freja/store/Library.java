@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,6 +38,7 @@ import freja.model.Photo;
 import freja.model.PhotoFilter;
 import freja.model.Tag;
 import freja.util.PathUtil;
+import freja.util.SmartTags;
 
 /**
  * The SQLite-backed photo catalog.
@@ -237,8 +239,58 @@ public final class Library implements AutoCloseable {
         ensureColumn("folders", "explicit", "INTEGER NOT NULL DEFAULT 1");
         ensureColumn("folders", "name", "TEXT NOT NULL DEFAULT ''");
         ensureColumn("photos", "thumbnail_revision", "INTEGER NOT NULL DEFAULT 1");
+        normalizeExistingTags();
         backfillFolderNames();
         migrateThumbnailRevision();
+    }
+
+    /** Converts tags stored with full-width names to the half-width spelling used now. */
+    private void normalizeExistingTags() throws SQLException {
+        List<Long> ids = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        try (Statement statement = connection.createStatement();
+                ResultSet results = statement.executeQuery("SELECT id, name FROM tags")) {
+            while (results.next()) {
+                ids.add(results.getLong("id"));
+                names.add(results.getString("name"));
+            }
+        }
+        for (int i = 0; i < ids.size(); i++) {
+            long id = ids.get(i);
+            String normalized = SmartTags.normalize(names.get(i));
+            if (normalized.isEmpty() || normalized.equals(names.get(i))) {
+                continue;
+            }
+            Long existing = null;
+            try (PreparedStatement statement = connection.prepareStatement("SELECT id FROM tags WHERE name=? AND id<>?")) {
+                statement.setString(1, normalized);
+                statement.setLong(2, id);
+                try (ResultSet results = statement.executeQuery()) {
+                    if (results.next()) {
+                        existing = results.getLong(1);
+                    }
+                }
+            }
+            if (existing == null) {
+                try (PreparedStatement statement = connection.prepareStatement("UPDATE tags SET name=? WHERE id=?")) {
+                    statement.setString(1, normalized);
+                    statement.setLong(2, id);
+                    statement.executeUpdate();
+                }
+            } else {
+                // Two spellings of the same tag: merge the assignments into the existing row.
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "INSERT OR IGNORE INTO folder_tags(folder_id, tag_id) SELECT folder_id, ? FROM folder_tags WHERE tag_id=?")) {
+                    statement.setLong(1, existing);
+                    statement.setLong(2, id);
+                    statement.executeUpdate();
+                }
+                try (PreparedStatement statement = connection.prepareStatement("DELETE FROM tags WHERE id=?")) {
+                    statement.setLong(1, id);
+                    statement.executeUpdate();
+                }
+            }
+        }
     }
 
     /**
@@ -263,6 +315,9 @@ public final class Library implements AutoCloseable {
                 statement.addBatch();
             }
             statement.executeBatch();
+        }
+        for (int i = 0; i < ids.size(); i++) {
+            applySmartTags(ids.get(i), names.get(i));
         }
     }
 
@@ -328,13 +383,20 @@ public final class Library implements AutoCloseable {
             if (key.startsWith(PathUtil.prefix(existing))) {
                 // The root scan already owns this directory. Register it as a managed folder so
                 // it has its own row even before the next scan walks the tree.
-                return insertFolder(normalized, key, false);
+                return register(normalized, key, false);
             }
             if (existing.startsWith(PathUtil.prefix(key))) {
                 throw new IllegalArgumentException("The folder overlaps an existing library folder: " + folder.path());
             }
         }
-        return insertFolder(normalized, key, true);
+        return register(normalized, key, true);
+    }
+
+    /** Registers a folder and attaches the smart tags found in its name. */
+    private Folder register(Path normalized, String key, boolean explicit) {
+        Folder folder = insertFolder(normalized, key, explicit);
+        applySmartTags(folder.id(), folder.name());
+        return folder(folder.id()).orElse(folder);
     }
 
     /**
@@ -347,7 +409,7 @@ public final class Library implements AutoCloseable {
         Path normalized = PathUtil.normalize(path);
         String key = PathUtil.key(normalized);
         Folder existing = findFolderByKey(key);
-        return existing != null ? existing : insertFolder(normalized, key, false);
+        return existing != null ? existing : register(normalized, key, false);
     }
 
     private String folderPath(long folderId) {
@@ -457,6 +519,53 @@ public final class Library implements AutoCloseable {
                 return List.copyOf(tags);
             }
         }
+    }
+
+    /**
+     * Applies smart tags to every folder that has bracketed names. Tags assigned by hand are kept.
+     *
+     * @return how many folders gained at least one tag
+     */
+    public synchronized int applySmartTagsToAllFolders() {
+        int updated = 0;
+        for (Folder folder : folders()) {
+            List<String> smart = SmartTags.fromFolderName(folder.name());
+            if (smart.isEmpty()) {
+                continue;
+            }
+            Set<String> merged = new LinkedHashSet<>();
+            try {
+                merged.addAll(folderTags(folder.id(), connection));
+            } catch (SQLException e) {
+                throw new LibraryException("Failed to read folder tags", e);
+            }
+            int before = merged.size();
+            merged.addAll(smart);
+            if (merged.size() > before) {
+                setFolderTags(folder.id(), merged);
+                updated++;
+            }
+        }
+        return updated;
+    }
+
+    /** Adds the tags parsed from a folder name without dropping tags the user assigned by hand. */
+    private void applySmartTags(long folderId, String folderName) {
+        List<String> smart = SmartTags.fromFolderName(folderName);
+        if (smart.isEmpty()) {
+            return;
+        }
+        List<String> merged = new ArrayList<>(smart);
+        try {
+            for (String tag : folderTags(folderId, connection)) {
+                if (!merged.contains(tag)) {
+                    merged.add(tag);
+                }
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read folder tags", e);
+        }
+        setFolderTags(folderId, merged);
     }
 
     private static PhotoFilter.SortOrder parseSort(String value) {
@@ -621,7 +730,10 @@ public final class Library implements AutoCloseable {
                 if (name == null || name.isBlank()) {
                     continue;
                 }
-                String value = name.trim();
+                String value = SmartTags.normalize(name);
+                if (value.isEmpty()) {
+                    continue;
+                }
                 if (seen.add(value.toLowerCase(Locale.ROOT))) {
                     values.add(value);
                 }
@@ -651,8 +763,9 @@ public final class Library implements AutoCloseable {
     }
 
     private long tagId(String name) throws SQLException {
+        String value = SmartTags.normalize(name);
         try (PreparedStatement statement = connection.prepareStatement("SELECT id FROM tags WHERE name=?")) {
-            statement.setString(1, name);
+            statement.setString(1, value);
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
                     return results.getLong(1);
@@ -661,7 +774,7 @@ public final class Library implements AutoCloseable {
         }
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO tags(name) VALUES(?)",
                 Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, name);
+            statement.setString(1, value);
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 return keys.next() ? keys.getLong(1) : -1;
@@ -670,10 +783,11 @@ public final class Library implements AutoCloseable {
     }
 
     private static String tagName(String name) {
-        if (name == null || name.isBlank()) {
+        String value = SmartTags.normalize(name);
+        if (value.isEmpty()) {
             throw new IllegalArgumentException("タグ名を入力してください");
         }
-        return name.trim();
+        return value;
     }
 
     private void autoCommit(boolean value) {
@@ -718,6 +832,7 @@ public final class Library implements AutoCloseable {
         } catch (SQLException e) {
             throw new LibraryException("Failed to rename the folder", e);
         }
+        applySmartTags(folderId, name.trim());
     }
 
     /**

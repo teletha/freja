@@ -284,4 +284,16 @@ class LibraryTest {
             assertTrue(library.tags().stream().noneMatch(t -> t.name().equals("家族アルバム")));
         }
     }
+
+    @Test
+    void smartTagsComeFromLeadingBracketsInFolderNames() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("(Trip) 2024"));
+        try (Library library = new Library(temp.resolve("smart-tags.db"))) {
+            Folder folder = library.addFolder(root);
+            assertEquals(List.of("Trip"), folder.tags());
+
+            library.renameFolder(folder.id(), "【家族】アルバム");
+            assertEquals(List.of("Trip", "家族"), library.folder(folder.id()).orElseThrow().tags());
+        }
+    }
 }
