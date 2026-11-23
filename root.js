@@ -116,6 +116,16 @@ const root = {
 			"type": "Enum"
 		},
 		{
+			"name": "ScanFoldersDialog",
+			"packageName": "freja.ui",
+			"type": "Class"
+		},
+		{
+			"name": "ScanFoldersDialog.Listener",
+			"packageName": "freja.ui",
+			"type": "Interface"
+		},
+		{
 			"name": "Sidebar",
 			"packageName": "freja.ui",
 			"type": "Class"
