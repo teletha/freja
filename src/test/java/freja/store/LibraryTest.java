@@ -26,6 +26,7 @@ import freja.model.LibraryStats;
 import freja.model.Photo;
 import freja.model.PhotoFilter;
 import freja.model.PhotoFilter.SortOrder;
+import freja.model.Tag;
 import freja.util.PathUtil;
 
 class LibraryTest {
@@ -282,6 +283,39 @@ class LibraryTest {
             library.deleteTags(List.of(family));
             assertEquals(List.of("旅行記"), library.folder(f1.id()).orElseThrow().tags());
             assertTrue(library.tags().stream().noneMatch(t -> t.name().equals("家族アルバム")));
+        }
+    }
+
+    @Test
+    void tagLinksAreOneWayAndExpandSearch() throws Exception {
+        Path first = Files.createDirectories(temp.resolve("link-first"));
+        Path second = Files.createDirectories(temp.resolve("link-second"));
+        PhotoImporter.AnalyzedPhoto analyzed = new PhotoImporter.AnalyzedPhoto(100, 100, 1, Exif.Data.EMPTY,
+                new byte[] {1}, 100, 100);
+        try (Library library = new Library(temp.resolve("links.db"))) {
+            Folder f1 = library.addFolder(first);
+            Folder f2 = library.addFolder(second);
+            library.savePhoto(f1.id(), first.resolve("a.jpg"), 1, 1, analyzed, null);
+            library.savePhoto(f2.id(), second.resolve("b.jpg"), 1, 1, analyzed, null);
+
+            long inoue = library.addTag("井上和彦");
+            long fujiwara = library.addTag("藤原カムイ");
+            long manga = library.addTag("漫画");
+            library.setFolderTags(f1.id(), List.of("井上和彦"));
+            library.setFolderTags(f2.id(), List.of("藤原カムイ"));
+            library.setTagLinks(inoue, List.of(manga));
+            library.setTagLinks(fujiwara, List.of(manga));
+
+            assertEquals(2, library.photos(PhotoFilter.all().withTags(List.of(manga))).size());
+            assertEquals(1, library.photos(PhotoFilter.all().withTags(List.of(inoue))).size());
+            assertEquals(2, library.photos(PhotoFilter.all().withSearch("漫画")).size());
+            assertEquals(1, library.photos(PhotoFilter.all().withSearch("井上")).size());
+            assertEquals(List.of(manga), library.linkedTargets(inoue).stream().map(Tag::id).toList());
+            assertEquals(2, library.linkedSources(manga).size());
+
+            library.deleteTags(List.of(inoue));
+            assertEquals(1, library.linkedSources(manga).size());
+            assertEquals(1, library.photos(PhotoFilter.all().withTags(List.of(manga))).size());
         }
     }
 

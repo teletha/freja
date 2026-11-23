@@ -172,10 +172,13 @@ final class TagManager extends JDialog {
         status.setForeground(Theme.MUTED);
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         buttons.setOpaque(false);
+        JButton links = secondary("タグの結びつけ", Icons.tag(14, Theme.MUTED),
+                () -> new TagLinkEditor(this, library, this::changed).setVisible(true));
         JButton smart = secondary("スマートタグを適用", Icons.refresh(14, Theme.MUTED), this::applySmartTags);
         JButton replace = secondary("一括改名", Icons.tag(14, Theme.MUTED), this::bulkRename);
         JButton delete = secondary("削除", Icons.close(13, Theme.DANGER), this::deleteSelected);
         JButton close = secondary("閉じる", null, this::dispose);
+        buttons.add(links);
         buttons.add(smart);
         buttons.add(replace);
         buttons.add(delete);
@@ -220,7 +223,7 @@ final class TagManager extends JDialog {
 
     private void applySmartTags() {
         int answer = JOptionPane.showConfirmDialog(this,
-                "すべてのフォルダ名の先頭にある括弧をタグとして付与します。\n手動で付けたタグはそのまま残ります。",
+                "フォルダ名からタグを自動設定します。\n手動で付けたタグはそのまま残ります。",
                 "スマートタグを適用", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (answer != JOptionPane.OK_OPTION) {
             return;

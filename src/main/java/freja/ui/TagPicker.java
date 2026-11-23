@@ -216,7 +216,14 @@ final class TagPicker extends JPanel {
             label.setIcon(Icons.tag(12, TagColors.of(tag.name())));
             label.setFont(Theme.font(Font.PLAIN, 12));
             label.setForeground(Theme.TEXT);
-            main.add(label, BorderLayout.CENTER);
+            main.add(label, BorderLayout.WEST);
+            List<String> linked = library.linkedTargets(tag.id()).stream().map(Tag::name).toList();
+            if (!linked.isEmpty()) {
+                JLabel linkHint = new JLabel("→ " + String.join(", ", linked));
+                linkHint.setFont(Theme.font(Font.PLAIN, 10));
+                linkHint.setForeground(Theme.MUTED);
+                main.add(linkHint, BorderLayout.CENTER);
+            }
             JLabel check = new JLabel();
             check.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 2));
             main.add(check, BorderLayout.EAST);

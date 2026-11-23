@@ -225,6 +225,13 @@ public final class Library implements AutoCloseable {
                     )
                     """);
             statement.execute("""
+                    CREATE TABLE IF NOT EXISTS tag_links (
+                        source_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+                        target_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+                        PRIMARY KEY (source_id, target_id)
+                    )
+                    """);
+            statement.execute("""
                     CREATE TABLE IF NOT EXISTS settings (
                         key TEXT PRIMARY KEY,
                         value TEXT NOT NULL
@@ -602,6 +609,68 @@ public final class Library implements AutoCloseable {
         }
     }
 
+    /** Tags that a tag points to; searching one of those also finds folders carrying this tag. */
+    public List<Tag> linkedTargets(long sourceId) {
+        synchronized (readerLock) {
+            return linkedTags("l.target_id = t.id AND l.source_id = ?", sourceId);
+        }
+    }
+
+    /** Tags that point to a tag; these are the ones whose folders match a search for it. */
+    public List<Tag> linkedSources(long targetId) {
+        synchronized (readerLock) {
+            return linkedTags("l.source_id = t.id AND l.target_id = ?", targetId);
+        }
+    }
+
+    private List<Tag> linkedTags(String condition, long id) {
+        String sql = "SELECT t.id, t.name, 0 AS folder_count FROM tags t JOIN tag_links l ON "
+                + condition + " ORDER BY t.name COLLATE NOCASE";
+        try (PreparedStatement statement = reader.prepareStatement(sql)) {
+            statement.setLong(1, id);
+            try (ResultSet results = statement.executeQuery()) {
+                List<Tag> tags = new ArrayList<>();
+                while (results.next()) {
+                    tags.add(new Tag(results.getLong("id"), results.getString("name"), 0));
+                }
+                return List.copyOf(tags);
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read tag links", e);
+        }
+    }
+
+    /** Replaces the outgoing links of a tag. Links are one-way: source implies target. */
+    public synchronized void setTagLinks(long sourceId, Collection<Long> targetIds) {
+        try {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM tag_links WHERE source_id=?")) {
+                statement.setLong(1, sourceId);
+                statement.executeUpdate();
+            }
+            if (targetIds != null) {
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "INSERT OR IGNORE INTO tag_links(source_id, target_id) VALUES(?,?)")) {
+                    for (Long target : targetIds) {
+                        if (target == null || target == sourceId) {
+                            continue;
+                        }
+                        statement.setLong(1, sourceId);
+                        statement.setLong(2, target);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to update tag links", e);
+        } finally {
+            autoCommit(true);
+        }
+    }
+
     /** Returns the names of the tags attached to one folder. */
     public synchronized List<String> folderTags(long folderId) {
         synchronized (readerLock) {
@@ -958,14 +1027,43 @@ public final class Library implements AutoCloseable {
         }
         if (filter.search() != null) {
             String search = "%" + PathUtil.likeValue(filter.search()) + "%";
-            sql.append(" AND f.name LIKE ? ESCAPE '\\'");
+            // Free-text search also matches tags on the folder, including tags linked from them.
+            sql.append(" AND (f.name LIKE ? ESCAPE '\\' OR EXISTS (")
+                    .append("SELECT 1 FROM folder_tags ft JOIN tags t ON t.id = ft.tag_id ")
+                    .append("LEFT JOIN tag_links l ON l.source_id = t.id ")
+                    .append("LEFT JOIN tags linked ON linked.id = l.target_id ")
+                    .append("WHERE ft.folder_id = p.folder_id ")
+                    .append("AND (t.name LIKE ? ESCAPE '\\' OR linked.name LIKE ? ESCAPE '\\')))");
+            parameters.add(search);
+            parameters.add(search);
             parameters.add(search);
         }
         if (!filter.tagIds().isEmpty()) {
-            sql.append(" AND EXISTS (SELECT 1 FROM folder_tags ft WHERE ft.folder_id = p.folder_id AND ft.tag_id IN (");
+            // A tag that points to a selected tag is also a match: "井上和彦 → 漫画" means a
+            // search for 漫画 finds folders tagged with either name.
+            Set<Long> matches = new LinkedHashSet<>(filter.tagIds());
+            StringBuilder links = new StringBuilder("SELECT source_id FROM tag_links WHERE target_id IN (");
             for (int i = 0; i < filter.tagIds().size(); i++) {
-                sql.append(i == 0 ? "?" : ",?");
-                parameters.add(filter.tagIds().get(i));
+                links.append(i == 0 ? "?" : ",?");
+            }
+            links.append(')');
+            try (PreparedStatement statement = reader.prepareStatement(links.toString())) {
+                for (int i = 0; i < filter.tagIds().size(); i++) {
+                    statement.setObject(i + 1, filter.tagIds().get(i));
+                }
+                try (ResultSet results = statement.executeQuery()) {
+                    while (results.next()) {
+                        matches.add(results.getLong(1));
+                    }
+                }
+            } catch (SQLException e) {
+                throw new LibraryException("Failed to read tag links", e);
+            }
+            sql.append(" AND EXISTS (SELECT 1 FROM folder_tags ft WHERE ft.folder_id = p.folder_id AND ft.tag_id IN (");
+            int index = 0;
+            for (Long id : matches) {
+                sql.append(index++ == 0 ? "?" : ",?");
+                parameters.add(id);
             }
             sql.append("))");
         }
