@@ -9,6 +9,7 @@
  */
 package freja.util;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -218,6 +219,31 @@ public final class ImageTransforms {
             }
         }
         return false;
+    }
+
+    /**
+     * Converts an image to an opaque RGB one with a straight blit.
+     * <p>
+     * Decoders such as jpegli always return an image whose alpha channel is fully opaque. For those
+     * images {@link #flatten(BufferedImage, int, Color)} only pays for bicubic interpolation and
+     * anti-aliasing setup that cannot change a single pixel. A source copy with {@link AlphaComposite#Src}
+     * is the same blit without those hints. {@link #hasTransparency(BufferedImage)} does not have to
+     * be called first when the caller already knows the pixels are opaque.
+     * </p>
+     *
+     * @param source an image whose pixels are all opaque
+     * @return an opaque RGB image
+     */
+    public static BufferedImage toOpaque(BufferedImage source) {
+        BufferedImage target = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = target.createGraphics();
+        try {
+            graphics.setComposite(AlphaComposite.Src);
+            graphics.drawImage(source, 0, 0, null);
+        } finally {
+            graphics.dispose();
+        }
+        return target;
     }
 
     /**

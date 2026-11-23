@@ -172,7 +172,10 @@ public final class LibraryScanner implements AutoCloseable {
     public LibraryScanner(Library library) {
         this.library = library;
         int threads = Math.max(2, Math.min(12, Runtime.getRuntime().availableProcessors() - 1));
-        this.importers = Executors.newFixedThreadPool(threads, runnable -> daemon(runnable, "freja-import"));
+        // Importing is background work: let the event dispatch thread and the UI loaders win whenever
+        // they wake up. The threads still use every idle core while the user is not interacting.
+        this.importers = Executors.newFixedThreadPool(threads,
+                runnable -> daemon(runnable, "freja-import", Thread.NORM_PRIORITY - 2));
         this.importPermits = new Semaphore(threads * 2);
     }
 
@@ -972,8 +975,13 @@ public final class LibraryScanner implements AutoCloseable {
     }
 
     private static Thread daemon(Runnable runnable, String name) {
+        return daemon(runnable, name, Thread.NORM_PRIORITY);
+    }
+
+    private static Thread daemon(Runnable runnable, String name, int priority) {
         Thread thread = new Thread(runnable, name);
         thread.setDaemon(true);
+        thread.setPriority(priority);
         return thread;
     }
 

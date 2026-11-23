@@ -9,7 +9,6 @@
  */
 package freja.store;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOError;
 import java.io.IOException;
@@ -20,6 +19,7 @@ import freja.util.ImageTransforms;
 import freja.util.PathUtil;
 import imagify.ImageFormat;
 import imagify.ImageReader;
+import imagify.ImageWriter;
 import imagify.Imagify;
 import imagify.jpeg.JpegException;
 import imagify.jpeg.JpegImageInfo;
@@ -33,11 +33,15 @@ public final class PhotoImporter {
     /** The longest edge of a cached thumbnail. */
     public static final int THUMBNAIL_SIZE = 220;
 
-    /** The background used behind transparent images before flattening. */
-    public static final Color THUMBNAIL_BACKGROUND = new Color(0xF4F5F7);
-
     /** WebP quality of the thumbnail. */
     public static final double THUMBNAIL_QUALITY = 0.6;
+
+    /**
+     * WebP format for thumbnails, with a lower encoder effort than the default method 4. Thumbnails
+     * are at most 220 px, so spending the default effort on them is not worth the scan time; the
+     * quality stays {@link #THUMBNAIL_QUALITY} and only the file size grows slightly.
+     */
+    private static final ImageFormat THUMBNAIL_FORMAT = ImageFormat.WEBP.compressionMethod(2);
 
     private PhotoImporter() {
     }
@@ -47,8 +51,12 @@ public final class PhotoImporter {
             int thumbnailWidth, int thumbnailHeight) {
     }
 
-    /** A decoded frame with the metadata and the dimensions the catalog has to record. */
-    private record Decoded(BufferedImage image, int width, int height, Exif.Data exif) {
+    /**
+     * A decoded frame with the metadata and the dimensions the catalog has to record.
+     *
+     * @param opaque whether the pixels are known to be opaque, so no alpha scan is needed
+     */
+    private record Decoded(BufferedImage image, int width, int height, Exif.Data exif, boolean opaque) {
     }
 
     /**
@@ -83,13 +91,15 @@ public final class PhotoImporter {
         BufferedImage oriented = ImageTransforms.orient(reduced, exif.orientation());
         BufferedImage scaled = ImageTransforms.scale(oriented, THUMBNAIL_SIZE);
 
-        // Many decoders return an ARGB image even for an opaque JPEG. Flatten those images so the
-        // WebP encoder does not spend bytes on an all-opaque alpha plane.
-        BufferedImage thumbnail = ImageTransforms.hasTransparency(scaled) ? scaled : ImageTransforms.flatten(scaled, 0, THUMBNAIL_BACKGROUND);
+        // Decoders return an ARGB image even for an opaque JPEG, so the all-opaque alpha plane has
+        // to be dropped. A JPEG's pixels are known to be opaque, which skips both the alpha scan and
+        // the Java2D redraw; real transparency is still kept for formats that can carry it.
+        BufferedImage thumbnail = decoded.opaque() || !ImageTransforms.hasTransparency(scaled)
+                ? ImageTransforms.toOpaque(scaled) : scaled;
 
         byte[] encoded;
         try {
-            encoded = Imagify.read(thumbnail).writeToBytes(ImageFormat.WEBP, THUMBNAIL_QUALITY);
+            encoded = ImageWriter.toBytes(thumbnail, THUMBNAIL_FORMAT, THUMBNAIL_QUALITY);
         } catch (RuntimeException | IOError | LinkageError e) {
             throw new IOException("Failed to encode the thumbnail: " + file.getFileName(), e);
         }
@@ -112,12 +122,14 @@ public final class PhotoImporter {
             Exif.Data exif = Exif.read(encoded);
             if (JpegliCodec.isAvailable() && JpegliCodec.supportsScaledDecode()) {
                 try {
-                    JpegImageInfo info = JpegliCodec.readHeader(encoded);
-                    int denominator = scaleDenominator(Math.max(info.width(), info.height()));
+                    int[] size = jpegSize(encoded);
+                    int denominator = scaleDenominator(Math.max(size[0], size[1]));
                     BufferedImage image = denominator == 1 ? decodeBytes(encoded, file)
-                            : ImageReader.read(encoded, 1, denominator).toBufferedImage();
+                            : ImageReader.read(encoded, ImageFormat.JPEG, 1, denominator).toBufferedImage();
                     if (image != null && image.getWidth() > 0 && image.getHeight() > 0) {
-                        return new Decoded(image, info.width(), info.height(), exif);
+                        // A JPEG decoded here cannot carry transparency, so the alpha scan in
+                        // analyze() can be skipped as well.
+                        return new Decoded(image, size[0], size[1], exif, true);
                     }
                 } catch (JpegException | IOException | RuntimeException e) {
                     // A header the decoder cannot read is no reason to give up on the file: the
@@ -125,12 +137,12 @@ public final class PhotoImporter {
                 }
             }
             BufferedImage image = decodeBytes(encoded, file);
-            return new Decoded(image, image.getWidth(), image.getHeight(), exif);
+            return new Decoded(image, image.getWidth(), image.getHeight(), exif, false);
         }
         // EXIF lives in JPEG segments only, so other formats need no metadata pass. Reading the
         // bytes lets imagify detect the real format from the header even if the extension lies.
         BufferedImage image = decodeBytes(Files.readAllBytes(file), file);
-        return new Decoded(image, image.getWidth(), image.getHeight(), Exif.Data.EMPTY);
+        return new Decoded(image, image.getWidth(), image.getHeight(), Exif.Data.EMPTY, false);
     }
 
     private static BufferedImage decodeBytes(byte[] encoded, Path file) throws IOException {
@@ -149,6 +161,74 @@ public final class PhotoImporter {
     private static boolean isJpeg(Path file) {
         String extension = PathUtil.extension(file);
         return extension.equals("jpg") || extension.equals("jpeg");
+    }
+
+    /**
+     * Reads the dimensions from a JPEG's SOF marker. jpegli's header reader copies the whole file
+     * into native memory to answer the same two 16 bit numbers, so this scan avoids one full size
+     * copy per photo. Segment payloads are skipped, not read.
+     *
+     * @param encoded the complete JPEG file
+     * @return width and height, or null when no usable SOF marker was found
+     */
+    static int[] jpegDimensions(byte[] encoded) {
+        if (encoded.length < 4 || u8(encoded, 0) != 0xFF || u8(encoded, 1) != 0xD8) {
+            return null;
+        }
+        int position = 2;
+        while (position + 3 < encoded.length) {
+            if (u8(encoded, position) != 0xFF) {
+                return null;
+            }
+            // A marker may be preceded by any number of fill bytes.
+            while (position < encoded.length && u8(encoded, position) == 0xFF) {
+                position++;
+            }
+            if (position >= encoded.length) {
+                return null;
+            }
+            int marker = u8(encoded, position++);
+            // Standalone markers carry no length; SOS and EOI mean no SOF is left to find.
+            if (marker == 0x01 || (marker >= 0xD0 && marker <= 0xD7) || marker == 0xD8) {
+                continue;
+            }
+            if (marker == 0xDA || marker == 0xD9) {
+                return null;
+            }
+            if (position + 1 >= encoded.length) {
+                return null;
+            }
+            int length = (u8(encoded, position) << 8) | u8(encoded, position + 1);
+            if (length < 2 || position + length > encoded.length) {
+                return null;
+            }
+            boolean frame = marker >= 0xC0 && marker <= 0xCF
+                    && marker != 0xC4 && marker != 0xC8 && marker != 0xCC;
+            if (frame) {
+                if (length < 8) {
+                    return null;
+                }
+                int height = (u8(encoded, position + 3) << 8) | u8(encoded, position + 4);
+                int width = (u8(encoded, position + 5) << 8) | u8(encoded, position + 6);
+                return width > 0 && height > 0 ? new int[] {width, height} : null;
+            }
+            position += length;
+        }
+        return null;
+    }
+
+    private static int u8(byte[] data, int index) {
+        return data[index] & 0xFF;
+    }
+
+    /** Uses the cheap Java scan first and keeps jpegli's reader as the fallback. */
+    private static int[] jpegSize(byte[] encoded) throws JpegException {
+        int[] size = jpegDimensions(encoded);
+        if (size != null) {
+            return size;
+        }
+        JpegImageInfo info = JpegliCodec.readHeader(encoded);
+        return new int[] {info.width(), info.height()};
     }
 
     /**

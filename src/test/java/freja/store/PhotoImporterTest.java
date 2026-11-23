@@ -64,6 +64,21 @@ class PhotoImporterTest {
     }
 
     @Test
+    void readsJpegDimensionsFromTheSofMarker() throws Exception {
+        BufferedImage source = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
+        Path file = Files.createFile(temp.resolve("dims.jpg"));
+        assertTrue(ImageIO.write(source, "jpg", file.toFile()));
+
+        assertArrayEquals(new int[] {800, 600}, PhotoImporter.jpegDimensions(Files.readAllBytes(file)));
+    }
+
+    @Test
+    void rejectsDataWithoutAJpegMarker() {
+        assertNull(PhotoImporter.jpegDimensions(new byte[0]));
+        assertNull(PhotoImporter.jpegDimensions(new byte[] {1, 2, 3, 4}));
+    }
+
+    @Test
     void detectsTheRealFormatWhenTheExtensionIsWrong() throws Exception {
         BufferedImage source = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = source.createGraphics();

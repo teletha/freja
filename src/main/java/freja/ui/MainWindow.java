@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -146,6 +148,25 @@ public final class MainWindow extends JFrame {
 
     private final Timer searchTimer;
 
+    /**
+     * Loads and sorts the catalog off the event dispatch thread. Two threads let a search refresh
+     * start while an unrelated full refresh (a finished scan, a sort change) is still running; the
+     * generation counter below discards whichever result the user has already superseded.
+     */
+    private final ExecutorService refresher = Executors.newFixedThreadPool(2, runnable -> {
+        Thread thread = new Thread(runnable, "freja-refresh");
+        thread.setDaemon(true);
+        return thread;
+    });
+
+    private long refreshGeneration;
+
+    /** Everything a background refresh needs to hand back to the event dispatch thread. */
+    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders,
+            Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections,
+            boolean fallback) {
+    }
+
     private Sidebar.Mode mode = Sidebar.Mode.ALL;
 
     private long folderId = -1;
@@ -179,7 +200,8 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
         refreshTimer.setRepeats(false);
-        searchTimer = new Timer(280, event -> refreshAll());
+        // Short enough to feel immediate, long enough to coalesce the keystrokes of one word.
+        searchTimer = new Timer(120, event -> refreshAll());
         searchTimer.setRepeats(false);
 
         buildUi();
@@ -1032,69 +1054,100 @@ public final class MainWindow extends JFrame {
         refreshTimer.restart();
     }
 
+    /**
+     * Starts a refresh. Called on the event dispatch thread, so every piece of UI state is captured
+     * here; the catalog is then read and sorted on the refresh thread and only the result comes back
+     * to the event dispatch thread.
+     */
     private void refreshAll() {
-        try {
-            List<Folder> folders = library.folders();
-            LibraryStats stats = library.stats();
-            PhotoFilter filter = switch (mode) {
-            case ALL, FOLDER -> PhotoFilter.all();
-            case FAVORITES -> PhotoFilter.favorites();
-            case RECENT -> PhotoFilter.recent();
-            };
-            SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
-            filter = filter.withSort(order).withSearch(search.getText());
+        long generation = ++refreshGeneration;
+        Sidebar.Mode requestedMode = mode;
+        long requestedFolder = folderId;
+        SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
+        String searchText = search.getText();
+        refresher.execute(() -> {
+            try {
+                RefreshData data = loadView(requestedMode, requestedFolder, order, searchText);
+                SwingUtilities.invokeLater(() -> {
+                    if (generation == refreshGeneration) {
+                        applyRefresh(data);
+                    }
+                });
+            } catch (RuntimeException e) {
+                SwingUtilities.invokeLater(() -> {
+                    if (generation == refreshGeneration) {
+                        statusMessage.setText("ライブラリを読み込めません: " + e.getMessage());
+                    }
+                });
+            }
+        });
+    }
 
-            List<Photo> photos = library.photos(filter);
-            List<Folder> visibleFolders = folders.stream().filter(folder -> folder.photoCount() > 0).toList();
-            if (filter.search() != null && !filter.search().isBlank()) {
-                java.util.Set<Long> matched = new java.util.HashSet<>();
-                for (Photo photo : photos) {
-                    matched.add(photo.folderId());
-                }
-                visibleFolders = folders.stream().filter(folder -> matched.contains(folder.id())).toList();
-            }
-            if (mode == Sidebar.Mode.FOLDER && visibleFolders.stream().noneMatch(folder -> folder.id() == folderId)) {
-                mode = Sidebar.Mode.ALL;
-                folderId = -1;
-                scrollToSelectedFolder = false;
-                applySortForCurrentView();
-            }
-            PhotoGrid.GroupMode grouping;
-            List<Folder> sections = List.of();
-            if (mode == Sidebar.Mode.ALL || mode == Sidebar.Mode.FOLDER) {
-                sections = visibleFolders;
-                photos = orderByFolder(photos, sections, mode == Sidebar.Mode.FOLDER);
-                grouping = PhotoGrid.GroupMode.FOLDER;
-            } else {
-                grouping = filter.groupsByDate() ? PhotoGrid.GroupMode.DATE : PhotoGrid.GroupMode.NONE;
-            }
-            grid.setPhotos(photos, grouping, sections);
-            // Only folders with a matching photo are shown while searching.
-            sidebar.setData(stats, visibleFolders, mode, folderId);
-            statusCount.setText(stats.photos() + " 枚  ·  " + Photo.formatSize(stats.bytes()));
-            updateSelectionInfo();
-            setTitle("Freja — " + stats.photos() + " 枚の写真");
+    /** Reads and sorts everything the current view needs. Never touches a Swing component. */
+    private RefreshData loadView(Sidebar.Mode requestedMode, long requestedFolder, SortOrder order, String searchText) {
+        List<Folder> folders = library.folders();
+        LibraryStats stats = library.stats();
+        PhotoFilter filter = switch (requestedMode) {
+        case ALL, FOLDER -> PhotoFilter.all();
+        case FAVORITES -> PhotoFilter.favorites();
+        case RECENT -> PhotoFilter.recent();
+        };
+        filter = filter.withSort(order).withSearch(searchText);
 
-            Photo selected = grid.selectedPhoto();
-            if (selected == null) {
-                showInspector(null);
-            } else {
-                showInspector(selected);
+        List<Photo> photos = library.photos(filter);
+        List<Folder> visibleFolders = folders.stream().filter(folder -> folder.photoCount() > 0).toList();
+        if (filter.search() != null && !filter.search().isBlank()) {
+            java.util.Set<Long> matched = new java.util.HashSet<>();
+            for (Photo photo : photos) {
+                matched.add(photo.folderId());
             }
+            visibleFolders = folders.stream().filter(folder -> matched.contains(folder.id())).toList();
+        }
+        // A folder whose photos were removed falls back to the whole library. The view's sort is
+        // reapplied on the event dispatch thread, which triggers another refresh with that order.
+        boolean fallback = requestedMode == Sidebar.Mode.FOLDER
+                && visibleFolders.stream().noneMatch(folder -> folder.id() == requestedFolder);
+        Sidebar.Mode effectiveMode = fallback ? Sidebar.Mode.ALL : requestedMode;
+        long effectiveFolder = fallback ? -1 : requestedFolder;
 
-            if (stats.folders() == 0 && mode == Sidebar.Mode.ALL) {
-                centerCards.show(center, "welcome");
-            } else {
-                centerCards.show(center, "grid");
-            }
+        PhotoGrid.GroupMode grouping;
+        List<Folder> sections = List.of();
+        if (effectiveMode == Sidebar.Mode.ALL || effectiveMode == Sidebar.Mode.FOLDER) {
+            sections = visibleFolders;
+            photos = orderByFolder(photos, sections, effectiveMode == Sidebar.Mode.FOLDER);
+            grouping = PhotoGrid.GroupMode.FOLDER;
+        } else {
+            grouping = filter.groupsByDate() ? PhotoGrid.GroupMode.DATE : PhotoGrid.GroupMode.NONE;
+        }
+        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, fallback);
+    }
 
-            if (scrollToSelectedFolder && mode == Sidebar.Mode.FOLDER) {
-                scrollToSelectedFolder = false;
-                long target = folderId;
-                SwingUtilities.invokeLater(() -> grid.scrollToFolder(target));
-            }
-        } catch (RuntimeException e) {
-            statusMessage.setText("ライブラリを読み込めません: " + e.getMessage());
+    /** Installs a loaded view on the event dispatch thread. Never touches the catalog. */
+    private void applyRefresh(RefreshData data) {
+        if (data.fallback()) {
+            mode = Sidebar.Mode.ALL;
+            folderId = -1;
+            scrollToSelectedFolder = false;
+            applySortForCurrentView();
+            refreshAll();
+            return;
+        }
+        grid.setPhotos(data.photos(), data.grouping(), data.sections());
+        // Only folders with a matching photo are shown while searching.
+        sidebar.setData(data.stats(), data.visibleFolders(), data.mode(), data.folderId());
+        statusCount.setText(data.stats().photos() + " 枚  ·  " + Photo.formatSize(data.stats().bytes()));
+        updateSelectionInfo();
+        setTitle("Freja — " + data.stats().photos() + " 枚の写真");
+        showInspector(grid.selectedPhoto());
+        if (data.stats().folders() == 0 && data.mode() == Sidebar.Mode.ALL) {
+            centerCards.show(center, "welcome");
+        } else {
+            centerCards.show(center, "grid");
+        }
+        if (scrollToSelectedFolder && data.mode() == Sidebar.Mode.FOLDER) {
+            scrollToSelectedFolder = false;
+            long target = data.folderId();
+            SwingUtilities.invokeLater(() -> grid.scrollToFolder(target));
         }
     }
 
@@ -1282,6 +1335,7 @@ public final class MainWindow extends JFrame {
 
     private void shutdown() {
         savePreferences();
+        refresher.shutdownNow();
         if (viewer != null) {
             viewer.dispose();
         }

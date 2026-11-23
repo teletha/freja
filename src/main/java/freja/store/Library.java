@@ -52,7 +52,7 @@ public final class Library implements AutoCloseable {
      * Bumped whenever thumbnail generation changes. Rows below this revision are decoded again by
      * the next scan, which is how existing libraries pick up a new thumbnail pipeline.
      */
-    private static final int THUMBNAIL_REVISION = 8;
+    private static final int THUMBNAIL_REVISION = 9;
 
     /** A thumbnail stored in the database. */
     public record Thumbnail(byte[] data, int width, int height) {
@@ -79,7 +79,18 @@ public final class Library implements AutoCloseable {
 
     private final Path database;
 
+    /** The single writer connection, guarded by this object's intrinsic lock. */
     private final Connection connection;
+
+    /**
+     * A second connection for reads from the UI. SQLite's WAL mode lets it read while the scanner
+     * commits a batch, so a full catalog refresh on the event dispatch thread never waits for the
+     * writer lock. An in-memory database cannot be shared, so it uses the writer connection.
+     */
+    private final Connection reader;
+
+    /** Guards the reader connection; the same lock as the writer when the connection is shared. */
+    private final Object readerLock;
 
     /**
      * Opens a library database, creating it when necessary.
@@ -96,7 +107,8 @@ public final class Library implements AutoCloseable {
         } catch (ClassNotFoundException e) {
             throw new SQLException("The SQLite JDBC driver (org.xerial:sqlite-jdbc) is not on the classpath.", e);
         }
-        if (!":memory:".equals(database.toString())) {
+        boolean memory = ":memory:".equals(database.toString());
+        if (!memory) {
             Path parent = database.toAbsolutePath().getParent();
             if (parent != null) {
                 try {
@@ -110,6 +122,18 @@ public final class Library implements AutoCloseable {
             this.connection = DriverManager.getConnection("jdbc:sqlite::memory:");
         }
         initialize();
+        if (memory) {
+            this.reader = this.connection;
+            this.readerLock = this;
+        } else {
+            this.reader = DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
+            this.readerLock = new Object();
+            try (Statement statement = reader.createStatement()) {
+                statement.execute("PRAGMA busy_timeout=5000");
+            } catch (SQLException e) {
+                throw new SQLException("Cannot prepare the library reader connection", e);
+            }
+        }
     }
 
     /**
@@ -164,7 +188,7 @@ public final class Library implements AutoCloseable {
                         favorite INTEGER NOT NULL DEFAULT 0,
                         rating INTEGER NOT NULL DEFAULT 0,
                         caption TEXT,
-                        thumbnail_revision INTEGER NOT NULL DEFAULT 8,
+                        thumbnail_revision INTEGER NOT NULL DEFAULT 9,
                         imported_at INTEGER NOT NULL,
                         scan_token TEXT
                     )
@@ -306,7 +330,7 @@ public final class Library implements AutoCloseable {
     }
 
     private String folderPath(long folderId) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT path FROM folders WHERE id=?")) {
+        try (PreparedStatement statement = reader.prepareStatement("SELECT path FROM folders WHERE id=?")) {
             statement.setLong(1, folderId);
             try (ResultSet results = statement.executeQuery()) {
                 return results.next() ? results.getString(1) : null;
@@ -359,7 +383,13 @@ public final class Library implements AutoCloseable {
      *
      * @return the folders ordered by name, with the path as a tie-breaker
      */
-    public synchronized List<Folder> folders() {
+    public List<Folder> folders() {
+        synchronized (readerLock) {
+            return foldersInternal();
+        }
+    }
+
+    private List<Folder> foldersInternal() {
         String sql = """
                 SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit, COUNT(p.id) AS photo_count
                 FROM folders f
@@ -367,7 +397,7 @@ public final class Library implements AutoCloseable {
                 GROUP BY f.id
                 ORDER BY f.name COLLATE NOCASE, f.path COLLATE NOCASE
                 """;
-        try (Statement statement = connection.createStatement(); ResultSet results = statement.executeQuery(sql)) {
+        try (Statement statement = reader.createStatement(); ResultSet results = statement.executeQuery(sql)) {
             List<Folder> folders = new ArrayList<>();
             while (results.next()) {
                 folders.add(mapFolder(results));
@@ -440,8 +470,10 @@ public final class Library implements AutoCloseable {
      * @param id a folder identifier
      * @return the folder, if it exists
      */
-    public synchronized Optional<Folder> folder(long id) {
-        return folders().stream().filter(folder -> folder.id() == id).findFirst();
+    public Optional<Folder> folder(long id) {
+        synchronized (readerLock) {
+            return folders().stream().filter(folder -> folder.id() == id).findFirst();
+        }
     }
 
     /**
@@ -516,7 +548,13 @@ public final class Library implements AutoCloseable {
      * @param filter the query
      * @return matching photos in the requested order
      */
-    public synchronized List<Photo> photos(PhotoFilter filter) {
+    public List<Photo> photos(PhotoFilter filter) {
+        synchronized (readerLock) {
+            return photosInternal(filter);
+        }
+    }
+
+    private List<Photo> photosInternal(PhotoFilter filter) {
         StringBuilder sql = new StringBuilder("""
                 SELECT p.*, f.path AS folder_path
                 FROM photos p
@@ -559,7 +597,7 @@ public final class Library implements AutoCloseable {
         default -> " ORDER BY p.captured_at DESC, p.file_name COLLATE NOCASE ASC";
         });
 
-        try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement statement = reader.prepareStatement(sql.toString())) {
             for (int i = 0; i < parameters.size(); i++) {
                 statement.setObject(i + 1, parameters.get(i));
             }
@@ -581,14 +619,20 @@ public final class Library implements AutoCloseable {
      * @param id a photo identifier
      * @return the photo, if it exists
      */
-    public synchronized Optional<Photo> photo(long id) {
+    public Optional<Photo> photo(long id) {
+        synchronized (readerLock) {
+            return photoInternal(id);
+        }
+    }
+
+    private Optional<Photo> photoInternal(long id) {
         String sql = """
                 SELECT p.*, f.path AS folder_path
                 FROM photos p
                 JOIN folders f ON f.id = p.folder_id
                 WHERE p.id = ?
                 """;
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = reader.prepareStatement(sql)) {
             statement.setLong(1, id);
             try (ResultSet results = statement.executeQuery()) {
                 return results.next() ? Optional.of(mapPhoto(results)) : Optional.empty();
@@ -604,8 +648,14 @@ public final class Library implements AutoCloseable {
      * @param photoId a photo identifier
      * @return the thumbnail, if one has been generated
      */
-    public synchronized Optional<Thumbnail> thumbnail(long photoId) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT width, height, data FROM thumbnails WHERE photo_id=?")) {
+    public Optional<Thumbnail> thumbnail(long photoId) {
+        synchronized (readerLock) {
+            return thumbnailInternal(photoId);
+        }
+    }
+
+    private Optional<Thumbnail> thumbnailInternal(long photoId) {
+        try (PreparedStatement statement = reader.prepareStatement("SELECT width, height, data FROM thumbnails WHERE photo_id=?")) {
             statement.setLong(1, photoId);
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
@@ -623,9 +673,15 @@ public final class Library implements AutoCloseable {
      *
      * @return library statistics
      */
-    public synchronized LibraryStats stats() {
+    public LibraryStats stats() {
+        synchronized (readerLock) {
+            return statsInternal();
+        }
+    }
+
+    private LibraryStats statsInternal() {
         long recentSince = Instant.now().minus(RECENT_WINDOW, ChronoUnit.MILLIS).toEpochMilli();
-        try (PreparedStatement statement = connection.prepareStatement("""
+        try (PreparedStatement statement = reader.prepareStatement("""
                 SELECT COUNT(*) AS total,
                        COALESCE(SUM(favorite), 0) AS favorites,
                        COALESCE(SUM(CASE WHEN imported_at >= ? THEN 1 ELSE 0 END), 0) AS recent,
@@ -1137,8 +1193,14 @@ public final class Library implements AutoCloseable {
      * @param key the setting name
      * @return the stored value, if any
      */
-    public synchronized Optional<String> setting(String key) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT value FROM settings WHERE key=?")) {
+    public Optional<String> setting(String key) {
+        synchronized (readerLock) {
+            return settingInternal(key);
+        }
+    }
+
+    private Optional<String> settingInternal(String key) {
+        try (PreparedStatement statement = reader.prepareStatement("SELECT value FROM settings WHERE key=?")) {
             statement.setString(1, key);
             try (ResultSet results = statement.executeQuery()) {
                 return results.next() ? Optional.of(results.getString(1)) : Optional.empty();
@@ -1215,6 +1277,9 @@ public final class Library implements AutoCloseable {
         } catch (SQLException ignored) {
         }
         try {
+            if (reader != connection) {
+                reader.close();
+            }
             connection.close();
         } catch (SQLException ignored) {
         }

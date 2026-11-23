@@ -143,8 +143,6 @@ public final class Sidebar extends JPanel {
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setBorder(BorderFactory.createEmptyBorder(18, 16, 8, 16));
-        top.add(brand());
-        top.add(Box.createVerticalStrut(18));
         // BoxLayout keeps centring a bare JLabel / nested panel even with LEFT_ALIGNMENT. Wrapping
         // them in a stretching BorderLayout panel pins both to the sidebar's left edge.
         JPanel libraryHeader = new JPanel(new BorderLayout());
@@ -202,44 +200,6 @@ public final class Sidebar extends JPanel {
 
     public void setListener(Listener listener) {
         this.listener = listener == null ? this.listener : listener;
-    }
-
-    private JComponent brand() {
-        JPanel panel = new JPanel(new BorderLayout(10, 0));
-        panel.setOpaque(false);
-        JComponent mark = new JComponent() {
-            @Override
-            protected void paintComponent(Graphics graphics) {
-                Graphics2D g = (Graphics2D) graphics.create();
-                try {
-                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g.setColor(Theme.ACCENT);
-                    g.fill(new RoundRectangle2D.Float(0, 2, 34, 34, 10, 10));
-                    g.setColor(Color.WHITE);
-                    g.setFont(Theme.font(Font.BOLD, 19));
-                    g.drawString("F", 12, 27);
-                } finally {
-                    g.dispose();
-                }
-            }
-        };
-        mark.setPreferredSize(new Dimension(38, 40));
-        panel.add(mark, BorderLayout.WEST);
-
-        JPanel text = new JPanel();
-        text.setOpaque(false);
-        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-        JLabel name = new JLabel("FREJA");
-        name.setFont(Theme.font(Font.BOLD, 19));
-        name.setForeground(Theme.TEXT);
-        JLabel caption = new JLabel("PHOTO LIBRARY");
-        caption.setFont(Theme.font(Font.PLAIN, 9));
-        caption.setForeground(Theme.MUTED);
-        text.add(name);
-        text.add(Box.createVerticalStrut(1));
-        text.add(caption);
-        panel.add(text, BorderLayout.CENTER);
-        return panel;
     }
 
     private JComponent folderHeader() {
