@@ -10,8 +10,11 @@
 package freja.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -27,17 +30,24 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.Icon;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
@@ -100,21 +110,17 @@ public final class ScanFoldersDialog extends JDialog {
 
     private final JTree tree = new JTree();
 
-    private final JLabel currentName = new JLabel("フォルダを選択してください");
-
-    private final JLabel currentPath = new JLabel(" ");
+    private final FolderRenderer folderRenderer = new FolderRenderer();
 
     private final JCheckBox startupScan = new JCheckBox("起動時にスキャンする");
 
     private final JCheckBox sweepScan = new JCheckBox("定期スキャンする（5分ごと）");
 
-    private final JButton scanButton = new JButton("今すぐスキャン");
+    private final DefaultListModel<Folder> registeredModel = new DefaultListModel<>();
 
-    private final JButton toggleButton = new JButton("スキャンを無効化");
+    private final JList<Folder> registeredList = new JList<>(registeredModel);
 
-    private final JButton registerButton = new JButton("フォルダを登録");
-
-    private final JButton removeButton = new JButton("ライブラリから削除");
+    private final JLabel emptyHint = new JLabel("登録されているフォルダはありません");
 
     private final Map<String, Folder> registered = new HashMap<>();
 
@@ -156,7 +162,7 @@ public final class ScanFoldersDialog extends JDialog {
         tree.setShowsRootHandles(true);
         tree.setRowHeight(26);
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        tree.setCellRenderer(new FolderRenderer());
+        tree.setCellRenderer(folderRenderer);
         tree.addTreeSelectionListener(event -> updateSelection());
         tree.addTreeWillExpandListener(new TreeWillExpandListener() {
             @Override
@@ -178,51 +184,62 @@ public final class ScanFoldersDialog extends JDialog {
                 }
             }
         });
-        add(new JScrollPane(tree), BorderLayout.CENTER);
+        JPanel treePanel = new JPanel(new BorderLayout(0, 6));
+        treePanel.setOpaque(false);
+        JLabel treeTitle = new JLabel("フォルダ");
+        treeTitle.setFont(Theme.font(Font.BOLD, 13));
+        treeTitle.setForeground(Theme.TEXT);
+        treePanel.add(treeTitle, BorderLayout.NORTH);
+        JScrollPane treeScroll = new JScrollPane(tree);
+        treeScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
+        treePanel.add(treeScroll, BorderLayout.CENTER);
 
-        JPanel details = new JPanel();
-        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
-        details.setBackground(Theme.SURFACE);
-        details.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        currentName.setFont(Theme.font(Font.BOLD, 14));
-        currentName.setForeground(Theme.TEXT);
-        currentName.setAlignmentX(LEFT_ALIGNMENT);
-        currentPath.setFont(Theme.font(Font.PLAIN, 11));
-        currentPath.setForeground(Theme.MUTED);
-        currentPath.setAlignmentX(LEFT_ALIGNMENT);
-        details.add(currentName);
-        details.add(Box.createVerticalStrut(3));
-        details.add(currentPath);
-        details.add(Box.createVerticalStrut(12));
-        for (JButton button : new JButton[] {registerButton, scanButton, toggleButton, removeButton}) {
-            button.setAlignmentX(LEFT_ALIGNMENT);
-            button.setFont(Theme.font(Font.PLAIN, 12));
-            button.setEnabled(false);
-            details.add(button);
-            details.add(Box.createVerticalStrut(6));
-        }
-        registerButton.addActionListener(event -> {
-            FileNode node = selectedNode();
-            if (node != null) {
-                listener.onRegisterFolder(node.path);
-            }
-        });
-        scanButton.addActionListener(event -> {
-            Folder folder = selectedFolder();
+        registeredList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        registeredList.setFont(Theme.font(Font.PLAIN, 13));
+        registeredList.setBackground(Theme.SURFACE);
+        registeredList.setForeground(Theme.TEXT);
+        registeredList.setCellRenderer(new RegisteredRenderer());
+        JPopupMenu actions = new JPopupMenu();
+        JMenuItem scanNow = new JMenuItem("今すぐスキャン");
+        scanNow.addActionListener(event -> {
+            Folder folder = selectedRegisteredFolder();
             if (folder != null) {
                 listener.onScanFolder(folder.id());
             }
         });
-        toggleButton.addActionListener(event -> toggleSelected());
-        removeButton.addActionListener(event -> {
-            Folder folder = selectedFolder();
+        JMenuItem remove = new JMenuItem("ライブラリから削除");
+        remove.addActionListener(event -> {
+            Folder folder = selectedRegisteredFolder();
             if (folder != null) {
                 listener.onRemoveFolder(folder.id());
             }
         });
-        details.add(Box.createVerticalGlue());
+        actions.add(scanNow);
+        actions.add(remove);
+        registeredList.setComponentPopupMenu(actions);
+        JScrollPane registeredScroll = new JScrollPane(registeredList);
+        registeredScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
 
-        add(details, BorderLayout.EAST);
+        JPanel registeredPanel = new JPanel(new BorderLayout(0, 6));
+        registeredPanel.setOpaque(false);
+        JLabel registeredTitle = new JLabel("登録済みフォルダ");
+        registeredTitle.setFont(Theme.font(Font.BOLD, 13));
+        registeredTitle.setForeground(Theme.TEXT);
+        emptyHint.setFont(Theme.font(Font.PLAIN, 11));
+        emptyHint.setForeground(Theme.MUTED);
+        emptyHint.setVisible(false);
+        JPanel registeredHeader = new JPanel(new BorderLayout(0, 4));
+        registeredHeader.setOpaque(false);
+        registeredHeader.add(registeredTitle, BorderLayout.NORTH);
+        registeredHeader.add(emptyHint, BorderLayout.SOUTH);
+        registeredPanel.add(registeredHeader, BorderLayout.NORTH);
+        registeredPanel.add(registeredScroll, BorderLayout.CENTER);
+
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, registeredPanel);
+        split.setResizeWeight(0.62);
+        split.setBorder(null);
+        split.setOpaque(false);
+        add(split, BorderLayout.CENTER);
 
         JPanel south = new JPanel(new BorderLayout(0, 8));
         south.setOpaque(false);
@@ -304,43 +321,64 @@ public final class ScanFoldersDialog extends JDialog {
     }
 
     public void setFolders(List<Folder> folders, boolean startup, boolean sweep) {
+        Folder selected = selectedRegisteredFolder();
+        long selectedId = selected == null ? -1 : selected.id();
         registered.clear();
         for (Folder folder : folders) {
             registered.put(PathUtil.key(folder.path()), folder);
         }
         startupScan.setSelected(startup);
         sweepScan.setSelected(sweep);
-        updateSelection();
+
+        List<Folder> sorted = new ArrayList<>(folders);
+        sorted.sort(Comparator.comparing(folder -> folder.name() == null || folder.name().isBlank()
+                ? folder.path().toString() : folder.name(), String.CASE_INSENSITIVE_ORDER));
+        registeredModel.clear();
+        for (Folder folder : sorted) {
+            registeredModel.addElement(folder);
+        }
+        emptyHint.setVisible(sorted.isEmpty());
+        if (selectedId == -1 || !selectRegisteredFolder(selectedId)) {
+            updateSelection();
+        }
         tree.repaint();
     }
 
     private void updateSelection() {
         FileNode node = selectedNode();
         Folder folder = node == null ? null : registered.get(PathUtil.key(node.path));
-        currentName.setText(node == null ? "フォルダを選択してください" : ((Node) node.getUserObject()).label());
-        currentPath.setText(node == null ? " " : node.path.toString());
-        boolean selected = node != null;
-        registerButton.setEnabled(selected && folder == null);
-        scanButton.setEnabled(folder != null);
-        removeButton.setEnabled(folder != null && folder.explicit());
-        toggleButton.setEnabled(folder != null);
-        toggleButton.setText(folder != null && !folder.scanEnabled() ? "スキャンを有効化" : "スキャンを無効化");
+        if (folder == null) {
+            registeredList.clearSelection();
+        } else {
+            selectRegisteredFolder(folder.id());
+        }
     }
 
-    /** Clicking the state icon (or just left of the label) toggles that folder. */
+    private boolean selectRegisteredFolder(long folderId) {
+        for (int i = 0; i < registeredModel.size(); i++) {
+            if (registeredModel.get(i).id() == folderId) {
+                registeredList.setSelectedIndex(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Folder selectedRegisteredFolder() {
+        return registeredList.getSelectedValue();
+    }
+
+    /** Clicking the state icon toggles that folder. */
     private void toggleAt(java.awt.event.MouseEvent event) {
         int row = tree.getRowForLocation(event.getX(), event.getY());
         if (row < 0) {
             return;
         }
         TreePath path = tree.getPathForRow(row);
-        java.awt.Rectangle bounds = tree.getRowBounds(row);
-        if (path == null || bounds == null || !(path.getLastPathComponent() instanceof FileNode node)) {
+        if (path == null || !(path.getLastPathComponent() instanceof FileNode node)) {
             return;
         }
-        int depth = Math.max(0, path.getPathCount() - 2);
-        int iconLeft = bounds.x + depth * 20;
-        if (event.getX() < iconLeft || event.getX() > iconLeft + 26) {
+        if (!folderRenderer.isIconHit(path, event.getX())) {
             return;
         }
         tree.setSelectionRow(row);
@@ -352,30 +390,59 @@ public final class ScanFoldersDialog extends JDialog {
         }
     }
 
-    private void toggleSelected() {
-        Folder folder = selectedFolder();
-        if (folder != null) {
-            listener.onScanEnabled(folder.id(), !folder.scanEnabled());
-        }
-    }
-
     private FileNode selectedNode() {
         Object value = tree.getLastSelectedPathComponent();
         return value instanceof FileNode node ? node : null;
     }
 
-    private Folder selectedFolder() {
-        FileNode node = selectedNode();
-        return node == null ? null : registered.get(PathUtil.key(node.path));
+    /** Renders a registered folder with its scan state and full path. */
+    private static final class RegisteredRenderer extends DefaultListCellRenderer {
+
+        @Override
+        public java.awt.Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                boolean selected, boolean focused) {
+            super.getListCellRendererComponent(list, value, index, selected, focused);
+            if (value instanceof Folder folder) {
+                String name = folder.name() == null || folder.name().isBlank()
+                        ? String.valueOf(folder.path().getFileName()) : folder.name();
+                setText("<html><body style='width:230px'><b>" + escape(name) + "</b><br>"
+                        + "<font color='#" + hex(Theme.MUTED) + "' size='-2'>"
+                        + escape(folder.path().toString()) + "</font></body></html>");
+                setIcon(folder.scanEnabled() ? Icons.check(14, Theme.ACCENT) : Icons.close(14, Theme.DANGER));
+                setToolTipText(folder.path().toString());
+            }
+            return this;
+        }
+
+        private static String escape(String text) {
+            return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        }
+
+        private static String hex(Color color) {
+            return String.format("%06x", color.getRGB() & 0xffffff);
+        }
     }
 
     private final class FolderRenderer extends DefaultTreeCellRenderer {
+
+        /** Small tolerance so the 14px icon stays easy to click. */
+        private static final int HIT_PADDING = 3;
+
+        private final Map<TreePath, Rectangle> iconBounds = new HashMap<>();
+
+        private TreePath renderingPath;
+
+        FolderRenderer() {
+            // The icon must sit at the renderer's left inset for the hit box below to be valid.
+            setHorizontalAlignment(SwingConstants.LEFT);
+        }
 
         @Override
         public java.awt.Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
                 boolean leaf, int row, boolean hasFocus) {
             super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             FileNode node = (FileNode) value;
+            renderingPath = new TreePath(node.getPath());
             setText(((Node) node.getUserObject()).label());
             Folder folder = node.path == null ? null : registered.get(PathUtil.key(node.path));
             if (folder == null) {
@@ -386,6 +453,39 @@ public final class ScanFoldersDialog extends JDialog {
             setBackgroundSelectionColor(Theme.ACCENT_SOFT);
             setTextSelectionColor(Theme.TEXT);
             return this;
+        }
+
+        /**
+         * The tree positions this renderer (including indentation and expand/collapse handles) right
+         * before painting it, so capture the real icon box there instead of guessing an offset.
+         */
+        @Override
+        public void setBounds(int x, int y, int width, int height) {
+            super.setBounds(x, y, width, height);
+            // CellRendererPane resets the renderer to (-w, -h, 0, 0) after painting; ignore that.
+            if (width <= 0 || height <= 0 || renderingPath == null) {
+                return;
+            }
+            Icon icon = getIcon();
+            if (icon == null) {
+                iconBounds.remove(renderingPath);
+                return;
+            }
+            Insets insets = getInsets();
+            if (insets == null) {
+                insets = new Insets(0, 0, 0, 0);
+            }
+            int contentHeight = Math.max(0, height - insets.top - insets.bottom);
+            int iconY = y + insets.top + Math.max(0, (contentHeight - icon.getIconHeight()) / 2);
+            iconBounds.put(renderingPath,
+                    new Rectangle(x + insets.left, iconY, icon.getIconWidth(), icon.getIconHeight()));
+        }
+
+        boolean isIconHit(TreePath path, int mouseX) {
+            Rectangle bounds = iconBounds.get(path);
+            return bounds != null
+                    && mouseX >= bounds.x - HIT_PADDING
+                    && mouseX <= bounds.x + bounds.width + HIT_PADDING;
         }
     }
 }
