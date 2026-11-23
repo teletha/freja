@@ -201,6 +201,19 @@ class LibraryTest {
     }
 
     @Test
+    void foldersCanBeDisabledAsScanTargets() throws Exception {
+        Path folder = Files.createDirectories(temp.resolve("toggle"));
+        try (Library library = new Library(temp.resolve("library.db"))) {
+            Folder added = library.addFolder(folder);
+            assertTrue(added.scanEnabled());
+
+            library.setFolderScanEnabled(added.id(), false);
+            assertFalse(library.folder(added.id()).orElseThrow().scanEnabled());
+            assertEquals(1, library.folders().size(), "disabling a folder must not delete it");
+        }
+    }
+
+    @Test
     void olderThumbnailsAreDiscardedForRegeneration() throws Exception {
         Path folder = Files.createDirectories(temp.resolve("photos"));
         Path file = Files.write(folder.resolve("photo.jpg"), new byte[] {1});

@@ -21,5 +21,5 @@ import java.util.List;
  * </p>
  */
 public record Folder(long id, Path path, String name, int photoCount, long addedAt, long lastScanAt,
-        PhotoFilter.SortOrder sort, boolean explicit, List<String> tags) {
+        PhotoFilter.SortOrder sort, boolean explicit, List<String> tags, boolean scanEnabled) {
 }

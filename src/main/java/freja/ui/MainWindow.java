@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -101,6 +102,10 @@ public final class MainWindow extends JFrame {
 
     private static final String INSPECTOR_VISIBLE_PREFERENCE = "view.inspectorVisible";
 
+    private static final String SCAN_ON_STARTUP_PREFERENCE = "scan.onStartup";
+
+    private static final String SCAN_SWEEP_PREFERENCE = "scan.sweep";
+
     private final Library library;
 
     private final LibraryScanner scanner;
@@ -136,6 +141,8 @@ public final class MainWindow extends JFrame {
     private final JCheckBoxMenuItem darkModeItem = new JCheckBoxMenuItem("ダークモード", Theme.isDark());
 
     private final JCheckBoxMenuItem inspectorItem = new JCheckBoxMenuItem("インスペクター", true);
+
+    private ScanFoldersDialog scanFoldersDialog;
 
     private JButton themeButton;
 
@@ -181,6 +188,12 @@ public final class MainWindow extends JFrame {
 
     private volatile boolean scanning;
 
+    private boolean shuttingDown;
+
+    private volatile long uiHeartbeat = System.nanoTime();
+
+    private volatile boolean uiWatchdogRunning = true;
+
     private boolean updatingSort;
 
     private boolean scrollToSelectedFolder;
@@ -210,6 +223,11 @@ public final class MainWindow extends JFrame {
         // Short enough to feel immediate, long enough to coalesce the keystrokes of one word.
         searchTimer = new Timer(120, event -> refreshAll());
         searchTimer.setRepeats(false);
+        Timer heartbeat = new Timer(500, event -> uiHeartbeat = System.nanoTime());
+        heartbeat.start();
+        Thread watchdog = new Thread(this::watchUiResponsiveness, "freja-ui-watchdog");
+        watchdog.setDaemon(true);
+        watchdog.start();
 
         buildUi();
         restorePreferences();
@@ -479,6 +497,7 @@ public final class MainWindow extends JFrame {
     private JMenuBar menuBar() {
         JMenuBar bar = new JMenuBar();
         JMenu file = new JMenu("ファイル");
+        file.add(menuItem("スキャン対象フォルダ…", null, this::openScanFolders));
         file.add(menuItem("フォルダを追加…", "control O", this::chooseFolder));
         file.add(menuItem("再スキャン", "F5", () -> scanner.scanAll()));
         file.addSeparator();
@@ -671,7 +690,8 @@ public final class MainWindow extends JFrame {
      * Starts the background scanner.
      */
     public void start() {
-        scanner.start();
+        scanner.start(true, PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false),
+                PREFERENCES.getBoolean(SCAN_SWEEP_PREFERENCE, false));
         SwingUtilities.invokeLater(() -> {
             if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && savedSidebarDivider > 0) {
                 sidebarSplit.setDividerLocation(Math.max(180, savedSidebarDivider));
@@ -719,6 +739,74 @@ public final class MainWindow extends JFrame {
         library.renameFolder(id, trimmed);
         refreshAll();
         statusMessage.setText("フォルダ名を変更しました: " + trimmed);
+    }
+
+    private void openScanFolders() {
+        if (scanFoldersDialog == null) {
+            scanFoldersDialog = new ScanFoldersDialog(this);
+            scanFoldersDialog.setListener(new ScanFoldersDialog.Listener() {
+                @Override
+                public void onRegisterFolder(Path path) {
+                    registerFolder(path);
+                }
+
+                @Override
+                public void onRemoveFolder(long folderId) {
+                    removeFolder(folderId);
+                    refreshScanFolders();
+                }
+
+                @Override
+                public void onScanFolder(long folderId) {
+                    scanner.scanFolder(folderId);
+                    statusMessage.setText("フォルダをスキャンしています…");
+                }
+
+                @Override
+                public void onScanEnabled(long folderId, boolean enabled) {
+                    library.setFolderScanEnabled(folderId, enabled);
+                    refreshScanFolders();
+                    refreshAll();
+                }
+
+                @Override
+                public void onStartupScanChanged(boolean enabled) {
+                    PREFERENCES.putBoolean(SCAN_ON_STARTUP_PREFERENCE, enabled);
+                    try {
+                        PREFERENCES.flush();
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                @Override
+                public void onSweepChanged(boolean enabled) {
+                    PREFERENCES.putBoolean(SCAN_SWEEP_PREFERENCE, enabled);
+                    try {
+                        PREFERENCES.flush();
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+        }
+        refreshScanFolders();
+        scanFoldersDialog.setVisible(true);
+    }
+
+    private void refreshScanFolders() {
+        if (scanFoldersDialog != null) {
+            scanFoldersDialog.setFolders(library.folders(), PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false),
+                    PREFERENCES.getBoolean(SCAN_SWEEP_PREFERENCE, false));
+        }
+    }
+
+    private void registerFolder(Path path) {
+        try {
+            scanner.addFolder(path, false);
+            refreshScanFolders();
+            refreshAll();
+        } catch (IllegalArgumentException e) {
+            statusMessage.setText(e.getMessage());
+        }
     }
 
     private void chooseFolder() {
@@ -984,7 +1072,7 @@ public final class MainWindow extends JFrame {
         viewer = PhotoViewer.open(this, photos, photo, (updated, favorite) -> {
             library.setFavorite(updated.id(), favorite);
             refreshAll();
-        });
+        }, cache.get(photo.id(), photo.modifiedAt()));
     }
 
     private void openSlideshow() {
@@ -1485,16 +1573,79 @@ public final class MainWindow extends JFrame {
         SwingUtilities.invokeLater(this::shutdown);
     }
 
+    /** Logs every thread when the event dispatch thread stops responding, for hang diagnosis. */
+    private void watchUiResponsiveness() {
+        boolean dumped = false;
+        while (uiWatchdogRunning) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            long stalled = System.nanoTime() - uiHeartbeat;
+            if (stalled > TimeUnit.SECONDS.toNanos(3)) {
+                if (!dumped) {
+                    dumped = true;
+                    System.err.println("=== Freja UI stalled for "
+                            + TimeUnit.NANOSECONDS.toMillis(stalled) + " ms ===");
+                    Thread.getAllStackTraces().forEach((thread, stack) -> {
+                        System.err.println("\"" + thread.getName() + "\" " + thread.getState());
+                        for (StackTraceElement frame : stack) {
+                            System.err.println("    at " + frame);
+                        }
+                    });
+                    System.err.println("=== end of thread dump ===");
+                }
+            } else {
+                dumped = false;
+            }
+        }
+    }
+
     private void shutdown() {
+        if (shuttingDown) {
+            return;
+        }
+        shuttingDown = true;
+        uiWatchdogRunning = false;
         savePreferences();
         refresher.shutdownNow();
         if (viewer != null) {
             viewer.dispose();
         }
-        scanner.close();
-        cache.close();
-        library.close();
+        // Close the UI on the event dispatch thread first: a scanner thread stuck in filesystem
+        // I/O must never keep the window on screen.
         dispose();
-        System.exit(0);
+
+        Thread watchdog = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            // halt() bypasses shutdown hooks; a blocked hook must not keep the process alive.
+            Runtime.getRuntime().halt(0);
+        }, "freja-exit-watchdog");
+        watchdog.setDaemon(true);
+        watchdog.start();
+
+        Thread cleanup = new Thread(() -> {
+            try {
+                scanner.close();
+            } catch (RuntimeException ignored) {
+            }
+            try {
+                cache.close();
+            } catch (RuntimeException ignored) {
+            }
+            try {
+                library.close();
+            } catch (RuntimeException ignored) {
+            }
+            System.exit(0);
+        }, "freja-cleanup");
+        cleanup.setDaemon(false);
+        cleanup.start();
     }
 }

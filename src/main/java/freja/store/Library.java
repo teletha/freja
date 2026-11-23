@@ -171,7 +171,8 @@ public final class Library implements AutoCloseable {
                         added_at INTEGER NOT NULL,
                         last_scan_at INTEGER NOT NULL DEFAULT 0,
                         sort_order TEXT NOT NULL DEFAULT 'NAME',
-                        explicit INTEGER NOT NULL DEFAULT 1
+                        explicit INTEGER NOT NULL DEFAULT 1,
+                        scan_enabled INTEGER NOT NULL DEFAULT 1
                     )
                     """);
             statement.execute("""
@@ -245,6 +246,7 @@ public final class Library implements AutoCloseable {
         ensureColumn("folders", "sort_order", "TEXT NOT NULL DEFAULT 'NAME'");
         ensureColumn("folders", "explicit", "INTEGER NOT NULL DEFAULT 1");
         ensureColumn("folders", "name", "TEXT NOT NULL DEFAULT ''");
+        ensureColumn("folders", "scan_enabled", "INTEGER NOT NULL DEFAULT 1");
         ensureColumn("photos", "thumbnail_revision", "INTEGER NOT NULL DEFAULT 1");
         normalizeExistingTags();
         backfillFolderNames();
@@ -432,7 +434,7 @@ public final class Library implements AutoCloseable {
 
     private Folder findFolderByKey(String key) {
         String sql = """
-                SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit,
+                SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit, f.scan_enabled,
                        (SELECT COUNT(*) FROM photos p WHERE p.folder_id = f.id) AS photo_count
                 FROM folders f
                 WHERE f.path_key = ?
@@ -460,7 +462,7 @@ public final class Library implements AutoCloseable {
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 keys.next();
-                return new Folder(keys.getLong(1), normalized, name, 0, now, 0, PhotoFilter.SortOrder.NAME, explicit, List.of());
+                return new Folder(keys.getLong(1), normalized, name, 0, now, 0, PhotoFilter.SortOrder.NAME, explicit, List.of(), true);
             }
         } catch (SQLException e) {
             throw new LibraryException("Failed to add the folder: " + normalized, e);
@@ -481,7 +483,7 @@ public final class Library implements AutoCloseable {
 
     private List<Folder> foldersInternal() {
         String sql = """
-                SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit, COUNT(p.id) AS photo_count
+                SELECT f.id, f.path, f.name, f.added_at, f.last_scan_at, f.sort_order, f.explicit, f.scan_enabled, COUNT(p.id) AS photo_count
                 FROM folders f
                 LEFT JOIN photos p ON p.folder_id = f.id
                 GROUP BY f.id
@@ -507,7 +509,8 @@ public final class Library implements AutoCloseable {
         long folderId = results.getLong("id");
         return new Folder(folderId, path, name, results.getInt("photo_count"), results.getLong("added_at"),
                 results.getLong("last_scan_at"), parseSort(results.getString("sort_order")),
-                results.getInt("explicit") != 0, folderTags(folderId, source));
+                results.getInt("explicit") != 0, folderTags(folderId, source),
+                results.getInt("scan_enabled") != 0);
     }
 
     private List<String> folderTags(long folderId, Connection source) throws SQLException {
@@ -880,6 +883,17 @@ public final class Library implements AutoCloseable {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new LibraryException("Failed to update the folder display order", e);
+        }
+    }
+
+    /** Enables or disables a folder as a scan target. Its photos stay in the catalog. */
+    public synchronized void setFolderScanEnabled(long folderId, boolean enabled) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET scan_enabled=? WHERE id=?")) {
+            statement.setInt(1, enabled ? 1 : 0);
+            statement.setLong(2, folderId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to update the folder scan flag", e);
         }
     }
 

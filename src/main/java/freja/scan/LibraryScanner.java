@@ -11,6 +11,7 @@ package freja.scan;
 
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,15 +29,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -88,9 +92,27 @@ public final class LibraryScanner implements AutoCloseable {
     /** How many photo rows share one commit during a scan. */
     private static final int SAVE_BATCH = 100;
 
+    /** Give up on a single unresponsive directory and keep scanning the rest of the tree. */
+    private static final long DIRECTORY_TIMEOUT_SECONDS = Long.getLong("freja.scan.directoryTimeoutSeconds", 10);
+
+    /** Treat a single import stuck in file I/O this long as unresponsive. */
+    private static final long IMPORT_STUCK_SECONDS = Long.getLong("freja.scan.importStuckSeconds", 15);
+
+    /** How long a walk waits for a free decode slot before abandoning the remaining files. */
+    private static final long IMPORT_WAIT_SECONDS = Long.getLong("freja.scan.importWaitSeconds", 5);
+
+    private record Entry(Path path, BasicFileAttributes attrs) {
+    }
+
+    private record Listing(BasicFileAttributes attrs, List<Entry> children) {
+    }
+
     private final Library library;
 
     private final ExecutorService importers;
+
+    /** Walks run separately so a blocked filesystem call can be abandoned with a timeout. */
+    private final ExecutorService walkers = Executors.newCachedThreadPool(runnable -> daemon(runnable, "freja-walk"));
 
     private final ExecutorService coordinator = Executors.newSingleThreadExecutor(runnable -> daemon(runnable, "freja-scan"));
 
@@ -108,6 +130,11 @@ public final class LibraryScanner implements AutoCloseable {
     private final Object importMonitor = new Object();
 
     private int activeImports;
+
+    private final Map<String, Long> importStarted = new ConcurrentHashMap<>();
+
+    /** Set when every decoder is stuck, so the walk skips the rest instead of waiting per file. */
+    private volatile boolean importsBlocked;
 
     private final Set<String> importing = ConcurrentHashMap.newKeySet();
 
@@ -210,6 +237,15 @@ public final class LibraryScanner implements AutoCloseable {
      * @param watch whether file system events should be observed continuously
      */
     public void start(boolean watch) {
+        start(watch, true);
+    }
+
+    /** Starts the scanner, optionally skipping the initial full scan and the periodic sweep. */
+    public void start(boolean watch, boolean initialScan) {
+        start(watch, initialScan, false);
+    }
+
+    public void start(boolean watch, boolean initialScan, boolean sweep) {
         refreshFolders();
         if (watch && !closed.get()) {
             try {
@@ -219,7 +255,7 @@ public final class LibraryScanner implements AutoCloseable {
                 watchThread.start();
                 scheduler.execute(() -> {
                     for (Folder folder : folders.values()) {
-                        if (folder.explicit()) {
+                        if (folder.explicit() && folder.scanEnabled()) {
                             registerTree(folder.path());
                         }
                     }
@@ -228,15 +264,19 @@ public final class LibraryScanner implements AutoCloseable {
                 watching = false;
                 lastError = "ファイル監視を開始できませんでした: " + e.getMessage();
             }
-            // Even when the platform watcher is unavailable, the sweep keeps the catalog current.
-            scheduler.scheduleWithFixedDelay(() -> {
-                if (!closed.get()) {
-                    requestScan();
-                }
-            }, SWEEP_MINUTES, SWEEP_MINUTES, TimeUnit.MINUTES);
+            if (sweep) {
+                // Even when the platform watcher is unavailable, the sweep keeps the catalog current.
+                scheduler.scheduleWithFixedDelay(() -> {
+                    if (!closed.get()) {
+                        requestScan();
+                    }
+                }, SWEEP_MINUTES, SWEEP_MINUTES, TimeUnit.MINUTES);
+            }
         }
         publishState(true);
-        requestScan();
+        if (initialScan) {
+            requestScan();
+        }
     }
 
     /**
@@ -246,13 +286,20 @@ public final class LibraryScanner implements AutoCloseable {
      * @return the registered folder
      */
     public Folder addFolder(Path directory) {
+        return addFolder(directory, true);
+    }
+
+    /** Registers a folder and optionally scans it right away. */
+    public Folder addFolder(Path directory, boolean scan) {
         Folder folder = library.addFolder(directory);
         remember(folder);
-        if (watching) {
+        if (watching && folder.scanEnabled()) {
             scheduler.execute(() -> registerTree(folder.path()));
         }
         publishState(true);
-        requestFolderScan(folder.id());
+        if (scan) {
+            requestFolderScan(folder.id());
+        }
         return folder;
     }
 
@@ -385,7 +432,7 @@ public final class LibraryScanner implements AutoCloseable {
                 refreshFolders();
                 List<Folder> targets;
                 if (all) {
-                    targets = folders.values().stream().filter(Folder::explicit).toList();
+                    targets = folders.values().stream().filter(Folder::explicit).filter(Folder::scanEnabled).toList();
                 } else {
                     targets = specific.stream().map(folders::get).filter(folder -> folder != null).toList();
                 }
@@ -432,13 +479,48 @@ public final class LibraryScanner implements AutoCloseable {
         }
     }
 
-    private void scanFolderInternal(Folder folder) {
-        Path root = folder.path();
-        if (!Files.isDirectory(root)) {
-            lastError = "フォルダが見つかりません: " + root;
+    private Listing listDirectory(Path dir) throws IOException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+            List<Entry> children = new ArrayList<>();
+            for (Path child : stream) {
+                children.add(new Entry(child, Files.readAttributes(child, BasicFileAttributes.class)));
+            }
+            return new Listing(Files.readAttributes(dir, BasicFileAttributes.class), children);
+        }
+    }
+
+    /**
+     * Walks one directory with a timeout. An unresponsive directory is skipped; its siblings and
+     * the rest of the tree are still scanned.
+     */
+    private void walkTree(Path dir, SimpleFileVisitor<Path> visitor, AtomicBoolean complete) throws IOException {
+        Listing listing;
+        try {
+            listing = walkers.submit(() -> listDirectory(dir)).get(DIRECTORY_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException | ExecutionException e) {
+            complete.set(false);
             errors.incrementAndGet();
+            lastError = "読み込めません: " + dir;
+            visitor.visitFileFailed(dir, new IOException(lastError, e));
+            visitor.postVisitDirectory(dir, new IOException(lastError, e));
+            return;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return;
         }
+        visitor.preVisitDirectory(dir, listing.attrs());
+        for (Entry entry : listing.children()) {
+            if (entry.attrs().isDirectory() && !entry.attrs().isSymbolicLink()) {
+                walkTree(entry.path(), visitor, complete);
+            } else {
+                visitor.visitFile(entry.path(), entry.attrs());
+            }
+        }
+        visitor.postVisitDirectory(dir, null);
+    }
+
+    private void scanFolderInternal(Folder folder) {
+        Path root = folder.path();
         String token = library.beginScan(folder.id());
         activeTokens.put(folder.id(), token);
         String rootKey = PathUtil.key(root);
@@ -453,10 +535,11 @@ public final class LibraryScanner implements AutoCloseable {
             }
         }
         AtomicBoolean walkFinished = new AtomicBoolean(true);
+        importsBlocked = false;
         message = folder.name() + " をスキャン中";
         publishState(true);
         try {
-            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+            SimpleFileVisitor<Path> visitor = new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                     // Reports the directory the walk is in, not the individual file being decoded.
@@ -492,7 +575,7 @@ public final class LibraryScanner implements AutoCloseable {
                             processed.incrementAndGet();
                             publishState(false);
                         } else {
-                            submitImport(ownerId, file, token, attrs);
+                            submitImport(ownerId, file, token, attrs, walkFinished);
                         }
                     } catch (RuntimeException e) {
                         errors.incrementAndGet();
@@ -518,9 +601,33 @@ public final class LibraryScanner implements AutoCloseable {
                     }
                     return FileVisitResult.CONTINUE;
                 }
-            });
+            };
+            Callable<Void> walk = () -> {
+                if (!Files.isDirectory(root)) {
+                    lastError = "フォルダが見つかりません: " + root;
+                    errors.incrementAndGet();
+                    walkFinished.set(false);
+                    return null;
+                }
+                walkTree(root, visitor, walkFinished);
+                return null;
+            };
+            try {
+                walkers.submit(walk).get();
+            } catch (ExecutionException e) {
+                walkFinished.set(false);
+                errors.incrementAndGet();
+                lastError = "スキャンできません: " + root + " (" + e.getCause() + ")";
+                drainAllSaves();
+                return;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                walkFinished.set(false);
+                drainAllSaves();
+                return;
+            }
 
-            awaitImports();
+            boolean importsDone = awaitImports();
             drainAllSaves();
             for (Map.Entry<Long, List<String>> entry : unchanged.entrySet()) {
                 List<String> keys = entry.getValue();
@@ -528,7 +635,7 @@ public final class LibraryScanner implements AutoCloseable {
                     library.touchBatch(keys.subList(from, Math.min(from + TOUCH_BATCH, keys.size())), token, entry.getKey());
                 }
             }
-            if (walkFinished.get() && !closed.get()) {
+            if (walkFinished.get() && importsDone && !closed.get()) {
                 library.finishScanTree(root, token);
                 candidates.removeAll(visited);
                 if (!candidates.isEmpty()) {
@@ -541,7 +648,7 @@ public final class LibraryScanner implements AutoCloseable {
                 }
             }
             library.markFolderScanned(folder.id());
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             errors.incrementAndGet();
             lastError = "スキャンできません: " + root + " (" + e.getMessage() + ")";
         } finally {
@@ -556,18 +663,29 @@ public final class LibraryScanner implements AutoCloseable {
      * number of files in flight; the monitor lets the scan wait for every queued decode before it
      * prunes rows that were not seen.
      */
-    private void submitImport(long folderId, Path file, String token, BasicFileAttributes attrs) {
-        if (closed.get()) {
+    private void submitImport(long folderId, Path file, String token, BasicFileAttributes attrs, AtomicBoolean complete) {
+        if (closed.get() || importsBlocked) {
             return;
         }
+        boolean acquired;
         try {
-            importPermits.acquire();
+            acquired = importPermits.tryAcquire(IMPORT_WAIT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return;
         }
+        if (!acquired) {
+            // Every decoder is stuck. Skip the rest of this scan rather than waiting per file.
+            importsBlocked = true;
+            complete.set(false);
+            errors.incrementAndGet();
+            lastError = "画像の読み込みが応答しないためスキップしました: " + file.getFileName();
+            return;
+        }
+        String key = PathUtil.key(file);
         synchronized (importMonitor) {
             activeImports++;
+            importStarted.put(key, System.nanoTime());
         }
         try {
             importers.submit(() -> {
@@ -577,17 +695,20 @@ public final class LibraryScanner implements AutoCloseable {
                     errors.incrementAndGet();
                     lastError = e.getMessage();
                 } finally {
-                    releaseImport();
+                    releaseImport(key);
                 }
             });
         } catch (RuntimeException e) {
-            releaseImport();
+            releaseImport(key);
             errors.incrementAndGet();
             lastError = e.getMessage();
         }
     }
 
-    private void releaseImport() {
+    private void releaseImport(String key) {
+        if (key != null) {
+            importStarted.remove(key);
+        }
         importPermits.release();
         synchronized (importMonitor) {
             activeImports--;
@@ -595,16 +716,26 @@ public final class LibraryScanner implements AutoCloseable {
         }
     }
 
-    private void awaitImports() {
+    /** Waits for decodes, but gives up when one of them is stuck in file I/O. */
+    private boolean awaitImports() {
         synchronized (importMonitor) {
             while (activeImports > 0 && !closed.get()) {
+                long now = System.nanoTime();
+                for (Map.Entry<String, Long> entry : importStarted.entrySet()) {
+                    if (now - entry.getValue() > TimeUnit.SECONDS.toNanos(IMPORT_STUCK_SECONDS)) {
+                        errors.incrementAndGet();
+                        lastError = "読み込みが応答しませんでした: " + entry.getKey();
+                        return false;
+                    }
+                }
                 try {
-                    importMonitor.wait(50);
+                    importMonitor.wait(200);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    return;
+                    return false;
                 }
             }
+            return true;
         }
     }
 
@@ -995,22 +1126,27 @@ public final class LibraryScanner implements AutoCloseable {
             future.cancel(false);
         }
         pendingEvents.clear();
+        // Interrupt the take() loop before closing the service: on some platforms close() waits
+        // for an in-flight take() to return.
+        if (watchThread != null) {
+            watchThread.interrupt();
+        }
         if (watchService != null) {
             try {
                 watchService.close();
             } catch (IOException ignored) {
             }
         }
-        if (watchThread != null) {
-            watchThread.interrupt();
-        }
         scheduler.shutdownNow();
         coordinator.shutdownNow();
         importers.shutdownNow();
+        walkers.shutdownNow();
+        // A thread blocked in native filesystem I/O ignores interrupts. Every pool thread is a
+        // daemon, so keep the waits short and let the JVM exit even if one is still stuck.
         try {
-            coordinator.awaitTermination(3, TimeUnit.SECONDS);
-            importers.awaitTermination(3, TimeUnit.SECONDS);
-            scheduler.awaitTermination(2, TimeUnit.SECONDS);
+            coordinator.awaitTermination(1, TimeUnit.SECONDS);
+            importers.awaitTermination(1, TimeUnit.SECONDS);
+            scheduler.awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

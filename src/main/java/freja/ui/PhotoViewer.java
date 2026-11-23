@@ -117,6 +117,10 @@ public final class PhotoViewer extends JDialog {
     };
 
     public PhotoViewer(Window owner, List<Photo> photos, Photo start) {
+        this(owner, photos, start, null);
+    }
+
+    public PhotoViewer(Window owner, List<Photo> photos, Photo start, BufferedImage placeholder) {
         super(owner, "Freja", ModalityType.MODELESS);
         setIconImage(Icons.applicationImage());
         this.photos = List.copyOf(photos);
@@ -217,16 +221,9 @@ public final class PhotoViewer extends JDialog {
             }
         });
 
-        // Decode the first photo before the window is shown so it never flashes a placeholder.
-        photo = photos.isEmpty() ? null : photos.get(index);
-        if (photo != null) {
-            try {
-                image = loadImage(photo);
-                loadedPhotoId = photo.id();
-            } catch (IOException | RuntimeException | Error e) {
-                error = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
-            }
-        }
+        // Never read a file on the event dispatch thread. The cached thumbnail, when available, is
+        // shown immediately and replaced by the full image once the background decode finishes.
+        image = placeholder;
         showPhoto(index);
     }
 
@@ -257,7 +254,12 @@ public final class PhotoViewer extends JDialog {
      * @return the visible viewer
      */
     public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener) {
-        PhotoViewer viewer = new PhotoViewer(owner, photos, start);
+        return open(owner, photos, start, listener, null);
+    }
+
+    public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener,
+            BufferedImage placeholder) {
+        PhotoViewer viewer = new PhotoViewer(owner, photos, start, placeholder);
         viewer.setListener(listener);
         GraphicsDevice device = owner == null ? GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
                 : owner.getGraphicsConfiguration().getDevice();
