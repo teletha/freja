@@ -306,6 +306,13 @@ public final class ARXSettingsPane extends JPanel {
         public Dimension getMaximumSize() {
             return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
         }
+
+        @Override
+        public Dimension getMinimumSize() {
+            // GridBagLayout shrinks rows below their preferred height when the enclosing document
+            // is short; a block must keep its full height or its contents get crushed.
+            return new Dimension(0, getPreferredSize().height);
+        }
     }
 
     /** One anchored page of the document. */

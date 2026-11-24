@@ -94,6 +94,9 @@ public final class SettingsPanel extends JPanel {
 
     private JPanel themeGrid;
 
+    /** Current number of tile rows, used to pin the grid's height against stale parent sizes. */
+    private int themeRows = 1;
+
     private ARXButton moreButton;
 
     private JLabel themeCount;
@@ -168,7 +171,24 @@ public final class SettingsPanel extends JPanel {
                 ARXSettingsPane.Text.of("Narrow the candidates by brightness"), themeScope)
                 .keywords("filter", "brightness", "light", "dark"));
 
-        themeGrid = new JPanel(new GridLayout(1, THEME_COLUMNS, 12, 12));
+        themeGrid = new JPanel(new GridLayout(1, THEME_COLUMNS, 12, 12)) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.height = gridHeight();
+                return size;
+            }
+
+            @Override
+            public Dimension getMinimumSize() {
+                return new Dimension(0, gridHeight());
+            }
+
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, gridHeight());
+            }
+        };
         themeGrid.setOpaque(false);
         section.addContent(themeGrid, "theme", "themes", "colour", "color", "palette");
         showThemes();
@@ -192,6 +212,7 @@ public final class SettingsPanel extends JPanel {
             }
         }
         int rows = Math.max(1, (visible.size() + THEME_COLUMNS - 1) / THEME_COLUMNS);
+        themeRows = rows;
         themeGrid.setLayout(new GridLayout(rows, THEME_COLUMNS, 12, 12));
         themeGrid.removeAll();
         for (ThemeTile tile : visible) {
@@ -202,6 +223,18 @@ public final class SettingsPanel extends JPanel {
         themeCount.setText(String.format(ARXLang.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
         themeGrid.revalidate();
         themeGrid.repaint();
+        // The grid's height changed, so every ancestor's preferred size changed with it.
+        for (java.awt.Component parent = themeGrid.getParent(); parent != null; parent = parent.getParent()) {
+            if (parent instanceof javax.swing.JComponent component) {
+                component.revalidate();
+                component.repaint();
+            }
+        }
+    }
+
+    /** Height the tile grid insists on, independent of whatever size the parent hands it. */
+    private int gridHeight() {
+        return themeRows * 112 + Math.max(0, themeRows - 1) * 12;
     }
 
     private void selectTheme(Theme.ThemeInfo theme) {
