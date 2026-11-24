@@ -137,6 +137,16 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "Theme.Preview",
+			"packageName": "freja.ui",
+			"type": "Record"
+		},
+		{
+			"name": "Theme.ThemeInfo",
+			"packageName": "freja.ui",
+			"type": "Record"
+		},
+		{
 			"name": "MainWindow",
 			"packageName": "freja.ui",
 			"type": "Class"
