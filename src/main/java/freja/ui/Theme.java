@@ -158,9 +158,20 @@ public final class Theme {
         UIManager.put("ScrollBar.thumbArc", 999);
         UIManager.put("ScrollBar.showButtons", false);
         UIManager.put("ScrollBar.trackArc", 999);
+        UIManager.put("ToolBar.background", palette.sidebar);
+        // FlatLaf paints toolbar buttons with its own toolbar hover colour. Point both that key and
+        // the ARX blended hover at the same shade derived from the sidebar background.
+        Color hover = hoverShade(palette.sidebar);
+        UIManager.put("Button.toolbar.hoverBackground", hover);
+        UIManager.put("Button.toolbar.hoverForeground", palette.text);
+        UIManager.put("ARXButton.hoverBackground", hover);
         UIManager.put("SplitPane.dividerSize", 1);
         UIManager.put("Table.showHorizontalLines", false);
         UIManager.put("Component.focusColor", palette.accent);
+        UIManager.put("Button.defaultBackground", palette.accent);
+        UIManager.put("Button.defaultForeground", Color.WHITE);
+        UIManager.put("Button.defaultHoverBackground", palette.accentDark);
+        UIManager.put("Button.defaultHoverForeground", Color.WHITE);
         UIManager.put("Component.selectionBackground", palette.accentSoft);
         UIManager.put("Component.selectionForeground", palette.text);
         UIManager.put("defaultFont", font(Font.PLAIN, 13));
@@ -201,6 +212,16 @@ public final class Theme {
     public static Color mix(Color first, Color second, double ratio) {
         double value = Math.max(0, Math.min(1, ratio));
         return new Color((int) Math.round(first.getRed() * (1 - value) + second.getRed() * value), (int) Math.round(first.getGreen() * (1 - value) + second.getGreen() * value), (int) Math.round(first.getBlue() * (1 - value) + second.getBlue() * value));
+    }
+
+    /** Darkens a light base slightly and lightens a dark one, keeping its hue and saturation. */
+    public static Color hoverShade(Color base) {
+        float[] hsb = Color.RGBtoHSB(base.getRed(), base.getGreen(), base.getBlue(), null);
+        float brightness = (base.getRed() * 0.299f + base.getGreen() * 0.587f + base.getBlue() * 0.114f) / 255f;
+        float delta = brightness > 0.5f ? -0.06f : 0.12f;
+        float value = Math.max(0f, Math.min(1f, hsb[2] + delta));
+        Color derived = new Color(Color.HSBtoRGB(hsb[0], hsb[1], value));
+        return new Color(derived.getRed(), derived.getGreen(), derived.getBlue(), base.getAlpha());
     }
 
     private static Color dynamic(Function<Palette, Color> selector) {

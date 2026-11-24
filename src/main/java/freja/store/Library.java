@@ -886,6 +886,15 @@ public final class Library implements AutoCloseable {
         }
     }
 
+    /** Removes every folder and, through foreign keys, everything catalogued below them. */
+    public synchronized void clearFolders() {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("DELETE FROM folders");
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to clear folders", e);
+        }
+    }
+
     /** Enables or disables a folder as a scan target. Its photos stay in the catalog. */
     public synchronized void setFolderScanEnabled(long folderId, boolean enabled) {
         try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET scan_enabled=? WHERE id=?")) {

@@ -39,6 +39,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -169,7 +170,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         setBackground(Theme.BACKGROUND);
         setFocusable(true);
         setCursor(Cursor.getDefaultCursor());
-        setBorder(null);
+        setBorder(BorderFactory.createEmptyBorder());
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -1279,17 +1280,10 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.drawImage(image, x, y, width, height, null);
         }
 
-        if (selected) {
-            g.setColor(Theme.ACCENT);
-            g.setStroke(new BasicStroke(2.4f));
-            g.draw(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 13, 13));
-            g.setColor(Theme.ACCENT);
-            g.fill(new Ellipse2D.Float(cardX + 8, cardY + 8, 24, 24));
-            Icons.check(16, Color.WHITE).paintIcon(this, g, cardX + 12, cardY + 12);
-        } else if (hovered) {
-            g.setColor(new Color(0x2E, 0x6B, 0xE6, 90));
-            g.setStroke(new BasicStroke(1.4f));
-            g.draw(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 13, 13));
+        // Match the sidebar's navigation rows: a translucent rounded tint, not a hard outline.
+        if (selected || hovered) {
+            g.setColor(selected ? withAlpha(Theme.ACCENT, 80) : withAlpha(Theme.HOVER, 110));
+            g.fill(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 12, 12));
         }
 
         if (photo.favorite()) {
@@ -1312,6 +1306,10 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         g.setFont(Theme.font(Font.PLAIN, 13));
         g.setColor(Theme.MUTED);
         drawCentered(g, "フォルダを追加するか、検索条件を変えてください。", centerX, centerY + 42);
+    }
+
+    private static Color withAlpha(Color color, int alpha) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
     }
 
     private void drawCentered(Graphics2D g, String text, int centerX, int y) {

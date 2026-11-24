@@ -134,7 +134,7 @@ public final class PhotoInspector extends JPanel {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         actions.setOpaque(false);
         actions.setAlignmentX(LEFT_ALIGNMENT);
-        open.putClientProperty(FlatClientProperties.STYLE, "background:#2E6BE6; foreground:#FFFFFF; borderWidth:0; arc:9; hoverBackground:#1F52B8; pressedBackground:#1A459B");
+        open.putClientProperty(FlatClientProperties.STYLE, "background:#2E6BE6; foreground:#FFFFFF; borderWidth:0; hoverBackground:#1F52B8; pressedBackground:#1A459B");
         open.setFont(Theme.font(Font.BOLD, 12));
         open.addActionListener(event -> {
             if (photo != null) {
@@ -240,7 +240,7 @@ public final class PhotoInspector extends JPanel {
         body.add(Box.createVerticalGlue());
 
         JScrollPane scroll = new JScrollPane(body);
-        scroll.setBorder(null);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(28);
         scroll.setBackground(Theme.SURFACE);

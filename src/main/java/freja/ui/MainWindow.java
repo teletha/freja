@@ -23,11 +23,8 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,12 +42,10 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -63,7 +58,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
@@ -71,10 +65,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
-import com.formdev.flatlaf.FlatClientProperties;
 
 import freja.model.Folder;
 import freja.model.LibraryStats;
@@ -84,6 +75,8 @@ import freja.model.PhotoFilter.SortOrder;
 import freja.scan.LibraryScanner;
 import freja.store.Library;
 import freja.util.PathUtil;
+import laevatain.ARXButton;
+import laevatain.ARXSearchField;
 
 /**
  * The main application window.
@@ -93,8 +86,6 @@ public final class MainWindow extends JFrame {
     private static final Preferences PREFERENCES = Preferences.userNodeForPackage(MainWindow.class);
 
     private static final String SORT_PREFERENCE = "view.sortOrder";
-
-    private static final String LAST_FOLDER_PREFERENCE = "folder.lastDirectory";
 
     private static final String SELECTED_FOLDER_PREFERENCE = "view.selectedFolderPath";
 
@@ -118,7 +109,7 @@ public final class MainWindow extends JFrame {
 
     private final PhotoInspector inspector;
 
-    private final JTextField search = new JTextField();
+    private final ARXSearchField search;
 
     private final JComboBox<SortOrder> sort = new JComboBox<>(SortOrder.values());
 
@@ -144,7 +135,7 @@ public final class MainWindow extends JFrame {
 
     private ScanFoldersDialog scanFoldersDialog;
 
-    private JButton themeButton;
+    private ARXButton themeButton;
 
     private javax.swing.JSplitPane split;
 
@@ -154,8 +145,6 @@ public final class MainWindow extends JFrame {
     private int savedSidebarDivider;
 
     private final Timer refreshTimer;
-
-    private final Timer searchTimer;
 
     /**
      * Loads and sorts the catalog off the event dispatch thread. Two threads let a search refresh
@@ -186,8 +175,6 @@ public final class MainWindow extends JFrame {
 
     private boolean refreshScheduled;
 
-    private volatile boolean scanning;
-
     private boolean shuttingDown;
 
     private volatile long uiHeartbeat = System.nanoTime();
@@ -201,7 +188,7 @@ public final class MainWindow extends JFrame {
     /** Tag identifiers selected in the toolbar filter; empty means no tag restriction. */
     private final List<Long> selectedTagIds = new ArrayList<>();
 
-    private JButton tagFilterButton;
+    private ARXButton tagFilterButton;
 
     public MainWindow(Library library, LibraryScanner scanner) {
         super("Freja");
@@ -211,6 +198,10 @@ public final class MainWindow extends JFrame {
         this.cache = new ThumbnailCache(library);
         this.inspector = new PhotoInspector();
         this.grid = new PhotoGrid(cache);
+        this.search = new ARXSearchField("検索", Icons.search(15, Theme.MUTED));
+        search.setPreferredSize(new Dimension(300, 31));
+        search.setMaximumSize(new Dimension(360, 31));
+        search.onTextChanged(this::scheduleRefresh);
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new Dimension(980, 640));
@@ -220,9 +211,6 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
         refreshTimer.setRepeats(false);
-        // Short enough to feel immediate, long enough to coalesce the keystrokes of one word.
-        searchTimer = new Timer(120, event -> refreshAll());
-        searchTimer.setRepeats(false);
         Timer heartbeat = new Timer(500, event -> uiHeartbeat = System.nanoTime());
         heartbeat.start();
         Thread watchdog = new Thread(this::watchUiResponsiveness, "freja-ui-watchdog");
@@ -236,19 +224,15 @@ public final class MainWindow extends JFrame {
         scanner.addListener(new LibraryScanner.Listener() {
             @Override
             public void onStateChanged(LibraryScanner.State state) {
-                scanning = state.scanning();
                 SwingUtilities.invokeLater(() -> applyState(state));
             }
 
             @Override
             public void onLibraryChanged() {
                 cache.retryMissing();
-                // A full refresh loads and sorts every row on the EDT. During an initial scan that
-                // would be repeated for every batch of imports; progress is already shown by
-                // applyState, so wait for the completion notification instead.
-                if (scanning) {
-                    return;
-                }
+                // The scanner notifies once per folder. The refresh runs on a background thread and
+                // the 320 ms debounce coalesces those notifications into a few updates per second,
+                // so the grid grows progressively without overloading the UI.
                 SwingUtilities.invokeLater(MainWindow.this::scheduleRefresh);
             }
         });
@@ -272,7 +256,7 @@ public final class MainWindow extends JFrame {
         main.add(toolbar(), BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(grid);
-        scroll.setBorder(null);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setBackground(Theme.BACKGROUND);
         scroll.getViewport().setBackground(Theme.BACKGROUND);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -286,7 +270,7 @@ public final class MainWindow extends JFrame {
 
         inspector.setMinimumSize(new Dimension(280, 320));
         split = new javax.swing.JSplitPane(javax.swing.JSplitPane.HORIZONTAL_SPLIT, center, inspector);
-        split.setBorder(null);
+        split.setBorder(BorderFactory.createEmptyBorder());
         split.setDividerSize(1);
         split.setResizeWeight(1.0);
         split.setContinuousLayout(true);
@@ -296,7 +280,7 @@ public final class MainWindow extends JFrame {
         sidebar.setMinimumSize(new Dimension(180, 0));
         main.setMinimumSize(new Dimension(420, 0));
         sidebarSplit = new javax.swing.JSplitPane(javax.swing.JSplitPane.HORIZONTAL_SPLIT, sidebar, main);
-        sidebarSplit.setBorder(null);
+        sidebarSplit.setBorder(BorderFactory.createEmptyBorder());
         sidebarSplit.setDividerSize(5);
         sidebarSplit.setResizeWeight(0.0);
         sidebarSplit.setContinuousLayout(true);
@@ -318,46 +302,29 @@ public final class MainWindow extends JFrame {
         JToolBar bar = new JToolBar();
         bar.setFloatable(false);
         bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER), BorderFactory.createEmptyBorder(7, 12, 7, 14)));
-        bar.setBackground(Theme.SURFACE);
+        bar.setBackground(Theme.SIDEBAR);
 
-        JButton add = new JButton("フォルダを追加", Icons.folder(16, Theme.ACCENT));
-        add.setFont(Theme.font(Font.BOLD, 12));
-        add.addActionListener(event -> chooseFolder());
+        ARXButton add = new ARXButton("フォルダを追加", Icons.folder(16, Theme.MUTED),
+                ARXButton.Variant.SECONDARY, this::openScanFolders);
+        add.setFont(Theme.font(Font.PLAIN, 12));
         bar.add(add);
         bar.add(Box.createHorizontalStrut(6));
 
-        JButton rescan = new JButton("再スキャン", Icons.refresh(15, Theme.MUTED));
-        rescan.setFont(Theme.font(Font.PLAIN, 12));
-        rescan.setToolTipText("すべてのフォルダを再スキャン (F5)");
-        rescan.addActionListener(event -> {
+        ARXButton rescan = new ARXButton("再スキャン", Icons.refresh(15, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> {
             scanner.scanAll();
             statusMessage.setText("再スキャンを開始しました");
         });
+        rescan.setFont(Theme.font(Font.PLAIN, 12));
+        rescan.setToolTipText("すべてのフォルダを再スキャン (F5)");
         bar.add(rescan);
         bar.add(Box.createHorizontalStrut(14));
 
-        // Swing beeps when Backspace/Delete is pressed on an empty text field.
-        search.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent event) {
-                if (search.getText().isEmpty()
-                        && (event.getKeyCode() == KeyEvent.VK_BACK_SPACE || event.getKeyCode() == KeyEvent.VK_DELETE)) {
-                    event.consume();
-                }
-            }
-        });
-        search.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(15, Theme.MUTED));
-        search.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "検索");
-        search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        search.setPreferredSize(new Dimension(300, 31));
-        search.setMaximumSize(new Dimension(360, 31));
         bar.add(search);
         bar.add(Box.createHorizontalStrut(6));
 
-        tagFilterButton = new JButton("タグ", Icons.tag(14, Theme.MUTED));
+        tagFilterButton = new ARXButton("タグ", Icons.tag(14, Theme.MUTED), ARXButton.Variant.SECONDARY, this::showTagFilter);
         tagFilterButton.setFont(Theme.font(Font.PLAIN, 12));
         tagFilterButton.setToolTipText("タグで絞り込む");
-        tagFilterButton.addActionListener(event -> showTagFilter());
         bar.add(tagFilterButton);
         bar.add(Box.createHorizontalGlue());
 
@@ -379,15 +346,14 @@ public final class MainWindow extends JFrame {
         bar.add(zoom);
         bar.add(Box.createHorizontalStrut(8));
 
-        JButton slideshow = new JButton("スライドショー", Icons.play(13, Theme.MUTED));
+        ARXButton slideshow = new ARXButton("スライドショー", Icons.play(13, Theme.MUTED), ARXButton.Variant.SECONDARY, this::openSlideshow);
         slideshow.setFont(Theme.font(Font.PLAIN, 12));
-        slideshow.addActionListener(event -> openSlideshow());
         bar.add(slideshow);
 
-        themeButton = new JButton(Theme.isDark() ? Icons.sun(16, Theme.MUTED) : Icons.moon(16, Theme.MUTED));
+        themeButton = new ARXButton(null,
+                Theme.isDark() ? Icons.sun(16, Theme.MUTED) : Icons.moon(16, Theme.MUTED),
+                ARXButton.Variant.SECONDARY, () -> setDarkMode(!Theme.isDark()));
         themeButton.setToolTipText(Theme.isDark() ? "ライトモードに切り替え" : "ダークモードに切り替え");
-        themeButton.setFocusable(false);
-        themeButton.addActionListener(event -> setDarkMode(!Theme.isDark()));
         bar.add(Box.createHorizontalStrut(8));
         bar.add(themeButton);
         return bar;
@@ -467,11 +433,10 @@ public final class MainWindow extends JFrame {
         card.add(description2);
         card.add(Box.createVerticalStrut(26));
 
-        JButton add = new JButton("フォルダを追加", Icons.folder(17, Color.WHITE));
-        add.setFont(Theme.font(Font.BOLD, 13));
-        add.putClientProperty(FlatClientProperties.STYLE, "background:#2E6BE6; foreground:#FFFFFF; borderWidth:0; arc:11; hoverBackground:#1F52B8; pressedBackground:#1A459B");
+        ARXButton add = new ARXButton("フォルダを追加", Icons.folder(17, Theme.MUTED),
+                ARXButton.Variant.SECONDARY, this::openScanFolders);
+        add.setFont(Theme.font(Font.PLAIN, 13));
         add.setAlignmentX(CENTER_ALIGNMENT);
-        add.addActionListener(event -> chooseFolder());
         card.add(add);
         card.add(Box.createVerticalStrut(22));
 
@@ -497,8 +462,7 @@ public final class MainWindow extends JFrame {
     private JMenuBar menuBar() {
         JMenuBar bar = new JMenuBar();
         JMenu file = new JMenu("ファイル");
-        file.add(menuItem("スキャン対象フォルダ…", null, this::openScanFolders));
-        file.add(menuItem("フォルダを追加…", "control O", this::chooseFolder));
+        file.add(menuItem("監視フォルダ…", "control O", this::openScanFolders));
         file.add(menuItem("再スキャン", "F5", () -> scanner.scanAll()));
         file.addSeparator();
         file.add(menuItem("終了", "control Q", this::shutdown));
@@ -548,7 +512,7 @@ public final class MainWindow extends JFrame {
 
             @Override
             public void onAddFolder() {
-                chooseFolder();
+                openScanFolders();
             }
 
             @Override
@@ -656,30 +620,25 @@ public final class MainWindow extends JFrame {
             savePreferences();
         });
         zoom.addChangeListener(event -> savePreferences());
-        search.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent event) {
-                searchTimer.restart();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent event) {
-                searchTimer.restart();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent event) {
-                searchTimer.restart();
-            }
-        });
     }
 
     /** Shows or hides the details panel and remembers the choice. */
     private void setInspectorVisible(boolean visible) {
         inspectorItem.setSelected(visible);
         inspector.setVisible(visible);
-        if (split.getWidth() > 0) {
-            split.setDividerLocation(visible ? Math.max(0, split.getWidth() - 308) : split.getWidth());
+        if (visible) {
+            if (split.getRightComponent() != inspector) {
+                split.setRightComponent(inspector);
+            }
+            split.setDividerSize(1);
+            if (split.getWidth() > 0) {
+                split.setDividerLocation(Math.max(0, split.getWidth() - 308));
+            }
+        } else {
+            // Moving the divider to the edge is not enough: JSplitPane clamps it to the right
+            // component's minimum width, which leaves the hidden inspector's space reserved.
+            split.setRightComponent(null);
+            split.setDividerSize(0);
         }
         split.revalidate();
         split.repaint();
@@ -751,15 +710,55 @@ public final class MainWindow extends JFrame {
                 }
 
                 @Override
-                public void onRemoveFolder(long folderId) {
-                    removeFolder(folderId);
+                public void onClearFolders() {
+                    int answer = JOptionPane.showConfirmDialog(MainWindow.this,
+                            "登録されているすべてのフォルダと、ライブラリに記録された写真データを削除します。\n"
+                                    + "ディスク上の写真ファイル自体は削除されません。",
+                            "監視フォルダをクリア", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (answer != JOptionPane.OK_OPTION) {
+                        return;
+                    }
+                    scanner.clearFolders();
                     refreshScanFolders();
+                    refreshAll();
+                    statusMessage.setText("監視フォルダをクリアしました");
                 }
 
                 @Override
-                public void onScanFolder(long folderId) {
-                    scanner.scanFolder(folderId);
-                    statusMessage.setText("フォルダをスキャンしています…");
+                public void onRemoveFolders(List<Long> folderIds) {
+                    if (folderIds.isEmpty()) {
+                        return;
+                    }
+                    List<String> names = folderIds.stream()
+                            .map(id -> library.folder(id).map(Folder::name).orElse("ID " + id))
+                            .toList();
+                    String message = folderIds.size() == 1
+                            ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
+                            : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
+                    int answer = JOptionPane.showConfirmDialog(MainWindow.this, message, "フォルダを削除",
+                            JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    if (answer != JOptionPane.OK_OPTION) {
+                        return;
+                    }
+                    for (Long folderId : folderIds) {
+                        scanner.removeFolder(folderId);
+                    }
+                    if (folderIds.contains(MainWindow.this.folderId)) {
+                        mode = Sidebar.Mode.ALL;
+                        MainWindow.this.folderId = -1;
+                        scrollToSelectedFolder = false;
+                        applySortForCurrentView();
+                    }
+                    refreshScanFolders();
+                    refreshAll();
+                }
+
+                @Override
+                public void onScanFolders(List<Long> folderIds) {
+                    for (Long id : folderIds) {
+                        scanner.scanFolder(id);
+                    }
+                    statusMessage.setText(folderIds.size() + " 件のフォルダをスキャンしています…");
                 }
 
                 @Override
@@ -801,66 +800,12 @@ public final class MainWindow extends JFrame {
 
     private void registerFolder(Path path) {
         try {
-            scanner.addFolder(path, false);
+            scanner.addFolder(path);
+            statusMessage.setText(path + " をスキャンしています…");
             refreshScanFolders();
             refreshAll();
         } catch (IllegalArgumentException e) {
             statusMessage.setText(e.getMessage());
-        }
-    }
-
-    private void chooseFolder() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("写真フォルダを選択");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setAcceptAllFileFilterUsed(false);
-        chooser.setCurrentDirectory(lastFolderDirectory());
-        int result = chooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selected = chooser.getSelectedFile();
-            if (selected == null) {
-                return;
-            }
-            rememberFolderLocation(selected);
-            try {
-                Folder folder = scanner.addFolder(selected.toPath());
-                selectMode(Sidebar.Mode.FOLDER, folder.id());
-                refreshAll();
-                statusMessage.setText(folder.path() + " をスキャンしています…");
-            } catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "フォルダを追加できません", JOptionPane.WARNING_MESSAGE);
-            }
-        } else {
-            // Remember where the user browsed even when they close the dialog without choosing.
-            rememberFolderLocation(chooser.getCurrentDirectory());
-        }
-    }
-
-    private File lastFolderDirectory() {
-        String remembered = PREFERENCES.get(LAST_FOLDER_PREFERENCE, "");
-        if (!remembered.isBlank()) {
-            File directory = new File(remembered);
-            while (directory != null && !directory.isDirectory()) {
-                directory = directory.getParentFile();
-            }
-            if (directory != null) {
-                return directory;
-            }
-        }
-        return new File(System.getProperty("user.home"));
-    }
-
-    private void rememberFolderLocation(File location) {
-        if (location == null) {
-            return;
-        }
-        File directory = location.isDirectory() ? location : location.getParentFile();
-        if (directory != null) {
-            PREFERENCES.put(LAST_FOLDER_PREFERENCE, directory.getAbsolutePath());
-            try {
-                PREFERENCES.flush();
-            } catch (Exception ignored) {
-            }
         }
     }
 
@@ -1151,7 +1096,8 @@ public final class MainWindow extends JFrame {
             themeButton.setIcon(dark ? Icons.sun(16, Theme.MUTED) : Icons.moon(16, Theme.MUTED));
             themeButton.setToolTipText(dark ? "ライトモードに切り替え" : "ダークモードに切り替え");
         }
-        SwingUtilities.updateComponentTreeUI(this);
+        // Theme.applyLookAndFeel() already calls FlatLaf.updateUI() for every window; doing it
+        // again here double-installs UIs on custom renderers (the folder tree lost its rows).
         grid.repaint();
         sidebar.repaint();
         inspector.repaint();
@@ -1174,9 +1120,7 @@ public final class MainWindow extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 10, 12));
         panel.setPreferredSize(new Dimension(300, 360));
 
-        JTextField filter = new JTextField();
-        filter.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED));
-        filter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "タグを検索");
+        ARXSearchField filter = new ARXSearchField("タグを検索", Icons.search(14, Theme.MUTED));
         panel.add(filter, BorderLayout.NORTH);
 
         JPanel list = new JPanel();
@@ -1217,51 +1161,30 @@ public final class MainWindow extends JFrame {
             empty.setBorder(BorderFactory.createEmptyBorder(12, 4, 12, 4));
             list.add(empty);
         }
-        filter.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent event) {
-                applyFilter();
+        Runnable applyFilter = () -> {
+            String query = filter.getText() == null ? "" : filter.getText().trim().toLowerCase(java.util.Locale.ROOT);
+            for (int i = 0; i < rows.size(); i++) {
+                rows.get(i).setVisible(rowTags.get(i).name().toLowerCase(java.util.Locale.ROOT).contains(query));
             }
-
-            @Override
-            public void removeUpdate(DocumentEvent event) {
-                applyFilter();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent event) {
-                applyFilter();
-            }
-
-            private void applyFilter() {
-                String query = filter.getText() == null ? "" : filter.getText().trim().toLowerCase(java.util.Locale.ROOT);
-                for (int i = 0; i < rows.size(); i++) {
-                    rows.get(i).setVisible(rowTags.get(i).name().toLowerCase(java.util.Locale.ROOT).contains(query));
-                }
-                list.revalidate();
-                list.repaint();
-            }
-        });
+            list.revalidate();
+            list.repaint();
+        };
+        filter.onTextChanged(applyFilter);
 
         JScrollPane scroll = new JScrollPane(list);
-        scroll.setBorder(null);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
         panel.add(scroll, BorderLayout.CENTER);
 
-        JButton clear = new JButton("選択を解除");
-        clear.setFont(Theme.font(Font.PLAIN, 12));
-        clear.setForeground(Theme.TEXT);
-        clear.setOpaque(false);
-        clear.setContentAreaFilled(false);
-        clear.setFocusPainted(false);
-        clear.setEnabled(!selectedTagIds.isEmpty());
-        clear.addActionListener(event -> {
+        ARXButton clear = new ARXButton("選択を解除", null, ARXButton.Variant.DANGER, () -> {
             selectedTagIds.clear();
             updateTagFilterButton();
             refreshAll();
             popup.setVisible(false);
         });
+        clear.setFont(Theme.font(Font.PLAIN, 12));
+        clear.setEnabled(!selectedTagIds.isEmpty());
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setOpaque(false);
         footer.add(clear);

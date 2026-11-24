@@ -300,6 +300,23 @@ class LibraryTest {
     }
 
     @Test
+    void clearingFoldersRemovesCataloguedPhotosButKeepsTags() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("to-clear"));
+        try (Library library = new Library(temp.resolve("clear.db"))) {
+            Folder folder = library.addFolder(root);
+            library.savePhoto(folder.id(), root.resolve("a.jpg"), 1, 1,
+                    new PhotoImporter.AnalyzedPhoto(100, 100, 1, Exif.Data.EMPTY, new byte[] {1}, 100, 100), null);
+            library.addTag("旅行");
+
+            library.clearFolders();
+
+            assertTrue(library.folders().isEmpty());
+            assertTrue(library.photos(PhotoFilter.all()).isEmpty());
+            assertEquals(1, library.tags().size());
+        }
+    }
+
+    @Test
     void tagLinksAreOneWayAndExpandSearch() throws Exception {
         Path first = Files.createDirectories(temp.resolve("link-first"));
         Path second = Files.createDirectories(temp.resolve("link-second"));

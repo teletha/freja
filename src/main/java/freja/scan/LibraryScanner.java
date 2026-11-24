@@ -303,6 +303,28 @@ public final class LibraryScanner implements AutoCloseable {
         return folder;
     }
 
+    /** Removes every folder and its photos from the catalog, and stops watching all of them. */
+    public void clearFolders() {
+        for (WatchKey key : watchKeys.keySet()) {
+            key.cancel();
+        }
+        watchKeys.clear();
+        watchedPaths.clear();
+        for (ScheduledFuture<?> future : pendingEvents.values()) {
+            future.cancel(false);
+        }
+        pendingEvents.clear();
+        pendingSaves.clear();
+        requestedFolders.clear();
+        scanAllRequested.set(false);
+        folders.clear();
+        foldersByKey.clear();
+        activeTokens.clear();
+        library.clearFolders();
+        notifyChanged(true);
+        publishState(true);
+    }
+
     /**
      * Removes a folder from the catalog. Files on disk are not touched.
      *
@@ -454,6 +476,8 @@ public final class LibraryScanner implements AutoCloseable {
                         break;
                     }
                     scanFolderInternal(folder);
+                    // Let the UI pick up this folder's photos before the next one starts.
+                    notifyChanged(true);
                 }
                 lastElapsedNanos = System.nanoTime() - scanStartedNanos;
                 scanStartedNanos = 0;

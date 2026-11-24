@@ -49,6 +49,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import freja.model.Folder;
+import laevatain.ARXButton;
 import freja.model.LibraryStats;
 import freja.model.PhotoFilter.SortOrder;
 
@@ -196,7 +197,7 @@ public final class Sidebar extends JPanel {
         folderHolder.add(folderRows, BorderLayout.NORTH);
         folderScroll = new JScrollPane(folderHolder);
         JScrollPane scroll = folderScroll;
-        scroll.setBorder(null);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setOpaque(true);
         scroll.setBackground(Theme.SIDEBAR);
         scroll.getViewport().setOpaque(true);
@@ -226,15 +227,8 @@ public final class Sidebar extends JPanel {
         panel.add(heading, BorderLayout.CENTER);
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         buttons.setOpaque(false);
-        JButton manage = new JButton("タグ", Icons.tag(13, Theme.MUTED));
-        manage.setFont(Theme.font(Font.PLAIN, 11));
-        manage.setFocusable(false);
-        manage.setOpaque(false);
-        manage.setContentAreaFilled(false);
-        manage.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
-        manage.setToolTipText("タグを管理");
-        manage.addActionListener(event -> listener.onManageTags());
-        JButton add = iconButton(Icons.plus(14, Theme.MUTED), "フォルダを追加", () -> listener.onAddFolder());
+        ARXButton manage = headerButton("タグ", Icons.tag(13, Theme.MUTED), "タグを管理", () -> listener.onManageTags());
+        ARXButton add = headerButton(null, Icons.plus(14, Theme.MUTED), "監視フォルダを管理", () -> listener.onAddFolder());
         buttons.add(manage);
         buttons.add(add);
         panel.add(buttons, BorderLayout.EAST);
@@ -437,14 +431,11 @@ public final class Sidebar extends JPanel {
         return menu;
     }
 
-    private JButton iconButton(javax.swing.Icon icon, String tooltip, Runnable action) {
-        JButton button = new JButton(icon);
-        button.setFocusable(false);
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+    /** A small flat header button whose background and text change on hover. */
+    private ARXButton headerButton(String text, javax.swing.Icon icon, String tooltip, Runnable action) {
+        ARXButton button = new ARXButton(text, icon, ARXButton.Variant.SECONDARY, action);
+        button.setFont(Theme.font(Font.PLAIN, 12));
         button.setToolTipText(tooltip);
-        button.addActionListener(event -> action.run());
         return button;
     }
 
