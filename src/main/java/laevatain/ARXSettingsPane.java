@@ -49,8 +49,8 @@ import kiss.Variable;
 /**
  * A Windows 11-style settings surface: an {@link ARXNavList} rail on the left and one continuous,
  * scrollable document on the right. Every section registers a rail entry; choosing an entry glides
- * the viewport to that section, scrolling keeps the rail in sync, and the search field above the
- * entries narrows the whole page to the rows which answer to the query.
+ * the viewport to that section, scrolling keeps the rail in sync, and the search field in its own
+ * pane above the document narrows the whole page to the rows which answer to the query.
  * <p>
  * A page is built from {@link Row rows} inside rounded {@link Card cards}, and rows carry the words
  * they answer to: their caption, their description, the English origin of both and whatever
@@ -489,6 +489,8 @@ public final class ARXSettingsPane extends JPanel {
 
     private final JScrollPane scroll;
 
+    private final JPanel searchPane = new JPanel(new BorderLayout());
+
     private ARXSearchField search;
 
     private Timer glide;
@@ -521,6 +523,7 @@ public final class ARXSettingsPane extends JPanel {
 
         rail.setSection(railTitle.get());
         railTitle.observing().to(rail::setSection);
+        rail.setOnSelect(this::show);
         JPanel railPane = new JPanel(new BorderLayout());
         railPane.setOpaque(true);
         railPane.setBackground(navColor());
@@ -563,17 +566,25 @@ public final class ARXSettingsPane extends JPanel {
         });
         glide = new Timer(16, event -> glideScrollBar());
 
+        searchPane.setOpaque(false);
+        searchPane.setBorder(BorderFactory.createEmptyBorder(20, 30, 0, 30));
+        searchPane.setVisible(false);
+
         JPanel content = new JPanel(new BorderLayout());
         content.setOpaque(false);
-        content.setBorder(BorderFactory.createEmptyBorder(26, 30, 20, 30));
+        content.setBorder(BorderFactory.createEmptyBorder(16, 30, 20, 30));
         content.add(scroll, BorderLayout.CENTER);
-        add(content, BorderLayout.CENTER);
+        JPanel right = new JPanel(new BorderLayout());
+        right.setOpaque(false);
+        right.add(searchPane, BorderLayout.NORTH);
+        right.add(content, BorderLayout.CENTER);
+        add(right, BorderLayout.CENTER);
     }
 
     /**
-     * Installs the search field above the rail entries. Typing narrows every page to the rows
-     * which answer to the query, hides the pages and rail entries left empty, and glides to the
-     * first hit; clearing the field restores the whole document. Both captions follow their
+     * Installs the search field in its own pane above the document. Typing narrows every page to
+     * the rows which answer to the query, hides the pages and rail entries left empty, and glides
+     * to the first hit; clearing the field restores the whole document. Both captions follow their
      * variables, so the field reads in the current language, and Ctrl+F reaches it from anywhere
      * inside the page.
      */
@@ -583,7 +594,11 @@ public final class ARXSettingsPane extends JPanel {
         search.onTextChanged(() -> filter(search.query()));
         placeholder.text().observing().to(search::setPlaceholder);
         noneMessage.text().observing().to(none::setText);
-        rail.setHeader(search);
+        search.setPreferredSize(new Dimension(340, 30));
+        searchPane.add(search, BorderLayout.WEST);
+        searchPane.setVisible(true);
+        searchPane.revalidate();
+        searchPane.repaint();
         search.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control F"),
                 "focusSettingsSearch");
         search.getActionMap().put("focusSettingsSearch", new javax.swing.AbstractAction() {

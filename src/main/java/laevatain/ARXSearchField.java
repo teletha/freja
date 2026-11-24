@@ -9,12 +9,21 @@
  */
 package laevatain;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 
 import javax.swing.Icon;
 import javax.swing.JTextField;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -28,6 +37,11 @@ public final class ARXSearchField extends JTextField {
 
     /** Default idle time before a text change is reported to the owner. */
     private static final int DEFAULT_DEBOUNCE_MS = 120;
+
+    /** Breathing room around the leading icon, left and right. */
+    private static final int ICON_PAD_LEFT = 4;
+
+    private static final int ICON_PAD_RIGHT = 6;
 
     private final Timer debounce;
 
@@ -45,9 +59,8 @@ public final class ARXSearchField extends JTextField {
     public ARXSearchField(String placeholder, Icon icon, int debounceMillis) {
         super();
         putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
-        if (icon != null) {
-            putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, icon);
-        }
+        // A search field should read as one at a glance even when the host passes no icon.
+        putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, padded(icon != null ? icon : searchIcon()));
         putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
 
         // Built in two steps: a listener passed inside the field's own initializer would be
@@ -91,6 +104,60 @@ public final class ARXSearchField extends JTextField {
                 }
             }
         });
+    }
+
+    /** A small magnifier tinted with the theme's muted text colour, used when no icon is supplied. */
+    private static Icon searchIcon() {
+        Color color = UIManager.getColor("TextField.placeholderForeground");
+        if (color == null) {
+            color = UIManager.getColor("Label.disabledForeground");
+        }
+        if (color == null) {
+            color = new Color(0x808080);
+        }
+        final Color tint = color;
+        return new Icon() {
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(tint);
+                g.setStroke(new BasicStroke(1.4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.draw(new Ellipse2D.Float(x + 1, y + 1, 9, 9));
+                g.draw(new Line2D.Float(x + 9, y + 9, x + 13, y + 13));
+                g.dispose();
+            }
+
+            @Override
+            public int getIconWidth() {
+                return 14;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return 14;
+            }
+        };
+    }
+
+    /** Wraps an icon with transparent side padding so it does not touch the field edge or the text. */
+    private static Icon padded(Icon icon) {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                icon.paintIcon(component, graphics, x + ICON_PAD_LEFT, y);
+            }
+
+            @Override
+            public int getIconWidth() {
+                return ICON_PAD_LEFT + icon.getIconWidth() + ICON_PAD_RIGHT;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return icon.getIconHeight();
+            }
+        };
     }
 
     /** Sets the callback invoked after the user stops typing. */

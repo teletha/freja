@@ -347,18 +347,30 @@ public final class ARXNavList extends JPanel {
                 remove(row);
             }
         }
+        // Rows live after the section label, the strut and the optional header. Without this base
+        // the first restored row is inserted at index 0, pushing the "Settings" label to the bottom.
+        int base = firstRowIndex();
         for (int index = 0; index < want.size(); index++) {
             Row row = want.get(index);
             int current = indexOf(row);
             if (current < 0) {
-                add(row, index);
-            } else if (current != index) {
+                add(row, base + index);
+            } else if (current != base + index) {
                 remove(row);
-                add(row, index);
+                add(row, base + index);
             }
         }
         revalidate();
         repaint();
+    }
+
+    /** The container index where the first row belongs, after the section label and header. */
+    private int firstRowIndex() {
+        int index = 0;
+        while (index < getComponentCount() && !(getComponent(index) instanceof Row)) {
+            index++;
+        }
+        return index;
     }
 
     /** The index of the row among all children, or -1 when it is not in the container. */

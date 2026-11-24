@@ -203,7 +203,8 @@ public final class MainWindow extends JFrame {
         this.cache = new ThumbnailCache(library);
         this.inspector = new PhotoInspector();
         this.grid = new PhotoGrid(cache);
-        this.search = new ARXSearchField("検索", Icons.search(15, Theme.MUTED));
+        // Use the field's default search glyph so the toolbar and the settings panel match in size.
+        this.search = new ARXSearchField("検索", null);
         search.setPreferredSize(new Dimension(300, 31));
         search.setMaximumSize(new Dimension(360, 31));
         search.onTextChanged(this::scheduleRefresh);
