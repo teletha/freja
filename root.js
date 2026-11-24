@@ -123,6 +123,11 @@ const root = {
 			"type": "Enum"
 		},
 		{
+			"name": "ARXWrapLabel",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXMenu",
 			"packageName": "laevatain",
 			"type": "Class"

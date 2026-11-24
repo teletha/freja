@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="CB">
-		<header class="X" date="2026-11-24">
-			<h1 class="P"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="L"><a href="api/main.html" id="API"><svg class="package">
+	<body class="b">
+		<header class="c" date="2026-11-24">
+			<h1 class="k"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="O"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,7 +35,7 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="Y"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="l"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
@@ -43,10 +43,10 @@
 				</a></div>
 		</header>
 		<nav class="f"></nav>
-		<article class="y" id="Article">
-			<section class="s"><code class="r">freja.ui</code>
-				<h2 class="Class p"><code class="b">PhotoViewer</code></h2>
-				<div class="J">
+		<article class="d" id="Article">
+			<section class="w"><code class="JB">freja.ui</code>
+				<h2 class="Class m"><code class="K">PhotoViewer</code></h2>
+				<div class="o">
 					<ul class="E G">
 						<li><code><a aria-label="javax.swing.JDialog 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JDialog.html">JDialog</a></code></li>
 						<li><code><a aria-label="java.awt.Dialog 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dialog.html">Dialog</a></code></li>
@@ -63,134 +63,136 @@
 						<li><code><a aria-label="java.io.Serializable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/Serializable.html">Serializable</a></code></li>
 						<li><code><a aria-label="javax.swing.WindowConstants 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/WindowConstants.html">WindowConstants</a></code></li>
 					</ul>
-				</div><span class="A"><p>A full screen photo viewer with zoom, pan, keyboard navigation and a slideshow.</p></span></section>
-			<section class="s" id="PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo)">
-				<h2 class="Z"><i class="PUBLIC"></i><code class="b">PhotoViewer</code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>)</code></h2>
-				<table class="LB">
-					<tr class="m">
+				</div><span class="A"><p>A photo viewer which covers the whole screen, with zoom, pan, keyboard navigation and a
+slideshow. It does so as a top-most window over the owner&apos;s screen rather than through the
+display&apos;s exclusive full-screen mode, so leaving it does not disturb the desktop.</p></span></section>
+			<section class="w" id="PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo)">
+				<h2 class="R"><i class="PUBLIC"></i><code class="K">PhotoViewer</code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>)</code></h2>
+				<table class="p">
+					<tr class="V">
 						<td><code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="s" id="PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo,java.awt.image.BufferedImage)">
-				<h2 class="Z"><i class="PUBLIC"></i><code class="b">PhotoViewer</code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code></h2>
-				<table class="LB">
-					<tr class="m">
+			<section class="w" id="PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo,java.awt.image.BufferedImage)">
+				<h2 class="R"><i class="PUBLIC"></i><code class="K">PhotoViewer</code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code></h2>
+				<table class="p">
+					<tr class="V">
 						<td><code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="s" id="setListener(freja.ui.PhotoViewer.Listener)">
-				<h2 class="Z"><i class="PUBLIC"></i><code class="b">setListener</code><code class="c">(<code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="IB"><code>void</code></i></h2>
-				<table class="LB">
-					<tr class="m">
+			<section class="w" id="setListener(freja.ui.PhotoViewer.Listener)">
+				<h2 class="R"><i class="PUBLIC"></i><code class="K">setListener</code><code class="z">(<code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="KB"><code>void</code></i></h2>
+				<table class="p">
+					<tr class="V">
 						<td><code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="s" id="startSlideshow()">
-				<h2 class="Z"><i class="PUBLIC"></i><code class="b">startSlideshow</code><code class="c">()</code><i class="IB"><code>void</code></i></h2><span class="A"><p>Starts the slideshow if it is not already running.</p></span></section>
-			<section class="s" id="open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener)">
-				<h2 class="Z"><i class="PUBLIC STATIC"></i><code class="b">open</code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="IB"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></h2>
-				<table class="LB">
-					<tr class="m">
+			<section class="w" id="startSlideshow()">
+				<h2 class="R"><i class="PUBLIC"></i><code class="K">startSlideshow</code><code class="z">()</code><i class="KB"><code>void</code></i></h2><span class="A"><p>Starts the slideshow if it is not already running.</p></span></section>
+			<section class="w" id="open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener)">
+				<h2 class="R"><i class="PUBLIC STATIC"></i><code class="K">open</code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="KB"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></h2>
+				<table class="p">
+					<tr class="V">
 						<td><code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code></td>
 						<td><span><p>the owner window</p></span></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code></td>
 						<td><span><p>the navigation set</p></span></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code></td>
 						<td><span><p>the initial photo</p></span></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code></td>
 						<td></td>
 					</tr>
-					<tr class="M">
+					<tr class="T">
 						<td><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
 						<td><span><p>the visible viewer</p></span></td>
 					</tr>
 				</table><span class="A"><p>Opens a viewer at a photo.</p></span></section>
-			<section class="s" id="open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener,java.awt.image.BufferedImage)">
-				<h2 class="Z"><i class="PUBLIC STATIC"></i><code class="b">open</code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code><i class="IB"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></h2>
-				<table class="LB">
-					<tr class="m">
+			<section class="w" id="open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener,java.awt.image.BufferedImage)">
+				<h2 class="R"><i class="PUBLIC STATIC"></i><code class="K">open</code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code><i class="KB"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></h2>
+				<table class="p">
+					<tr class="V">
 						<td><code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code></td>
 						<td></td>
 					</tr>
-					<tr class="m">
+					<tr class="V">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code></td>
 						<td></td>
 					</tr>
-					<tr class="M">
+					<tr class="T">
 						<td><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="s" id="dispose()">
-				<h2 class="Z"><i class="OVERRIDE PUBLIC"></i><code class="b">dispose</code><code class="c">()</code><i class="IB"><code>void</code></i></h2>
+			<section class="w" id="dispose()">
+				<h2 class="R"><i class="OVERRIDE PUBLIC"></i><code class="K">dispose</code><code class="z">()</code><i class="KB"><code>void</code></i></h2>
 			</section>
 		</article>
-		<aside class="N">
-			<div class="o">
-				<h5 class="w">Constructors</h5>
+		<aside class="g">
+			<div class="y">
+				<h5 class="BB">Constructors</h5>
 				<ul>
-					<li class="j"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo)">PhotoViewer</a></code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>)</code></li>
-					<li class="j"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo,java.awt.image.BufferedImage)">PhotoViewer</a></code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code></li>
+					<li class="W"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo)">PhotoViewer</a></code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>)</code></li>
+					<li class="W"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#PhotoViewer(java.awt.Window,java.util.List,freja.model.Photo,java.awt.image.BufferedImage)">PhotoViewer</a></code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code></li>
 				</ul>
-				<h5 class="w">Static Methods</h5>
+				<h5 class="BB">Static Methods</h5>
 				<ul>
-					<li class="j"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.PhotoViewer.html#open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener)">open</a></code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="K"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></li>
-					<li class="j"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.PhotoViewer.html#open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener,java.awt.image.BufferedImage)">open</a></code><code class="c">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code><i class="K"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></li>
+					<li class="W"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.PhotoViewer.html#open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener)">open</a></code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="P"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></li>
+					<li class="W"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.PhotoViewer.html#open(java.awt.Window,java.util.List,freja.model.Photo,freja.ui.PhotoViewer.Listener,java.awt.image.BufferedImage)">open</a></code><code class="z">(<code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code><code class="parameterName">owner</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code><a aria-label="freja.model.Photo" href="api/freja.model.Photo.html">Photo</a></code><code class="parameterName">start</code>, <code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>, <code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">placeholder</code>)</code><i class="P"><code><a aria-label="freja.ui.PhotoViewer" href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></i></li>
 				</ul>
-				<h5 class="w">Methods</h5>
+				<h5 class="BB">Methods</h5>
 				<ul>
-					<li class="j"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#setListener(freja.ui.PhotoViewer.Listener)">setListener</a></code><code class="c">(<code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="K"><code>void</code></i></li>
-					<li class="j"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#startSlideshow()">startSlideshow</a></code><code class="c">()</code><i class="K"><code>void</code></i></li>
-					<li class="j"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#dispose()">dispose</a></code><code class="c">()</code><i class="K"><code>void</code></i></li>
+					<li class="W"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#setListener(freja.ui.PhotoViewer.Listener)">setListener</a></code><code class="z">(<code><a aria-label="freja.ui.PhotoViewer.Listener" href="api/freja.ui.PhotoViewer.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="P"><code>void</code></i></li>
+					<li class="W"><i class="PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#startSlideshow()">startSlideshow</a></code><code class="z">()</code><i class="P"><code>void</code></i></li>
+					<li class="W"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.ui.PhotoViewer.html#dispose()">dispose</a></code><code class="z">()</code><i class="P"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="i">
+		<footer class="e">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
