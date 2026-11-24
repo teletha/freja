@@ -102,6 +102,15 @@ public final class Theme {
         return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
     }
 
+    /**
+     * The accent tint which paints a selected navigation row. A stronger tint than
+     * {@link #ACCENT_SOFT} so the active row is obvious at a glance.
+     */
+    public static final Color SELECTION = dynamic(p -> tint(p.accent, 80));
+
+    /** The accent used for a tinted, secondary-emphasis button. */
+    public static final Color TINT_HOVER = dynamic(p -> mix(p.accentSoft, p.accent, 0.18));
+
     /** The full screen viewer background. */
     public static final Color VIEWER = dynamic(p -> p.viewer);
 
@@ -187,37 +196,40 @@ public final class Theme {
         UIManager.put("ScrollBar.trackArc", 999);
         UIManager.put("ToolBar.background", palette.sidebar);
         // FlatLaf paints toolbar buttons with its own toolbar hover colour. Point both that key and
-        // the ARX blended hover at the same shade derived from the sidebar background.
+        // the ARX blended hover at the same shade derived from the sidebar background. These are
+        // dynamic colours, so components which captured them while being built still follow a
+        // later light/dark switch instead of freezing the palette of their birth.
+        UIManager.put("ToolBar.background", SIDEBAR);
         Color hover = hoverShade(palette.sidebar);
         UIManager.put("Button.toolbar.hoverBackground", hover);
-        UIManager.put("Button.toolbar.hoverForeground", palette.text);
-        UIManager.put("ARXButton.hoverBackground", hover);
+        UIManager.put("Button.toolbar.hoverForeground", TEXT);
+        UIManager.put("ARXButton.hoverBackground", dynamic(p -> hoverShade(p.sidebar)));
         UIManager.put("SplitPane.dividerSize", 1);
         UIManager.put("Table.showHorizontalLines", false);
-        UIManager.put("Component.focusColor", palette.accent);
-        UIManager.put("Button.defaultBackground", palette.accent);
+        UIManager.put("Component.focusColor", ACCENT);
+        UIManager.put("Button.defaultBackground", ACCENT);
         UIManager.put("Button.defaultForeground", Color.WHITE);
-        UIManager.put("Button.defaultHoverBackground", palette.accentDark);
+        UIManager.put("Button.defaultHoverBackground", ACCENT_DARK);
         UIManager.put("Button.defaultHoverForeground", Color.WHITE);
         // A softer accent role for emphasized-but-not-primary actions (see ARXButton.TINTED).
-        UIManager.put("ARXButton.tintedBackground", palette.accentSoft);
-        UIManager.put("ARXButton.tintedHoverBackground", mix(palette.accentSoft, palette.accent, 0.18));
-        UIManager.put("ARXButton.tintedForeground", palette.accentDark);
-        UIManager.put("ARXButton.tintedHoverForeground", palette.accent);
-        UIManager.put("Component.selectionBackground", palette.accentSoft);
-        UIManager.put("Component.selectionForeground", palette.text);
+        UIManager.put("ARXButton.tintedBackground", ACCENT_SOFT);
+        UIManager.put("ARXButton.tintedHoverBackground", TINT_HOVER);
+        UIManager.put("ARXButton.tintedForeground", ACCENT_DARK);
+        UIManager.put("ARXButton.tintedHoverForeground", ACCENT);
+        UIManager.put("Component.selectionBackground", ACCENT_SOFT);
+        UIManager.put("Component.selectionForeground", TEXT);
         UIManager.put("defaultFont", font(Font.PLAIN, 13));
         // The ARX components read their palette and type scale from these keys instead of
         // importing this class, so laevatain stays reusable outside Freja while still following
         // every light/dark switch and font change.
-        UIManager.put("ARX.background", palette.background);
-        UIManager.put("ARX.surface", palette.surface);
-        UIManager.put("ARX.navBackground", palette.sidebar);
-        UIManager.put("ARX.hairline", palette.border);
-        UIManager.put("ARX.text", palette.text);
-        UIManager.put("ARX.textMuted", palette.muted);
-        UIManager.put("ARX.selection", tint(palette.accent, 80));
-        UIManager.put("ARX.hover", palette.hover);
+        UIManager.put("ARX.background", BACKGROUND);
+        UIManager.put("ARX.surface", SURFACE);
+        UIManager.put("ARX.navBackground", SIDEBAR);
+        UIManager.put("ARX.hairline", BORDER);
+        UIManager.put("ARX.text", TEXT);
+        UIManager.put("ARX.textMuted", MUTED);
+        UIManager.put("ARX.selection", SELECTION);
+        UIManager.put("ARX.hover", HOVER);
         UIManager.put("ARX.font.title", font(Font.BOLD, 19));
         UIManager.put("ARX.font.group", font(Font.BOLD, 13));
         UIManager.put("ARX.font.subtitle", font(Font.PLAIN, 12));

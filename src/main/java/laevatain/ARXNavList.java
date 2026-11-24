@@ -215,6 +215,18 @@ public final class ARXNavList extends JPanel {
     public ARXNavList() {
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setAlignmentX(Component.LEFT_ALIGNMENT);
+    }
+
+    /**
+     * BoxLayout derives a component's maximum from its own layout manager, which caps this list at
+     * its preferred width and lets the parent centre it - the header and every row then drift to
+     * the right. Ask for the full column width while keeping the height rigid, so the list is
+     * stretched by its parent and never stretched apart by it.
+     */
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
     }
 
     /** Appends a row and returns it, so counts and tooltips can be set afterwards. */

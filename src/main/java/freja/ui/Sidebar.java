@@ -141,7 +141,13 @@ public final class Sidebar extends JPanel {
         library.add("FAVORITES", "お気に入り", Icons.star(17, Theme.MUTED, true));
         library.add("RECENT", "最近の写真", Icons.clock(17, Theme.MUTED));
         library.setOnSelect(key -> select(Mode.valueOf(key), -1));
-        top.add(library);
+        // A BoxLayout column hands a child only what it asked for and centres the sliver, so the
+        // list goes into a stretching holder: the rows then span the sidebar instead of parking on
+        // the right.
+        JPanel libraryHolder = new JPanel(new BorderLayout());
+        libraryHolder.setOpaque(false);
+        libraryHolder.add(library, BorderLayout.CENTER);
+        top.add(libraryHolder);
         top.add(Box.createVerticalStrut(18));
         top.add(folderHeader());
         add(top, BorderLayout.NORTH);
