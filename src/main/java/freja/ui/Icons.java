@@ -219,6 +219,32 @@ public final class Icons {
         };
     }
 
+    public static Icon settings(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float w = size;
+                Path2D.Float teeth = new Path2D.Float();
+                int points = 16;
+                for (int i = 0; i < points; i++) {
+                    double angle = i * Math.PI * 2 / points - Math.PI / 2;
+                    double radius = (i % 2 == 0 ? w * 0.46 : w * 0.34);
+                    float x = w / 2 + (float) (Math.cos(angle) * radius);
+                    float y = w / 2 + (float) (Math.sin(angle) * radius);
+                    if (i == 0) {
+                        teeth.moveTo(x, y);
+                    } else {
+                        teeth.lineTo(x, y);
+                    }
+                }
+                teeth.closePath();
+                Area gear = new Area(teeth);
+                gear.subtract(new Area(new Ellipse2D.Float(w * 0.34f, w * 0.34f, w * 0.32f, w * 0.32f)));
+                g.fill(gear);
+            }
+        };
+    }
+
     public static Icon grid(int size, Color color) {
         return new Vector(size, color) {
             @Override

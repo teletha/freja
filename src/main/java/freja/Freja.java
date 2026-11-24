@@ -16,7 +16,9 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -41,6 +43,8 @@ public final class Freja {
     private static volatile ServerSocket instanceSocket;
 
     private static volatile MainWindow window;
+
+    private static String[] launchArgs = new String[0];
 
     private Freja() {
     }
@@ -86,12 +90,40 @@ public final class Freja {
         }
     }
 
+    /** Restarts the application with the same arguments and JVM options. */
+    public static void restart() {
+        try {
+            List<String> command = new ArrayList<>();
+            command.add(Path.of(System.getProperty("java.home"), "bin", "java").toString());
+            for (String option : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+                if (option.startsWith("--enable-native-access") || option.startsWith("--add-opens")
+                        || option.startsWith("--add-exports") || option.startsWith("-D")) {
+                    command.add(option);
+                }
+            }
+            command.add("-cp");
+            command.add(System.getProperty("java.class.path"));
+            command.add(Freja.class.getName());
+            command.addAll(Arrays.asList(launchArgs));
+            new ProcessBuilder(command).start();
+            if (window != null) {
+                SwingUtilities.invokeLater(window::requestShutdown);
+            } else {
+                System.exit(0);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(window, "再起動できませんでした: " + e.getMessage(),
+                    "再起動", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
     /**
      * Starts the desktop application.
      *
      * @param args optional photo folders, plus {@code --library=<path>}
      */
     public static void main(String[] args) {
+        launchArgs = args.clone();
         Path database = null;
         List<Path> folders = new ArrayList<>();
         for (int i = 0; i < args.length; i++) {

@@ -12,6 +12,7 @@ package freja.ui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -134,6 +135,10 @@ public final class MainWindow extends JFrame {
     private final JCheckBoxMenuItem inspectorItem = new JCheckBoxMenuItem("インスペクター", true);
 
     private ScanFoldersDialog scanFoldersDialog;
+
+    private JPanel panes;
+
+    private SettingsPanel settingsPanel;
 
     private ARXButton themeButton;
 
@@ -293,9 +298,118 @@ public final class MainWindow extends JFrame {
                 PREFERENCES.putInt(SIDEBAR_DIVIDER_PREFERENCE, location);
             }
         });
-        add(sidebarSplit, BorderLayout.CENTER);
+        panes = new JPanel(new java.awt.CardLayout());
+        panes.add(sidebarSplit, "viewer");
+        SettingsPanel[] holder = new SettingsPanel[1];
+        settingsPanel = new SettingsPanel(new SettingsPanel.Listener() {
+            @Override
+            public void onFontChanged(float ratio) {
+                Theme.scaleFonts(MainWindow.this, ratio);
+                if (holder[0] != null) {
+                    Theme.scaleFonts(holder[0], ratio);
+                }
+                repaint();
+            }
+
+            @Override
+            public void onThemeChanged() {
+                applyThemeUi();
+            }
+        });
+        holder[0] = settingsPanel;
+        panes.add(settingsPanel, "settings");
+        add(panes, BorderLayout.CENTER);
+        add(activityBar(), BorderLayout.WEST);
+        switchPane("viewer");
 
         setJMenuBar(menuBar());
+    }
+
+    private final List<ActivityButton> activityButtons = new ArrayList<>();
+
+    /** The VS Code-style strip on the far left which switches between the main panes. */
+    private JComponent activityBar() {
+        JPanel bar = new JPanel();
+        bar.setBackground(Theme.SIDEBAR);
+        bar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Theme.BORDER));
+        bar.setLayout(new BoxLayout(bar, BoxLayout.Y_AXIS));
+        bar.setPreferredSize(new Dimension(48, 0));
+        bar.add(Box.createVerticalStrut(8));
+        activityButtons.add(new ActivityButton("viewer", Icons.grid(20, Theme.MUTED), "写真ライブラリ",
+                () -> switchPane("viewer")));
+        activityButtons.add(new ActivityButton("settings", Icons.settings(20, Theme.MUTED), "設定",
+                () -> switchPane("settings")));
+        for (ActivityButton button : activityButtons) {
+            bar.add(button);
+        }
+        bar.add(Box.createVerticalGlue());
+        return bar;
+    }
+
+    private void switchPane(String id) {
+        ((java.awt.CardLayout) panes.getLayout()).show(panes, id);
+        for (ActivityButton button : activityButtons) {
+            button.setSelected(id.equals(button.id));
+        }
+        panes.revalidate();
+        panes.repaint();
+    }
+
+    private final class ActivityButton extends JPanel {
+
+        private final String id;
+
+        private boolean selected;
+
+        private boolean hovered;
+
+        ActivityButton(String id, javax.swing.Icon icon, String tooltip, Runnable action) {
+            this.id = id;
+            setOpaque(true);
+            setLayout(new BorderLayout());
+            setBorder(BorderFactory.createEmptyBorder(11, 14, 11, 14));
+            setMaximumSize(new Dimension(48, 48));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            setToolTipText(tooltip);
+            add(new JLabel(icon), BorderLayout.CENTER);
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent event) {
+                    action.run();
+                }
+
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent event) {
+                    hovered = true;
+                    paintState();
+                }
+
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent event) {
+                    hovered = false;
+                    paintState();
+                }
+            });
+        }
+
+        void setSelected(boolean value) {
+            selected = value;
+            paintState();
+        }
+
+        @Override
+        protected void paintComponent(java.awt.Graphics graphics) {
+            super.paintComponent(graphics);
+            if (selected) {
+                graphics.setColor(Theme.ACCENT);
+                graphics.fillRect(0, 0, 3, getHeight());
+            }
+        }
+
+        private void paintState() {
+            setBackground(selected ? Theme.ACCENT_SOFT : hovered ? Theme.HOVER : Theme.SIDEBAR);
+            repaint();
+        }
     }
 
     private JComponent toolbar() {
@@ -464,6 +578,7 @@ public final class MainWindow extends JFrame {
         JMenu file = new JMenu("ファイル");
         file.add(menuItem("監視フォルダ…", "control O", this::openScanFolders));
         file.add(menuItem("再スキャン", "F5", () -> scanner.scanAll()));
+        file.add(menuItem("設定…", null, () -> switchPane("settings")));
         file.addSeparator();
         file.add(menuItem("終了", "control Q", this::shutdown));
         bar.add(file);
@@ -1089,6 +1204,12 @@ public final class MainWindow extends JFrame {
 
     private void setDarkMode(boolean dark) {
         Theme.setDark(dark);
+        applyThemeUi();
+    }
+
+    /** Refreshes the UI after the theme was changed elsewhere (e.g. the settings dialog). */
+    private void applyThemeUi() {
+        boolean dark = Theme.isDark();
         if (darkModeItem.isSelected() != dark) {
             darkModeItem.setSelected(dark);
         }

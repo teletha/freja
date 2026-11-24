@@ -38,6 +38,13 @@ public final class Theme {
 
     private static final String DARK_KEY = "dark";
 
+    private static final String FONT_FAMILY_KEY = "font.family";
+
+    private static final String FONT_SIZE_KEY = "font.size";
+
+    /** The size the individual font calls in this application were designed around. */
+    private static final int BASE_FONT_SIZE = 13;
+
     private record Palette(Color background, Color surface, Color sidebar, Color border, Color text, Color muted,
             Color faint, Color accent, Color accentSoft, Color accentDark, Color gold, Color danger, Color hover,
             Color viewer, Color viewerPanel) {
@@ -96,7 +103,9 @@ public final class Theme {
     /** The full screen viewer toolbar and footer. */
     public static final Color VIEWER_PANEL = dynamic(p -> p.viewerPanel);
 
-    private static String family;
+    private static String fontFamily;
+
+    private static int fontSize = BASE_FONT_SIZE;
 
     private Theme() {
     }
@@ -107,7 +116,20 @@ public final class Theme {
     public static void install() {
         dark = PREFERENCES.getBoolean(DARK_KEY, false);
         palette = dark ? DARK : LIGHT;
+        fontFamily = PREFERENCES.get(FONT_FAMILY_KEY, detectJapaneseFont());
+        fontSize = Math.max(8, Math.min(28, PREFERENCES.getInt(FONT_SIZE_KEY, BASE_FONT_SIZE)));
         applyLookAndFeel();
+    }
+
+    private static String detectJapaneseFont() {
+        Set<String> available = new HashSet<>(Arrays.asList(
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+        for (String candidate : new String[] {"Yu Gothic UI", "Meiryo UI", "Hiragino Sans", "Noto Sans JP", "Segoe UI"}) {
+            if (available.contains(candidate)) {
+                return candidate;
+            }
+        }
+        return Font.SANS_SERIF;
     }
 
     /**
@@ -186,19 +208,59 @@ public final class Theme {
      * @return a font which can render Japanese
      */
     public static Font font(int style, int size) {
-        if (family == null) {
-            Set<String> available = new HashSet<>(Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
-            for (String candidate : new String[] {"Yu Gothic UI", "Meiryo UI", "Hiragino Sans", "Noto Sans JP", "Segoe UI", "SansSerif"}) {
-                if (available.contains(candidate)) {
-                    family = candidate;
-                    break;
-                }
-            }
-            if (family == null) {
-                family = Font.SANS_SERIF;
+        int scaled = Math.max(8, Math.round(size * (float) fontSize / BASE_FONT_SIZE));
+        return new Font(fontFamily, style, scaled);
+    }
+
+    /** Returns the configured font family. */
+    public static String fontFamily() {
+        return fontFamily;
+    }
+
+    /** Returns the configured base font size. */
+    public static int fontSize() {
+        return fontSize;
+    }
+
+    /** Lists font families available on this system. */
+    public static String[] availableFontFamilies() {
+        return GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    }
+
+    /** Changes the font family and/or base size and persists the choice. */
+    public static void setFont(String family, int size) {
+        String chosen = family == null || family.isBlank() ? fontFamily : family;
+        int chosenSize = Math.max(8, Math.min(28, size));
+        fontFamily = chosen;
+        fontSize = chosenSize;
+        PREFERENCES.put(FONT_FAMILY_KEY, chosen);
+        PREFERENCES.putInt(FONT_SIZE_KEY, chosenSize);
+        try {
+            PREFERENCES.flush();
+        } catch (Exception ignored) {
+        }
+        applyLookAndFeel();
+    }
+
+    /** Rebuilds component fonts after a family/size change, preserving each component's scale. */
+    public static void scaleFonts(java.awt.Component component, float ratio) {
+        if (component == null) {
+            return;
+        }
+        Font font = component.getFont();
+        if (font != null) {
+            int size = Math.max(8, Math.round(font.getSize2D() * ratio));
+            component.setFont(new Font(fontFamily, font.getStyle(), size));
+        }
+        if (component instanceof java.awt.Container container) {
+            for (java.awt.Component child : container.getComponents()) {
+                scaleFonts(child, ratio);
             }
         }
-        return new Font(family, style, size);
+        if (component instanceof javax.swing.JComponent jcomponent) {
+            jcomponent.revalidate();
+            jcomponent.repaint();
+        }
     }
 
     /**
