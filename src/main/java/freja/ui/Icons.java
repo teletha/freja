@@ -245,6 +245,37 @@ public final class Icons {
         };
     }
 
+    public static Icon appearance(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float inset = size * 0.15f;
+                float radius = size * 0.14f;
+                float inner = size * 0.3f;
+                g.setStroke(new BasicStroke(Math.max(1.3f, size / 13f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.draw(new RoundRectangle2D.Float(inset, inset, size - inset * 2, size - inset * 2, radius, radius));
+                g.draw(new java.awt.geom.Line2D.Float(inset + inner, inset + inner / 2, inset + inner, inset + inner - inner / 2));
+                g.draw(new java.awt.geom.Line2D.Float(inset + inner / 2, inset + inner, inset + inner - inner / 2, inset + inner));
+            }
+        };
+    }
+
+    public static Icon font(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                g.setStroke(new BasicStroke(Math.max(1.4f, size / 9f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                Path2D.Float cap = new Path2D.Float();
+                cap.moveTo(size * 0.22f, size * 0.72f);
+                cap.lineTo(size * 0.5f, size * 0.2f);
+                cap.lineTo(size * 0.78f, size * 0.72f);
+                cap.closePath();
+                g.draw(cap);
+                g.draw(new java.awt.geom.Line2D.Float(size * 0.3f, size * 0.66f, size * 0.7f, size * 0.66f));
+            }
+        };
+    }
+
     public static Icon grid(int size, Color color) {
         return new Vector(size, color) {
             @Override
