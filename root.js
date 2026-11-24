@@ -13,12 +13,12 @@ const root = {
 	],
 	"types": [
 		{
-			"name": "LangUtil",
+			"name": "Language",
 			"packageName": "laevatain.util",
 			"type": "Class"
 		},
 		{
-			"name": "LangUtil.Language",
+			"name": "Language.SupportedLaguage",
 			"packageName": "laevatain.util",
 			"type": "Record"
 		},
