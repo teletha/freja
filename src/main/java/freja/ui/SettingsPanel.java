@@ -39,6 +39,7 @@ import javax.swing.SwingConstants;
 
 import kiss.I;
 import laevatain.ARXButton;
+import laevatain.ARXComboBox;
 import laevatain.ARXLabel;
 import laevatain.ARXLang;
 import laevatain.ARXSettingsPane;
@@ -99,11 +100,11 @@ public final class SettingsPanel extends JPanel {
 
     private JLabel themeCount;
 
-    private JComboBox<String> themeScope;
+    private ARXComboBox themeScope;
 
     private boolean expanded;
 
-    private JComboBox<String> languages;
+    private ARXComboBox languages;
 
     private JLabel localeValue;
 
@@ -159,7 +160,8 @@ public final class SettingsPanel extends JPanel {
                 .row(ARXSettingsPane.Text.of("All themes"), ARXSettingsPane.Text.of("Show the representative palettes only"), morePanel)
                 .keywords("theme", "themes", "palette", "palettes"));
 
-        themeScope = new JComboBox<>(THEMES);
+        themeScope = new ARXComboBox();
+        themeScope.setSources(THEMES);
         themeScope.setFont(Theme.font(Font.PLAIN, 13));
         themeScope.setPreferredSize(new Dimension(160, 30));
         themeScope.addActionListener(event -> showThemes());
@@ -254,10 +256,7 @@ public final class SettingsPanel extends JPanel {
     private void refreshLocalized() {
         if (themeScope != null) {
             int scope = Math.max(0, themeScope.getSelectedIndex());
-            themeScope.removeAllItems();
-            for (String label : THEMES) {
-                themeScope.addItem(ARXTextBinding.value(I.translate(label), label));
-            }
+            themeScope.setSources(THEMES);
             themeScope.setSelectedIndex(Math.min(scope, THEMES.length - 1));
         }
         refreshTheme();
@@ -348,7 +347,7 @@ public final class SettingsPanel extends JPanel {
      * result is cached, and bound captions - including this page's own - update as they arrive.
      */
     private void languageSection() {
-        languages = new JComboBox<>();
+        languages = new ARXComboBox();
         for (ARXLang.Language language : ARXLang.LANGUAGES) {
             languages.addItem(language.name());
         }
@@ -395,10 +394,10 @@ public final class SettingsPanel extends JPanel {
         togglePanel.add(state);
         togglePanel.add(startup);
 
-        ARXButton check = new ARXButton("Check now", Icons
-                .search(14, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> JOptionPane.showMessageDialog(this, ARXTextBinding.value(I
-                        .translate("The update check is not available yet."), "The update check is not available yet."), ARXTextBinding
-                                .value(I.translate("Update"), "Update"), JOptionPane.INFORMATION_MESSAGE));
+        ARXButton check = new ARXButton("Check now", Icons.search(14, Theme.MUTED), ARXButton.Variant.SECONDARY,
+                () -> JOptionPane.showMessageDialog(this,
+                        I.translate("The update check is not available yet.").get(),
+                        I.translate("Update").get(), JOptionPane.INFORMATION_MESSAGE));
         check.setFont(Theme.font(Font.PLAIN, 12));
 
         ARXButton restart = new ARXButton("Restart", Icons.refresh(14, Theme.ACCENT_DARK), ARXButton.Variant.TINTED, freja.Freja::restart);

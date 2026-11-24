@@ -39,9 +39,4 @@ public final class ARXTextBinding {
         return value == null ? null : value.get();
     }
 
-    /** The current wording, or {@code fallback} when the translation is missing or blank. */
-    public static String value(Variable<String> value, String fallback) {
-        String text = get(value);
-        return text == null || text.isBlank() ? fallback : text;
-    }
 }

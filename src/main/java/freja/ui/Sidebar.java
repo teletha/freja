@@ -252,9 +252,10 @@ public final class Sidebar extends JPanel {
         known.clear();
         for (Folder folder : registered) {
             ARXNavList.Row row = folders.add(Long.toString(folder.id()), folder.name(), Icons.folder(17, Theme.MUTED));
-            row.setToolTipText(folder.path() + (folder.explicit() ? ""
-                    : "  " + ARXTextBinding.value(I.translate("(auto-detected)"), "(auto-detected)")) + (folder.tags().isEmpty() ? ""
-                            : "\n" + ARXTextBinding.value(I.translate("Tags"), "Tags") + ": " + String.join(", ", folder.tags())));
+            row.setToolTipText(folder.path()
+                    + (folder.explicit() ? "" : "  " + I.translate("(auto-detected)").get())
+                    + (folder.tags().isEmpty() ? "" : "\n" + I.translate("Tags").get() + ": "
+                            + String.join(", ", folder.tags())));
             row.setTrailing(Integer.toString(folder.photoCount()));
             known.put(folder.id(), folder);
         }
