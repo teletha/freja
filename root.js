@@ -27,6 +27,11 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXToggle",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXButton",
 			"packageName": "laevatain",
 			"type": "Class"
@@ -120,6 +125,16 @@ const root = {
 			"name": "Icons",
 			"packageName": "freja.ui",
 			"type": "Class"
+		},
+		{
+			"name": "SettingsPanel",
+			"packageName": "freja.ui",
+			"type": "Class"
+		},
+		{
+			"name": "SettingsPanel.Listener",
+			"packageName": "freja.ui",
+			"type": "Interface"
 		},
 		{
 			"name": "PhotoViewer",
