@@ -14,9 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 
-import kiss.Disposable;
 import kiss.I;
-import kiss.Variable;
 
 /**
  * The localisation bridge for ARX components.
@@ -24,7 +22,7 @@ import kiss.Variable;
  * Interface text is written in the source as plain English and passed through {@link I#translate},
  * which resolves it against the language held in {@link I#Lang}: a sentence seen for the first time
  * is translated online once and stored in a local bundle, later requests come from that cache. The
- * result is a {@link Variable}, so widgets bound here follow a language change immediately and
+ * result is a {@link kiss.Variable}, so widgets bound here follow a language change immediately and
  * without restarting the application.
  */
 public final class ARXLang {
@@ -138,33 +136,5 @@ public final class ARXLang {
             }
         }
         return code;
-    }
-
-    /**
-     * A sentence in the current language, kept up to date. The source wording is used until a
-     * translation is available, so a missing or not-yet-fetched translation can never leave a bound
-     * component with empty text. A late answer from a previous language is discarded.
-     */
-    public static Variable<String> text(String sentence) {
-        Variable<String> out = Variable.of(sentence);
-        Disposable[] pending = new Disposable[1];
-        I.Lang.observing().to(code -> {
-            if (pending[0] != null) {
-                pending[0].dispose();
-                pending[0] = null;
-            }
-            pending[0] = I.translate(sentence).observing()
-                    .to(value -> out.set(value == null || value.isBlank() ? sentence : value));
-        });
-        return out;
-    }
-
-    /**
-     * The wording available right now: the cached translation when there is one, otherwise the
-     * English source.
-     */
-    public static String of(String sentence) {
-        String term = I.translate(sentence).get();
-        return term == null || term.isBlank() ? sentence : term;
     }
 }

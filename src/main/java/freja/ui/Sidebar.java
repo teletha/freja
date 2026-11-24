@@ -34,17 +34,19 @@ import javax.swing.SwingUtilities;
 import freja.model.Folder;
 import freja.model.LibraryStats;
 import freja.model.PhotoFilter.SortOrder;
+import kiss.I;
 import laevatain.ARXButton;
 import laevatain.ARXLabel;
-import laevatain.ARXLang;
 import laevatain.ARXMenu;
 import laevatain.ARXMenuItem;
 import laevatain.ARXNavList;
 import laevatain.ARXRadioButtonMenuItem;
+import laevatain.ARXTextBinding;
 
 /**
  * The navigation sidebar: a library list and the registered folders, both built from the reusable
- * {@link ARXNavList} and translated through {@link ARXLang}.
+ * {@link ARXNavList}, with captions bound to live translations from
+ * {@link I#translate(String, Object...)}.
  */
 public final class Sidebar extends JPanel {
 
@@ -142,10 +144,10 @@ public final class Sidebar extends JPanel {
         top.setBorder(BorderFactory.createEmptyBorder(18, 16, 8, 16));
         // The captions are written in English; each row binds its own live translation, so a
         // language change reaches them without a restart and without ARXLang callbacks here.
-        library.setSection(ARXLang.text("Library"));
-        library.add("ALL", ARXLang.text("All photos"), Icons.grid(17, Theme.MUTED));
-        library.add("FAVORITES", ARXLang.text("Favorites"), Icons.star(17, Theme.MUTED, true));
-        library.add("RECENT", ARXLang.text("Recent photos"), Icons.clock(17, Theme.MUTED));
+        library.setSection(I.translate("Library"));
+        library.add("ALL", I.translate("All photos"), Icons.grid(17, Theme.MUTED));
+        library.add("FAVORITES", I.translate("Favorites"), Icons.star(17, Theme.MUTED, true));
+        library.add("RECENT", I.translate("Recent photos"), Icons.clock(17, Theme.MUTED));
         library.setOnSelect(key -> select(Mode.valueOf(key), -1));
         // A BoxLayout column hands a child only what it asked for and centres the sliver, so the
         // list goes into a stretching holder: the rows then span the sidebar instead of parking on
@@ -162,7 +164,7 @@ public final class Sidebar extends JPanel {
         folders.setOnSelect(key -> select(Mode.FOLDER, Long.parseLong(key)));
         folderScroll = folders.scrolled();
 
-        ARXLabel empty = new ARXLabel(ARXLang.text("No folders are registered"));
+        ARXLabel empty = new ARXLabel(I.translate("No folders are registered"));
         empty.setForeground(Theme.FAINT);
         empty.setFont(Theme.font(Font.PLAIN, 11));
         empty.setBorder(BorderFactory.createEmptyBorder(10, 12, 0, 0));
@@ -187,7 +189,7 @@ public final class Sidebar extends JPanel {
         panel.setOpaque(false);
         JPanel heading = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         heading.setOpaque(false);
-        ARXLabel title = ARXNavList.headingLabel(ARXLang.text("Folders"));
+        ARXLabel title = ARXNavList.headingLabel(I.translate("Folders"));
         heading.add(title);
         folderCount.setFont(Theme.font(Font.PLAIN, 11));
         folderCount.setForeground(Theme.MUTED);
@@ -196,8 +198,7 @@ public final class Sidebar extends JPanel {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         buttons.setOpaque(false);
         buttons.add(headerButton("Tags", Icons.tag(13, Theme.MUTED), "Manage tags", () -> listener.onManageTags()));
-        buttons.add(headerButton(null, Icons.plus(14, Theme.MUTED), "Manage watched folders",
-                () -> listener.onAddFolder()));
+        buttons.add(headerButton(null, Icons.plus(14, Theme.MUTED), "Manage watched folders", () -> listener.onAddFolder()));
         panel.add(buttons, BorderLayout.EAST);
         return panel;
     }
@@ -205,10 +206,9 @@ public final class Sidebar extends JPanel {
     /** A small flat header button whose background and text change on hover. */
     private ARXButton headerButton(String text, javax.swing.Icon icon, String tooltip, Runnable action) {
         // A null label keeps the button icon-only, so there is nothing to translate.
-        ARXButton button = new ARXButton(text == null ? null : ARXLang.text(text), icon,
-                ARXButton.Variant.SECONDARY, action);
+        ARXButton button = new ARXButton(text == null ? null : I.translate(text), icon, ARXButton.Variant.SECONDARY, action);
         button.setFont(Theme.font(Font.PLAIN, 12));
-        button.setToolTipText(ARXLang.text(tooltip));
+        button.setToolTipText(I.translate(tooltip));
         return button;
     }
 
@@ -251,11 +251,10 @@ public final class Sidebar extends JPanel {
         folders.clear();
         known.clear();
         for (Folder folder : registered) {
-            ARXNavList.Row row = folders.add(Long.toString(folder.id()), folder.name(),
-                    Icons.folder(17, Theme.MUTED));
-            row.setToolTipText(folder.path() + (folder.explicit() ? "" : "  " + ARXLang.of("(auto-detected)"))
-                    + (folder.tags().isEmpty() ? "" : "\n" + ARXLang.of("Tags") + ": "
-                            + String.join(", ", folder.tags())));
+            ARXNavList.Row row = folders.add(Long.toString(folder.id()), folder.name(), Icons.folder(17, Theme.MUTED));
+            row.setToolTipText(folder.path() + (folder.explicit() ? ""
+                    : "  " + ARXTextBinding.value(I.translate("(auto-detected)"), "(auto-detected)")) + (folder.tags().isEmpty() ? ""
+                            : "\n" + ARXTextBinding.value(I.translate("Tags"), "Tags") + ": " + String.join(", ", folder.tags())));
             row.setTrailing(Integer.toString(folder.photoCount()));
             known.put(folder.id(), folder);
         }
@@ -267,8 +266,7 @@ public final class Sidebar extends JPanel {
         // Restore the old position after layout, then only move if the selected row is out of view.
         SwingUtilities.invokeLater(() -> {
             JScrollPane scroll = folderScroll;
-            int maximum = Math.max(0, scroll.getViewport().getViewSize().height
-                    - scroll.getViewport().getExtentSize().height);
+            int maximum = Math.max(0, scroll.getViewport().getViewSize().height - scroll.getViewport().getExtentSize().height);
             int y = Math.max(0, Math.min(previousViewY, maximum));
             scroll.getViewport().setViewPosition(new Point(scroll.getViewport().getViewPosition().x, y));
             if (mode == Mode.FOLDER) {
@@ -321,7 +319,7 @@ public final class Sidebar extends JPanel {
     }
 
     private JMenu sortMenu(Folder folder) {
-        JMenu menu = new ARXMenu(ARXLang.text("Sort order"));
+        JMenu menu = new ARXMenu(I.translate("Sort order"));
         ButtonGroup group = new ButtonGroup();
         for (SortOrder sort : SortOrder.values()) {
             ARXRadioButtonMenuItem item = new ARXRadioButtonMenuItem(label(sort), sort == folder.sort());
@@ -337,17 +335,17 @@ public final class Sidebar extends JPanel {
      * still shows them untranslated; this mapping is what the sidebar menu offers.
      */
     private static kiss.Variable<String> label(SortOrder order) {
-        return ARXLang.text(switch (order) {
-            case NAME -> "By name";
-            case DATE_NEWEST -> "Newest first";
-            case DATE_OLDEST -> "Oldest first";
-            case SIZE -> "By size";
+        return I.translate(switch (order) {
+        case NAME -> "By name";
+        case DATE_NEWEST -> "Newest first";
+        case DATE_OLDEST -> "Oldest first";
+        case SIZE -> "By size";
         });
     }
 
     /** A menu item whose English caption is translated on the way in. */
     private javax.swing.JMenuItem item(String sentence, Runnable action) {
-        javax.swing.JMenuItem item = new ARXMenuItem(ARXLang.text(sentence));
+        javax.swing.JMenuItem item = new ARXMenuItem(I.translate(sentence));
         item.addActionListener(event -> action.run());
         return item;
     }

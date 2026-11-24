@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,8 +33,8 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -44,6 +43,7 @@ import javax.swing.UIManager;
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
 
+import kiss.I;
 import kiss.Variable;
 
 /**
@@ -73,7 +73,7 @@ public final class ARXSettingsPane extends JPanel {
 
         /** Creates a caption whose wording follows the active interface language. */
         public static Text of(String source) {
-            return new Text(source, ARXLang.text(source));
+            return new Text(source, I.translate(source));
         }
     }
 
@@ -552,9 +552,8 @@ public final class ARXSettingsPane extends JPanel {
         JPanel railPane = new JPanel(new BorderLayout());
         railPane.setOpaque(true);
         railPane.setBackground(navColor());
-        railPane.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, hairlineColor()),
-                BorderFactory.createEmptyBorder(20, 16, 16, 16)));
+        railPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, hairlineColor()), BorderFactory
+                .createEmptyBorder(20, 16, 16, 16)));
         railPane.setMinimumSize(new Dimension(railWidth, 0));
         railPane.setPreferredSize(new Dimension(railWidth, 0));
         railPane.setMaximumSize(new Dimension(railWidth, Integer.MAX_VALUE));
@@ -624,8 +623,7 @@ public final class ARXSettingsPane extends JPanel {
         searchPane.setVisible(true);
         searchPane.revalidate();
         searchPane.repaint();
-        search.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control F"),
-                "focusSettingsSearch");
+        search.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control F"), "focusSettingsSearch");
         search.getActionMap().put("focusSettingsSearch", new javax.swing.AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent event) {
@@ -723,14 +721,12 @@ public final class ARXSettingsPane extends JPanel {
 
     /** One settings row: caption and description on the left, control vertically centred right. */
     public static Row row(Text caption, Text description, Component control) {
-        return new Row(caption == null ? null : caption.value(),
-                description == null ? null : description.value(), control);
+        return new Row(caption == null ? null : caption.value(), description == null ? null : description.value(), control);
     }
 
     /** A row whose caption is translated live and whose description is a plain label. */
     public static Row row(Text caption, String description, Component control) {
-        return new Row(caption.value(), description == null || description.isEmpty() ? null
-                : Variable.of(description), control);
+        return new Row(caption.value(), description == null || description.isEmpty() ? null : Variable.of(description), control);
     }
 
     /** A row whose text never changes: captions and descriptions are searchable as written. */

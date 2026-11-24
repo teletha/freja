@@ -28,16 +28,16 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.SwingConstants;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 
+import kiss.I;
 import laevatain.ARXButton;
 import laevatain.ARXLabel;
 import laevatain.ARXLang;
@@ -48,8 +48,9 @@ import laevatain.ARXToggle;
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored
  * sections, glide scrolling and cards - filled with the application's appearance, font, language
- * and system settings. Captions are written in English and translated by {@link ARXLang}, so both
- * the page and its search follow the language picked on the language section.
+ * and system settings. Captions are written in English and translated by
+ * {@link I#translate(String, Object...)},
+ * so both the page and its search follow the language picked on the language section.
  */
 public final class SettingsPanel extends JPanel {
 
@@ -76,18 +77,15 @@ public final class SettingsPanel extends JPanel {
      * The themes shown before the list is opened up: a spread of well known light and dark
      * palettes, chosen so the twelve tiles already cover most tastes.
      */
-    private static final Set<String> RECOMMENDED = Set.of("Arc", "GitHub (Material)", "Solarized Light",
-            "Light Owl (Material)", "Gray", "Dracula", "Nord", "Monokai Pro", "One Dark", "Cobalt 2");
+    private static final Set<String> RECOMMENDED = Set
+            .of("Arc", "GitHub (Material)", "Solarized Light", "Light Owl (Material)", "Gray", "Dracula", "Nord", "Monokai Pro", "One Dark", "Cobalt 2");
 
     /** The scope of the tile grid: the picks, or everything. */
-    private static final String[] THEMES = {
-            "All themes",
-            "Light themes",
-            "Dark themes" };
+    private static final String[] THEMES = {"All themes", "Light themes", "Dark themes"};
 
     private final Listener listener;
 
-    private final ARXSettingsPane pane = new ARXSettingsPane(ARXLang.text("Settings"));
+    private final ARXSettingsPane pane = new ARXSettingsPane(I.translate("Settings"));
 
     /** The preview tiles by theme id, so choosing a theme can refresh every badge. */
     private final Map<String, ThemeTile> themeTiles = new LinkedHashMap<>();
@@ -112,7 +110,6 @@ public final class SettingsPanel extends JPanel {
     private JLabel preview;
 
     /** The system page mirrors the active theme name, which the tiles can change. */
-    private JLabel currentThemeValue;
 
     private boolean updating;
 
@@ -144,31 +141,30 @@ public final class SettingsPanel extends JPanel {
             themeTiles.put(theme.id(), tile);
         }
 
-        ARXSettingsPane.Section section = pane.addSection(APPEARANCE, ARXSettingsPane.Text.of("Appearance"),
-                ARXSettingsPane.Text.of("Choose how the application is coloured."), Icons.contrast(17, Theme.MUTED));
+        ARXSettingsPane.Section section = pane.addSection(APPEARANCE, ARXSettingsPane.Text.of("Appearance"), ARXSettingsPane.Text
+                .of("Choose how the application is coloured."), Icons.contrast(17, Theme.MUTED));
 
         // Scope first, then brightness, then the tiles: each control narrows what appears below it.
-        moreButton = new ARXButton("More themes", Icons.chevron(14, Theme.MUTED, false),
-                ARXButton.Variant.SECONDARY, () -> {
-                    expanded = !expanded;
-                    showThemes();
-                });
+        moreButton = new ARXButton("More themes", Icons.chevron(14, Theme.MUTED, false), ARXButton.Variant.SECONDARY, () -> {
+            expanded = !expanded;
+            showThemes();
+        });
         moreButton.setFont(Theme.font(Font.PLAIN, 12));
         themeCount = ARXSettingsPane.value("");
         JPanel morePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         morePanel.setOpaque(false);
         morePanel.add(themeCount);
         morePanel.add(moreButton);
-        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("All themes"),
-                ARXSettingsPane.Text.of("Show the representative palettes only"), morePanel)
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("All themes"), ARXSettingsPane.Text.of("Show the representative palettes only"), morePanel)
                 .keywords("theme", "themes", "palette", "palettes"));
 
         themeScope = new JComboBox<>(THEMES);
         themeScope.setFont(Theme.font(Font.PLAIN, 13));
         themeScope.setPreferredSize(new Dimension(160, 30));
         themeScope.addActionListener(event -> showThemes());
-        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Filter"),
-                ARXSettingsPane.Text.of("Narrow the candidates by brightness"), themeScope)
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Filter"), ARXSettingsPane.Text.of("Narrow the candidates by brightness"), themeScope)
                 .keywords("filter", "brightness", "light", "dark"));
 
         themeGrid = new JPanel(new GridLayout(1, THEME_COLUMNS, 12, 12)) {
@@ -204,8 +200,7 @@ public final class SettingsPanel extends JPanel {
             Theme.ThemeInfo theme = tile.theme();
             // The two hand tuned palettes are always in reach, as is the live theme even when it is
             // not one of the picks.
-            boolean inScope = expanded || theme.builtin() || theme.id().equals(active)
-                    || RECOMMENDED.contains(theme.name());
+            boolean inScope = expanded || theme.builtin() || theme.id().equals(active) || RECOMMENDED.contains(theme.name());
             boolean matches = scope == 0 || theme.dark() == (scope == 2);
             if (inScope && matches) {
                 visible.add(tile);
@@ -218,7 +213,7 @@ public final class SettingsPanel extends JPanel {
         for (ThemeTile tile : visible) {
             themeGrid.add(tile);
         }
-        moreButton.setText(ARXLang.text(expanded ? "Fewer themes" : "More themes"));
+        moreButton.setText(I.translate(expanded ? "Fewer themes" : "More themes"));
         moreButton.setIcon(Icons.chevron(14, Theme.MUTED, expanded));
         themeCount.setText(String.format(ARXLang.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
         themeGrid.revalidate();
@@ -253,10 +248,6 @@ public final class SettingsPanel extends JPanel {
     public void refreshTheme() {
         syncThemeTiles();
         showThemes();
-        if (currentThemeValue != null) {
-            currentThemeValue.setText(themeName());
-            currentThemeValue.repaint();
-        }
     }
 
     /** Rebuilds the captions which are assembled from values rather than bound as variables. */
@@ -265,7 +256,7 @@ public final class SettingsPanel extends JPanel {
             int scope = Math.max(0, themeScope.getSelectedIndex());
             themeScope.removeAllItems();
             for (String label : THEMES) {
-                themeScope.addItem(ARXLang.of(label));
+                themeScope.addItem(ARXTextBinding.value(I.translate(label), label));
             }
             themeScope.setSelectedIndex(Math.min(scope, THEMES.length - 1));
         }
@@ -329,16 +320,15 @@ public final class SettingsPanel extends JPanel {
         sample.setBorder(BorderFactory.createEmptyBorder(10, 16, 18, 16));
         sample.add(preview, BorderLayout.CENTER);
         // The specimen is part of the preview row, so it comes and goes with it.
-        ARXSettingsPane.Row previewRow = ARXSettingsPane.row(ARXSettingsPane.Text.of("Preview"),
-                ARXSettingsPane.Text.of("How the current settings look"), sample)
+        ARXSettingsPane.Row previewRow = ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Preview"), ARXSettingsPane.Text.of("How the current settings look"), sample)
                 .keywords("preview", "sample", "specimen");
 
-        ARXSettingsPane.Section section = pane.addSection(FONTS, ARXSettingsPane.Text.of("Fonts"),
-                ARXSettingsPane.Text.of("Adjust the typeface and its base size."), Icons.letter("A", 17, Theme.MUTED));
-        section.addCard(
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Font family"), ARXSettingsPane.Text.of("Typeface to use"), family)
-                        .keywords("font", "typeface", "family"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Font size"), ARXSettingsPane.Text.of("Base size in points"), size)
+        ARXSettingsPane.Section section = pane.addSection(FONTS, ARXSettingsPane.Text.of("Fonts"), ARXSettingsPane.Text
+                .of("Adjust the typeface and its base size."), Icons.letter("A", 17, Theme.MUTED));
+        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Font family"), ARXSettingsPane.Text.of("Typeface to use"), family)
+                .keywords("font", "typeface", "family"), ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("Font size"), ARXSettingsPane.Text.of("Base size in points"), size)
                         .keywords("size", "points", "scale"));
         section.addCard(previewRow);
         refreshPreview();
@@ -380,26 +370,24 @@ public final class SettingsPanel extends JPanel {
 
         localeValue = ARXSettingsPane.value(ARXLang.displayName());
 
-        ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"),
-                ARXSettingsPane.Text.of("Pick the language of the interface."), Icons.letter("あ", 17, Theme.MUTED));
-        section.addCard(
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Display language"),
-                        ARXSettingsPane.Text.of("Interface text is written in English and translated "
-                                + "automatically; results are cached for offline use"), languages)
-                        .keywords("language", "locale", "translation", "translate"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Current locale"),
-                        ARXSettingsPane.Text.of("Used for dates, numbers and sorting"), localeValue)
+        ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"), ARXSettingsPane.Text
+                .of("Pick the language of the interface."), Icons.letter("あ", 17, Theme.MUTED));
+        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Display language"), ARXSettingsPane.Text
+                .of("Interface text is written in English and translated " + "automatically; results are cached for offline use"), languages)
+                .keywords("language", "locale", "translation", "translate"), ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("Current locale"), ARXSettingsPane.Text
+                                .of("Used for dates, numbers and sorting"), localeValue)
                         .keywords("locale", "region", "date", "numbers", "sorting"));
     }
 
     /** The system section: update controls, app information and restart. */
     private void systemSection() {
         ARXToggle startup = new ARXToggle(false);
-        ARXLabel state = new ARXLabel(ARXLang.text("Off"));
+        ARXLabel state = new ARXLabel(I.translate("Off"));
         state.setFont(Theme.font(Font.PLAIN, 12));
         state.setForeground(Theme.MUTED);
         startup.addActionListener(event -> {
-            state.setText(ARXLang.text(startup.isSelected() ? "On" : "Off"));
+            state.setText(I.translate(startup.isSelected() ? "On" : "Off"));
             state.repaint();
         });
         JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -407,51 +395,38 @@ public final class SettingsPanel extends JPanel {
         togglePanel.add(state);
         togglePanel.add(startup);
 
-        ARXButton check = new ARXButton("Check now", Icons.search(14, Theme.MUTED),
-                ARXButton.Variant.SECONDARY, () -> JOptionPane.showMessageDialog(this,
-                        ARXLang.of("The update check is not available yet."), ARXLang.of("Update"),
-                        JOptionPane.INFORMATION_MESSAGE));
+        ARXButton check = new ARXButton("Check now", Icons
+                .search(14, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> JOptionPane.showMessageDialog(this, ARXTextBinding.value(I
+                        .translate("The update check is not available yet."), "The update check is not available yet."), ARXTextBinding
+                                .value(I.translate("Update"), "Update"), JOptionPane.INFORMATION_MESSAGE));
         check.setFont(Theme.font(Font.PLAIN, 12));
 
-        ARXButton restart = new ARXButton("Restart", Icons.refresh(14, Theme.ACCENT_DARK),
-                ARXButton.Variant.TINTED, freja.Freja::restart);
+        ARXButton restart = new ARXButton("Restart", Icons.refresh(14, Theme.ACCENT_DARK), ARXButton.Variant.TINTED, freja.Freja::restart);
         restart.setFont(Theme.font(Font.PLAIN, 12));
 
-        ARXSettingsPane.Section section = pane.addSection(SYSTEM, ARXSettingsPane.Text.of("System"),
-                ARXSettingsPane.Text.of("Update checks, application information and restart."),
-                Icons.settings(17, Theme.MUTED));
-        section.addCard(
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Check for updates at startup"),
-                        ARXSettingsPane.Text.of("Look for a newer version when Freja starts"), togglePanel)
-                        .keywords("update", "updates", "startup", "boot"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Check for updates"),
-                        ARXSettingsPane.Text.of("Compare against the latest release"), check)
-                        .keywords("update", "updates", "version", "release"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Restart the application"),
-                        ARXSettingsPane.Text.of("Apply the settings and start again"), restart)
-                        .keywords("restart", "reboot", "reload"));
-        currentThemeValue = ARXSettingsPane.value(themeName());
-        section.addCard(
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Current theme"), "", currentThemeValue)
-                        .keywords("theme", "appearance"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Application"), "",
-                        ARXSettingsPane.value("Freja " + freja.Freja.VERSION + " (2026-11-24)"))
-                        .keywords("version", "build", "about"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Operating system"), "", ARXSettingsPane.value(
-                        System.getProperty("os.name") + " " + System.getProperty("os.arch") + " "
-                                + System.getProperty("os.version"))).keywords("os", "windows", "system"),
-                ARXSettingsPane.row(ARXSettingsPane.Text.of("Java runtime"), "",
-                        ARXSettingsPane.value(System.getProperty("java.version")))
-                        .keywords("java", "jvm", "runtime"));
-    }
-
-    /** The display name of the active theme, in the current language. */
-    private String themeName() {
-        return Theme.availableThemes().stream()
-                .filter(theme -> theme.id().equals(Theme.themeId()))
-                .findFirst()
-                .map(theme -> theme.builtin() ? ARXLang.of(theme.name()) : theme.name())
-                .orElse(ARXLang.of("Light"));
+        ARXSettingsPane.Section section = pane.addSection(SYSTEM, ARXSettingsPane.Text.of("System"), ARXSettingsPane.Text
+                .of("Update checks, application information and restart."), Icons.settings(17, Theme.MUTED));
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Check for updates at startup"), ARXSettingsPane.Text
+                        .of("Look for a newer version when Freja starts"), togglePanel)
+                .keywords("update", "updates", "startup", "boot"), ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("Check for updates"), ARXSettingsPane.Text
+                                .of("Compare against the latest release"), check)
+                        .keywords("update", "updates", "version", "release"), ARXSettingsPane
+                                .row(ARXSettingsPane.Text.of("Restart the application"), ARXSettingsPane.Text
+                                        .of("Apply the settings and start again"), restart)
+                                .keywords("restart", "reboot", "reload"));
+        section.addCard(ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("Application"), "", ARXSettingsPane
+                                .value("Freja " + freja.Freja.VERSION + " (2026-11-24)"))
+                        .keywords("version", "build", "about"), ARXSettingsPane
+                                .row(ARXSettingsPane.Text.of("Operating system"), "", ARXSettingsPane
+                                        .value(System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System
+                                                .getProperty("os.version")))
+                                .keywords("os", "windows", "system"), ARXSettingsPane
+                                        .row(ARXSettingsPane.Text.of("Java runtime"), "", ARXSettingsPane
+                                                .value(System.getProperty("java.version")))
+                                        .keywords("java", "jvm", "runtime"));
     }
 
     /** A theme preview: a miniature window painted in the shades of the theme it offers. */
@@ -473,9 +448,9 @@ public final class SettingsPanel extends JPanel {
             colors = Theme.preview(theme);
             // Built-in palettes carry a translatable name; third-party themes are proper nouns.
             if (theme.builtin()) {
-                textBinding.bind(ARXLang.text(theme.name()), this::setText);
+                textBinding.bind(I.translate(theme.name()), this::setText);
             }
-            tipBinding.bind(ARXLang.text(theme.dark() ? "Dark" : "Light"), this::refreshTip);
+            tipBinding.bind(I.translate(theme.dark() ? "Dark" : "Light"), this::refreshTip);
             setFocusable(false);
             setContentAreaFilled(false);
             setBorderPainted(false);
@@ -514,8 +489,7 @@ public final class SettingsPanel extends JPanel {
             Graphics2D g = (Graphics2D) graphics.create();
             try {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                 boolean selected = theme.id().equals(Theme.themeId());
                 int w = getWidth();
                 int h = getHeight();
