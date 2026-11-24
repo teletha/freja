@@ -97,6 +97,11 @@ public final class Theme {
     /** Hover background of neutral rows. */
     public static final Color HOVER = dynamic(p -> p.hover);
 
+    /** Repeats a palette entry with a fixed alpha, used for selection washes. */
+    private static Color tint(Color base, int alpha) {
+        return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
+    }
+
     /** The full screen viewer background. */
     public static final Color VIEWER = dynamic(p -> p.viewer);
 
@@ -194,9 +199,34 @@ public final class Theme {
         UIManager.put("Button.defaultForeground", Color.WHITE);
         UIManager.put("Button.defaultHoverBackground", palette.accentDark);
         UIManager.put("Button.defaultHoverForeground", Color.WHITE);
+        // A softer accent role for emphasized-but-not-primary actions (see ARXButton.TINTED).
+        UIManager.put("ARXButton.tintedBackground", palette.accentSoft);
+        UIManager.put("ARXButton.tintedHoverBackground", mix(palette.accentSoft, palette.accent, 0.18));
+        UIManager.put("ARXButton.tintedForeground", palette.accentDark);
+        UIManager.put("ARXButton.tintedHoverForeground", palette.accent);
         UIManager.put("Component.selectionBackground", palette.accentSoft);
         UIManager.put("Component.selectionForeground", palette.text);
         UIManager.put("defaultFont", font(Font.PLAIN, 13));
+        // The ARX components read their palette and type scale from these keys instead of
+        // importing this class, so laevatain stays reusable outside Freja while still following
+        // every light/dark switch and font change.
+        UIManager.put("ARX.background", palette.background);
+        UIManager.put("ARX.surface", palette.surface);
+        UIManager.put("ARX.navBackground", palette.sidebar);
+        UIManager.put("ARX.hairline", palette.border);
+        UIManager.put("ARX.text", palette.text);
+        UIManager.put("ARX.textMuted", palette.muted);
+        UIManager.put("ARX.selection", tint(palette.accent, 80));
+        UIManager.put("ARX.hover", palette.hover);
+        UIManager.put("ARX.font.title", font(Font.BOLD, 19));
+        UIManager.put("ARX.font.group", font(Font.BOLD, 13));
+        UIManager.put("ARX.font.subtitle", font(Font.PLAIN, 12));
+        UIManager.put("ARX.font.label", font(Font.PLAIN, 13));
+        UIManager.put("ARX.font.hint", font(Font.PLAIN, 11));
+        UIManager.put("ARX.font.value", font(Font.PLAIN, 12));
+        UIManager.put("ARX.font.row", font(Font.PLAIN, 13));
+        UIManager.put("ARX.font.annotation", font(Font.PLAIN, 11));
+        UIManager.put("ARX.font.section", font(Font.BOLD, 11));
         FlatLaf.updateUI();
     }
 

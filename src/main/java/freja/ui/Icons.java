@@ -12,6 +12,8 @@ package freja.ui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -219,6 +221,40 @@ public final class Icons {
         };
     }
 
+    /**
+     * A glyph icon painted with the configured application font, for the cases where a letter reads
+     * better than an outline: the font row shows an "A" in the very typeface it configures.
+     */
+    public static Icon letter(String text, int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                Font font = new Font(freja.ui.Theme.fontFamily(), Font.BOLD, Math.round(size * 1.1f));
+                g.setFont(font);
+                FontMetrics metrics = g.getFontMetrics();
+                int x = (size - metrics.stringWidth(text)) / 2;
+                int y = (size - metrics.getHeight()) / 2 + metrics.getAscent();
+                g.drawString(text, x, y);
+            }
+        };
+    }
+
+    /** The theme glyph: an outlined circle with its right half filled, like the contrast symbol. */
+    public static Icon contrast(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float inset = size * 0.16f;
+                float diameter = size - inset * 2;
+                g.setStroke(new BasicStroke(Math.max(1.4f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.draw(new Ellipse2D.Float(inset, inset, diameter, diameter));
+                g.fill(new Arc2D.Float(inset, inset, diameter, diameter, -90, 180, Arc2D.PIE));
+            }
+        };
+    }
+
     public static Icon settings(int size, Color color) {
         return new Vector(size, color) {
             @Override
@@ -241,37 +277,6 @@ public final class Icons {
                 Area gear = new Area(teeth);
                 gear.subtract(new Area(new Ellipse2D.Float(w * 0.34f, w * 0.34f, w * 0.32f, w * 0.32f)));
                 g.fill(gear);
-            }
-        };
-    }
-
-    public static Icon appearance(int size, Color color) {
-        return new Vector(size, color) {
-            @Override
-            protected void paint(Graphics2D g) {
-                float inset = size * 0.15f;
-                float radius = size * 0.14f;
-                float inner = size * 0.3f;
-                g.setStroke(new BasicStroke(Math.max(1.3f, size / 13f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                g.draw(new RoundRectangle2D.Float(inset, inset, size - inset * 2, size - inset * 2, radius, radius));
-                g.draw(new java.awt.geom.Line2D.Float(inset + inner, inset + inner / 2, inset + inner, inset + inner - inner / 2));
-                g.draw(new java.awt.geom.Line2D.Float(inset + inner / 2, inset + inner, inset + inner - inner / 2, inset + inner));
-            }
-        };
-    }
-
-    public static Icon font(int size, Color color) {
-        return new Vector(size, color) {
-            @Override
-            protected void paint(Graphics2D g) {
-                g.setStroke(new BasicStroke(Math.max(1.4f, size / 9f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                Path2D.Float cap = new Path2D.Float();
-                cap.moveTo(size * 0.22f, size * 0.72f);
-                cap.lineTo(size * 0.5f, size * 0.2f);
-                cap.lineTo(size * 0.78f, size * 0.72f);
-                cap.closePath();
-                g.draw(cap);
-                g.draw(new java.awt.geom.Line2D.Float(size * 0.3f, size * 0.66f, size * 0.7f, size * 0.66f));
             }
         };
     }

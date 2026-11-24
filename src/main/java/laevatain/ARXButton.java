@@ -29,7 +29,7 @@ public final class ARXButton extends JButton {
 
     /** Predefined button roles, each mapped to FlatLaf UI defaults. */
     public enum Variant {
-        PRIMARY, SECONDARY, DANGER
+        PRIMARY, SECONDARY, TINTED, DANGER
     }
 
     private static final Insets PADDING = new Insets(3, 6, 3, 6);
@@ -116,6 +116,16 @@ public final class ARXButton extends JButton {
             return color(hovering ? "Button.defaultHoverBackground" : "Button.defaultBackground",
                     "Button.background");
         }
+        if (variant == Variant.TINTED) {
+            // A soft accent fill: visible as an action, but far lighter than a solid primary.
+            return color(hovering ? "ARXButton.tintedHoverBackground" : "ARXButton.tintedBackground",
+                    "Button.background");
+        }
+        if (variant == Variant.TINTED) {
+            // A soft accent fill: prominent without the weight of a solid primary button.
+            return color(hovering ? "ARXButton.tintedHoverBackground" : "ARXButton.tintedBackground",
+                    "Button.background");
+        }
         if (hovering && blendWithParent) {
             // Use the shared hover shade supplied by the active theme; fall back to deriving one
             // from the enclosing panel when the key is absent.
@@ -134,6 +144,10 @@ public final class ARXButton extends JButton {
         }
         if (variant == Variant.PRIMARY) {
             return color(hovering ? "Button.defaultHoverForeground" : "Button.defaultForeground",
+                    "Button.foreground");
+        }
+        if (variant == Variant.TINTED) {
+            return color(hovering ? "ARXButton.tintedHoverForeground" : "ARXButton.tintedForeground",
                     "Button.foreground");
         }
         return color(hovering ? "Button.hoverForeground" : "Button.foreground", "Button.foreground");
