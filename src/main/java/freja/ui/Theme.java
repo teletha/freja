@@ -12,12 +12,16 @@ package freja.ui;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -38,6 +42,15 @@ public final class Theme {
 
     private static final String DARK_KEY = "dark";
 
+    /** The identifier of the active theme: one of the built-ins or an IntelliJ theme class. */
+    private static final String THEME_KEY = "theme";
+
+    /** The hand tuned light palette, offered as a quick pick. */
+    public static final String THEME_LIGHT = "light";
+
+    /** The hand tuned dark palette, offered as a quick pick. */
+    public static final String THEME_DARK = "dark";
+
     private static final String FONT_FAMILY_KEY = "font.family";
 
     private static final String FONT_SIZE_KEY = "font.size";
@@ -57,6 +70,18 @@ public final class Theme {
     private static volatile Palette palette = LIGHT;
 
     private static volatile boolean dark;
+
+    private static volatile String themeId = THEME_LIGHT;
+
+    /** The IntelliJ themes found on the class path; populated on first use, empty without them. */
+    private static List<ThemeInfo> intellijThemes;
+
+    /**
+     * A theme the user can pick: an identifier, a display name and whether it is dark. Built-ins
+     * carry a short id, IntelliJ themes their look and feel class name.
+     */
+    public record ThemeInfo(String id, String name, boolean dark, boolean builtin) {
+    }
 
     /** The application background. */
     public static final Color BACKGROUND = dynamic(p -> p.background);
@@ -129,6 +154,8 @@ public final class Theme {
      */
     public static void install() {
         dark = PREFERENCES.getBoolean(DARK_KEY, false);
+        themeId = PREFERENCES.get(THEME_KEY, dark ? THEME_DARK : THEME_LIGHT);
+        dark = isDarkTheme(themeId);
         palette = dark ? DARK : LIGHT;
         fontFamily = PREFERENCES.get(FONT_FAMILY_KEY, detectJapaneseFont());
         fontSize = Math.max(8, Math.min(28, PREFERENCES.getInt(FONT_SIZE_KEY, BASE_FONT_SIZE)));
@@ -161,14 +188,7 @@ public final class Theme {
      * @param value true for dark mode, false for light mode
      */
     public static void setDark(boolean value) {
-        dark = value;
-        palette = value ? DARK : LIGHT;
-        PREFERENCES.putBoolean(DARK_KEY, value);
-        try {
-            PREFERENCES.flush();
-        } catch (Exception ignored) {
-        }
-        applyLookAndFeel();
+        setTheme(value ? THEME_DARK : THEME_LIGHT);
     }
 
     /**
@@ -181,12 +201,180 @@ public final class Theme {
         return dark;
     }
 
-    private static void applyLookAndFeel() {
-        if (dark) {
-            FlatDarkLaf.setup();
-        } else {
-            FlatLightLaf.setup();
+    /** The identifier of the active theme: a built-in id or an IntelliJ theme class name. */
+    public static String themeId() {
+        return themeId;
+    }
+
+    /**
+     * Switches to the theme with the given id and persists the choice. The look and feel goes in
+     * first, so a custom theme's own defaults can supply the shades the application paints with.
+     *
+     * @param id an id from {@link #availableThemes()}
+     */
+    public static void setTheme(String id) {
+        if (id == null || id.equals(themeId)) {
+            return;
         }
+        themeId = id;
+        dark = isDarkTheme(id);
+        PREFERENCES.put(THEME_KEY, id);
+        // Keep the legacy flag in sync: earlier releases stored only this, and it doubles as the
+        // fallback when a theme id turns out to be unavailable.
+        PREFERENCES.putBoolean(DARK_KEY, dark);
+        try {
+            PREFERENCES.flush();
+        } catch (Exception ignored) {
+        }
+        applyLookAndFeel();
+    }
+
+    /** The themes on offer: the two hand tuned palettes plus every IntelliJ theme available. */
+    public static List<ThemeInfo> availableThemes() {
+        List<ThemeInfo> themes = new ArrayList<>();
+        themes.add(new ThemeInfo(THEME_LIGHT, "ライト", false, true));
+        themes.add(new ThemeInfo(THEME_DARK, "ダーク", true, true));
+        themes.addAll(intellijThemes());
+        return themes;
+    }
+
+    /**
+     * The IntelliJ themes found on the class path. Looked up reflectively, so the optional
+     * flatlaf-intellij-themes artifact stays optional at build and at run time.
+     */
+    public static List<ThemeInfo> intellijThemes() {
+        List<ThemeInfo> cached = intellijThemes;
+        if (cached != null) {
+            return cached;
+        }
+        List<ThemeInfo> found = new ArrayList<>();
+        try {
+            Object[] infos = (Object[]) Class
+                    .forName("com.formdev.flatlaf.intellijthemes.FlatAllIJThemes")
+                    .getField("INFOS").get(null);
+            for (Object info : infos) {
+                if (info instanceof UIManager.LookAndFeelInfo entry) {
+                    boolean isDark = (Boolean) entry.getClass().getMethod("isDark").invoke(entry);
+                    found.add(new ThemeInfo(entry.getClassName(), entry.getName(), isDark, false));
+                }
+            }
+            found.sort(java.util.Comparator.comparing(ThemeInfo::name));
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            // Without the extra artifact the two built-in palettes are all there is.
+        }
+        intellijThemes = found;
+        return found;
+    }
+
+    /** Whether the theme behind an id is dark, which picks the fallback palette and icons. */
+    public static boolean isDarkTheme(String id) {
+        if (THEME_DARK.equals(id)) {
+            return true;
+        }
+        if (THEME_LIGHT.equals(id)) {
+            return false;
+        }
+        for (ThemeInfo theme : intellijThemes()) {
+            if (theme.id().equals(id)) {
+                return theme.dark();
+            }
+        }
+        return false;
+    }
+
+    /** The handful of shades that stand for a theme in the appearance picker. */
+    public record Preview(Color background, Color surface, Color sidebar, Color text, Color accent) {
+    }
+
+    private static final Map<String, Preview> PREVIEWS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * The shades a theme would paint with, resolved without installing it: a look and feel hands
+     * over its defaults as soon as it is constructed, so the picker can preview every theme at once.
+     */
+    public static Preview preview(ThemeInfo theme) {
+        return PREVIEWS.computeIfAbsent(theme.id(), id -> readPreview(theme, id));
+    }
+
+    private static Preview readPreview(ThemeInfo theme, String id) {
+        Palette base = theme.dark() ? DARK : LIGHT;
+        if (theme.builtin()) {
+            return new Preview(base.background(), base.surface(), base.sidebar(), base.text(),
+                    base.accent());
+        }
+        try {
+            if (Class.forName(id).getDeclaredConstructor().newInstance() instanceof javax.swing.LookAndFeel laf) {
+                UIDefaults defaults = laf.getDefaults();
+                Color background = color(defaults, "Panel.background", base.background());
+                Color text = color(defaults, "Label.foreground", base.text());
+                return new Preview(background, color(defaults, "List.background", base.surface()),
+                        mix(background, text, theme.dark() ? 0.05 : 0.035), text,
+                        color(defaults, "Component.accentColor", base.accent()));
+            }
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+        }
+        return new Preview(base.background(), base.surface(), base.sidebar(), base.text(), base.accent());
+    }
+
+    private static Color color(UIDefaults defaults, String key, Color fallback) {
+        Color value = defaults == null ? null : defaults.getColor(key);
+        // Copy out of the UIResource: the instance belongs to a look and feel that is not installed.
+        return value == null ? fallback : new Color(value.getRGB(), true);
+    }
+
+    /** Instantiates the look and feel behind an id, or null when the theme is unavailable. */
+    private static javax.swing.LookAndFeel createLookAndFeel(String id) {
+        if (THEME_LIGHT.equals(id)) {
+            return new FlatLightLaf();
+        }
+        if (THEME_DARK.equals(id)) {
+            return new FlatDarkLaf();
+        }
+        try {
+            if (Class.forName(id).getDeclaredConstructor().newInstance() instanceof javax.swing.LookAndFeel laf) {
+                return laf;
+            }
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+        }
+        return null;
+    }
+
+    /**
+     * Reads the application's shades from the freshly installed look and feel, so rails, cards and
+     * hairlines follow the chosen theme instead of the hand tuned palette. Colours are copied out of
+     * the look and feel defaults: UIResource instances belong to the previous theme.
+     */
+    private static Palette readPalette(Palette base, boolean isDark) {
+        Color background = uiColor("Panel.background", base.background);
+        Color text = uiColor("Label.foreground", base.text);
+        Color muted = uiColor("Label.disabledForeground", base.muted);
+        Color accent = uiColor("Component.accentColor", base.accent);
+        return new Palette(background, uiColor("List.background", base.surface),
+                mix(background, text, isDark ? 0.05 : 0.035),
+                uiColor("Component.borderColor", base.border), text, muted,
+                mix(muted, background, 0.45), accent,
+                mix(accent, background, isDark ? 0.78 : 0.86),
+                isDark ? mix(accent, Color.WHITE, 0.25) : mix(accent, Color.BLACK, 0.18),
+                base.gold, base.danger, mix(background, text, isDark ? 0.14 : 0.09),
+                base.viewer, base.viewerPanel);
+    }
+
+    private static Color uiColor(String key, Color fallback) {
+        Color value = UIManager.getColor(key);
+        return value == null ? fallback : new Color(value.getRGB(), true);
+    }
+
+    private static void applyLookAndFeel() {
+        javax.swing.LookAndFeel theme = createLookAndFeel(themeId);
+        if (theme == null) {
+            themeId = dark ? THEME_DARK : THEME_LIGHT;
+            theme = createLookAndFeel(themeId);
+        }
+        dark = isDarkTheme(themeId);
+        FlatLaf.setup(theme);
+        Palette base = dark ? DARK : LIGHT;
+        boolean builtin = THEME_LIGHT.equals(themeId) || THEME_DARK.equals(themeId);
+        palette = builtin ? base : readPalette(base, dark);
         UIManager.put("Component.arc", 10);
         UIManager.put("Button.arc", 10);
         UIManager.put("TextComponent.arc", 10);

@@ -1217,6 +1217,11 @@ public final class MainWindow extends JFrame {
             themeButton.setIcon(dark ? Icons.sun(16, Theme.MUTED) : Icons.moon(16, Theme.MUTED));
             themeButton.setToolTipText(dark ? "ライトモードに切り替え" : "ダークモードに切り替え");
         }
+        // The settings page keeps its own view of the active theme: badges, the visible picks and
+        // the current theme row.
+        if (settingsPanel != null) {
+            settingsPanel.refreshTheme();
+        }
         // Theme.applyLookAndFeel() already calls FlatLaf.updateUI() for every window; doing it
         // again here double-installs UIs on custom renderers (the folder tree lost its rows).
         grid.repaint();
