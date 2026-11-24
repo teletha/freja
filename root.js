@@ -12,12 +12,32 @@ const root = {
 	],
 	"types": [
 		{
+			"name": "ARXSettingsPane",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSettingsPane.Section",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXSearchField",
 			"packageName": "laevatain",
 			"type": "Class"
 		},
 		{
 			"name": "ARXFileChooser",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXNavList",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXNavList.Row",
 			"packageName": "laevatain",
 			"type": "Class"
 		},

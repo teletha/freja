@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="BB">
-		<header class="t" date="2026-11-24">
-			<h1 class="W"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="X"><a href="api/main.html" id="API"><svg class="package">
+	<body class="P">
+		<header class="Q" date="2026-11-24">
+			<h1 class="f"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="g"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="R"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="X"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="h"></nav>
-		<article class="x" id="Article">
-			<div class="y">
+		<nav class="T"></nav>
+		<article class="R" id="Article">
+			<div class="AB">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -86,6 +86,16 @@
 						<h4>🛠️ Class</h4>
 						<table>
 							<tr>
+								<td><code><a href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></td>
+								<td>A Windows 11-style settings surface: an ARXNavList rail on the left and one continuous,
+scrollable document on the right. Every section registers a rail entry; choosing an entry glides
+the viewport to that section, and scrolling keeps the rail selection in sync.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXSettingsPane.Section.html">ARXSettingsPane.Section</a></code></td>
+								<td>One anchored page of the document.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></td>
 								<td>A reusable search field with a leading icon, placeholder, clear button and a debounced text
 callback. Fonts and colours come from the active FlatLaf theme.</td>
@@ -96,12 +106,24 @@ callback. Fonts and colours come from the active FlatLaf theme.</td>
 it closes. Each dialog passes its own key so the positions do not mix.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/laevatain.ARXNavList.html">ARXNavList</a></code></td>
+								<td>A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
+trailing annotation, hover feedback, arrow-key navigation and an optional context menu.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXNavList.Row.html">ARXNavList.Row</a></code></td>
+								<td>One row of the list. Kept public so callers can annotate or extend it.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/laevatain.ChooserLocations.html">ChooserLocations</a></code></td>
 								<td>Remembers the last directory used by each file chooser, keyed by the dialog that owns it.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ARXToggle.html">ARXToggle</a></code></td>
-								<td>A Windows-style on/off switch whose colours follow the active FlatLaf theme.</td>
+								<td>A Windows-style on/off switch. The state is delegated to Swing&apos;s toggle button model, so
+pressing, releasing, keyboard focus and the active look and feel all drive it the way they do for
+any other button; the component only paints the Fluent pill and glides the knob between the two
+positions.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ARXButton.html">ARXButton</a></code></td>
@@ -144,8 +166,9 @@ emoji fonts.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.SettingsPanel.html">SettingsPanel</a></code></td>
-								<td>A Windows 11-style settings pane: a pill-shaped navigation rail, theme preview tiles and cards
-with hairline dividers and a live font preview.</td>
+								<td>Freja&apos;s settings page: the reusable ARXSettingsPane scaffold - rail, anchored sections,
+glide scrolling and cards - filled with the application&apos;s own appearance, font and system
+settings.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
@@ -161,7 +184,8 @@ with hairline dividers and a live font preview.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.Sidebar.html">Sidebar</a></code></td>
-								<td>The navigation sidebar.</td>
+								<td>The navigation sidebar: a library list and the registered folders, both built from the reusable
+ARXNavList.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
@@ -254,8 +278,8 @@ with hairline dividers and a live font preview.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="V"></aside>
-		<footer class="p">
+		<aside class="U"></aside>
+		<footer class="S">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
