@@ -359,12 +359,14 @@ public final class SettingsPanel extends JPanel {
         togglePanel.add(state);
         togglePanel.add(startup);
 
-        ARXButton check = new ARXButton("Check now", Icons.search(14, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> JOptionPane
-                .showMessageDialog(this, I.translate("The update check is not available yet.").get(), I.translate("Update")
-                        .get(), JOptionPane.INFORMATION_MESSAGE));
+        ARXButton check = new ARXButton(I.translate("Check now"), Icons
+                .search(14, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> JOptionPane
+                        .showMessageDialog(this, I.translate("The update check is not available yet.").get(), I.translate("Update")
+                                .get(), JOptionPane.INFORMATION_MESSAGE));
         check.setFont(Theme.font(Font.PLAIN, 12));
 
-        ARXButton restart = new ARXButton("Restart", Icons.refresh(14, Theme.ACCENT_DARK), ARXButton.Variant.TINTED, freja.Freja::restart);
+        ARXButton restart = new ARXButton(I.translate("Restart"), Icons
+                .refresh(14, Theme.ACCENT_DARK), ARXButton.Variant.TINTED, freja.Freja::restart);
         restart.setFont(Theme.font(Font.PLAIN, 12));
 
         ARXSettingsPane.Section section = pane.addSection(SYSTEM, ARXSettingsPane.Text.of("System"), ARXSettingsPane.Text

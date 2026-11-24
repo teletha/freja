@@ -80,9 +80,9 @@ public final class ARXSettingsPane extends JPanel {
     /** One searchable settings row. */
     public static final class Row extends JPanel {
 
-        private final JLabel caption = new JLabel();
+        private final ARXWrapLabel caption = new ARXWrapLabel();
 
-        private final JLabel description = new JLabel();
+        private final ARXWrapLabel description = new ARXWrapLabel();
 
         /** The phrases this row answers to: captions, their origins and the registered keywords. */
         private final Set<String> terms = new LinkedHashSet<>();
@@ -98,24 +98,20 @@ public final class ARXSettingsPane extends JPanel {
             text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
             caption.setFont(labelFont());
             caption.setForeground(textColor());
-            caption.setHorizontalAlignment(SwingConstants.LEFT);
-            caption.setAlignmentX(Component.LEFT_ALIGNMENT);
             description.setFont(hintFont());
             description.setForeground(mutedColor());
-            description.setHorizontalAlignment(SwingConstants.LEFT);
-            description.setAlignmentX(Component.LEFT_ALIGNMENT);
             text.add(caption);
             text.add(description);
 
             if (title != null) {
                 title.observing().to(value -> {
-                    caption.setText(value);
+                    caption.setSource(value);
                     remember(value);
                 });
             }
             if (hint != null) {
                 hint.observing().to(value -> {
-                    description.setText(value == null ? "" : value);
+                    description.setSource(value);
                     // A row without a description stays on one line.
                     description.setVisible(value != null && !value.isEmpty());
                     remember(value);
@@ -151,7 +147,7 @@ public final class ARXSettingsPane extends JPanel {
 
         /** The caption currently shown. */
         public String caption() {
-            return caption.getText();
+            return caption.source();
         }
 
         /** Whether this row answers to the query; an empty query matches everything. */
