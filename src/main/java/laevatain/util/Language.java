@@ -27,7 +27,7 @@ import kiss.I;
 public final class Language {
 
     /** A language the interface can be shown in. */
-    public record SupportedLaguage(String code, String name) {
+    public record Supported(String code, String name) {
     }
 
     private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Language.class);
@@ -39,8 +39,8 @@ public final class Language {
      * system lists them, so a bad translation can never hide the option the user is looking for.
      * The first entry is the language the source sentences are written in.
      */
-    public static final List<SupportedLaguage> SUPPORTS = List
-            .of(new SupportedLaguage("en", "English"), new SupportedLaguage("ja", "日本語"), new SupportedLaguage("ko", "한국어"), new SupportedLaguage("zh-CN", "简体中文"), new SupportedLaguage("zh-TW", "繁體中文"), new SupportedLaguage("de", "Deutsch"), new SupportedLaguage("fr", "Français"), new SupportedLaguage("es", "Español"), new SupportedLaguage("it", "Italiano"), new SupportedLaguage("pt", "Português"), new SupportedLaguage("ru", "Русский"), new SupportedLaguage("nl", "Nederlands"));
+    public static final List<Supported> SUPPORTS = List
+            .of(new Supported("en", "English"), new Supported("ja", "日本語"), new Supported("ko", "한국어"), new Supported("zh-CN", "简体中文"), new Supported("zh-TW", "繁體中文"), new Supported("de", "Deutsch"), new Supported("fr", "Français"), new Supported("es", "Español"), new Supported("it", "Italiano"), new Supported("pt", "Português"), new Supported("ru", "Русский"), new Supported("nl", "Nederlands"));
 
     private Language() {
     }
@@ -68,10 +68,25 @@ public final class Language {
         return PREFERENCES.get(LANGUAGE_KEY, I.Lang.get());
     }
 
+    /** The name of a language code as that language writes it, e.g. Français for {@code fr}. */
+    public static String name(String code) {
+        for (Supported language : SUPPORTS) {
+            if (language.code().equals(code)) {
+                return language.name();
+            }
+        }
+        return code;
+    }
+
     /** The locale matching the active language, for dates, numbers and collation. */
     public static Locale locale() {
         Locale locale = Locale.forLanguageTag(language());
         return locale.getLanguage().isEmpty() ? Locale.getDefault() : locale;
+    }
+
+    /** The name of the active language, as that language writes it. */
+    public static String name() {
+        return name(language());
     }
 
     /** The active locale in its own words, e.g. 日本語 (日本) or English (United States). */

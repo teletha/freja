@@ -110,10 +110,6 @@ public final class SettingsPanel extends JPanel {
 
     private JLabel preview;
 
-    /** The system page mirrors the active theme name, which the tiles can change. */
-
-    private boolean updating;
-
     public SettingsPanel(Listener listener) {
         this.listener = listener;
         setLayout(new BorderLayout());
@@ -268,9 +264,6 @@ public final class SettingsPanel extends JPanel {
         size.setPreferredSize(new Dimension(110, 30));
 
         family.addActionListener(event -> {
-            if (updating) {
-                return;
-            }
             if (family.getSelectedItem() instanceof String chosen) {
                 Theme.setFont(chosen, Theme.fontSize());
                 refreshPreview();
@@ -278,9 +271,6 @@ public final class SettingsPanel extends JPanel {
             }
         });
         size.addChangeListener(event -> {
-            if (updating) {
-                return;
-            }
             int value = (Integer) size.getValue();
             float ratio = (float) value / Theme.fontSize();
             Object chosen = family.getSelectedItem();
@@ -326,18 +316,15 @@ public final class SettingsPanel extends JPanel {
      */
     private void languageSection() {
         languages = new ARXComboBox();
-        for (Language.SupportedLaguage language : Language.SUPPORTS) {
+        for (Language.Supported language : Language.SUPPORTS) {
             languages.addItem(language.name());
         }
-        languages.setSelectedItem(Language.displayName());
+        languages.setSelectedItem(Language.name());
         languages.setFont(Theme.font(Font.PLAIN, 13));
         languages.setPreferredSize(new Dimension(200, 30));
         languages.addActionListener(event -> {
-            if (updating) {
-                return;
-            }
             String display = (String) languages.getSelectedItem();
-            for (Language.SupportedLaguage language : Language.SUPPORTS) {
+            for (Language.Supported language : Language.SUPPORTS) {
                 if (language.name().equals(display)) {
                     Language.install(language.code());
                     break;
