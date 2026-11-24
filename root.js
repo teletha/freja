@@ -72,6 +72,11 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXComboBox",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXNavList",
 			"packageName": "laevatain",
 			"type": "Class"

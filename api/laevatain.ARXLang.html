@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="e">
-		<header class="a" date="2026-11-24">
-			<h1 class="M"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="b"><a href="api/main.html" id="API"><svg class="package">
+	<body class="JB">
+		<header class="EB" date="2026-11-24">
+			<h1 class="y"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="l"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="c"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="Q"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="g"></nav>
-		<article class="d" id="Article">
-			<section class="n"><code class="BB">laevatain</code>
-				<h2 class="Class q"><code class="Q">ARXLang</code></h2>
-				<div class="j"></div><span class="A"><p>The localisation bridge for ARX components.</p><p>
+		<nav class="p"></nav>
+		<article class="b" id="Article">
+			<section class="t"><code class="P">laevatain</code>
+				<h2 class="Class h"><code class="z">ARXLang</code></h2>
+				<div class="m"></div><span class="A"><p>The localisation bridge for ARX components.</p><p>
 Interface text is written in the source as plain English and passed through I#translate,
 which resolves it against the language held in I#Lang: a sentence seen for the first time
 is translated online once and stored in a local bundle, later requests come from that cache. The
@@ -54,14 +54,14 @@ result is a kiss.Variable, so widgets bound here follow a language change immedi
 without restarting the application.
 </p>
 				</span></section>
-			<section class="n" id="LANGUAGES">
-				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="Q">LANGUAGES</code><i class="IB"><code class="return"><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="laevatain.ARXLang.Language" href="api/laevatain.ARXLang.Language.html">Language</a></code></code></code></i></h2><span class="A"><p>The offered languages. Their names are written in their own language, the way every operating
+			<section class="t" id="LANGUAGES">
+				<h2 class="o"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="z">LANGUAGES</code><i class="V"><code class="return"><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="laevatain.ARXLang.Language" href="api/laevatain.ARXLang.Language.html">Language</a></code></code></code></i></h2><span class="A"><p>The offered languages. Their names are written in their own language, the way every operating
 system lists them, so a bad translation can never hide the option the user is looking for.
 The first entry is the language the source sentences are written in.</p></span></section>
-			<section class="n" id="bundleDirectory(java.nio.file.Path)">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">bundleDirectory</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code>)</code><i class="IB"><code>void</code></i></h2>
-				<table class="W">
-					<tr class="S">
+			<section class="t" id="bundleDirectory(java.nio.file.Path)">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">bundleDirectory</code><code class="v">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code>)</code><i class="V"><code>void</code></i></h2>
+				<table class="S">
+					<tr class="d">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code></td>
 						<td><span><p>the folder which will hold <code>&lt;language&gt;.json</code></p></span></td>
 					</tr>
@@ -70,83 +70,83 @@ folder relative to the working directory - into the environment cache while <cod
 initializing, so handing it a default here would arrive too late; the resolved value is
 written into that cache directly instead. An explicit <code>LangDirectory</code> environment
 variable always wins.</p></span></section>
-			<section class="n" id="install()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">install</code><code class="HB">()</code><i class="IB"><code>void</code></i></h2><span class="A"><p>Applies the saved language. Without a saved choice the operating system&apos;s language stands,
+			<section class="t" id="install()">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">install</code><code class="v">()</code><i class="V"><code>void</code></i></h2><span class="A"><p>Applies the saved language. Without a saved choice the operating system&apos;s language stands,
 which is what I#Lang already holds.</p></span></section>
-			<section class="n" id="language()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">language</code><code class="HB">()</code><i class="IB"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="W">
-					<tr class="o">
+			<section class="t" id="language()">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">language</code><code class="v">()</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="S">
+					<tr class="e">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The active language code, in the form the translation service expects.</p></span></section>
-			<section class="n" id="locale()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">locale</code><code class="HB">()</code><i class="IB"><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></i></h2>
-				<table class="W">
-					<tr class="o">
+			<section class="t" id="locale()">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">locale</code><code class="v">()</code><i class="V"><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></i></h2>
+				<table class="S">
+					<tr class="e">
 						<td><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The locale matching the active language, for dates, numbers and collation.</p></span></section>
-			<section class="n" id="displayName()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">displayName</code><code class="HB">()</code><i class="IB"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="W">
-					<tr class="o">
+			<section class="t" id="displayName()">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">displayName</code><code class="v">()</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="S">
+					<tr class="e">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The active locale in its own words, e.g. 日本語 (日本) or English (United States).</p></span></section>
-			<section class="n" id="setLanguage(java.lang.String)">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">setLanguage</code><code class="HB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="IB"><code>void</code></i></h2>
-				<table class="W">
-					<tr class="S">
+			<section class="t" id="setLanguage(java.lang.String)">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">setLanguage</code><code class="v">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="V"><code>void</code></i></h2>
+				<table class="S">
+					<tr class="d">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Switches the interface language, remembers the choice and notifies the listeners.</p></span></section>
-			<section class="n" id="onChange(java.lang.Runnable)">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">onChange</code><code class="HB">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">listener</code>)</code><i class="IB"><code>void</code></i></h2>
-				<table class="W">
-					<tr class="S">
+			<section class="t" id="onChange(java.lang.Runnable)">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">onChange</code><code class="v">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">listener</code>)</code><i class="V"><code>void</code></i></h2>
+				<table class="S">
+					<tr class="d">
 						<td><code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">listener</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Registers a callback for language changes, for text assembled from values which cannot be
 bound as a variable, such as a popup menu built on demand.</p></span></section>
-			<section class="n" id="name(java.lang.String)">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="Q">name</code><code class="HB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="IB"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="W">
-					<tr class="S">
+			<section class="t" id="name(java.lang.String)">
+				<h2 class="o"><i class="PUBLIC STATIC"></i><code class="z">name</code><code class="v">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="S">
+					<tr class="d">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code></td>
 						<td></td>
 					</tr>
-					<tr class="o">
+					<tr class="e">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The display name of a language code, in its own language.</p></span></section>
 		</article>
-		<aside class="h">
-			<div class="Y">
-				<h5 class="u">Static Fields</h5>
+		<aside class="q">
+			<div class="n">
+				<h5 class="r">Static Fields</h5>
 				<ul>
-					<li class="DB"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/laevatain.ARXLang.html#LANGUAGES">LANGUAGES</a></code><i class="N"><code class="return"><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="laevatain.ARXLang.Language" href="api/laevatain.ARXLang.Language.html">Language</a></code></code></code></i></li>
+					<li class="g"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/laevatain.ARXLang.html#LANGUAGES">LANGUAGES</a></code><i class="X"><code class="return"><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="laevatain.ARXLang.Language" href="api/laevatain.ARXLang.Language.html">Language</a></code></code></code></i></li>
 				</ul>
-				<h5 class="u">Static Methods</h5>
+				<h5 class="r">Static Methods</h5>
 				<ul>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#bundleDirectory(java.nio.file.Path)">bundleDirectory</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code>)</code><i class="N"><code>void</code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#install()">install</a></code><code class="HB">()</code><i class="N"><code>void</code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#language()">language</a></code><code class="HB">()</code><i class="N"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#locale()">locale</a></code><code class="HB">()</code><i class="N"><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#displayName()">displayName</a></code><code class="HB">()</code><i class="N"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#setLanguage(java.lang.String)">setLanguage</a></code><code class="HB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="N"><code>void</code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#onChange(java.lang.Runnable)">onChange</a></code><code class="HB">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">listener</code>)</code><i class="N"><code>void</code></i></li>
-					<li class="DB"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#name(java.lang.String)">name</a></code><code class="HB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="N"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#bundleDirectory(java.nio.file.Path)">bundleDirectory</a></code><code class="v">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code>)</code><i class="X"><code>void</code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#install()">install</a></code><code class="v">()</code><i class="X"><code>void</code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#language()">language</a></code><code class="v">()</code><i class="X"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#locale()">locale</a></code><code class="v">()</code><i class="X"><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#displayName()">displayName</a></code><code class="v">()</code><i class="X"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#setLanguage(java.lang.String)">setLanguage</a></code><code class="v">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="X"><code>void</code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#onChange(java.lang.Runnable)">onChange</a></code><code class="v">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">listener</code>)</code><i class="X"><code>void</code></i></li>
+					<li class="g"><i class="PUBLIC STATIC"></i><code><a href="api/laevatain.ARXLang.html#name(java.lang.String)">name</a></code><code class="v">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="X"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="f">
+		<footer class="x">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
