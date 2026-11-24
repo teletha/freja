@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="v">
-		<header class="K" date="2026-11-24">
-			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+	<body class="e">
+		<header class="a" date="2026-11-24">
+			<h1 class="M"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="b"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="c"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="w"></nav>
+		<nav class="g"></nav>
 		<article class="d" id="Article">
-			<div class="AB">
+			<div class="n">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -222,8 +222,9 @@ emoji fonts.</td>
 								<td><code><a href="api/freja.ui.SettingsPanel.html">SettingsPanel</a></code></td>
 								<td>Freja&apos;s settings page: the reusable ARXSettingsPane scaffold - searchable rail, anchored
 sections, glide scrolling and cards - filled with the application&apos;s appearance, font, language
-and system settings. Captions are written in English and translated by ARXLang, so both
-the page and its search follow the language picked on the language section.</td>
+and system settings. Captions are written in English and translated by
+I#translate(String, Object...),
+so both the page and its search follow the language picked on the language section.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
@@ -240,7 +241,8 @@ the page and its search follow the language picked on the language section.</td>
 							<tr>
 								<td><code><a href="api/freja.ui.Sidebar.html">Sidebar</a></code></td>
 								<td>The navigation sidebar: a library list and the registered folders, both built from the reusable
-ARXNavList and translated through ARXLang.</td>
+ARXNavList, with captions bound to live translations from
+I#translate(String, Object...).</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
@@ -351,8 +353,8 @@ carry a short id, IntelliJ themes their look and feel class name.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="x"></aside>
-		<footer class="Q">
+		<aside class="h"></aside>
+		<footer class="f">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
