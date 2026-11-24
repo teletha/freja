@@ -128,9 +128,6 @@ public final class SettingsPanel extends JPanel {
         fontSection();
         languageSection();
         systemSection();
-        // Captions built from values - counts, the current theme, the resolved locale - cannot be
-        // bound as variables, so they are rebuilt when the language changes.
-        ARXLang.onChange(this::refreshLocalized);
         pane.show(APPEARANCE);
     }
 
@@ -394,10 +391,9 @@ public final class SettingsPanel extends JPanel {
         togglePanel.add(state);
         togglePanel.add(startup);
 
-        ARXButton check = new ARXButton("Check now", Icons.search(14, Theme.MUTED), ARXButton.Variant.SECONDARY,
-                () -> JOptionPane.showMessageDialog(this,
-                        I.translate("The update check is not available yet.").get(),
-                        I.translate("Update").get(), JOptionPane.INFORMATION_MESSAGE));
+        ARXButton check = new ARXButton("Check now", Icons.search(14, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> JOptionPane
+                .showMessageDialog(this, I.translate("The update check is not available yet.").get(), I.translate("Update")
+                        .get(), JOptionPane.INFORMATION_MESSAGE));
         check.setFont(Theme.font(Font.PLAIN, 12));
 
         ARXButton restart = new ARXButton("Restart", Icons.refresh(14, Theme.ACCENT_DARK), ARXButton.Variant.TINTED, freja.Freja::restart);
@@ -416,16 +412,13 @@ public final class SettingsPanel extends JPanel {
                                         .of("Apply the settings and start again"), restart)
                                 .keywords("restart", "reboot", "reload"));
         section.addCard(ARXSettingsPane
-                        .row(ARXSettingsPane.Text.of("Application"), "", ARXSettingsPane
-                                .value("Freja " + freja.Freja.VERSION + " (2026-11-24)"))
-                        .keywords("version", "build", "about"), ARXSettingsPane
-                                .row(ARXSettingsPane.Text.of("Operating system"), "", ARXSettingsPane
-                                        .value(System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System
-                                                .getProperty("os.version")))
-                                .keywords("os", "windows", "system"), ARXSettingsPane
-                                        .row(ARXSettingsPane.Text.of("Java runtime"), "", ARXSettingsPane
-                                                .value(System.getProperty("java.version")))
-                                        .keywords("java", "jvm", "runtime"));
+                .row(ARXSettingsPane.Text.of("Application"), "", ARXSettingsPane.value("Freja " + freja.Freja.VERSION + " (2026-11-24)"))
+                .keywords("version", "build", "about"), ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("Operating system"), "", ARXSettingsPane.value(System
+                                .getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System.getProperty("os.version")))
+                        .keywords("os", "windows", "system"), ARXSettingsPane
+                                .row(ARXSettingsPane.Text.of("Java runtime"), "", ARXSettingsPane.value(System.getProperty("java.version")))
+                                .keywords("java", "jvm", "runtime"));
     }
 
     /** A theme preview: a miniature window painted in the shades of the theme it offers. */

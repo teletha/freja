@@ -9,7 +9,6 @@
  */
 package laevatain;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.prefs.Preferences;
@@ -42,10 +41,6 @@ public final class ARXLang {
      */
     public static final List<Language> LANGUAGES = List
             .of(new Language("en", "English"), new Language("ja", "日本語"), new Language("ko", "한국어"), new Language("zh-CN", "简体中文"), new Language("zh-TW", "繁體中文"), new Language("de", "Deutsch"), new Language("fr", "Français"), new Language("es", "Español"), new Language("it", "Italiano"), new Language("pt", "Português"), new Language("ru", "Русский"), new Language("nl", "Nederlands"));
-
-
-    /** Listeners rebuilt text can call when the language changes. */
-    private static final List<Runnable> listeners = new ArrayList<>();
 
     private ARXLang() {
     }
@@ -113,19 +108,6 @@ public final class ARXLang {
         }
         PREFERENCES.put(LANGUAGE_KEY, code);
         I.Lang.set(code);
-        for (Runnable listener : List.copyOf(listeners)) {
-            listener.run();
-        }
-    }
-
-    /**
-     * Registers a callback for language changes, for text assembled from values which cannot be
-     * bound as a variable, such as a popup menu built on demand.
-     */
-    public static void onChange(Runnable listener) {
-        if (listener != null && !listeners.contains(listener)) {
-            listeners.add(listener);
-        }
     }
 
     /** The display name of a language code, in its own language. */
