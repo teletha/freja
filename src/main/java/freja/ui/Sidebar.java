@@ -28,7 +28,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
@@ -41,6 +40,7 @@ import laevatain.ARXLang;
 import laevatain.ARXMenu;
 import laevatain.ARXMenuItem;
 import laevatain.ARXNavList;
+import laevatain.ARXRadioButtonMenuItem;
 
 /**
  * The navigation sidebar: a library list and the registered folders, both built from the reusable
@@ -324,7 +324,7 @@ public final class Sidebar extends JPanel {
         JMenu menu = new ARXMenu(ARXLang.text("Sort order"));
         ButtonGroup group = new ButtonGroup();
         for (SortOrder sort : SortOrder.values()) {
-            JRadioButtonMenuItem item = new JRadioButtonMenuItem(label(sort), sort == folder.sort());
+            ARXRadioButtonMenuItem item = new ARXRadioButtonMenuItem(label(sort), sort == folder.sort());
             item.addActionListener(event -> listener.onSortFolder(folder.id(), sort));
             group.add(item);
             menu.add(item);
@@ -336,8 +336,8 @@ public final class Sidebar extends JPanel {
      * The sort entries in the current language. The model keeps its own labels because the toolbar
      * still shows them untranslated; this mapping is what the sidebar menu offers.
      */
-    private static String label(SortOrder order) {
-        return ARXLang.of(switch (order) {
+    private static kiss.Variable<String> label(SortOrder order) {
+        return ARXLang.text(switch (order) {
             case NAME -> "By name";
             case DATE_NEWEST -> "Newest first";
             case DATE_OLDEST -> "Oldest first";

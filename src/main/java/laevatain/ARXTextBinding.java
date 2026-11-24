@@ -19,12 +19,12 @@ import kiss.Variable;
  * component can switch sources - for example when its language changes - without leaking or being
  * written by two translations at once.
  */
-final class ARXTextBinding {
+public final class ARXTextBinding {
 
     private Disposable current;
 
     /** Points the setter at {@code value} now and on every later change. */
-    void bind(Variable<String> value, Consumer<String> setter) {
+    public void bind(Variable<String> value, Consumer<String> setter) {
         if (current != null) {
             current.dispose();
             current = null;
@@ -35,7 +35,7 @@ final class ARXTextBinding {
     }
 
     /** The current wording, or null while nothing is bound. */
-    static String get(Variable<String> value) {
+    public static String get(Variable<String> value) {
         return value == null ? null : value.get();
     }
 }

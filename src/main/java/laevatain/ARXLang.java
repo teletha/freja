@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.prefs.Preferences;
-
-import javax.swing.AbstractButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 
 import kiss.Disposable;
 import kiss.I;
@@ -32,10 +27,6 @@ import kiss.Variable;
  * is translated online once and stored in a local bundle, later requests come from that cache. The
  * result is a {@link Variable}, so widgets bound here follow a language change immediately and
  * without restarting the application.
- * <p>
- * Values are inserted with {@link String#format} placeholders ({@code %d}, {@code %s}) via
- * {@link #dynamic}: mustache braces cannot be used, because the translation step substitutes those
- * away before the text reaches the caller.
  */
 public final class ARXLang {
 
@@ -52,19 +43,8 @@ public final class ARXLang {
      * system lists them, so a bad translation can never hide the option the user is looking for.
      * The first entry is the language the source sentences are written in.
      */
-    public static final List<Language> LANGUAGES = List.of(
-            new Language("en", "English"),
-            new Language("ja", "日本語"),
-            new Language("ko", "한국어"),
-            new Language("zh-CN", "简体中文"),
-            new Language("zh-TW", "繁體中文"),
-            new Language("de", "Deutsch"),
-            new Language("fr", "Français"),
-            new Language("es", "Español"),
-            new Language("it", "Italiano"),
-            new Language("pt", "Português"),
-            new Language("ru", "Русский"),
-            new Language("nl", "Nederlands"));
+    public static final List<Language> LANGUAGES = List
+            .of(new Language("en", "English"), new Language("ja", "日本語"), new Language("ko", "한국어"), new Language("zh-CN", "简体中文"), new Language("zh-TW", "繁體中文"), new Language("de", "Deutsch"), new Language("fr", "Français"), new Language("es", "Español"), new Language("it", "Italiano"), new Language("pt", "Português"), new Language("ru", "Русский"), new Language("nl", "Nederlands"));
 
     /**
      * Machine translation is faithful but not idiomatic, so sentences whose wording matters are
@@ -72,83 +52,49 @@ public final class ARXLang {
      */
     private static final Map<String, Map<String, String>> GLOSSARY = Map.of("ja", Map.ofEntries(
             // Navigation and section titles.
-            Map.entry("Library", "ライブラリ"),
-            Map.entry("Folders", "フォルダ"),
-            Map.entry("All photos", "すべての写真"),
-            Map.entry("Favorites", "お気に入り"),
-            Map.entry("Recent photos", "最近の写真"),
-            Map.entry("No folders are registered", "登録されたフォルダはありません"),
-            Map.entry("Settings", "設定"),
-            Map.entry("Appearance", "外観"),
-            Map.entry("Fonts", "フォント"),
-            Map.entry("Language", "言語"),
-            Map.entry("System", "システム"),
+            Map.entry("Library", "ライブラリ"), Map.entry("Folders", "フォルダ"), Map.entry("All photos", "すべての写真"), Map
+                    .entry("Favorites", "お気に入り"), Map.entry("Recent photos", "最近の写真"), Map
+                            .entry("No folders are registered", "登録されたフォルダはありません"), Map.entry("Settings", "設定"), Map
+                                    .entry("Appearance", "外観"), Map
+                                            .entry("Fonts", "フォント"), Map.entry("Language", "言語"), Map.entry("System", "システム"),
             // Folder context menu.
-            Map.entry("Sort order", "表示順"),
-            Map.entry("By name", "名前順"),
-            Map.entry("Newest first", "日時順 (新しい順)"),
-            Map.entry("Oldest first", "日時順 (古い順)"),
-            Map.entry("By size", "サイズ順"),
-            Map.entry("Rename", "名前を変更"),
-            Map.entry("Edit tags…", "タグを編集…"),
-            Map.entry("Rescan", "再スキャン"),
-            Map.entry("Open in Explorer", "エクスプローラーで開く"),
+            Map.entry("Sort order", "表示順"), Map.entry("By name", "名前順"), Map.entry("Newest first", "日時順 (新しい順)"), Map
+                    .entry("Oldest first", "日時順 (古い順)"), Map.entry("By size", "サイズ順"), Map.entry("Rename", "名前を変更"), Map
+                            .entry("Edit tags…", "タグを編集…"), Map.entry("Rescan", "再スキャン"), Map.entry("Open in Explorer", "エクスプローラーで開く"),
             // The search box on the settings page.
-            Map.entry("Search settings", "設定を検索"),
-            Map.entry("No settings match your search", "検索条件に一致する設定はありません"),
-            Map.entry("Remove from library", "ライブラリから削除"),
-            Map.entry("Tags", "タグ"),
-            Map.entry("Manage tags", "タグを管理"),
-            Map.entry("Manage watched folders", "監視フォルダを管理"),
-            Map.entry("(auto-detected)", "(自動検出)"),
+            Map.entry("Search settings", "設定を検索"), Map.entry("No settings match your search", "検索条件に一致する設定はありません"), Map
+                    .entry("Remove from library", "ライブラリから削除"), Map.entry("Tags", "タグ"), Map.entry("Manage tags", "タグを管理"), Map
+                            .entry("Manage watched folders", "監視フォルダを管理"), Map.entry("(auto-detected)", "(自動検出)"),
             // Appearance page.
-            Map.entry("Light", "ライト"),
-            Map.entry("Dark", "ダーク"),
-            Map.entry("All themes", "すべてのテーマ"),
-            Map.entry("Light themes", "ライト系"),
-            Map.entry("Dark themes", "ダーク系"),
-            Map.entry("More themes", "さらに見る"),
-            Map.entry("Fewer themes", "代表のみ表示"),
-            Map.entry("Filter", "絞り込み"),
-            Map.entry("Choose how the application is coloured.", "アプリの配色を選択します。"),
-            Map.entry("Show the representative palettes only", "代表的な配色に絞って表示します"),
-            Map.entry("Narrow the candidates by brightness", "明るさに応じて候補を絞り込みます"),
+            Map.entry("Light", "ライト"), Map.entry("Dark", "ダーク"), Map.entry("All themes", "すべてのテーマ"), Map.entry("Light themes", "ライト系"), Map
+                    .entry("Dark themes", "ダーク系"), Map.entry("More themes", "さらに見る"), Map.entry("Fewer themes", "代表のみ表示"), Map
+                            .entry("Filter", "絞り込み"), Map.entry("Choose how the application is coloured.", "アプリの配色を選択します。"), Map
+                                    .entry("Show the representative palettes only", "代表的な配色に絞って表示します"), Map
+                                            .entry("Narrow the candidates by brightness", "明るさに応じて候補を絞り込みます"),
             // Fonts page.
-            Map.entry("Adjust the typeface and its base size.", "文字の書体と大きさを調整します。"),
-            Map.entry("Font family", "フォント ファミリー"),
-            Map.entry("Typeface to use", "使用する書体"),
-            Map.entry("Font size", "フォント サイズ"),
-            Map.entry("Base size in points", "文字の基準サイズ（ポイント）"),
-            Map.entry("Preview", "プレビュー"),
-            Map.entry("How the current settings look", "現在の設定の確認結果"),
+            Map.entry("Adjust the typeface and its base size.", "文字の書体と大きさを調整します。"), Map.entry("Font family", "フォント ファミリー"), Map
+                    .entry("Typeface to use", "使用する書体"), Map.entry("Font size", "フォント サイズ"), Map
+                            .entry("Base size in points", "文字の基準サイズ（ポイント）"), Map
+                                    .entry("Preview", "プレビュー"), Map.entry("How the current settings look", "現在の設定の確認結果"),
             // Language page.
-            Map.entry("Pick the language of the interface.", "表示言語を選択します。"),
-            Map.entry("Display language", "表示言語"),
-            Map.entry("Interface text is written in English and translated automatically; "
-                    + "results are cached for offline use",
-                    "表示文は英語で記述され、自動的に翻訳されます。翻訳結果はオフライン用に保存されます"),
-            Map.entry("Current locale", "現在のロケール"),
-            Map.entry("Used for dates, numbers and sorting", "日付・数値・並び順に使用されます"),
+            Map.entry("Pick the language of the interface.", "表示言語を選択します。"), Map.entry("Display language", "表示言語"), Map
+                    .entry("Interface text is written in English and translated automatically; " + "results are cached for offline use", "表示文は英語で記述され、自動的に翻訳されます。翻訳結果はオフライン用に保存されます"), Map
+                            .entry("Current locale", "現在のロケール"), Map.entry("Used for dates, numbers and sorting", "日付・数値・並び順に使用されます"),
             // System page.
-            Map.entry("Update checks, application information and restart.",
-                    "アップデート確認とアプリの情報、再起動を管理します。"),
-            Map.entry("Check for updates at startup", "起動時にアップデートを確認する"),
-            Map.entry("Look for a newer version when Freja starts", "起動時に新しいバージョンを確認します"),
-            Map.entry("Check for updates", "アップデートの確認"),
-            Map.entry("Compare against the latest release", "最新バージョンを確認します"),
-            Map.entry("Restart the application", "アプリケーションを再起動"),
-            Map.entry("Apply the settings and start again", "設定を反映してアプリを再起動します"),
-            Map.entry("Restart", "再起動する"),
-            Map.entry("Check now", "アップデートを確認"),
-            Map.entry("The update check is not available yet.", "アップデート確認機能は現在準備中です。"),
-            Map.entry("Update", "アップデート"),
-            Map.entry("On", "オン"),
-            Map.entry("Off", "オフ"),
+            Map.entry("Update checks, application information and restart.", "アップデート確認とアプリの情報、再起動を管理します。"), Map
+                    .entry("Check for updates at startup", "起動時にアップデートを確認する"), Map
+                            .entry("Look for a newer version when Freja starts", "起動時に新しいバージョンを確認します"), Map
+                                    .entry("Check for updates", "アップデートの確認"), Map
+                                            .entry("Compare against the latest release", "最新バージョンを確認します"), Map
+                                                    .entry("Restart the application", "アプリケーションを再起動"), Map
+                                                            .entry("Apply the settings and start again", "設定を反映してアプリを再起動します"), Map
+                                                                    .entry("Restart", "再起動する"), Map.entry("Check now", "アップデートを確認"), Map
+                                                                            .entry("The update check is not available yet.", "アップデート確認機能は現在準備中です。"), Map
+                                                                                    .entry("Update", "アップデート"), Map
+                                                                                            .entry("On", "オン"), Map.entry("Off", "オフ"),
             // Information rows: the service turns "Application" into 応用, which is not the word.
-            Map.entry("Current theme", "現在のテーマ"),
-            Map.entry("Application", "アプリケーション"),
-            Map.entry("Operating system", "オペレーティングシステム"),
-            Map.entry("Java runtime", "Javaランタイム")));
+            Map.entry("Current theme", "現在のテーマ"), Map.entry("Application", "アプリケーション"), Map.entry("Operating system", "オペレーティングシステム"), Map
+                    .entry("Java runtime", "Javaランタイム")));
 
     /** Listeners rebuilt text can call when the language changes. */
     private static final List<Runnable> listeners = new ArrayList<>();
@@ -172,21 +118,10 @@ public final class ARXLang {
         try {
             java.lang.reflect.Field cache = I.class.getDeclaredField("env");
             cache.setAccessible(true);
-            ((java.util.Properties) cache.get(null)).setProperty("LangDirectory",
-                    directory.toAbsolutePath().toString());
+            ((java.util.Properties) cache.get(null)).setProperty("LangDirectory", directory.toAbsolutePath().toString());
         } catch (ReflectiveOperationException | RuntimeException e) {
             // A future sinobu layout may not expose the cache; the relative folder still works.
         }
-    }
-
-    /**
-     * The folder currently holding the translation bundles. A plain read: sinobu's two-argument
-     * lookup stores its default when the value is missing, so asking this first would lock the
-     * cache to the relative folder and make {@link #bundleDirectory(java.nio.file.Path)} too late.
-     */
-    public static java.nio.file.Path bundleDirectory() {
-        String value = I.env("LangDirectory");
-        return java.nio.file.Path.of(value == null ? "lang" : value);
     }
 
     /**
@@ -222,8 +157,7 @@ public final class ARXLang {
     }
 
     /**
-     * Switches the interface language, remembers the choice and notifies the listeners. Widgets
-     * bound through {@link #bind} update themselves as the underlying variable emits.
+     * Switches the interface language, remembers the choice and notifies the listeners.
      */
     public static void setLanguage(String code) {
         if (code == null || code.equals(language())) {
@@ -280,23 +214,6 @@ public final class ARXLang {
     }
 
     /**
-     * A sentence paired with its English origin. Search matches on the origin, because the
-     * displayed wording moves with the language while the identity of a setting must not.
-     */
-    public record Sentence(String source, Variable<String> text) {
-        /** The wording currently shown, falling back to the origin while it is being fetched. */
-        public String value() {
-            String resolved = text.get();
-            return resolved == null ? source : resolved;
-        }
-    }
-
-    /** A searchable sentence: the origin plus its live translation. */
-    public static Sentence say(String sentence) {
-        return new Sentence(sentence, text(sentence));
-    }
-
-    /**
      * The wording available right now: the glossary entry when there is one, otherwise the cached
      * translation, or the English source for a sentence never fetched.
      */
@@ -308,49 +225,5 @@ public final class ARXLang {
     private static Map<String, String> glossary(String code) {
         Map<String, String> terms = GLOSSARY.get(code);
         return terms == null ? Map.of() : terms;
-    }
-
-    /**
-     * A sentence whose {@code %d} / {@code %s} placeholders are filled after translation, so the
-     * wording can move in every language while the values stay live.
-     */
-    public static Variable<String> dynamic(String sentence, Object... arguments) {
-        return text(sentence).map(v -> String.format(locale(), v, arguments));
-    }
-
-    /**
-     * Feeds a sentence into a setter now and on every later change. The returned subscription can
-     * be ignored for widgets that live as long as the window, or disposed with an owner.
-     */
-    public static Disposable on(String sentence, Consumer<String> setter) {
-        return text(sentence).observing().to(setter::accept);
-    }
-
-    /** Creates a label whose text follows the language. */
-    public static JLabel label(String sentence) {
-        return bind(new JLabel(), sentence);
-    }
-
-    /** Binds a sentence to a button's text and returns the button. */
-    public static <T extends AbstractButton> T bind(T button, String sentence) {
-        on(sentence, button::setText);
-        return button;
-    }
-
-    /** Binds a sentence to a label's text and returns it. */
-    public static <T extends JLabel> T bind(T label, String sentence) {
-        on(sentence, label::setText);
-        return label;
-    }
-
-    /** Binds a sentence to a component's tooltip and returns the component. */
-    public static <T extends JComponent> T tooltip(T component, String sentence) {
-        on(sentence, component::setToolTipText);
-        return component;
-    }
-
-    /** Formats a value with the active locale, so numbers and dates follow the language too. */
-    public static String format(String pattern, Object... arguments) {
-        return String.format(locale(), pattern, arguments);
     }
 }

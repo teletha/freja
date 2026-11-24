@@ -59,6 +59,24 @@ import kiss.Variable;
  */
 public final class ARXSettingsPane extends JPanel {
 
+    /**
+     * A caption with its English origin kept for search. The displayed wording follows a live
+     * translation, while the origin stays stable so a query finds a row in every language.
+     */
+    public record Text(String source, Variable<String> value) {
+
+        /** The wording currently shown, falling back to the origin while it is being fetched. */
+        public String display() {
+            String resolved = value == null ? null : value.get();
+            return resolved == null || resolved.isBlank() ? source : resolved;
+        }
+
+        /** Creates a caption whose wording follows the active interface language. */
+        public static Text of(String source) {
+            return new Text(source, ARXLang.text(source));
+        }
+    }
+
     /** One searchable settings row. */
     public static final class Row extends JPanel {
 
@@ -308,7 +326,7 @@ public final class ARXSettingsPane extends JPanel {
 
         private int slot;
 
-        private Section(String id, ARXLang.Sentence title, ARXLang.Sentence subtitle) {
+        private Section(String id, Text title, Text subtitle) {
             this.id = id;
             setName(id);
             setOpaque(false);
@@ -318,7 +336,7 @@ public final class ARXSettingsPane extends JPanel {
             heading.setForeground(textColor());
             hint.setFont(subtitleFont());
             hint.setForeground(mutedColor());
-            title.text().observing().to(value -> {
+            title.value().observing().to(value -> {
                 heading.setText(value);
                 remember(value);
             });
@@ -326,7 +344,7 @@ public final class ARXSettingsPane extends JPanel {
             if (subtitle == null) {
                 hint.setVisible(false);
             } else {
-                subtitle.text().observing().to(value -> {
+                subtitle.value().observing().to(value -> {
                     hint.setText(value);
                     remember(value);
                 });
@@ -358,15 +376,15 @@ public final class ARXSettingsPane extends JPanel {
         }
 
         /** Appends a heading above the next block, e.g. "Other options". */
-        public void addGroup(ARXLang.Sentence group) {
+        public void addGroup(Text group) {
             remember(group.source());
             pendingGroup = group.source();
-            group.text().observing().to(this::remember);
+            group.value().observing().to(this::remember);
         }
 
         /** Appends a heading above the next block. */
         public void addGroup(String group) {
-            addGroup(ARXLang.say(group));
+            addGroup(Text.of(group));
         }
 
         /** The identifier this section registered under. */
@@ -588,12 +606,12 @@ public final class ARXSettingsPane extends JPanel {
      * variables, so the field reads in the current language, and Ctrl+F reaches it from anywhere
      * inside the page.
      */
-    public final void search(ARXLang.Sentence placeholder, ARXLang.Sentence noneMessage) {
-        search = new ARXSearchField(placeholder.value(), null);
+    public final void search(Text placeholder, Text noneMessage) {
+        search = new ARXSearchField(placeholder.display(), null);
         search.setFont(labelFont());
         search.onTextChanged(() -> filter(search.query()));
-        placeholder.text().observing().to(search::setPlaceholder);
-        noneMessage.text().observing().to(none::setText);
+        placeholder.value().observing().to(search::setPlaceholder);
+        noneMessage.value().observing().to(none::setText);
         search.setPreferredSize(new Dimension(340, 30));
         searchPane.add(search, BorderLayout.WEST);
         searchPane.setVisible(true);
@@ -658,14 +676,14 @@ public final class ARXSettingsPane extends JPanel {
     }
 
     /** Registers a page: a rail entry, an anchored section heading and the scroll tracking. */
-    public Section addSection(String id, ARXLang.Sentence title, ARXLang.Sentence subtitle, Icon icon) {
+    public Section addSection(String id, Text title, Text subtitle, Icon icon) {
         Section section = new Section(id, title, subtitle);
         sections.put(id, section);
         // The gap between pages comes from the cell insets: a strut added without a GridBag
         // constraint would simply never be laid out.
         attach(section, documentRow++);
-        ARXNavList.Row entry = rail.add(id, title.value(), icon);
-        title.text().observing().to(text -> {
+        ARXNavList.Row entry = rail.add(id, title.display(), icon);
+        title.value().observing().to(text -> {
             if (entry != null) {
                 entry.setTitle(text);
             }
@@ -697,14 +715,14 @@ public final class ARXSettingsPane extends JPanel {
     }
 
     /** One settings row: caption and description on the left, control vertically centred right. */
-    public static Row row(ARXLang.Sentence caption, ARXLang.Sentence description, Component control) {
-        return new Row(caption == null ? null : caption.text(),
-                description == null ? null : description.text(), control);
+    public static Row row(Text caption, Text description, Component control) {
+        return new Row(caption == null ? null : caption.value(),
+                description == null ? null : description.value(), control);
     }
 
     /** A row whose caption is translated live and whose description is a plain label. */
-    public static Row row(ARXLang.Sentence caption, String description, Component control) {
-        return new Row(caption.text(), description == null || description.isEmpty() ? null
+    public static Row row(Text caption, String description, Component control) {
+        return new Row(caption.value(), description == null || description.isEmpty() ? null
                 : Variable.of(description), control);
     }
 
