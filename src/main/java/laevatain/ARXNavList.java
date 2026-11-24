@@ -56,6 +56,27 @@ import kiss.Variable;
  */
 public final class ARXNavList extends JPanel {
 
+    /**
+     * A display-only label. It refuses to answer for the point under it, so the row keeps the mouse:
+     * AWT hands an event to the single deepest component which contains the pointer, and a child
+     * claiming the middle of a row made the row hear "you were left" and swallow the click there.
+     */
+    private static final class PassthroughLabel extends JLabel {
+
+        PassthroughLabel(Icon icon) {
+            super(icon);
+        }
+
+        PassthroughLabel() {
+            super();
+        }
+
+        @Override
+        public boolean contains(int x, int y) {
+            return false;
+        }
+    }
+
     /** A title that shrinks with an ellipsis so the trailing annotation always stays in view. */
     private static final class TruncatedLabel extends JLabel {
 
@@ -64,6 +85,12 @@ public final class ARXNavList extends JPanel {
             setHorizontalAlignment(SwingConstants.LEFT);
             // Without this, a long label's minimum width pushes the annotation out of the row.
             setMinimumSize(new Dimension(0, 0));
+        }
+
+        @Override
+        public boolean contains(int x, int y) {
+            // The row owns the pointer; this label only paints.
+            return false;
         }
 
         @Override
@@ -106,7 +133,7 @@ public final class ARXNavList extends JPanel {
 
         private final ARXTextBinding tipBinding = new ARXTextBinding();
 
-        private final JLabel trailing = new JLabel();
+        private final JLabel trailing = new PassthroughLabel();
 
         private boolean selected;
 
@@ -124,7 +151,7 @@ public final class ARXNavList extends JPanel {
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setFocusable(true);
             if (icon != null) {
-                add(new JLabel(icon), BorderLayout.WEST);
+                add(new PassthroughLabel(icon), BorderLayout.WEST);
             }
             label = new TruncatedLabel(text);
             label.setFont(rowFont());
@@ -428,6 +455,48 @@ public final class ARXNavList extends JPanel {
     /** The keys in display order. */
     public List<String> keys() {
         return new ArrayList<>(rows.keySet());
+    }
+
+    /**
+     * Takes one row out of the list without touching the others. Rebuilding the whole list for a
+     * refresh replaces the panels under the pointer, which swallows clicks which are in flight.
+     */
+    public void remove(String key) {
+        Row row = rows.remove(key);
+        if (row == null) {
+            return;
+        }
+        hidden.remove(row);
+        if (key.equals(selected)) {
+            selected = null;
+        }
+        remove((Component) row);
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Places the rows in the given order, reusing the row components which are already there. The
+     * order is left alone when it already matches, so a refresh which changes nothing keeps the
+     * components - and a click in flight - intact.
+     */
+    public void align(List<String> order) {
+        if (keys().equals(order)) {
+            return;
+        }
+        Map<String, Row> arranged = new LinkedHashMap<>();
+        for (String key : order) {
+            Row row = rows.get(key);
+            if (row != null) {
+                arranged.put(key, row);
+            }
+        }
+        for (Map.Entry<String, Row> entry : rows.entrySet()) {
+            arranged.putIfAbsent(entry.getKey(), entry.getValue());
+        }
+        rows.clear();
+        rows.putAll(arranged);
+        refreshOrder();
     }
 
     /** Receives the key of every row the user selected with the pointer or the keyboard. */

@@ -11,6 +11,7 @@ package freja.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -53,7 +54,9 @@ import freja.util.ImageTransforms;
 import imagify.Imagify;
 
 /**
- * A full screen photo viewer with zoom, pan, keyboard navigation and a slideshow.
+ * A photo viewer which covers the whole screen, with zoom, pan, keyboard navigation and a
+ * slideshow. It does so as a top-most window over the owner's screen rather than through the
+ * display's exclusive full-screen mode, so leaving it does not disturb the desktop.
  */
 public final class PhotoViewer extends JDialog {
 
@@ -261,11 +264,35 @@ public final class PhotoViewer extends JDialog {
             BufferedImage placeholder) {
         PhotoViewer viewer = new PhotoViewer(owner, photos, start, placeholder);
         viewer.setListener(listener);
-        GraphicsDevice device = owner == null ? GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
-                : owner.getGraphicsConfiguration().getDevice();
-        device.setFullScreenWindow(viewer);
-        viewer.toFront();
+        viewer.coverScreen();
         return viewer;
+    }
+
+    /**
+     * Covers the screen the owner lives on without handing the display to the window manager. This
+     * viewer never calls {@code setDisplayMode}, so exclusive full-screen mode would buy nothing
+     * except the mode switch: on the way out Windows restores the desktop and repaints the window
+     * underneath in pieces, which is what made the main screen flicker after the viewer closed.
+     */
+    private void coverScreen() {
+        GraphicsDevice device = null;
+        Window owner = getOwner();
+        if (owner != null && owner.getGraphicsConfiguration() != null) {
+            device = owner.getGraphicsConfiguration().getDevice();
+        }
+        if (device == null) {
+            device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        }
+        GraphicsConfiguration configuration = device.getDefaultConfiguration();
+        setBounds(configuration.getBounds());
+        setAlwaysOnTop(true);
+        setVisible(true);
+        toFront();
+        // A window which has just been shown does not always accept focus on the first attempt,
+        // and the keyboard navigation below depends on it.
+        if (!requestFocusInWindow()) {
+            SwingUtilities.invokeLater(this::requestFocusInWindow);
+        }
     }
 
     private static JButton button(javax.swing.Icon icon, String tooltip) {
@@ -440,14 +467,19 @@ public final class PhotoViewer extends JDialog {
         slideshowTimer.stop();
         generation.incrementAndGet();
         loader.shutdownNow();
-        GraphicsConfiguration configuration = getGraphicsConfiguration();
-        if (configuration != null) {
-            GraphicsDevice device = configuration.getDevice();
-            if (device.getFullScreenWindow() == this) {
-                device.setFullScreenWindow(null);
-            }
-        }
+        // Leave the screen and give up the top-most rank before the window goes away, then hand
+        // activation back to the owner in one step, so the main window is shown once fully painted
+        // instead of being expose-painted while the viewer is still on top of it.
+        Window owner = getOwner();
+        setVisible(false);
+        setAlwaysOnTop(false);
         super.dispose();
+        if (owner instanceof Frame frame) {
+            frame.toFront();
+            frame.requestFocusInWindow();
+        } else if (owner != null) {
+            owner.toFront();
+        }
     }
 
     /**

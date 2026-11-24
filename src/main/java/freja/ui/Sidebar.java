@@ -15,6 +15,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -248,15 +249,33 @@ public final class Sidebar extends JPanel {
 
         int previousViewY = folderScroll.getViewport().getViewPosition().y;
         String focused = focusedRow();
-        folders.clear();
-        known.clear();
+        // Rows are updated in place rather than cleared and rebuilt. A refresh arrives often while
+        // the scanner reports progress, and replacing every panel discarded the click which had
+        // just landed on one of them - the sidebar then looked dead for no reason at all.
+        List<String> order = new ArrayList<>(registered.size());
         for (Folder folder : registered) {
-            ARXNavList.Row row = folders.add(Long.toString(folder.id()), folder.name(), Icons.folder(17, Theme.MUTED));
+            String key = Long.toString(folder.id());
+            order.add(key);
+            ARXNavList.Row row = folders.row(key);
+            if (row == null) {
+                row = folders.add(key, folder.name(), Icons.folder(17, Theme.MUTED));
+            } else {
+                row.setTitle(folder.name());
+            }
             row.setToolTipText(folder.path()
                     + (folder.explicit() ? "" : "  " + I.translate("(auto-detected)").get())
                     + (folder.tags().isEmpty() ? "" : "\n" + I.translate("Tags").get() + ": "
                             + String.join(", ", folder.tags())));
             row.setTrailing(Integer.toString(folder.photoCount()));
+        }
+        for (String key : folders.keys()) {
+            if (!order.contains(key)) {
+                folders.remove(key);
+            }
+        }
+        folders.align(order);
+        known.keySet().removeIf(id -> folders.row(Long.toString(id)) == null);
+        for (Folder folder : registered) {
             known.put(folder.id(), folder);
         }
         updateSelection();

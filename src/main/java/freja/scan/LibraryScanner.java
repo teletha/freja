@@ -36,6 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
@@ -95,11 +96,25 @@ public final class LibraryScanner implements AutoCloseable {
     /** Give up on a single unresponsive directory and keep scanning the rest of the tree. */
     private static final long DIRECTORY_TIMEOUT_SECONDS = Long.getLong("freja.scan.directoryTimeoutSeconds", 10);
 
-    /** Treat a single import stuck in file I/O this long as unresponsive. */
-    private static final long IMPORT_STUCK_SECONDS = Long.getLong("freja.scan.importStuckSeconds", 15);
+    /**
+     * A share which is merely slow - a NAS over SMB, a spindle disk spun down, an antivirus making
+     * its first pass - needs far longer than the first budget without being unresponsive, so a
+     * timed-out listing is waited on once more at this length before the directory is skipped.
+     */
+    private static final long DIRECTORY_RETRY_SECONDS = Long.getLong("freja.scan.directoryRetrySeconds", 300);
 
-    /** How long a walk waits for a free decode slot before abandoning the remaining files. */
+    /** How long a walk waits for a free decode slot before looking whether anything still moves. */
     private static final long IMPORT_WAIT_SECONDS = Long.getLong("freja.scan.importWaitSeconds", 5);
+
+    /** No import has finished for this long while slots stay full: the media really is dead. */
+    private static final long IMPORT_STALL_SECONDS = Long.getLong("freja.scan.importStallSeconds", 90);
+
+    /** How long a share which answers nothing at all is waited on before the folder is given up on. */
+    private static final int MAX_CONSECUTIVE_DIRECTORY_FAILURES = Integer
+            .getInteger("freja.scan.consecutiveDirectoryFailures", 8);
+
+    /** Consecutive directory listings which failed, so a departed share is noticed early. */
+    private final AtomicInteger directoryFailures = new AtomicInteger();
 
     private record Entry(Path path, BasicFileAttributes attrs) {
     }
@@ -131,9 +146,14 @@ public final class LibraryScanner implements AutoCloseable {
 
     private int activeImports;
 
-    private final Map<String, Long> importStarted = new ConcurrentHashMap<>();
+    /**
+     * When the last import finished. Progress, not the age of one file, decides whether the media is
+     * dead: a network share keeps serving while its decoders are simply busy, and only a run of
+     * silence means nothing is coming back.
+     */
+    private final AtomicLong lastImportProgress = new AtomicLong();
 
-    /** Set when every decoder is stuck, so the walk skips the rest instead of waiting per file. */
+    /** Set when no decoder finishes any more, so the walk skips the rest instead of waiting per file. */
     private volatile boolean importsBlocked;
 
     private final Set<String> importing = ConcurrentHashMap.newKeySet();
@@ -515,18 +535,33 @@ public final class LibraryScanner implements AutoCloseable {
 
     /**
      * Walks one directory with a timeout. An unresponsive directory is skipped; its siblings and
-     * the rest of the tree are still scanned.
+     * the rest of the tree are still scanned. A directory which merely takes longer than the first
+     * budget - a large folder on a share - is waited on once more before it is given up on, because
+     * skipping it silently loses every photo inside it.
      */
     private void walkTree(Path dir, SimpleFileVisitor<Path> visitor, AtomicBoolean complete) throws IOException {
-        Listing listing;
-        try {
-            listing = walkers.submit(() -> listDirectory(dir)).get(DIRECTORY_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (TimeoutException | ExecutionException e) {
+        if (directoryFailures.get() >= MAX_CONSECUTIVE_DIRECTORY_FAILURES) {
+            // The share stopped answering entirely; waiting through every remaining folder would
+            // take hours, so stop this one and let the next scan try again.
             complete.set(false);
-            errors.incrementAndGet();
-            lastError = "読み込めません: " + dir;
-            visitor.visitFileFailed(dir, new IOException(lastError, e));
-            visitor.postVisitDirectory(dir, new IOException(lastError, e));
+            lastError = "応答しないため中断しました: " + dir;
+            return;
+        }
+        Listing listing;
+        Future<Listing> first = null;
+        try {
+            first = walkers.submit(() -> listDirectory(dir));
+            listing = first.get(DIRECTORY_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            directoryFailures.set(0);
+        } catch (TimeoutException e) {
+            try {
+                listing = first.get(DIRECTORY_RETRY_SECONDS, TimeUnit.SECONDS);
+            } catch (TimeoutException | ExecutionException | InterruptedException retry) {
+                abandon(dir, visitor, complete, retry);
+                return;
+            }
+        } catch (ExecutionException e) {
+            abandon(dir, visitor, complete, e);
             return;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -543,9 +578,24 @@ public final class LibraryScanner implements AutoCloseable {
         visitor.postVisitDirectory(dir, null);
     }
 
+    /** Records one directory as unreadable and lets the walk carry on with its siblings. */
+    private void abandon(Path dir, SimpleFileVisitor<Path> visitor, AtomicBoolean complete, Exception cause)
+            throws IOException {
+        complete.set(false);
+        errors.incrementAndGet();
+        directoryFailures.incrementAndGet();
+        lastError = "読み込めません: " + dir;
+        IOException failure = new IOException(lastError, cause);
+        visitor.visitFileFailed(dir, failure);
+        visitor.postVisitDirectory(dir, failure);
+    }
+
     private void scanFolderInternal(Folder folder) {
         Path root = folder.path();
         String token = library.beginScan(folder.id());
+        // Slow media is only unresponsive when nothing completes at all, so the silence is measured
+        // from the start of this scan rather than from some earlier import.
+        lastImportProgress.set(System.nanoTime());
         activeTokens.put(folder.id(), token);
         String rootKey = PathUtil.key(root);
         Map<Path, Long> owners = new HashMap<>();
@@ -559,6 +609,7 @@ public final class LibraryScanner implements AutoCloseable {
             }
         }
         AtomicBoolean walkFinished = new AtomicBoolean(true);
+        directoryFailures.set(0);
         importsBlocked = false;
         message = folder.name() + " をスキャン中";
         publishState(true);
@@ -691,15 +742,24 @@ public final class LibraryScanner implements AutoCloseable {
         if (closed.get() || importsBlocked) {
             return;
         }
-        boolean acquired;
-        try {
-            acquired = importPermits.tryAcquire(IMPORT_WAIT_SECONDS, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
+        boolean acquired = false;
+        // Waiting for a slot is not the same as the media being dead: on a share the decoders are
+        // simply busy, and imports keep finishing. Only a run of silence gives the rest up.
+        while (!closed.get() && !importsBlocked) {
+            try {
+                if (acquired = importPermits.tryAcquire(IMPORT_WAIT_SECONDS, TimeUnit.SECONDS)) {
+                    break;
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (stalled()) {
+                importsBlocked = true;
+            }
         }
         if (!acquired) {
-            // Every decoder is stuck. Skip the rest of this scan rather than waiting per file.
+            // Nothing is completing any more. Skip the rest of this scan rather than waiting per file.
             importsBlocked = true;
             complete.set(false);
             errors.incrementAndGet();
@@ -709,7 +769,6 @@ public final class LibraryScanner implements AutoCloseable {
         String key = PathUtil.key(file);
         synchronized (importMonitor) {
             activeImports++;
-            importStarted.put(key, System.nanoTime());
         }
         try {
             importers.submit(() -> {
@@ -719,38 +778,38 @@ public final class LibraryScanner implements AutoCloseable {
                     errors.incrementAndGet();
                     lastError = e.getMessage();
                 } finally {
-                    releaseImport(key);
+                    releaseImport();
                 }
             });
         } catch (RuntimeException e) {
-            releaseImport(key);
+            releaseImport();
             errors.incrementAndGet();
             lastError = e.getMessage();
         }
     }
 
-    private void releaseImport(String key) {
-        if (key != null) {
-            importStarted.remove(key);
-        }
+    /** Whether no import has completed for as long as even a loaded share should need. */
+    private boolean stalled() {
+        return System.nanoTime() - lastImportProgress.get() > TimeUnit.SECONDS.toNanos(IMPORT_STALL_SECONDS);
+    }
+
+    private void releaseImport() {
         importPermits.release();
         synchronized (importMonitor) {
             activeImports--;
+            lastImportProgress.set(System.nanoTime());
             importMonitor.notifyAll();
         }
     }
 
-    /** Waits for decodes, but gives up when one of them is stuck in file I/O. */
+    /** Waits for decodes, but gives up when nothing completes any more, not when one is merely slow. */
     private boolean awaitImports() {
         synchronized (importMonitor) {
             while (activeImports > 0 && !closed.get()) {
-                long now = System.nanoTime();
-                for (Map.Entry<String, Long> entry : importStarted.entrySet()) {
-                    if (now - entry.getValue() > TimeUnit.SECONDS.toNanos(IMPORT_STUCK_SECONDS)) {
-                        errors.incrementAndGet();
-                        lastError = "読み込みが応答しませんでした: " + entry.getKey();
-                        return false;
-                    }
+                if (stalled()) {
+                    errors.incrementAndGet();
+                    lastError = "読み込みが応答しませんでした";
+                    return false;
                 }
                 try {
                     importMonitor.wait(200);

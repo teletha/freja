@@ -12,12 +12,15 @@ package laevatain;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 
 /**
  * A label which breaks its text into lines instead of asking for as much width as the longest line
@@ -26,13 +29,36 @@ import javax.swing.SwingUtilities;
  * <p>
  * The breaking itself is left to Swing: this is a read-only text area with word wrapping turned on,
  * which measures its height against the width it actually has. The component is only dressed up as
- * a label - transparent, borderless, unfocusable - and its maximum height pinned, because a
- * vertical {@code BoxLayout} would otherwise stretch it across the leftover room in the row.
+ * a label - transparent, borderless, unfocusable - its maximum height pinned, because a vertical
+ * {@code BoxLayout} would otherwise stretch it across the leftover room in the row, and its caret
+ * made deaf to the viewport, because a caret otherwise drags the scroll pane around.
  */
 public final class ARXWrapLabel extends JTextArea {
 
     /** The width asked for before the label knows how much room it will actually get. */
     private static final int CAPPED_WIDTH = 460;
+
+    /**
+     * A caret which never asks the enclosing scroll pane to follow it. {@code DefaultCaret} calls
+     * {@code scrollRectToVisible} every time it is repainted, and {@code BasicTextUI} switches the
+     * {@code autoscrolls} client property back on whenever a look and feel is (re)installed, so a
+     * read-only label dragged the settings document around - straight to the last wrapped
+     * description - whenever the theme changed. A caret which is not a {@code UIResource} survives
+     * that re-install, which is what keeps the fix in place.
+     */
+    private static final class StillCaret extends DefaultCaret {
+
+        @Override
+        protected void adjustVisibility(Rectangle n) {
+            // Deliberately empty: this label is never edited, so its caret has no reason to move
+            // the viewport anywhere.
+        }
+
+        @Override
+        public void paint(Graphics graphics) {
+            // Nothing to draw: a caption does not show a caret.
+        }
+    }
 
     public ARXWrapLabel() {
         setLineWrap(true);
@@ -43,6 +69,11 @@ public final class ARXWrapLabel extends JTextArea {
         setBorder(BorderFactory.createEmptyBorder());
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         setAlignmentX(Component.LEFT_ALIGNMENT);
+        DefaultCaret caret = new StillCaret();
+        caret.setBlinkRate(0);
+        caret.setVisible(false);
+        caret.setSelectionVisible(false);
+        setCaret(caret);
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent event) {

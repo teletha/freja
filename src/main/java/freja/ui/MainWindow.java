@@ -935,6 +935,10 @@ public final class MainWindow extends JFrame {
 
     private void selectMode(Sidebar.Mode mode, long folderId) {
         if (this.mode == mode && this.folderId == folderId) {
+            // Clicking the entry which is already selected is not a no-op: the grid has been
+            // scrolled elsewhere in the meantime, and the click means "take me back there".
+            // Ignoring it made the sidebar look unresponsive on most repeats.
+            revisit();
             return;
         }
         boolean folderToFolder = this.mode == Sidebar.Mode.FOLDER && mode == Sidebar.Mode.FOLDER && folderId >= 0;
@@ -953,6 +957,24 @@ public final class MainWindow extends JFrame {
             return;
         }
         refreshAll();
+    }
+
+    /**
+     * Returns the grid to what the sidebar already has selected: the folder's section, or the first
+     * photo for a whole-library view. A folder whose section is missing - nothing scanned yet - is
+     * reloaded instead, and the jump then follows the data, as it does for a new selection.
+     */
+    private void revisit() {
+        if (mode == Sidebar.Mode.FOLDER && folderId >= 0) {
+            scrollToSelectedFolder = true;
+            if (grid.scrollToFolder(folderId)) {
+                scrollToSelectedFolder = false;
+            } else {
+                refreshAll();
+            }
+            return;
+        }
+        grid.scrollToTop();
     }
 
     /** Remembers the last selected folder by path, so a rebuilt catalog can still resolve it. */

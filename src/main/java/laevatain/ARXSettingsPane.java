@@ -514,6 +514,15 @@ public final class ARXSettingsPane extends JPanel {
 
     private ARXSearchField search;
 
+    /**
+     * Prints a stack trace whenever the document jumps by more than a few rows, so the caller which
+     * moved the bar can be identified: {@code -Dfreja.debug.settingsScroll=true} turns it on.
+     */
+    private static final boolean TRACE_SCROLL = Boolean.getBoolean("freja.debug.settingsScroll");
+
+    /** The last value reported by the trace, so only genuine jumps are printed. */
+    private int tracedValue;
+
     private Timer glide;
 
     private int target;
@@ -584,6 +593,19 @@ public final class ARXSettingsPane extends JPanel {
                 trackVisible(event.getValue() + 60);
             }
         });
+        if (TRACE_SCROLL) {
+            scroll.getVerticalScrollBar().addAdjustmentListener(event -> {
+                int value = event.getValue();
+                if (Math.abs(value - tracedValue) < 120) {
+                    tracedValue = value;
+                    return;
+                }
+                tracedValue = value;
+                System.out.println("[settings] scroll " + value + " of max " + event.getAdjustable().getMaximum()
+                        + " visible " + event.getAdjustable().getVisibleAmount() + (animating ? " (glide)" : ""));
+                new Exception("[settings] scroll moved").printStackTrace(System.out);
+            });
+        }
         glide = new Timer(16, event -> glideScrollBar());
 
         searchPane.setOpaque(false);

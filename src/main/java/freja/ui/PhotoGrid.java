@@ -738,6 +738,20 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         return true;
     }
 
+    /**
+     * Brings the view back to the first photo. Selecting the entry the grid is already showing is a
+     * deliberate request to return to its start, so it needs the same glide the folder jump gives.
+     */
+    public void scrollToTop() {
+        JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        if (pane == null) {
+            return;
+        }
+        pane.validate();
+        JScrollBar bar = pane.getVerticalScrollBar();
+        animateTo(bar, bar.getMinimum());
+    }
+
     private void animateToVisible(Rectangle bounds) {
         JScrollPane pane = scrollPane;
         if (pane == null) {
