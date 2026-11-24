@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="T">
-		<header class="U" date="2026-11-24">
-			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="f"><a href="api/main.html" id="API"><svg class="package">
+	<body class="S">
+		<header class="T" date="2026-11-24">
+			<h1 class="r"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="d"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="g"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="b"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="X"></nav>
-		<article class="V" id="Article">
-			<div class="a">
+		<nav class="V"></nav>
+		<article class="O" id="Article">
+			<div class="M">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -52,24 +52,24 @@
 						<h4>🛠️ Interface</h4>
 						<table>
 							<tr>
+								<td><code><a href="api/freja.scan.LibraryScanner.Listener.html">LibraryScanner.Listener</a></code></td>
+								<td>Receives scanner events. Methods may be called from a background thread.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/freja.ui.PhotoInspector.Listener.html">PhotoInspector.Listener</a></code></td>
 								<td>User actions initiated from the inspector.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.Sidebar.Listener.html">Sidebar.Listener</a></code></td>
-								<td>Callbacks for navigation actions.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.ScanFoldersDialog.Listener.html">ScanFoldersDialog.Listener</a></code></td>
-								<td>Actions requested by this dialog.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.SettingsPanel.Listener.html">SettingsPanel.Listener</a></code></td>
 								<td>Notifications sent back to the owner after a setting changed.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/freja.scan.LibraryScanner.Listener.html">LibraryScanner.Listener</a></code></td>
-								<td>Receives scanner events. Methods may be called from a background thread.</td>
+								<td><code><a href="api/freja.ui.ScanFoldersDialog.Listener.html">ScanFoldersDialog.Listener</a></code></td>
+								<td>Actions requested by this dialog.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Sidebar.Listener.html">Sidebar.Listener</a></code></td>
+								<td>Callbacks for navigation actions.</td>
 							</tr>
 						</table>
 					</section>
@@ -86,103 +86,9 @@
 						<h4>🛠️ Class</h4>
 						<table>
 							<tr>
-								<td><code><a href="api/freja.store.PhotoImporter.html">PhotoImporter</a></code></td>
-								<td>Decodes an image once and produces everything the library stores about it.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.store.Exif.html">Exif</a></code></td>
-								<td>A small, dependency-free reader for the EXIF block of a JPEG file.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.store.Library.html">Library</a></code></td>
-								<td>The SQLite-backed photo catalog.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.util.SmartTags.html">SmartTags</a></code></td>
-								<td>Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
-tagged with them, e.g. 【旅行】(２０２４) 写真 yields 旅行 and 2024.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.util.PathUtil.html">PathUtil</a></code></td>
-								<td>Path normalization helpers shared by the database and the scanner.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.util.ImageTransforms.html">ImageTransforms</a></code></td>
-								<td>Pixel operations shared by thumbnail generation and the full screen viewer.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.PhotoGrid.html">PhotoGrid</a></code></td>
-								<td>A virtualized, Picasa-like thumbnail grid.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.Icons.html">Icons</a></code></td>
-								<td>Small vector icons drawn with Java2D, so the application does not depend on image assets or on
-emoji fonts.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.Theme.html">Theme</a></code></td>
-								<td>The visual language of the application.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.PhotoInspector.html">PhotoInspector</a></code></td>
-								<td>The details panel shown next to the thumbnail grid.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.Sidebar.html">Sidebar</a></code></td>
-								<td>The navigation sidebar: a library list and the registered folders, both built from the reusable
-ARXNavList and translated through ARXLang.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.ScanFoldersDialog.html">ScanFoldersDialog</a></code></td>
-								<td>Dialog for managing the folders the library watches and scans.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
-								<td>A full screen photo viewer with zoom, pan, keyboard navigation and a slideshow.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.MainWindow.html">MainWindow</a></code></td>
-								<td>The main application window.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.SettingsPanel.html">SettingsPanel</a></code></td>
-								<td>Freja&apos;s settings page: the reusable ARXSettingsPane scaffold - searchable rail, anchored
-sections, glide scrolling and cards - filled with the application&apos;s appearance, font, language
-and system settings. Captions are written in English and translated by ARXLang, so both
-the page and its search follow the language picked on the language section.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
-								<td>The application entry point.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.scan.LibraryScanner.html">LibraryScanner</a></code></td>
-								<td>Keeps the catalog in sync with the folders on disk.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXTextField.html">ARXTextField</a></code></td>
-								<td>A text field whose contents can follow a Variable. Useful for values which are edited in
-place and also change elsewhere, such as the current name of a folder.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ChooserLocations.html">ChooserLocations</a></code></td>
-								<td>Remembers the last directory used by each file chooser, keyed by the dialog that owns it.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXLabel.html">ARXLabel</a></code></td>
-								<td>A label whose caption can follow a Variable, e.g. the value returned by
-I#translate(String, Object...). Assigning a new variable replaces the previous
-subscription, so
-the caption stays in sync when the interface language changes.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXNavList.html">ARXNavList</a></code></td>
-								<td>A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
-trailing annotation, hover feedback, arrow-key navigation and an optional context menu.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXNavList.Row.html">ARXNavList.Row</a></code></td>
-								<td>One row of the list. Kept public so callers can annotate or extend it.</td>
+								<td><code><a href="api/laevatain.ARXCheckBox.html">ARXCheckBox</a></code></td>
+								<td>A check box whose caption can follow a Variable, so a translated option keeps its wording
+when the interface language changes.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></td>
@@ -208,23 +114,54 @@ pane above the document narrows the whole page to the rows which answer to the q
 								<td>One searchable settings row.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXFileChooser.html">ARXFileChooser</a></code></td>
-								<td>A FlatLaf system chooser which opens where its owner last left it and stores the new location when
-it closes. Each dialog passes its own key so the positions do not mix.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXCheckBox.html">ARXCheckBox</a></code></td>
-								<td>A check box whose caption can follow a Variable, so a translated option keeps its wording
-when the interface language changes.</td>
-							</tr>
-							<tr>
 								<td><code><a href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></td>
 								<td>A reusable search field with a leading icon, placeholder, clear button and a debounced text
 callback. Fonts and colours come from the active FlatLaf theme.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXMenu.html">ARXMenu</a></code></td>
-								<td>A menu whose caption can follow a Variable, mirroring ARXMenuItem.</td>
+								<td><code><a href="api/laevatain.ARXRadioButtonMenuItem.html">ARXRadioButtonMenuItem</a></code></td>
+								<td>A radio menu item whose caption can follow a Variable, mirroring ARXMenuItem.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXMenuItem.html">ARXMenuItem</a></code></td>
+								<td>A menu item whose caption can follow a Variable. Menus are built on demand, so a late
+translation still reaches an item which is already on screen.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXTextBinding.html">ARXTextBinding</a></code></td>
+								<td>Keeps one live text subscription for a component. Rebinding disposes the previous observer, so a
+component can switch sources - for example when its language changes - without leaking or being
+written by two translations at once.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXFileChooser.html">ARXFileChooser</a></code></td>
+								<td>A FlatLaf system chooser which opens where its owner last left it and stores the new location when
+it closes. Each dialog passes its own key so the positions do not mix.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXNavList.html">ARXNavList</a></code></td>
+								<td>A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
+trailing annotation, hover feedback, arrow-key navigation and an optional context menu.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXNavList.Row.html">ARXNavList.Row</a></code></td>
+								<td>One row of the list. Kept public so callers can annotate or extend it.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ChooserLocations.html">ChooserLocations</a></code></td>
+								<td>Remembers the last directory used by each file chooser, keyed by the dialog that owns it.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXTextField.html">ARXTextField</a></code></td>
+								<td>A text field whose contents can follow a Variable. Useful for values which are edited in
+place and also change elsewhere, such as the current name of a folder.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXToggle.html">ARXToggle</a></code></td>
+								<td>A Windows-style on/off switch. The state is delegated to Swing&apos;s toggle button model, so
+pressing, releasing, keyboard focus and the active look and feel all drive it the way they do for
+any other button; the component only paints the Fluent pill and glides the knob between the two
+positions.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ARXButton.html">ARXButton</a></code></td>
@@ -237,22 +174,99 @@ corner radius come from the active FlatLaf theme, so the button follows runtime 
 								<td>The localisation bridge for ARX components.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXToggle.html">ARXToggle</a></code></td>
-								<td>A Windows-style on/off switch. The state is delegated to Swing&apos;s toggle button model, so
-pressing, releasing, keyboard focus and the active look and feel all drive it the way they do for
-any other button; the component only paints the Fluent pill and glides the knob between the two
-positions.</td>
+								<td><code><a href="api/laevatain.ARXMenu.html">ARXMenu</a></code></td>
+								<td>A menu whose caption can follow a Variable, mirroring ARXMenuItem.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXMenuItem.html">ARXMenuItem</a></code></td>
-								<td>A menu item whose caption can follow a Variable. Menus are built on demand, so a late
-translation still reaches an item which is already on screen.</td>
+								<td><code><a href="api/laevatain.ARXLabel.html">ARXLabel</a></code></td>
+								<td>A label whose caption can follow a Variable, e.g. the value returned by
+I#translate(String, Object...). Assigning a new variable replaces the previous
+subscription, so
+the caption stays in sync when the interface language changes.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.util.SmartTags.html">SmartTags</a></code></td>
+								<td>Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
+tagged with them, e.g. 【旅行】(２０２４) 写真 yields 旅行 and 2024.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.util.PathUtil.html">PathUtil</a></code></td>
+								<td>Path normalization helpers shared by the database and the scanner.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.util.ImageTransforms.html">ImageTransforms</a></code></td>
+								<td>Pixel operations shared by thumbnail generation and the full screen viewer.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.scan.LibraryScanner.html">LibraryScanner</a></code></td>
+								<td>Keeps the catalog in sync with the folders on disk.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoInspector.html">PhotoInspector</a></code></td>
+								<td>The details panel shown next to the thumbnail grid.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Theme.html">Theme</a></code></td>
+								<td>The visual language of the application.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.MainWindow.html">MainWindow</a></code></td>
+								<td>The main application window.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Icons.html">Icons</a></code></td>
+								<td>Small vector icons drawn with Java2D, so the application does not depend on image assets or on
+emoji fonts.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.SettingsPanel.html">SettingsPanel</a></code></td>
+								<td>Freja&apos;s settings page: the reusable ARXSettingsPane scaffold - searchable rail, anchored
+sections, glide scrolling and cards - filled with the application&apos;s appearance, font, language
+and system settings. Captions are written in English and translated by ARXLang, so both
+the page and its search follow the language picked on the language section.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
+								<td>A full screen photo viewer with zoom, pan, keyboard navigation and a slideshow.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.PhotoGrid.html">PhotoGrid</a></code></td>
+								<td>A virtualized, Picasa-like thumbnail grid.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.ScanFoldersDialog.html">ScanFoldersDialog</a></code></td>
+								<td>Dialog for managing the folders the library watches and scans.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Sidebar.html">Sidebar</a></code></td>
+								<td>The navigation sidebar: a library list and the registered folders, both built from the reusable
+ARXNavList and translated through ARXLang.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
+								<td>The application entry point.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.PhotoImporter.html">PhotoImporter</a></code></td>
+								<td>Decodes an image once and produces everything the library stores about it.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Exif.html">Exif</a></code></td>
+								<td>A small, dependency-free reader for the EXIF block of a JPEG file.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.store.Library.html">Library</a></code></td>
+								<td>The SQLite-backed photo catalog.</td>
 							</tr>
 						</table>
 					</section>
 					<section class="A">
 						<h4>🛠️ Enum</h4>
 						<table>
+							<tr>
+								<td><code><a href="api/laevatain.ARXButton.Variant.html">ARXButton.Variant</a></code></td>
+								<td>Predefined button roles, each mapped to FlatLaf UI defaults.</td>
+							</tr>
 							<tr>
 								<td><code><a href="api/freja.model.PhotoFilter.SortOrder.html">PhotoFilter.SortOrder</a></code></td>
 								<td>How a result set is ordered.</td>
@@ -265,15 +279,53 @@ translation still reaches an item which is already on screen.</td>
 								<td><code><a href="api/freja.ui.Sidebar.Mode.html">Sidebar.Mode</a></code></td>
 								<td>The selected library view.</td>
 							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXButton.Variant.html">ARXButton.Variant</a></code></td>
-								<td>Predefined button roles, each mapped to FlatLaf UI defaults.</td>
-							</tr>
 						</table>
 					</section>
 					<section class="A">
 						<h4>🛠️ Record</h4>
 						<table>
+							<tr>
+								<td><code><a href="api/laevatain.ARXSettingsPane.Text.html">ARXSettingsPane.Text</a></code></td>
+								<td>A caption with its English origin kept for search. The displayed wording follows a live
+translation, while the origin stays stable so a query finds a row in every language.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXLang.Language.html">ARXLang.Language</a></code></td>
+								<td>A language the interface can be shown in.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.scan.LibraryScanner.State.html">LibraryScanner.State</a></code></td>
+								<td>A snapshot of the scanner state for the status bar.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.LibraryStats.html">LibraryStats</a></code></td>
+								<td>Aggregate counters shown by the sidebar and status bar.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.PhotoFilter.html">PhotoFilter</a></code></td>
+								<td>A query against the photo library.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.Folder.html">Folder</a></code></td>
+								<td>A directory registered with the library.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.Tag.html">Tag</a></code></td>
+								<td>A label that can be attached to folders.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.model.Photo.html">Photo</a></code></td>
+								<td>One photo managed by the library.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Theme.Preview.html">Theme.Preview</a></code></td>
+								<td>The handful of shades that stand for a theme in the appearance picker.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.ui.Theme.ThemeInfo.html">Theme.ThemeInfo</a></code></td>
+								<td>A theme the user can pick: an identifier, a display name and whether it is dark. Built-ins
+carry a short id, IntelliJ themes their look and feel class name.</td>
+							</tr>
 							<tr>
 								<td><code><a href="api/freja.store.PhotoImporter.AnalyzedPhoto.html">PhotoImporter.AnalyzedPhoto</a></code></td>
 								<td>The result of inspecting one image file.</td>
@@ -294,55 +346,13 @@ translation still reaches an item which is already on screen.</td>
 								<td><code><a href="api/freja.store.Library.Thumbnail.html">Library.Thumbnail</a></code></td>
 								<td>A thumbnail stored in the database.</td>
 							</tr>
-							<tr>
-								<td><code><a href="api/freja.model.LibraryStats.html">LibraryStats</a></code></td>
-								<td>Aggregate counters shown by the sidebar and status bar.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.model.Tag.html">Tag</a></code></td>
-								<td>A label that can be attached to folders.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.model.Photo.html">Photo</a></code></td>
-								<td>One photo managed by the library.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.model.Folder.html">Folder</a></code></td>
-								<td>A directory registered with the library.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.model.PhotoFilter.html">PhotoFilter</a></code></td>
-								<td>A query against the photo library.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.Theme.Preview.html">Theme.Preview</a></code></td>
-								<td>The handful of shades that stand for a theme in the appearance picker.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.ui.Theme.ThemeInfo.html">Theme.ThemeInfo</a></code></td>
-								<td>A theme the user can pick: an identifier, a display name and whether it is dark. Built-ins
-carry a short id, IntelliJ themes their look and feel class name.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/freja.scan.LibraryScanner.State.html">LibraryScanner.State</a></code></td>
-								<td>A snapshot of the scanner state for the status bar.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXLang.Sentence.html">ARXLang.Sentence</a></code></td>
-								<td>A sentence paired with its English origin. Search matches on the origin, because the
-displayed wording moves with the language while the identity of a setting must not.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXLang.Language.html">ARXLang.Language</a></code></td>
-								<td>A language the interface can be shown in.</td>
-							</tr>
 						</table>
 					</section>
 				</section>
 			</div>
 		</article>
-		<aside class="R"></aside>
-		<footer class="W">
+		<aside class="W"></aside>
+		<footer class="U">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
