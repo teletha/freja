@@ -36,7 +36,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -482,7 +481,7 @@ public final class ARXNavList extends JPanel {
     }
 
     /** A label used as a section heading inside a scroll pane; matches {@link #setSection}. */
-    public static JComponent headingLabel(String text) {
+    public static JLabel headingLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(sectionFont());
         label.setForeground(mutedColor());

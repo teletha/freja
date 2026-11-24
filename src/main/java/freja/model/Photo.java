@@ -28,8 +28,30 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
         String lens, String exposure, Double aperture, Integer iso, Double focalLength, int orientation,
         boolean favorite, int rating, String caption, long importedAt) {
 
-    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.JAPANESE);
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", Locale.JAPANESE);
+    private static volatile DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.JAPANESE);
+    private static volatile DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", Locale.JAPANESE);
+
+    private static volatile String formattedLanguage;
+
+    /**
+     * Rebuilds the date formatters when the interface language changes. Japanese keeps the
+     * patterns the application was designed around; every other language gets its locale's style.
+     */
+    private static synchronized void followLanguage() {
+        String language = laevatain.ARXLang.language();
+        if (language.equals(formattedLanguage)) {
+            return;
+        }
+        formattedLanguage = language;
+        Locale locale = laevatain.ARXLang.locale();
+        DATE = "ja".equals(language)
+                ? DateTimeFormatter.ofPattern("yyyy年M月d日", locale)
+                : DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(locale);
+        DATE_TIME = "ja".equals(language)
+                ? DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", locale)
+                : DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.MEDIUM,
+                        java.time.format.FormatStyle.SHORT).withLocale(locale);
+    }
 
     /**
      * The width as displayed, after applying the EXIF orientation.
@@ -91,6 +113,7 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
      * @return for example "2026年7月23日 09:44"
      */
     public String capturedLabel() {
+        followLanguage();
         return DATE_TIME.format(capturedLocal());
     }
 
@@ -100,6 +123,7 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
      * @return for example "2026年7月23日"
      */
     public String dateLabel() {
+        followLanguage();
         return DATE.format(capturedLocal());
     }
 

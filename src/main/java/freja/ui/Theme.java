@@ -232,8 +232,8 @@ public final class Theme {
     /** The themes on offer: the two hand tuned palettes plus every IntelliJ theme available. */
     public static List<ThemeInfo> availableThemes() {
         List<ThemeInfo> themes = new ArrayList<>();
-        themes.add(new ThemeInfo(THEME_LIGHT, "ライト", false, true));
-        themes.add(new ThemeInfo(THEME_DARK, "ダーク", true, true));
+        themes.add(new ThemeInfo(THEME_LIGHT, "Light", false, true));
+        themes.add(new ThemeInfo(THEME_DARK, "Dark", true, true));
         themes.addAll(intellijThemes());
         return themes;
     }

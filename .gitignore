@@ -48,6 +48,8 @@ replay_pid*
 
 ### Maven ###
 target/
+# sinobu's translation cache: written next to the working directory on the first fetch.
+lang/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

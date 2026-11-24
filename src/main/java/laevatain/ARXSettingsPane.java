@@ -34,6 +34,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 
+import kiss.Variable;
+
 import com.formdev.flatlaf.ui.FlatLineBorder;
 
 /**
@@ -53,16 +55,34 @@ public final class ARXSettingsPane extends JPanel {
 
         private final String id;
 
+        private final JLabel heading = new JLabel();
+
+        private final JLabel hint = new JLabel();
+
         private int slot;
 
         private Section(String id, String title, String subtitle) {
+            this(id, Variable.of(title), Variable.of(subtitle));
+        }
+
+        /**
+         * A section whose heading and description follow variables: hand in
+         * {@code Lang.text("...")} and the heading, the description and the rail entry change with
+         * the interface language.
+         */
+        private Section(String id, Variable<String> title, Variable<String> subtitle) {
             this.id = id;
             setName(id);
             setOpaque(false);
             setLayout(new GridBagLayout());
             setAlignmentX(Component.LEFT_ALIGNMENT);
-            GridBagConstraints cell = anchor(0, GridBagConstraints.HORIZONTAL);
-            add(header(title, subtitle), cell);
+            heading.setFont(titleFont());
+            heading.setForeground(textColor());
+            hint.setFont(subtitleFont());
+            hint.setForeground(mutedColor());
+            title.observing().to(heading::setText);
+            subtitle.observing().to(hint::setText);
+            add(header(heading, hint), anchor(0, GridBagConstraints.HORIZONTAL));
         }
 
         /** Appends a component which brings its own chrome, e.g. a pair of preview tiles. */
@@ -77,16 +97,22 @@ public final class ARXSettingsPane extends JPanel {
             add(card(rows), anchor(slot, GridBagConstraints.HORIZONTAL));
         }
 
-        /** Appends a heading which groups the cards below it, e.g. "その他のオプション". */
-        public void addGroup(String title) {
+        /** Appends a heading which groups the cards below it. */
+        public void addGroup(Variable<String> title) {
             slot++;
             JPanel holder = new JPanel(new BorderLayout());
             holder.setOpaque(false);
-            JLabel label = new JLabel(title);
+            JLabel label = new JLabel();
             label.setFont(groupFont());
             label.setForeground(textColor());
+            title.observing().to(label::setText);
             holder.add(label, BorderLayout.CENTER);
             add(holder, anchor(slot, GridBagConstraints.HORIZONTAL));
+        }
+
+        /** Appends a heading which groups the cards below it, e.g. "Other options". */
+        public void addGroup(String title) {
+            addGroup(Variable.of(title));
         }
 
         /** The identifier this section registered under. */
@@ -117,15 +143,8 @@ public final class ARXSettingsPane extends JPanel {
             return cell;
         }
 
-        /** A heading block: title above its description, stretched across the column by the grid. */
-        private static JComponent header(String title, String subtitle) {
-            JLabel heading = new JLabel(title);
-            heading.setFont(titleFont());
-            heading.setForeground(textColor());
-            JLabel hint = new JLabel(subtitle);
-            hint.setFont(subtitleFont());
-            hint.setForeground(mutedColor());
-
+        /** Packs the two heading labels into the grid block the section puts on top. */
+        private static JComponent header(JLabel heading, JLabel hint) {
             JPanel block = new JPanel(new GridBagLayout());
             block.setOpaque(false);
             GridBagConstraints west = new GridBagConstraints();
@@ -168,15 +187,25 @@ public final class ARXSettingsPane extends JPanel {
     }
 
     public ARXSettingsPane(String railTitle) {
+        this(Variable.of(railTitle), DEFAULT_RAIL_WIDTH);
+    }
+
+    /** A rail whose heading follows a variable, e.g. a translated sentence. */
+    public ARXSettingsPane(Variable<String> railTitle) {
         this(railTitle, DEFAULT_RAIL_WIDTH);
     }
 
     public ARXSettingsPane(String railTitle, int railWidth) {
+        this(Variable.of(railTitle), railWidth);
+    }
+
+    private ARXSettingsPane(Variable<String> railTitle, int railWidth) {
         setLayout(new BorderLayout());
         setOpaque(true);
         setBackground(pageColor());
 
-        rail.setSection(railTitle);
+        rail.setSection(railTitle.get());
+        railTitle.observing().to(rail::setSection);
         rail.setOnSelect(this::show);
         JPanel railPane = new JPanel(new BorderLayout());
         railPane.setOpaque(true);
@@ -224,13 +253,26 @@ public final class ARXSettingsPane extends JPanel {
      * Section#addGroup}.
      */
     public Section addSection(String id, String title, String subtitle, Icon icon) {
+        return addSection(id, Variable.of(title), Variable.of(subtitle), icon);
+    }
+
+    /**
+     * Registers a page whose heading follows a variable. The rail entry keeps the same text, so a
+     * translated heading and its navigation label never drift apart.
+     */
+    public Section addSection(String id, Variable<String> title, Variable<String> subtitle, Icon icon) {
         if (!sections.isEmpty()) {
             document.add(Box.createVerticalStrut(36));
         }
         Section section = new Section(id, title, subtitle);
         sections.put(id, section);
         document.add(section);
-        rail.add(id, title, icon);
+        ARXNavList.Row entry = rail.add(id, title.get(), icon);
+        title.observing().to(text -> {
+            if (entry != null) {
+                entry.setTitle(text);
+            }
+        });
         return section;
     }
 
@@ -313,6 +355,24 @@ public final class ARXSettingsPane extends JPanel {
 
     /** One settings row: label and description on the left, control vertically centred right. */
     public static JPanel row(String title, String description, Component control) {
+        return row(Variable.of(title), Variable.of(description), control);
+    }
+
+    /** A row whose caption is a translated sentence and whose description is fixed. */
+    public static JPanel row(Variable<String> title, String description, Component control) {
+        return row(title, Variable.of(description), control);
+    }
+
+    /** A row whose description is a translated sentence and whose caption is fixed. */
+    public static JPanel row(String title, Variable<String> description, Component control) {
+        return row(Variable.of(title), description, control);
+    }
+
+    /**
+     * A row whose label and description follow variables, so a translated sentence keeps the row
+     * caption, its description and the rail entry in one language.
+     */
+    public static JPanel row(Variable<String> title, Variable<String> description, Component control) {
         JPanel row = new JPanel(new BorderLayout(16, 0));
         row.setOpaque(false);
         row.setBorder(BorderFactory.createEmptyBorder(13, 16, 13, 16));
@@ -320,20 +380,29 @@ public final class ARXSettingsPane extends JPanel {
         JPanel text = new JPanel();
         text.setOpaque(false);
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-        JLabel name = new JLabel(title);
+        JLabel name = new JLabel();
         name.setFont(labelFont());
         name.setForeground(textColor());
         name.setHorizontalAlignment(SwingConstants.LEFT);
         name.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel hint = new JLabel(description);
+        JLabel hint = new JLabel();
         hint.setFont(hintFont());
         hint.setForeground(mutedColor());
         hint.setHorizontalAlignment(SwingConstants.LEFT);
         hint.setAlignmentX(Component.LEFT_ALIGNMENT);
+        title.observing().to(name::setText);
+        // A row without a description stays on one line: visibility follows the text.
+        description.observing().to(value -> {
+            hint.setText(value == null ? "" : value);
+            boolean empty = value == null || value.isEmpty();
+            hint.setVisible(!empty);
+            if (hint.isShowing()) {
+                row.revalidate();
+                row.repaint();
+            }
+        });
         text.add(name);
-        if (description != null && !description.isEmpty()) {
-            text.add(hint);
-        }
+        text.add(hint);
         row.add(text, BorderLayout.CENTER);
         // Anchoring the control EAST keeps it flush with the right edge while the extra cell
         // height centres it against the two-line label instead of letting it sit on top.

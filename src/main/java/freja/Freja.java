@@ -179,6 +179,12 @@ public final class Freja {
         }
 
         Path location = database == null ? defaultDatabase() : database;
+        // The translation bundles belong beside the library, not beside whatever folder the
+        // process was started from, so pin the directory before the first sentence is resolved.
+        laevatain.ARXLang.bundleDirectory(location.toAbsolutePath().getParent().resolve("lang"));
+        // The language goes in before any component is built: the saved choice has to be in
+        // kiss.I#Lang before the first sentence is translated.
+        laevatain.ARXLang.install();
         Theme.install();
 
         SwingUtilities.invokeLater(() -> {

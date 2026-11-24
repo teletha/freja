@@ -36,11 +36,12 @@ import freja.model.Folder;
 import freja.model.LibraryStats;
 import freja.model.PhotoFilter.SortOrder;
 import laevatain.ARXButton;
+import laevatain.ARXLang;
 import laevatain.ARXNavList;
 
 /**
  * The navigation sidebar: a library list and the registered folders, both built from the reusable
- * {@link ARXNavList}.
+ * {@link ARXNavList} and translated through {@link ARXLang}.
  */
 public final class Sidebar extends JPanel {
 
@@ -136,10 +137,15 @@ public final class Sidebar extends JPanel {
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setBorder(BorderFactory.createEmptyBorder(18, 16, 8, 16));
-        library.setSection("ライブラリ");
-        library.add("ALL", "すべての写真", Icons.grid(17, Theme.MUTED));
-        library.add("FAVORITES", "お気に入り", Icons.star(17, Theme.MUTED, true));
-        library.add("RECENT", "最近の写真", Icons.clock(17, Theme.MUTED));
+        // The captions are written in English and translated by ARXLang; bindings keep the sidebar
+        // in the chosen language without a restart.
+        ARXLang.on("Library", library::setSection);
+        ARXLang.on("All photos",
+                library.add("ALL", ARXLang.of("All photos"), Icons.grid(17, Theme.MUTED))::setTitle);
+        ARXLang.on("Favorites",
+                library.add("FAVORITES", ARXLang.of("Favorites"), Icons.star(17, Theme.MUTED, true))::setTitle);
+        ARXLang.on("Recent photos",
+                library.add("RECENT", ARXLang.of("Recent photos"), Icons.clock(17, Theme.MUTED))::setTitle);
         library.setOnSelect(key -> select(Mode.valueOf(key), -1));
         // A BoxLayout column hands a child only what it asked for and centres the sliver, so the
         // list goes into a stretching holder: the rows then span the sidebar instead of parking on
@@ -156,7 +162,8 @@ public final class Sidebar extends JPanel {
         folders.setOnSelect(key -> select(Mode.FOLDER, Long.parseLong(key)));
         folderScroll = folders.scrolled();
 
-        JLabel empty = new JLabel("登録されたフォルダはありません");
+        JLabel empty = new JLabel();
+        ARXLang.bind(empty, "No folders are registered");
         empty.setForeground(Theme.FAINT);
         empty.setFont(Theme.font(Font.PLAIN, 11));
         empty.setBorder(BorderFactory.createEmptyBorder(10, 12, 0, 0));
@@ -181,24 +188,29 @@ public final class Sidebar extends JPanel {
         panel.setOpaque(false);
         JPanel heading = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         heading.setOpaque(false);
-        heading.add(ARXNavList.headingLabel("フォルダ"));
+        JLabel title = ARXNavList.headingLabel(ARXLang.of("Folders"));
+        ARXLang.bind(title, "Folders");
+        heading.add(title);
         folderCount.setFont(Theme.font(Font.PLAIN, 11));
         folderCount.setForeground(Theme.MUTED);
         heading.add(folderCount);
         panel.add(heading, BorderLayout.CENTER);
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         buttons.setOpaque(false);
-        buttons.add(headerButton("タグ", Icons.tag(13, Theme.MUTED), "タグを管理", () -> listener.onManageTags()));
-        buttons.add(headerButton(null, Icons.plus(14, Theme.MUTED), "監視フォルダを管理", () -> listener.onAddFolder()));
+        buttons.add(headerButton("Tags", Icons.tag(13, Theme.MUTED), "Manage tags", () -> listener.onManageTags()));
+        buttons.add(headerButton(null, Icons.plus(14, Theme.MUTED), "Manage watched folders",
+                () -> listener.onAddFolder()));
         panel.add(buttons, BorderLayout.EAST);
         return panel;
     }
 
     /** A small flat header button whose background and text change on hover. */
     private ARXButton headerButton(String text, javax.swing.Icon icon, String tooltip, Runnable action) {
-        ARXButton button = new ARXButton(text, icon, ARXButton.Variant.SECONDARY, action);
+        // A null label keeps the button icon-only, so there is nothing to translate.
+        ARXButton button = new ARXButton(text == null ? null : ARXLang.of(text), icon,
+                ARXButton.Variant.SECONDARY, action);
         button.setFont(Theme.font(Font.PLAIN, 12));
-        button.setToolTipText(tooltip);
+        ARXLang.tooltip(button, tooltip);
         return button;
     }
 
@@ -243,8 +255,9 @@ public final class Sidebar extends JPanel {
         for (Folder folder : registered) {
             ARXNavList.Row row = folders.add(Long.toString(folder.id()), folder.name(),
                     Icons.folder(17, Theme.MUTED));
-            String tags = folder.tags().isEmpty() ? "" : "\nタグ: " + String.join(", ", folder.tags());
-            row.setToolTipText(folder.path().toString() + (folder.explicit() ? "" : "  (自動検出)") + tags);
+            row.setToolTipText(folder.path() + (folder.explicit() ? "" : "  " + ARXLang.of("(auto-detected)"))
+                    + (folder.tags().isEmpty() ? "" : "\n" + ARXLang.of("Tags") + ": "
+                            + String.join(", ", folder.tags())));
             row.setTrailing(Integer.toString(folder.photoCount()));
             known.put(folder.id(), folder);
         }
@@ -294,25 +307,26 @@ public final class Sidebar extends JPanel {
         if (folder == null) {
             return null;
         }
+        // The menu is rebuilt on every popup, so a snapshot of the translation is enough here.
         JPopupMenu menu = new JPopupMenu();
         menu.add(sortMenu(folder));
         menu.addSeparator();
-        menu.add(item("名前を変更", () -> listener.onRenameFolder(folder.id())));
-        menu.add(item("タグを編集…", () -> listener.onEditFolderTags(folder.id())));
-        menu.add(item("再スキャン", () -> listener.onRescanFolder(folder.id())));
-        menu.add(item("エクスプローラーで開く", () -> listener.onRevealFolder(folder.id())));
+        menu.add(item("Rename", () -> listener.onRenameFolder(folder.id())));
+        menu.add(item("Edit tags…", () -> listener.onEditFolderTags(folder.id())));
+        menu.add(item("Rescan", () -> listener.onRescanFolder(folder.id())));
+        menu.add(item("Open in Explorer", () -> listener.onRevealFolder(folder.id())));
         if (folder.explicit()) {
             menu.addSeparator();
-            menu.add(item("ライブラリから削除", () -> listener.onRemoveFolder(folder.id())));
+            menu.add(item("Remove from library", () -> listener.onRemoveFolder(folder.id())));
         }
         return menu;
     }
 
     private JMenu sortMenu(Folder folder) {
-        JMenu menu = new JMenu("表示順");
+        JMenu menu = new JMenu(ARXLang.of("Sort order"));
         ButtonGroup group = new ButtonGroup();
         for (SortOrder sort : SortOrder.values()) {
-            JRadioButtonMenuItem item = new JRadioButtonMenuItem(sort.label(), sort == folder.sort());
+            JRadioButtonMenuItem item = new JRadioButtonMenuItem(label(sort), sort == folder.sort());
             item.addActionListener(event -> listener.onSortFolder(folder.id(), sort));
             group.add(item);
             menu.add(item);
@@ -320,8 +334,22 @@ public final class Sidebar extends JPanel {
         return menu;
     }
 
-    private javax.swing.JMenuItem item(String text, Runnable action) {
-        javax.swing.JMenuItem item = new javax.swing.JMenuItem(text);
+    /**
+     * The sort entries in the current language. The model keeps its own labels because the toolbar
+     * still shows them untranslated; this mapping is what the sidebar menu offers.
+     */
+    private static String label(SortOrder order) {
+        return ARXLang.of(switch (order) {
+            case NAME -> "By name";
+            case DATE_NEWEST -> "Newest first";
+            case DATE_OLDEST -> "Oldest first";
+            case SIZE -> "By size";
+        });
+    }
+
+    /** A menu item whose English caption is translated on the way in. */
+    private javax.swing.JMenuItem item(String sentence, Runnable action) {
+        javax.swing.JMenuItem item = new javax.swing.JMenuItem(ARXLang.of(sentence));
         item.addActionListener(event -> action.run());
         return item;
     }
