@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="q">
-		<header class="r" date="2026-11-24">
-			<h1 class="j"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="g"><a href="api/main.html" id="API"><svg class="package">
+	<body class="P">
+		<header class="Q" date="2026-11-24">
+			<h1 class="f"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="i"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="a"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="Z"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="P"></nav>
-		<article class="Z" id="Article">
-			<div class="w">
+		<nav class="T"></nav>
+		<article class="R" id="Article">
+			<div class="W">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -89,11 +89,24 @@
 								<td><code><a href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></td>
 								<td>A Windows 11-style settings surface: an ARXNavList rail on the left and one continuous,
 scrollable document on the right. Every section registers a rail entry; choosing an entry glides
-the viewport to that section, and scrolling keeps the rail selection in sync.</td>
+the viewport to that section, scrolling keeps the rail in sync, and the search field in its own
+pane above the document narrows the whole page to the rows which answer to the query.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ARXSettingsPane.Section.html">ARXSettingsPane.Section</a></code></td>
 								<td>One anchored page of the document.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXSettingsPane.Block.html">ARXSettingsPane.Block</a></code></td>
+								<td>A block of a section which is not a card: a tile grid, a chart, anything with keywords.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXSettingsPane.Card.html">ARXSettingsPane.Card</a></code></td>
+								<td>A rounded card which re-lays itself around the rows a query leaves standing.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXSettingsPane.Row.html">ARXSettingsPane.Row</a></code></td>
+								<td>One searchable settings row.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></td>
@@ -131,6 +144,10 @@ positions.</td>
 corner radius come from the active FlatLaf theme, so the button follows runtime theme changes.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/laevatain.ARXLang.html">ARXLang</a></code></td>
+								<td>The localisation bridge for ARX components.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/freja.util.SmartTags.html">SmartTags</a></code></td>
 								<td>Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
 tagged with them, e.g. 【旅行】(２０２４) 写真 yields 旅行 and 2024.</td>
@@ -166,9 +183,10 @@ emoji fonts.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.SettingsPanel.html">SettingsPanel</a></code></td>
-								<td>Freja&apos;s settings page: the reusable ARXSettingsPane scaffold - rail, anchored sections,
-glide scrolling and cards - filled with the application&apos;s own appearance, font and system
-settings.</td>
+								<td>Freja&apos;s settings page: the reusable ARXSettingsPane scaffold - searchable rail, anchored
+sections, glide scrolling and cards - filled with the application&apos;s appearance, font, language
+and system settings. Captions are written in English and translated by ARXLang, so both
+the page and its search follow the language picked on the language section.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.ui.PhotoViewer.html">PhotoViewer</a></code></td>
@@ -185,7 +203,7 @@ settings.</td>
 							<tr>
 								<td><code><a href="api/freja.ui.Sidebar.html">Sidebar</a></code></td>
 								<td>The navigation sidebar: a library list and the registered folders, both built from the reusable
-ARXNavList.</td>
+ARXNavList and translated through ARXLang.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
@@ -229,6 +247,15 @@ ARXNavList.</td>
 					<section class="A">
 						<h4>🛠️ Record</h4>
 						<table>
+							<tr>
+								<td><code><a href="api/laevatain.ARXLang.Sentence.html">ARXLang.Sentence</a></code></td>
+								<td>A sentence paired with its English origin. Search matches on the origin, because the
+displayed wording moves with the language while the identity of a setting must not.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.ARXLang.Language.html">ARXLang.Language</a></code></td>
+								<td>A language the interface can be shown in.</td>
+							</tr>
 							<tr>
 								<td><code><a href="api/freja.scan.LibraryScanner.State.html">LibraryScanner.State</a></code></td>
 								<td>A snapshot of the scanner state for the status bar.</td>
@@ -287,8 +314,8 @@ carry a short id, IntelliJ themes their look and feel class name.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="Y"></aside>
-		<footer class="f">
+		<aside class="U"></aside>
+		<footer class="S">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

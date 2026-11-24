@@ -22,6 +22,21 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXSettingsPane.Block",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSettingsPane.Card",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSettingsPane.Row",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXSearchField",
 			"packageName": "laevatain",
 			"type": "Class"
@@ -60,6 +75,21 @@ const root = {
 			"name": "ARXButton.Variant",
 			"packageName": "laevatain",
 			"type": "Enum"
+		},
+		{
+			"name": "ARXLang",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXLang.Sentence",
+			"packageName": "laevatain",
+			"type": "Record"
+		},
+		{
+			"name": "ARXLang.Language",
+			"packageName": "laevatain",
+			"type": "Record"
 		},
 		{
 			"name": "SmartTags",
