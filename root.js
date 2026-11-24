@@ -2,6 +2,7 @@ const root = {
 	"docs": [],
 	"modules": [],
 	"packages": [
+		"laevatain",
 		"freja.util",
 		"freja.scan",
 		"freja.model",
@@ -10,6 +11,31 @@ const root = {
 		"freja.store"
 	],
 	"types": [
+		{
+			"name": "ARXSearchField",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXFileChooser",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ChooserLocations",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXButton",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXButton.Variant",
+			"packageName": "laevatain",
+			"type": "Enum"
+		},
 		{
 			"name": "SmartTags",
 			"packageName": "freja.util",

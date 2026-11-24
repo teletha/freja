@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="O">
+		<header class="P" date="2026-11-24">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="f"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="S"></nav>
+		<article class="Q" id="Article">
+			<section class="JB"><code class="d">laevatain</code>
+				<h2 class="Class n"><code class="z">ARXButton</code></h2>
+				<div class="CB">
+					<ul class="E G">
+						<li><code><a aria-label="javax.swing.JButton 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JButton.html">JButton</a></code></li>
+						<li><code><a aria-label="javax.swing.AbstractButton 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/AbstractButton.html">AbstractButton</a></code></li>
+						<li><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></li>
+						<li><code><a aria-label="java.awt.Container 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Container.html">Container</a></code></li>
+						<li><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code></li>
+					</ul>
+					<ul class="E H">
+						<li><code><a aria-label="javax.accessibility.Accessible 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/accessibility/Accessible.html">Accessible</a></code></li>
+						<li><code><a aria-label="javax.swing.TransferHandler.HasGetTransferHandler 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/TransferHandler.HasGetTransferHandler.html">HasGetTransferHandler</a></code></li>
+						<li><code><a aria-label="java.awt.image.ImageObserver 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/ImageObserver.html">ImageObserver</a></code></li>
+						<li><code><a aria-label="java.awt.ItemSelectable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/ItemSelectable.html">ItemSelectable</a></code></li>
+						<li><code><a aria-label="java.awt.MenuContainer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/MenuContainer.html">MenuContainer</a></code></li>
+						<li><code><a aria-label="java.io.Serializable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/Serializable.html">Serializable</a></code></li>
+						<li><code><a aria-label="javax.swing.SwingConstants 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/SwingConstants.html">SwingConstants</a></code></li>
+					</ul>
+				</div><span class="A"><p>A reusable FlatLaf button with a flat look, rounded corners and a hover style. All colours and the
+corner radius come from the active FlatLaf theme, so the button follows runtime theme changes.</p></span></section>
+			<section class="JB" id="ARXButton(java.lang.String,javax.swing.Icon,laevatain.ARXButton.Variant,java.lang.Runnable)">
+				<h2 class="HB"><i class="PUBLIC"></i><code class="z">ARXButton</code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>, <code><a aria-label="laevatain.ARXButton.Variant" href="api/laevatain.ARXButton.Variant.html">Variant</a></code><code class="parameterName">variant</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>)</code></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code></td>
+						<td><span><p>the button label, or null for an icon-only button</p></span></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code></td>
+						<td><span><p>the icon, or null for a text-only button</p></span></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="laevatain.ARXButton.Variant" href="api/laevatain.ARXButton.Variant.html">Variant</a></code><code class="parameterName">variant</code></td>
+						<td><span><p>the role whose FlatLaf colours are used</p></span></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code></td>
+						<td><span><p>invoked on click</p></span></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="ARXButton(java.lang.String,javax.swing.Icon,laevatain.ARXButton.Variant,java.lang.Runnable,boolean)">
+				<h2 class="HB"><i class="PUBLIC"></i><code class="z">ARXButton</code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>, <code><a aria-label="laevatain.ARXButton.Variant" href="api/laevatain.ARXButton.Variant.html">Variant</a></code><code class="parameterName">variant</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>, <code>boolean</code><code class="parameterName">blendWithParent</code>)</code></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code></td>
+						<td></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code></td>
+						<td></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="laevatain.ARXButton.Variant" href="api/laevatain.ARXButton.Variant.html">Variant</a></code><code class="parameterName">variant</code></td>
+						<td></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code></td>
+						<td></td>
+					</tr>
+					<tr class="V">
+						<td><code>boolean</code><code class="parameterName">blendWithParent</code></td>
+						<td><span><p>whether the resting background matches the enclosing panel instead of
+the FlatLaf button background</p></span></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="updateUI()">
+				<h2 class="HB"><i class="OVERRIDE PUBLIC"></i><code class="z">updateUI</code><code class="Z">()</code><i class="AB"><code>void</code></i></h2>
+			</section>
+			<section class="JB" id="addNotify()">
+				<h2 class="HB"><i class="OVERRIDE PUBLIC"></i><code class="z">addNotify</code><code class="Z">()</code><i class="AB"><code>void</code></i></h2>
+			</section>
+		</article>
+		<aside class="T">
+			<div class="FB">
+				<h5 class="g">Constructors</h5>
+				<ul>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/laevatain.ARXButton.html#ARXButton(java.lang.String,javax.swing.Icon,laevatain.ARXButton.Variant,java.lang.Runnable)">ARXButton</a></code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>, <code><a aria-label="laevatain.ARXButton.Variant" href="api/laevatain.ARXButton.Variant.html">Variant</a></code><code class="parameterName">variant</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>)</code></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/laevatain.ARXButton.html#ARXButton(java.lang.String,javax.swing.Icon,laevatain.ARXButton.Variant,java.lang.Runnable,boolean)">ARXButton</a></code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>, <code><a aria-label="laevatain.ARXButton.Variant" href="api/laevatain.ARXButton.Variant.html">Variant</a></code><code class="parameterName">variant</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>, <code>boolean</code><code class="parameterName">blendWithParent</code>)</code></li>
+				</ul>
+				<h5 class="g">Methods</h5>
+				<ul>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/laevatain.ARXButton.html#updateUI()">updateUI</a></code><code class="Z">()</code><i class="Y"><code>void</code></i></li>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/laevatain.ARXButton.html#addNotify()">addNotify</a></code><code class="Z">()</code><i class="Y"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="R">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

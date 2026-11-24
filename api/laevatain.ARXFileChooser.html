@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="O">
+		<header class="P" date="2026-11-24">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="f"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="S"></nav>
+		<article class="Q" id="Article">
+			<section class="JB"><code class="d">laevatain</code>
+				<h2 class="Class n"><code class="z">ARXFileChooser</code></h2>
+				<div class="CB">
+					<ul class="E G">
+						<li><code>com.formdev.flatlaf.util.SystemFileChooser</code></li>
+					</ul>
+				</div><span class="A"><p>A FlatLaf system chooser which opens where its owner last left it and stores the new location when
+it closes. Each dialog passes its own key so the positions do not mix.</p></span></section>
+			<section class="JB" id="ARXFileChooser(java.lang.String)">
+				<h2 class="HB"><i class="PUBLIC"></i><code class="z">ARXFileChooser</code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="ARXFileChooser(java.lang.String,java.io.File)">
+				<h2 class="HB"><i class="PUBLIC"></i><code class="z">ARXFileChooser</code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">fallback</code>)</code></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>an identifier unique to the dialog using this chooser</p></span></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">fallback</code></td>
+						<td><span><p>where to open when the dialog has never been used</p></span></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="showOpenDialog(java.awt.Component)">
+				<h2 class="HB"><i class="OVERRIDE PUBLIC"></i><code class="z">showOpenDialog</code><code class="Z">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code>)</code><i class="AB"><code>int</code></i></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="showSaveDialog(java.awt.Component)">
+				<h2 class="HB"><i class="OVERRIDE PUBLIC"></i><code class="z">showSaveDialog</code><code class="Z">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code>)</code><i class="AB"><code>int</code></i></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="showDialog(java.awt.Component,java.lang.String)">
+				<h2 class="HB"><i class="OVERRIDE PUBLIC"></i><code class="z">showDialog</code><code class="Z">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">approveButtonText</code>)</code><i class="AB"><code>int</code></i></h2>
+				<table class="e">
+					<tr class="V">
+						<td><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code></td>
+						<td></td>
+					</tr>
+					<tr class="V">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">approveButtonText</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+		</article>
+		<aside class="T">
+			<div class="FB">
+				<h5 class="g">Constructors</h5>
+				<ul>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/laevatain.ARXFileChooser.html#ARXFileChooser(java.lang.String)">ARXFileChooser</a></code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/laevatain.ARXFileChooser.html#ARXFileChooser(java.lang.String,java.io.File)">ARXFileChooser</a></code><code class="Z">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">fallback</code>)</code></li>
+				</ul>
+				<h5 class="g">Methods</h5>
+				<ul>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/laevatain.ARXFileChooser.html#showOpenDialog(java.awt.Component)">showOpenDialog</a></code><code class="Z">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code>)</code><i class="Y"><code>int</code></i></li>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/laevatain.ARXFileChooser.html#showSaveDialog(java.awt.Component)">showSaveDialog</a></code><code class="Z">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code>)</code><i class="Y"><code>int</code></i></li>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/laevatain.ARXFileChooser.html#showDialog(java.awt.Component,java.lang.String)">showDialog</a></code><code class="Z">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">approveButtonText</code>)</code><i class="Y"><code>int</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="R">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>
