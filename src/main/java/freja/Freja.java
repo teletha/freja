@@ -11,12 +11,12 @@ package freja;
 
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,8 +96,8 @@ public final class Freja {
             List<String> command = new ArrayList<>();
             command.add(Path.of(System.getProperty("java.home"), "bin", "java").toString());
             for (String option : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-                if (option.startsWith("--enable-native-access") || option.startsWith("--add-opens")
-                        || option.startsWith("--add-exports") || option.startsWith("-D")) {
+                if (option.startsWith("--enable-native-access") || option.startsWith("--add-opens") || option
+                        .startsWith("--add-exports") || option.startsWith("-D")) {
                     command.add(option);
                 }
             }
@@ -112,8 +112,7 @@ public final class Freja {
                 System.exit(0);
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(window, "再起動できませんでした: " + e.getMessage(),
-                    "再起動", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(window, "再起動できませんでした: " + e.getMessage(), "再起動", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -179,12 +178,6 @@ public final class Freja {
         }
 
         Path location = database == null ? defaultDatabase() : database;
-        // The translation bundles belong beside the library, not beside whatever folder the
-        // process was started from, so pin the directory before the first sentence is resolved.
-        laevatain.ARXLang.bundleDirectory(location.toAbsolutePath().getParent().resolve("lang"));
-        // The language goes in before any component is built: the saved choice has to be in
-        // kiss.I#Lang before the first sentence is translated.
-        laevatain.ARXLang.install();
         Theme.install();
 
         SwingUtilities.invokeLater(() -> {

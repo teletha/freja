@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.util;
 
 import java.util.List;
 import java.util.Locale;
@@ -24,13 +24,13 @@ import kiss.I;
  * result is a {@link kiss.Variable}, so widgets bound here follow a language change immediately and
  * without restarting the application.
  */
-public final class ARXLang {
+public final class LangUtil {
 
     /** A language the interface can be shown in. */
     public record Language(String code, String name) {
     }
 
-    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(ARXLang.class);
+    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(LangUtil.class);
 
     private static final String LANGUAGE_KEY = "language";
 
@@ -42,40 +42,7 @@ public final class ARXLang {
     public static final List<Language> LANGUAGES = List
             .of(new Language("en", "English"), new Language("ja", "日本語"), new Language("ko", "한국어"), new Language("zh-CN", "简体中文"), new Language("zh-TW", "繁體中文"), new Language("de", "Deutsch"), new Language("fr", "Français"), new Language("es", "Español"), new Language("it", "Italiano"), new Language("pt", "Português"), new Language("ru", "Русский"), new Language("nl", "Nederlands"));
 
-    private ARXLang() {
-    }
-
-    /**
-     * Pins where sinobu keeps its translation bundles. sinobu bakes its default - a {@code lang}
-     * folder relative to the working directory - into the environment cache while {@code kiss.I} is
-     * initializing, so handing it a default here would arrive too late; the resolved value is
-     * written into that cache directly instead. An explicit {@code LangDirectory} environment
-     * variable always wins.
-     *
-     * @param directory the folder which will hold {@code <language>.json}
-     */
-    public static void bundleDirectory(java.nio.file.Path directory) {
-        if (directory == null || System.getenv("LangDirectory") != null) {
-            return;
-        }
-        try {
-            java.lang.reflect.Field cache = I.class.getDeclaredField("env");
-            cache.setAccessible(true);
-            ((java.util.Properties) cache.get(null)).setProperty("LangDirectory", directory.toAbsolutePath().toString());
-        } catch (ReflectiveOperationException | RuntimeException e) {
-            // A future sinobu layout may not expose the cache; the relative folder still works.
-        }
-    }
-
-    /**
-     * Applies the saved language. Without a saved choice the operating system's language stands,
-     * which is what {@link I#Lang} already holds.
-     */
-    public static void install() {
-        String code = PREFERENCES.get(LANGUAGE_KEY, null);
-        if (code != null && !code.isBlank()) {
-            I.Lang.set(code);
-        }
+    private LangUtil() {
     }
 
     /** The active language code, in the form the translation service expects. */
@@ -108,15 +75,5 @@ public final class ARXLang {
         }
         PREFERENCES.put(LANGUAGE_KEY, code);
         I.Lang.set(code);
-    }
-
-    /** The display name of a language code, in its own language. */
-    public static String name(String code) {
-        for (Language language : LANGUAGES) {
-            if (language.code().equals(code)) {
-                return language.name();
-            }
-        }
-        return code;
     }
 }

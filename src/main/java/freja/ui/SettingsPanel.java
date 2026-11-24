@@ -41,10 +41,10 @@ import kiss.I;
 import laevatain.ARXButton;
 import laevatain.ARXComboBox;
 import laevatain.ARXLabel;
-import laevatain.ARXLang;
 import laevatain.ARXSettingsPane;
 import laevatain.ARXTextBinding;
 import laevatain.ARXToggle;
+import laevatain.util.LangUtil;
 
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored
@@ -214,7 +214,7 @@ public final class SettingsPanel extends JPanel {
         }
         moreButton.setText(I.translate(expanded ? "Fewer themes" : "More themes"));
         moreButton.setIcon(Icons.chevron(14, Theme.MUTED, expanded));
-        themeCount.setText(String.format(ARXLang.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
+        themeCount.setText(String.format(LangUtil.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
         themeGrid.revalidate();
         themeGrid.repaint();
         // The grid's height changed, so every ancestor's preferred size changed with it.
@@ -247,25 +247,6 @@ public final class SettingsPanel extends JPanel {
     public void refreshTheme() {
         syncThemeTiles();
         showThemes();
-    }
-
-    /** Rebuilds the captions which are assembled from values rather than bound as variables. */
-    private void refreshLocalized() {
-        if (themeScope != null) {
-            int scope = Math.max(0, themeScope.getSelectedIndex());
-            themeScope.setSources(THEMES);
-            themeScope.setSelectedIndex(Math.min(scope, THEMES.length - 1));
-        }
-        refreshTheme();
-        if (languages != null) {
-            updating = true;
-            languages.setSelectedItem(ARXLang.name(ARXLang.language()));
-            updating = false;
-        }
-        if (localeValue != null) {
-            localeValue.setText(ARXLang.displayName());
-        }
-        refreshPreview();
     }
 
     /** Repaints the tiles so the badge follows the now active theme. */
@@ -339,16 +320,16 @@ public final class SettingsPanel extends JPanel {
     }
 
     /**
-     * The language section. Freja writes its interface text in English and {@link ARXLang}
+     * The language section. Freja writes its interface text in English and {@link LangUtil}
      * translates it into the language chosen here; the first request per sentence goes online, the
      * result is cached, and bound captions - including this page's own - update as they arrive.
      */
     private void languageSection() {
         languages = new ARXComboBox();
-        for (ARXLang.Language language : ARXLang.LANGUAGES) {
+        for (LangUtil.Language language : LangUtil.LANGUAGES) {
             languages.addItem(language.name());
         }
-        languages.setSelectedItem(ARXLang.name(ARXLang.language()));
+        languages.setSelectedItem(LangUtil.displayName());
         languages.setFont(Theme.font(Font.PLAIN, 13));
         languages.setPreferredSize(new Dimension(200, 30));
         languages.addActionListener(event -> {
@@ -356,15 +337,15 @@ public final class SettingsPanel extends JPanel {
                 return;
             }
             String display = (String) languages.getSelectedItem();
-            for (ARXLang.Language language : ARXLang.LANGUAGES) {
+            for (LangUtil.Language language : LangUtil.LANGUAGES) {
                 if (language.name().equals(display)) {
-                    ARXLang.setLanguage(language.code());
+                    LangUtil.setLanguage(language.code());
                     break;
                 }
             }
         });
 
-        localeValue = ARXSettingsPane.value(ARXLang.displayName());
+        localeValue = ARXSettingsPane.value(LangUtil.displayName());
 
         ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"), ARXSettingsPane.Text
                 .of("Pick the language of the interface."), Icons.letter("あ", 17, Theme.MUTED));
