@@ -101,6 +101,7 @@ If you think something might be a bug, but you're not sure, ask on StackOverflow
 ## Dependency
 Freja depends on the following products on runtime.
 * [flatlaf-3.8](https://mvnrepository.com/artifact/com.formdev/flatlaf/3.8)
+* [flatlaf-intellij-themes-3.8](https://mvnrepository.com/artifact/com.formdev/flatlaf-intellij-themes/3.8)
 * [imagify-1.3.1](https://mvnrepository.com/artifact/io.github.teletha/imagify/1.3.1)
 * [jsvg-2.2.0](https://mvnrepository.com/artifact/com.github.weisj/jsvg/2.2.0)
 * [psychopath-2.3.0](https://mvnrepository.com/artifact/io.github.teletha/psychopath/2.3.0)
