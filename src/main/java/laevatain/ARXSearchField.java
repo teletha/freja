@@ -29,6 +29,8 @@ import javax.swing.event.DocumentListener;
 
 import com.formdev.flatlaf.FlatClientProperties;
 
+import kiss.Variable;
+
 /**
  * A reusable search field with a leading icon, placeholder, clear button and a debounced text
  * callback. Fonts and colours come from the active FlatLaf theme.
@@ -45,6 +47,10 @@ public final class ARXSearchField extends JTextField {
 
     private final Timer debounce;
 
+    private final ARXTextBinding placeholderBinding = new ARXTextBinding();
+
+    private final ARXTextBinding textBinding = new ARXTextBinding();
+
     private Runnable onTextChanged = () -> {
     };
 
@@ -54,6 +60,17 @@ public final class ARXSearchField extends JTextField {
      */
     public ARXSearchField(String placeholder, Icon icon) {
         this(placeholder, icon, DEFAULT_DEBOUNCE_MS);
+    }
+
+    /** @param placeholder a live hint which follows the interface language */
+    public ARXSearchField(Variable<String> placeholder, Icon icon) {
+        this(placeholder, icon, DEFAULT_DEBOUNCE_MS);
+    }
+
+    /** @param placeholder a live hint which follows the interface language */
+    public ARXSearchField(Variable<String> placeholder, Icon icon, int debounceMillis) {
+        this(ARXTextBinding.get(placeholder), icon, debounceMillis);
+        setPlaceholder(placeholder);
     }
 
     public ARXSearchField(String placeholder, Icon icon, int debounceMillis) {
@@ -170,6 +187,22 @@ public final class ARXSearchField extends JTextField {
     public void setPlaceholder(String placeholder) {
         putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
         repaint();
+    }
+
+    /** Binds the hint to a live value; passing null clears it. */
+    public void setPlaceholder(Variable<String> placeholder) {
+        if (placeholder == null) {
+            setPlaceholder((String) null);
+        }
+        placeholderBinding.bind(placeholder, value -> setPlaceholder(value));
+    }
+
+    /** Binds the field contents to a live value; passing null clears the field. */
+    public void setText(Variable<String> text) {
+        if (text == null) {
+            super.setText(null);
+        }
+        textBinding.bind(text, super::setText);
     }
 
     /** Returns the trimmed query text. */
