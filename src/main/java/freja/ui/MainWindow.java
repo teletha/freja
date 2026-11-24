@@ -11,11 +11,9 @@ package freja.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -66,7 +64,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
-
 
 import freja.model.Folder;
 import freja.model.LibraryStats;
@@ -146,7 +143,9 @@ public final class MainWindow extends JFrame {
 
     private javax.swing.JSplitPane sidebarSplit;
 
-    /** Read before the split pane fires initial layout events that would overwrite the preference. */
+    /**
+     * Read before the split pane fires initial layout events that would overwrite the preference.
+     */
     private int savedSidebarDivider;
 
     private final Timer refreshTimer;
@@ -165,9 +164,7 @@ public final class MainWindow extends JFrame {
     private long refreshGeneration;
 
     /** Everything a background refresh needs to hand back to the event dispatch thread. */
-    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders,
-            Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections,
-            boolean fallback) {
+    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, boolean fallback) {
     }
 
     private Sidebar.Mode mode = Sidebar.Mode.ALL;
@@ -336,10 +333,8 @@ public final class MainWindow extends JFrame {
         bar.setLayout(new BoxLayout(bar, BoxLayout.Y_AXIS));
         bar.setPreferredSize(new Dimension(48, 0));
         bar.add(Box.createVerticalStrut(8));
-        activityButtons.add(new ActivityButton("viewer", Icons.grid(20, Theme.MUTED), "写真ライブラリ",
-                () -> switchPane("viewer")));
-        activityButtons.add(new ActivityButton("settings", Icons.settings(20, Theme.MUTED), "設定",
-                () -> switchPane("settings")));
+        activityButtons.add(new ActivityButton("viewer", Icons.grid(20, Theme.MUTED), "写真ライブラリ", () -> switchPane("viewer")));
+        activityButtons.add(new ActivityButton("settings", Icons.settings(20, Theme.MUTED), "設定", () -> switchPane("settings")));
         for (ActivityButton button : activityButtons) {
             bar.add(button);
         }
@@ -416,11 +411,11 @@ public final class MainWindow extends JFrame {
     private JComponent toolbar() {
         JToolBar bar = new JToolBar();
         bar.setFloatable(false);
-        bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER), BorderFactory.createEmptyBorder(7, 12, 7, 14)));
+        bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER), BorderFactory
+                .createEmptyBorder(7, 12, 7, 14)));
         bar.setBackground(Theme.SIDEBAR);
 
-        ARXButton add = new ARXButton("フォルダを追加", Icons.folder(16, Theme.MUTED),
-                ARXButton.Variant.SECONDARY, this::openScanFolders);
+        ARXButton add = new ARXButton("フォルダを追加", Icons.folder(16, Theme.MUTED), ARXButton.Variant.SECONDARY, this::openScanFolders);
         add.setFont(Theme.font(Font.PLAIN, 12));
         bar.add(add);
         bar.add(Box.createHorizontalStrut(6));
@@ -465,9 +460,8 @@ public final class MainWindow extends JFrame {
         slideshow.setFont(Theme.font(Font.PLAIN, 12));
         bar.add(slideshow);
 
-        themeButton = new ARXButton(null,
-                Theme.isDark() ? Icons.sun(16, Theme.MUTED) : Icons.moon(16, Theme.MUTED),
-                ARXButton.Variant.SECONDARY, () -> setDarkMode(!Theme.isDark()));
+        themeButton = new ARXButton((String) null, Theme.isDark() ? Icons.sun(16, Theme.MUTED)
+                : Icons.moon(16, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> setDarkMode(!Theme.isDark()));
         themeButton.setToolTipText(Theme.isDark() ? "ライトモードに切り替え" : "ダークモードに切り替え");
         bar.add(Box.createHorizontalStrut(8));
         bar.add(themeButton);
@@ -490,7 +484,8 @@ public final class MainWindow extends JFrame {
     private JComponent statusBar() {
         JPanel bar = new JPanel(new BorderLayout(12, 0));
         bar.setBackground(Theme.SURFACE);
-        bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.BORDER), BorderFactory.createEmptyBorder(6, 14, 6, 14)));
+        bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.BORDER), BorderFactory
+                .createEmptyBorder(6, 14, 6, 14)));
         statusMessage.setFont(Theme.font(Font.PLAIN, 11));
         statusMessage.setForeground(Theme.MUTED);
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -548,8 +543,7 @@ public final class MainWindow extends JFrame {
         card.add(description2);
         card.add(Box.createVerticalStrut(26));
 
-        ARXButton add = new ARXButton("フォルダを追加", Icons.folder(17, Theme.MUTED),
-                ARXButton.Variant.SECONDARY, this::openScanFolders);
+        ARXButton add = new ARXButton("フォルダを追加", Icons.folder(17, Theme.MUTED), ARXButton.Variant.SECONDARY, this::openScanFolders);
         add.setFont(Theme.font(Font.PLAIN, 13));
         add.setAlignmentX(CENTER_ALIGNMENT);
         card.add(add);
@@ -685,8 +679,8 @@ public final class MainWindow extends JFrame {
             mode = Sidebar.Mode.FOLDER;
             this.folderId = folderId;
         });
-        grid.setOnTagFolder((folderId, point) -> library.folder(folderId).ifPresent(folder ->
-                TagPicker.show(grid, point.x, point.y + 8, library, folderId, this::tagsChanged)));
+        grid.setOnTagFolder((folderId, point) -> library.folder(folderId)
+                .ifPresent(folder -> TagPicker.show(grid, point.x, point.y + 8, library, folderId, this::tagsChanged)));
         grid.setOnRemove(this::removeFromLibrary);
         grid.setOnDeleteFromDisk(this::deleteFromDisk);
         grid.setOnOpen(this::openViewer);
@@ -765,8 +759,8 @@ public final class MainWindow extends JFrame {
      * Starts the background scanner.
      */
     public void start() {
-        scanner.start(true, PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false),
-                PREFERENCES.getBoolean(SCAN_SWEEP_PREFERENCE, false));
+        scanner.start(true, PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false), PREFERENCES
+                .getBoolean(SCAN_SWEEP_PREFERENCE, false));
         SwingUtilities.invokeLater(() -> {
             if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && savedSidebarDivider > 0) {
                 sidebarSplit.setDividerLocation(Math.max(180, savedSidebarDivider));
@@ -801,8 +795,8 @@ public final class MainWindow extends JFrame {
         if (folder == null) {
             return;
         }
-        String name = (String) JOptionPane.showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane.QUESTION_MESSAGE,
-                null, null, folder.name());
+        String name = (String) JOptionPane
+                .showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane.QUESTION_MESSAGE, null, null, folder.name());
         if (name == null) {
             return;
         }
@@ -827,10 +821,8 @@ public final class MainWindow extends JFrame {
 
                 @Override
                 public void onClearFolders() {
-                    int answer = JOptionPane.showConfirmDialog(MainWindow.this,
-                            "登録されているすべてのフォルダと、ライブラリに記録された写真データを削除します。\n"
-                                    + "ディスク上の写真ファイル自体は削除されません。",
-                            "監視フォルダをクリア", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    int answer = JOptionPane
+                            .showConfirmDialog(MainWindow.this, "登録されているすべてのフォルダと、ライブラリに記録された写真データを削除します。\n" + "ディスク上の写真ファイル自体は削除されません。", "監視フォルダをクリア", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                     if (answer != JOptionPane.OK_OPTION) {
                         return;
                     }
@@ -845,14 +837,11 @@ public final class MainWindow extends JFrame {
                     if (folderIds.isEmpty()) {
                         return;
                     }
-                    List<String> names = folderIds.stream()
-                            .map(id -> library.folder(id).map(Folder::name).orElse("ID " + id))
-                            .toList();
-                    String message = folderIds.size() == 1
-                            ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
+                    List<String> names = folderIds.stream().map(id -> library.folder(id).map(Folder::name).orElse("ID " + id)).toList();
+                    String message = folderIds.size() == 1 ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
                             : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
-                    int answer = JOptionPane.showConfirmDialog(MainWindow.this, message, "フォルダを削除",
-                            JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    int answer = JOptionPane
+                            .showConfirmDialog(MainWindow.this, message, "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
                     if (answer != JOptionPane.OK_OPTION) {
                         return;
                     }
@@ -909,8 +898,8 @@ public final class MainWindow extends JFrame {
 
     private void refreshScanFolders() {
         if (scanFoldersDialog != null) {
-            scanFoldersDialog.setFolders(library.folders(), PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false),
-                    PREFERENCES.getBoolean(SCAN_SWEEP_PREFERENCE, false));
+            scanFoldersDialog.setFolders(library.folders(), PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false), PREFERENCES
+                    .getBoolean(SCAN_SWEEP_PREFERENCE, false));
         }
     }
 
@@ -930,7 +919,8 @@ public final class MainWindow extends JFrame {
         if (folder.isEmpty()) {
             return;
         }
-        int answer = JOptionPane.showConfirmDialog(this, "「" + folder.get().name() + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。", "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int answer = JOptionPane.showConfirmDialog(this, "「" + folder.get()
+                .name() + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。", "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.OK_OPTION) {
             scanner.removeFolder(folderId);
             if (mode == Sidebar.Mode.FOLDER && this.folderId == folderId) {
@@ -957,7 +947,8 @@ public final class MainWindow extends JFrame {
         applySortForCurrentView();
         if (folderToFolder && grid.scrollToFolder(folderId)) {
             // The grid already contains every folder section. Moving between them only needs a
-            // scroll; reloading and re-sorting the whole library would land one step behind the click.
+            // scroll; reloading and re-sorting the whole library would land one step behind the
+            // click.
             scrollToSelectedFolder = false;
             return;
         }
@@ -1052,12 +1043,9 @@ public final class MainWindow extends JFrame {
         if (photos.isEmpty()) {
             return;
         }
-        String description = photos.size() > 1
-                ? photos.size() + " 枚の写真をライブラリから削除します。"
-                : photos.get(0).fileName() + " をライブラリから削除します。";
-        int answer = JOptionPane.showConfirmDialog(this,
-                description + "\n写真ファイル自体は削除されません。",
-                "写真を削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        String description = photos.size() > 1 ? photos.size() + " 枚の写真をライブラリから削除します。" : photos.get(0).fileName() + " をライブラリから削除します。";
+        int answer = JOptionPane
+                .showConfirmDialog(this, description + "\n写真ファイル自体は削除されません。", "写真を削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
@@ -1074,12 +1062,10 @@ public final class MainWindow extends JFrame {
         if (photos.isEmpty()) {
             return;
         }
-        String description = photos.size() > 1
-                ? photos.size() + " 枚の画像ファイルをディスクから完全に削除します。"
+        String description = photos.size() > 1 ? photos.size() + " 枚の画像ファイルをディスクから完全に削除します。"
                 : photos.get(0).fileName() + " をディスクから完全に削除します。";
-        int answer = JOptionPane.showConfirmDialog(this,
-                description + "\n\nこの操作は取り消せません。ライブラリからも削除されます。",
-                "ディスクから削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        int answer = JOptionPane
+                .showConfirmDialog(this, description + "\n\nこの操作は取り消せません。ライブラリからも削除されます。", "ディスクから削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
@@ -1100,9 +1086,7 @@ public final class MainWindow extends JFrame {
         inspectorPhoto = null;
         inspector.show(null);
         refreshAll();
-        statusMessage.setText(failed == 0
-                ? deleted + " 枚をディスクから削除しました"
-                : deleted + " 枚を削除し、" + failed + " 枚は削除できませんでした");
+        statusMessage.setText(failed == 0 ? deleted + " 枚をディスクから削除しました" : deleted + " 枚を削除し、" + failed + " 枚は削除できませんでした");
     }
 
     private void setFavorites(List<Photo> photos, boolean favorite) {
@@ -1200,7 +1184,8 @@ public final class MainWindow extends JFrame {
                 ライブラリ: %s
 
                 Java %s
-                """.formatted(stats.photos(), stats.favorites(), stats.recent(), stats.folders(), library.location(), System.getProperty("java.version")), "Freja について", JOptionPane.INFORMATION_MESSAGE);
+                """.formatted(stats.photos(), stats.favorites(), stats.recent(), stats.folders(), library.location(), System
+                .getProperty("java.version")), "Freja について", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void setDarkMode(boolean dark) {
@@ -1344,7 +1329,8 @@ public final class MainWindow extends JFrame {
 
     /**
      * Starts a refresh. Called on the event dispatch thread, so every piece of UI state is captured
-     * here; the catalog is then read and sorted on the refresh thread and only the result comes back
+     * here; the catalog is then read and sorted on the refresh thread and only the result comes
+     * back
      * to the event dispatch thread.
      */
     private void refreshAll() {
@@ -1373,8 +1359,7 @@ public final class MainWindow extends JFrame {
     }
 
     /** Reads and sorts everything the current view needs. Never touches a Swing component. */
-    private RefreshData loadView(Sidebar.Mode requestedMode, long requestedFolder, SortOrder order, String searchText,
-            List<Long> tagIds) {
+    private RefreshData loadView(Sidebar.Mode requestedMode, long requestedFolder, SortOrder order, String searchText, List<Long> tagIds) {
         List<Folder> folders = library.folders();
         LibraryStats stats = library.stats();
         PhotoFilter filter = switch (requestedMode) {
@@ -1395,8 +1380,8 @@ public final class MainWindow extends JFrame {
         }
         // A folder whose photos were removed falls back to the whole library. The view's sort is
         // reapplied on the event dispatch thread, which triggers another refresh with that order.
-        boolean fallback = requestedMode == Sidebar.Mode.FOLDER
-                && visibleFolders.stream().noneMatch(folder -> folder.id() == requestedFolder);
+        boolean fallback = requestedMode == Sidebar.Mode.FOLDER && visibleFolders.stream()
+                .noneMatch(folder -> folder.id() == requestedFolder);
         Sidebar.Mode effectiveMode = fallback ? Sidebar.Mode.ALL : requestedMode;
         long effectiveFolder = fallback ? -1 : requestedFolder;
 
@@ -1484,8 +1469,8 @@ public final class MainWindow extends JFrame {
         }
         if (selected.size() == 1) {
             Photo photo = selected.get(0);
-            selectionInfo.setText(photo.fileName() + "  ·  " + photo.width() + "×" + photo.height()
-                    + "  ·  " + photo.capturedLabel() + "  ·  " + Photo.formatSize(photo.byteSize()));
+            selectionInfo.setText(photo.fileName() + "  ·  " + photo.width() + "×" + photo.height() + "  ·  " + photo
+                    .capturedLabel() + "  ·  " + Photo.formatSize(photo.byteSize()));
         } else {
             long bytes = 0;
             for (Photo photo : selected) {
@@ -1530,7 +1515,8 @@ public final class MainWindow extends JFrame {
             progress.setIndeterminate(false);
             progress.setVisible(false);
             if (state.errors() > 0) {
-                statusMessage.setText(state.message() == null || state.message().isBlank() ? state.errors() + " 件のファイルを読み込めませんでした" : shorten(state.message(), 110));
+                statusMessage.setText(state.message() == null || state.message().isBlank() ? state.errors() + " 件のファイルを読み込めませんでした"
+                        : shorten(state.message(), 110));
             } else if (state.imported() > 0) {
                 statusMessage.setText(state.imported() + " 枚の写真を更新しました  (" + formatDuration(state.elapsed()) + ")");
             } else if (!state.elapsed().isZero()) {
@@ -1637,8 +1623,7 @@ public final class MainWindow extends JFrame {
             if (stalled > TimeUnit.SECONDS.toNanos(3)) {
                 if (!dumped) {
                     dumped = true;
-                    System.err.println("=== Freja UI stalled for "
-                            + TimeUnit.NANOSECONDS.toMillis(stalled) + " ms ===");
+                    System.err.println("=== Freja UI stalled for " + TimeUnit.NANOSECONDS.toMillis(stalled) + " ms ===");
                     Thread.getAllStackTraces().forEach((thread, stack) -> {
                         System.err.println("\"" + thread.getName() + "\" " + thread.getState());
                         for (StackTraceElement frame : stack) {

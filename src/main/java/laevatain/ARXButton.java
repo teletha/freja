@@ -21,8 +21,12 @@ import javax.swing.UIManager;
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
 
+import kiss.Disposable;
+import kiss.Variable;
+
 /**
- * A reusable FlatLaf button with a flat look, rounded corners and a hover style. All colours and the
+ * A reusable FlatLaf button with a flat look, rounded corners and a hover style. All colours and
+ * the
  * corner radius come from the active FlatLaf theme, so the button follows runtime theme changes.
  */
 public final class ARXButton extends JButton {
@@ -36,7 +40,9 @@ public final class ARXButton extends JButton {
 
     private final Variant variant;
 
-    /** When true, the resting state blends into the enclosing panel and only hover paints a colour. */
+    /**
+     * When true, the resting state blends into the enclosing panel and only hover paints a colour.
+     */
     private final boolean blendWithParent;
 
     private boolean hovering;
@@ -54,11 +60,32 @@ public final class ARXButton extends JButton {
     }
 
     /**
+     * @param text the button label, or null for an icon-only button
+     * @param icon the icon, or null for a text-only button
+     * @param variant the role whose FlatLaf colours are used
+     * @param action invoked on click
+     */
+    public ARXButton(Variable<String> text, Icon icon, Variant variant, Runnable action) {
+        // Secondary buttons have no resting fill of their own: they merge into the surrounding
+        // panel and only paint FlatLaf's hover colour while the pointer is over them.
+        this(text, icon, variant, action, variant == Variant.SECONDARY);
+    }
+
+    /**
      * @param blendWithParent whether the resting background matches the enclosing panel instead of
-     *        the FlatLaf button background
+     *            the FlatLaf button background
      */
     public ARXButton(String text, Icon icon, Variant variant, Runnable action, boolean blendWithParent) {
-        super(text, icon);
+        this(Variable.of(text), icon, variant, action, blendWithParent);
+    }
+
+    /**
+     * @param blendWithParent whether the resting background matches the enclosing panel instead of
+     *            the FlatLaf button background
+     */
+    public ARXButton(Variable<String> text, Icon icon, Variant variant, Runnable action, boolean blendWithParent) {
+        super(text.get(), icon);
+        setText(text);
         this.variant = variant;
         this.blendWithParent = blendWithParent;
         setFocusable(false);
@@ -80,6 +107,15 @@ public final class ARXButton extends JButton {
         });
         addActionListener(event -> action.run());
         applyStyle();
+    }
+
+    private Disposable textBinding;
+
+    public void setText(Variable<String> text) {
+        if (textBinding != null) {
+            textBinding.dispose();
+        }
+        textBinding = text.observing().to(this::setText);
     }
 
     @Override
@@ -113,18 +149,15 @@ public final class ARXButton extends JButton {
             return enclosingBackground();
         }
         if (variant == Variant.PRIMARY) {
-            return color(hovering ? "Button.defaultHoverBackground" : "Button.defaultBackground",
-                    "Button.background");
+            return color(hovering ? "Button.defaultHoverBackground" : "Button.defaultBackground", "Button.background");
         }
         if (variant == Variant.TINTED) {
             // A soft accent fill: visible as an action, but far lighter than a solid primary.
-            return color(hovering ? "ARXButton.tintedHoverBackground" : "ARXButton.tintedBackground",
-                    "Button.background");
+            return color(hovering ? "ARXButton.tintedHoverBackground" : "ARXButton.tintedBackground", "Button.background");
         }
         if (variant == Variant.TINTED) {
             // A soft accent fill: prominent without the weight of a solid primary button.
-            return color(hovering ? "ARXButton.tintedHoverBackground" : "ARXButton.tintedBackground",
-                    "Button.background");
+            return color(hovering ? "ARXButton.tintedHoverBackground" : "ARXButton.tintedBackground", "Button.background");
         }
         if (hovering && blendWithParent) {
             // Use the shared hover shade supplied by the active theme; fall back to deriving one
@@ -143,12 +176,10 @@ public final class ARXButton extends JButton {
             return color("Component.error.borderColor", "Button.foreground");
         }
         if (variant == Variant.PRIMARY) {
-            return color(hovering ? "Button.defaultHoverForeground" : "Button.defaultForeground",
-                    "Button.foreground");
+            return color(hovering ? "Button.defaultHoverForeground" : "Button.defaultForeground", "Button.foreground");
         }
         if (variant == Variant.TINTED) {
-            return color(hovering ? "ARXButton.tintedHoverForeground" : "ARXButton.tintedForeground",
-                    "Button.foreground");
+            return color(hovering ? "ARXButton.tintedHoverForeground" : "ARXButton.tintedForeground", "Button.foreground");
         }
         return color(hovering ? "Button.hoverForeground" : "Button.foreground", "Button.foreground");
     }
