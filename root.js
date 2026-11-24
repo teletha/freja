@@ -2,6 +2,7 @@ const root = {
 	"docs": [],
 	"modules": [],
 	"packages": [
+		"laevatain.util",
 		"laevatain",
 		"freja.util",
 		"freja.scan",
@@ -11,6 +12,16 @@ const root = {
 		"freja.store"
 	],
 	"types": [
+		{
+			"name": "LangUtil",
+			"packageName": "laevatain.util",
+			"type": "Class"
+		},
+		{
+			"name": "LangUtil.Language",
+			"packageName": "laevatain.util",
+			"type": "Record"
+		},
 		{
 			"name": "ARXCheckBox",
 			"packageName": "laevatain",
@@ -110,16 +121,6 @@ const root = {
 			"name": "ARXButton.Variant",
 			"packageName": "laevatain",
 			"type": "Enum"
-		},
-		{
-			"name": "ARXLang",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXLang.Language",
-			"packageName": "laevatain",
-			"type": "Record"
 		},
 		{
 			"name": "ARXMenu",

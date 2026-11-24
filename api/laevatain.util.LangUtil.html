@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="U">
+		<header class="V" date="2026-11-24">
+			<h1 class="AB"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="w"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="d"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Y"></nav>
+		<article class="W" id="Article">
+			<section class="s"><code class="g">laevatain.util</code>
+				<h2 class="Class Q"><code class="f">LangUtil</code></h2>
+				<div class="b"></div><span class="A"><p>The localisation bridge for ARX components.</p><p>
+Interface text is written in the source as plain English and passed through I#translate,
+which resolves it against the language held in I#Lang: a sentence seen for the first time
+is translated online once and stored in a local bundle, later requests come from that cache. The
+result is a kiss.Variable, so widgets bound here follow a language change immediately and
+without restarting the application.
+</p>
+				</span></section>
+			<section class="s" id="LANGUAGES">
+				<h2 class="LB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="f">LANGUAGES</code><i class="JB"><code class="return"><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="laevatain.util.LangUtil.Language" href="api/laevatain.util.LangUtil.Language.html">Language</a></code></code></code></i></h2><span class="A"><p>The offered languages. Their names are written in their own language, the way every operating
+system lists them, so a bad translation can never hide the option the user is looking for.
+The first entry is the language the source sentences are written in.</p></span></section>
+			<section class="s" id="language()">
+				<h2 class="LB"><i class="STATIC PUBLIC"></i><code class="f">language</code><code class="L">()</code><i class="JB"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="R">
+					<tr class="Z">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>The active language code, in the form the translation service expects.</p></span></section>
+			<section class="s" id="locale()">
+				<h2 class="LB"><i class="STATIC PUBLIC"></i><code class="f">locale</code><code class="L">()</code><i class="JB"><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></i></h2>
+				<table class="R">
+					<tr class="Z">
+						<td><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>The locale matching the active language, for dates, numbers and collation.</p></span></section>
+			<section class="s" id="displayName()">
+				<h2 class="LB"><i class="STATIC PUBLIC"></i><code class="f">displayName</code><code class="L">()</code><i class="JB"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="R">
+					<tr class="Z">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>The active locale in its own words, e.g. 日本語 (日本) or English (United States).</p></span></section>
+			<section class="s" id="setLanguage(java.lang.String)">
+				<h2 class="LB"><i class="STATIC PUBLIC"></i><code class="f">setLanguage</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="JB"><code>void</code></i></h2>
+				<table class="R">
+					<tr class="l">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Switches the interface language, remembers the choice and notifies the listeners.</p></span></section>
+		</article>
+		<aside class="J">
+			<div class="x">
+				<h5 class="q">Static Fields</h5>
+				<ul>
+					<li class="y"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/laevatain.util.LangUtil.html#LANGUAGES">LANGUAGES</a></code><i class="z"><code class="return"><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="laevatain.util.LangUtil.Language" href="api/laevatain.util.LangUtil.Language.html">Language</a></code></code></code></i></li>
+				</ul>
+				<h5 class="q">Static Methods</h5>
+				<ul>
+					<li class="y"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.util.LangUtil.html#language()">language</a></code><code class="L">()</code><i class="z"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="y"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.util.LangUtil.html#locale()">locale</a></code><code class="L">()</code><i class="z"><code><a aria-label="java.util.Locale 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Locale.html">Locale</a></code></i></li>
+					<li class="y"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.util.LangUtil.html#displayName()">displayName</a></code><code class="L">()</code><i class="z"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="y"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.util.LangUtil.html#setLanguage(java.lang.String)">setLanguage</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">code</code>)</code><i class="z"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="X">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>
