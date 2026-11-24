@@ -28,6 +28,7 @@ import freja.scan.LibraryScanner;
 import freja.store.Library;
 import freja.ui.MainWindow;
 import freja.ui.Theme;
+import laevatain.util.Language;
 
 /**
  * The application entry point.
@@ -178,6 +179,7 @@ public final class Freja {
         }
 
         Path location = database == null ? defaultDatabase() : database;
+        Language.install();
         Theme.install();
 
         SwingUtilities.invokeLater(() -> {

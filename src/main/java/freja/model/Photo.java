@@ -38,12 +38,12 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
      * patterns the application was designed around; every other language gets its locale's style.
      */
     private static synchronized void followLanguage() {
-        String language = laevatain.util.LangUtil.language();
+        String language = laevatain.util.Language.language();
         if (language.equals(formattedLanguage)) {
             return;
         }
         formattedLanguage = language;
-        Locale locale = laevatain.util.LangUtil.locale();
+        Locale locale = laevatain.util.Language.locale();
         DATE = "ja".equals(language)
                 ? DateTimeFormatter.ofPattern("yyyy年M月d日", locale)
                 : DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(locale);

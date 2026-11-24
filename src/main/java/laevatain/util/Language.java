@@ -24,13 +24,13 @@ import kiss.I;
  * result is a {@link kiss.Variable}, so widgets bound here follow a language change immediately and
  * without restarting the application.
  */
-public final class LangUtil {
+public final class Language {
 
     /** A language the interface can be shown in. */
-    public record Language(String code, String name) {
+    public record SupportedLaguage(String code, String name) {
     }
 
-    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(LangUtil.class);
+    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Language.class);
 
     private static final String LANGUAGE_KEY = "language";
 
@@ -39,19 +39,33 @@ public final class LangUtil {
      * system lists them, so a bad translation can never hide the option the user is looking for.
      * The first entry is the language the source sentences are written in.
      */
-    public static final List<Language> LANGUAGES = List
-            .of(new Language("en", "English"), new Language("ja", "日本語"), new Language("ko", "한국어"), new Language("zh-CN", "简体中文"), new Language("zh-TW", "繁體中文"), new Language("de", "Deutsch"), new Language("fr", "Français"), new Language("es", "Español"), new Language("it", "Italiano"), new Language("pt", "Português"), new Language("ru", "Русский"), new Language("nl", "Nederlands"));
+    public static final List<SupportedLaguage> SUPPORTS = List
+            .of(new SupportedLaguage("en", "English"), new SupportedLaguage("ja", "日本語"), new SupportedLaguage("ko", "한국어"), new SupportedLaguage("zh-CN", "简体中文"), new SupportedLaguage("zh-TW", "繁體中文"), new SupportedLaguage("de", "Deutsch"), new SupportedLaguage("fr", "Français"), new SupportedLaguage("es", "Español"), new SupportedLaguage("it", "Italiano"), new SupportedLaguage("pt", "Português"), new SupportedLaguage("ru", "Русский"), new SupportedLaguage("nl", "Nederlands"));
 
-    private LangUtil() {
+    private Language() {
+    }
+
+    /**
+     * Switches the interface language, remembers the choice and notifies the listeners.
+     */
+    public static void install() {
+        install(language());
+    }
+
+    /**
+     * Switches the interface language, remembers the choice and notifies the listeners.
+     */
+    public static void install(String code) {
+        if (code == null) {
+            return;
+        }
+        PREFERENCES.put(LANGUAGE_KEY, code);
+        I.Lang.set(code);
     }
 
     /** The active language code, in the form the translation service expects. */
     public static String language() {
-        String code = I.Lang.get();
-        if (code == null || code.isBlank()) {
-            return Locale.getDefault().getLanguage();
-        }
-        return code;
+        return PREFERENCES.get(LANGUAGE_KEY, I.Lang.get());
     }
 
     /** The locale matching the active language, for dates, numbers and collation. */
@@ -64,16 +78,5 @@ public final class LangUtil {
     public static String displayName() {
         Locale locale = locale();
         return locale.getDisplayName(locale);
-    }
-
-    /**
-     * Switches the interface language, remembers the choice and notifies the listeners.
-     */
-    public static void setLanguage(String code) {
-        if (code == null || code.equals(language())) {
-            return;
-        }
-        PREFERENCES.put(LANGUAGE_KEY, code);
-        I.Lang.set(code);
     }
 }

@@ -44,7 +44,7 @@ import laevatain.ARXLabel;
 import laevatain.ARXSettingsPane;
 import laevatain.ARXTextBinding;
 import laevatain.ARXToggle;
-import laevatain.util.LangUtil;
+import laevatain.util.Language;
 
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored
@@ -214,7 +214,7 @@ public final class SettingsPanel extends JPanel {
         }
         moreButton.setText(I.translate(expanded ? "Fewer themes" : "More themes"));
         moreButton.setIcon(Icons.chevron(14, Theme.MUTED, expanded));
-        themeCount.setText(String.format(LangUtil.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
+        themeCount.setText(String.format(Language.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
         themeGrid.revalidate();
         themeGrid.repaint();
         // The grid's height changed, so every ancestor's preferred size changed with it.
@@ -320,16 +320,16 @@ public final class SettingsPanel extends JPanel {
     }
 
     /**
-     * The language section. Freja writes its interface text in English and {@link LangUtil}
+     * The language section. Freja writes its interface text in English and {@link Language}
      * translates it into the language chosen here; the first request per sentence goes online, the
      * result is cached, and bound captions - including this page's own - update as they arrive.
      */
     private void languageSection() {
         languages = new ARXComboBox();
-        for (LangUtil.Language language : LangUtil.LANGUAGES) {
+        for (Language.SupportedLaguage language : Language.SUPPORTS) {
             languages.addItem(language.name());
         }
-        languages.setSelectedItem(LangUtil.displayName());
+        languages.setSelectedItem(Language.displayName());
         languages.setFont(Theme.font(Font.PLAIN, 13));
         languages.setPreferredSize(new Dimension(200, 30));
         languages.addActionListener(event -> {
@@ -337,15 +337,15 @@ public final class SettingsPanel extends JPanel {
                 return;
             }
             String display = (String) languages.getSelectedItem();
-            for (LangUtil.Language language : LangUtil.LANGUAGES) {
+            for (Language.SupportedLaguage language : Language.SUPPORTS) {
                 if (language.name().equals(display)) {
-                    LangUtil.setLanguage(language.code());
+                    Language.install(language.code());
                     break;
                 }
             }
         });
 
-        localeValue = ARXSettingsPane.value(LangUtil.displayName());
+        localeValue = ARXSettingsPane.value(Language.displayName());
 
         ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"), ARXSettingsPane.Text
                 .of("Pick the language of the interface."), Icons.letter("あ", 17, Theme.MUTED));
