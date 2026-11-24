@@ -12,6 +12,11 @@ const root = {
 	],
 	"types": [
 		{
+			"name": "ARXCheckBox",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXSettingsPane",
 			"packageName": "laevatain",
 			"type": "Class"
@@ -42,6 +47,11 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXMenuItem",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXFileChooser",
 			"packageName": "laevatain",
 			"type": "Class"
@@ -58,6 +68,11 @@ const root = {
 		},
 		{
 			"name": "ChooserLocations",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXTextField",
 			"packageName": "laevatain",
 			"type": "Class"
 		},
@@ -90,6 +105,16 @@ const root = {
 			"name": "ARXLang.Language",
 			"packageName": "laevatain",
 			"type": "Record"
+		},
+		{
+			"name": "ARXMenu",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXLabel",
+			"packageName": "laevatain",
+			"type": "Class"
 		},
 		{
 			"name": "SmartTags",
