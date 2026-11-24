@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -36,6 +37,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -200,6 +202,9 @@ public final class ARXNavList extends JPanel {
 
     private final Map<String, Row> rows = new LinkedHashMap<>();
 
+    /** Rows taken out of the list by a search, still remembered in {@link #rows}. */
+    private final Set<Row> hidden = new java.util.HashSet<>();
+
     private Consumer<String> onSelect = key -> {
     };
 
@@ -210,6 +215,9 @@ public final class ARXNavList extends JPanel {
     private JLabel section;
 
     private JPanel sectionHolder;
+
+    /** The holder for the control inserted by {@link #setHeader}, the search field, say. */
+    private JPanel headerHolder;
 
     public ARXNavList() {
         setOpaque(false);
@@ -284,6 +292,89 @@ public final class ARXNavList extends JPanel {
     public void clear() {
         rows.clear();
         refreshOrder();
+    }
+
+    /**
+     * Hides a row without forgetting it, so a search can narrow the list and give it back intact
+     * afterwards. Hidden rows keep their selection state but answer to neither clicks nor keys.
+     *
+     * @param key the row to hide or show again
+     * @param visible false to take the row out of the list
+     */
+    public void setVisible(String key, boolean visible) {
+        Row row = rows.get(key);
+        if (row == null) {
+            return;
+        }
+        // Nothing to do when the row is already in the requested state: rebuilding the list is a
+        // structural change and should stay rare.
+        if (hidden.contains(row) == !visible) {
+            return;
+        }
+        if (visible) {
+            hidden.remove(row);
+        } else {
+            hidden.add(row);
+        }
+        rebuildRows();
+    }
+
+    /**
+     * Replaces the rows in place. The section label and the header - which holds the search field -
+     * are deliberately left alone: removing and re-adding them detaches the field from its window,
+     * which would drop the caret on every keystroke. Rows which are already in the right state are
+     * not touched either, for the same reason.
+     */
+    private void rebuildRows() {
+        List<Row> want = new ArrayList<>();
+        for (Row row : rows.values()) {
+            if (!hidden.contains(row)) {
+                want.add(row);
+            }
+        }
+        List<Row> have = new ArrayList<>();
+        for (int index = 0; index < getComponentCount(); index++) {
+            if (getComponent(index) instanceof Row row) {
+                have.add(row);
+            }
+        }
+        if (want.equals(have)) {
+            // Nothing changed: leaving the tree alone is what keeps the caret where it is.
+            return;
+        }
+        for (Row row : have) {
+            if (!want.contains(row)) {
+                remove(row);
+            }
+        }
+        for (int index = 0; index < want.size(); index++) {
+            Row row = want.get(index);
+            int current = indexOf(row);
+            if (current < 0) {
+                add(row, index);
+            } else if (current != index) {
+                remove(row);
+                add(row, index);
+            }
+        }
+        revalidate();
+        repaint();
+    }
+
+    /** The index of the row among all children, or -1 when it is not in the container. */
+    private int indexOf(Row row) {
+        for (int index = 0; index < getComponentCount(); index++) {
+            if (getComponent(index) == row) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    /** Whether the row is currently shown. */
+    public boolean isRowVisible(String key) {
+        Row row = rows.get(key);
+        return row != null && !hidden.contains(row);
     }
 
     /** The row registered under the key, or null. */
@@ -420,6 +511,33 @@ public final class ARXNavList extends JPanel {
         }
     }
 
+    /**
+     * Inserts a control between the section label and the rows - a search field, say - in a holder
+     * which BoxLayout stretches to the full width of the list. Pass null to take it out again.
+     */
+    public void setHeader(JComponent header) {
+        if (header == null) {
+            if (headerHolder != null) {
+                headerHolder.removeAll();
+                headerHolder.setVisible(false);
+                refreshOrder();
+            }
+            return;
+        }
+        if (headerHolder == null) {
+            headerHolder = new JPanel(new BorderLayout());
+            headerHolder.setOpaque(false);
+            headerHolder.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        headerHolder.removeAll();
+        headerHolder.add(header, BorderLayout.CENTER);
+        Dimension box = headerHolder.getPreferredSize();
+        headerHolder.setMinimumSize(box);
+        headerHolder.setMaximumSize(new Dimension(Integer.MAX_VALUE, box.height));
+        headerHolder.setVisible(true);
+        refreshOrder();
+    }
+
     /** Rebuilds the row order, keeping the section label on top. */
     private void refreshOrder() {
         removeAll();
@@ -427,8 +545,16 @@ public final class ARXNavList extends JPanel {
             add(sectionHolder);
             add(Box.createVerticalStrut(6));
         }
+        if (headerHolder != null && headerHolder.isVisible()) {
+            add(headerHolder);
+            add(Box.createVerticalStrut(10));
+        }
         for (Row row : rows.values()) {
-            add(row);
+            // Hidden rows are left out entirely rather than made invisible: BoxLayout would still
+            // reserve their space and the list would show gaps.
+            if (!hidden.contains(row)) {
+                add(row);
+            }
         }
         revalidate();
         repaint();

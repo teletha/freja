@@ -50,8 +50,21 @@ public final class ARXSearchField extends JTextField {
         }
         putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
 
-        debounce = new Timer(Math.max(0, debounceMillis), event -> onTextChanged.run());
+        // Built in two steps: a listener passed inside the field's own initializer would be
+        // reading debounce before it exists.
+        debounce = new Timer(Math.max(0, debounceMillis), null);
         debounce.setRepeats(false);
+        debounce.addActionListener(event -> {
+            // While an input method owns the text - Japanese keystrokes before they are committed -
+            // touching the page rebuilds the layout around this field and the IME drops the
+            // composition, which is what made the edit vanish after a single character. Poll again
+            // instead of firing in the middle of it.
+            if (isComposing()) {
+                debounce.restart();
+                return;
+            }
+            onTextChanged.run();
+        });
         getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent event) {
@@ -86,8 +99,41 @@ public final class ARXSearchField extends JTextField {
         } : callback;
     }
 
+    /** Replaces the hint, so the placeholder can follow the interface language. */
+    public void setPlaceholder(String placeholder) {
+        putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
+        repaint();
+    }
+
     /** Returns the trimmed query text. */
     public String query() {
         return getText() == null ? "" : getText().trim();
+    }
+
+    /** Focuses the field and selects any text in it, the way a search shortcut expects. */
+    public void reveal() {
+        if (isShowing()) {
+            requestFocusInWindow();
+        }
+        selectAll();
+    }
+
+    /**
+     * Whether an input method is composing text in this field right now: Swing marks the in-flight
+     * run with {@code ComposedTextAttribute}, which is the same signal the underline is drawn
+     * from. Read from the document rather than tracked in a flag, so it cannot go stale when the
+     * user deletes text, clicks away or cancels a conversion.
+     */
+    private boolean isComposing() {
+        if (!(getDocument() instanceof javax.swing.text.StyledDocument document)) {
+            return false;
+        }
+        for (int offset = 0, length = document.getLength(); offset < length; offset++) {
+            if (document.getCharacterElement(offset).getAttributes()
+                    .getAttribute(javax.swing.text.StyleConstants.ComposedTextAttribute) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

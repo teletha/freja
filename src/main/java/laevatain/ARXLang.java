@@ -93,6 +93,9 @@ public final class ARXLang {
             Map.entry("Edit tags…", "タグを編集…"),
             Map.entry("Rescan", "再スキャン"),
             Map.entry("Open in Explorer", "エクスプローラーで開く"),
+            // The search box on the settings page.
+            Map.entry("Search settings", "設定を検索"),
+            Map.entry("No settings match your search", "検索条件に一致する設定はありません"),
             Map.entry("Remove from library", "ライブラリから削除"),
             Map.entry("Tags", "タグ"),
             Map.entry("Manage tags", "タグを管理"),
@@ -274,6 +277,23 @@ public final class ARXLang {
             }
         });
         return out;
+    }
+
+    /**
+     * A sentence paired with its English origin. Search matches on the origin, because the
+     * displayed wording moves with the language while the identity of a setting must not.
+     */
+    public record Sentence(String source, Variable<String> text) {
+        /** The wording currently shown, falling back to the origin while it is being fetched. */
+        public String value() {
+            String resolved = text.get();
+            return resolved == null ? source : resolved;
+        }
+    }
+
+    /** A searchable sentence: the origin plus its live translation. */
+    public static Sentence say(String sentence) {
+        return new Sentence(sentence, text(sentence));
     }
 
     /**

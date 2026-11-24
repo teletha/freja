@@ -17,8 +17,15 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -29,26 +36,259 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 
-import kiss.Variable;
-
 import com.formdev.flatlaf.ui.FlatLineBorder;
+
+import kiss.Variable;
 
 /**
  * A Windows 11-style settings surface: an {@link ARXNavList} rail on the left and one continuous,
  * scrollable document on the right. Every section registers a rail entry; choosing an entry glides
- * the viewport to that section, and scrolling keeps the rail selection in sync.
+ * the viewport to that section, scrolling keeps the rail in sync, and the search field above the
+ * entries narrows the whole page to the rows which answer to the query.
  * <p>
- * The building blocks the pages are made of - rounded {@link #card cards} of
- * {@link #row label-and-control rows} separated by {@link #divider hairlines} - are exposed as
- * statics so any host can compose its own pages. Colours and fonts are read from the
- * {@code ARX.*} UI defaults, keeping the component independent of a concrete theme class.
+ * A page is built from {@link Row rows} inside rounded {@link Card cards}, and rows carry the words
+ * they answer to: their caption, their description, the English origin of both and whatever
+ * {@link Row#keywords extra terms} the host registers. That way "フォント", "font" and "typeface"
+ * all find the same setting, whatever language the page is currently shown in.
  */
 public final class ARXSettingsPane extends JPanel {
+
+    /** One searchable settings row. */
+    public static final class Row extends JPanel {
+
+        private final JLabel caption = new JLabel();
+
+        private final JLabel description = new JLabel();
+
+        /** The phrases this row answers to: captions, their origins and the registered keywords. */
+        private final Set<String> terms = new LinkedHashSet<>();
+
+        private Row(Variable<String> title, Variable<String> hint, Component control) {
+            setOpaque(false);
+            setBorder(BorderFactory.createEmptyBorder(13, 16, 13, 16));
+            setLayout(new BorderLayout(16, 0));
+            setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            caption.setFont(labelFont());
+            caption.setForeground(textColor());
+            caption.setHorizontalAlignment(SwingConstants.LEFT);
+            caption.setAlignmentX(Component.LEFT_ALIGNMENT);
+            description.setFont(hintFont());
+            description.setForeground(mutedColor());
+            description.setHorizontalAlignment(SwingConstants.LEFT);
+            description.setAlignmentX(Component.LEFT_ALIGNMENT);
+            text.add(caption);
+            text.add(description);
+
+            if (title != null) {
+                title.observing().to(value -> {
+                    caption.setText(value);
+                    remember(value);
+                });
+            }
+            if (hint != null) {
+                hint.observing().to(value -> {
+                    description.setText(value == null ? "" : value);
+                    // A row without a description stays on one line.
+                    description.setVisible(value != null && !value.isEmpty());
+                    remember(value);
+                });
+            } else {
+                description.setVisible(false);
+            }
+            add(text, BorderLayout.CENTER);
+            // Anchoring the control EAST keeps it flush with the right edge while the extra cell
+            // height centres it against the two-line label instead of letting it sit on top.
+            JPanel east = new JPanel(new GridBagLayout());
+            east.setOpaque(false);
+            GridBagConstraints anchor = new GridBagConstraints();
+            anchor.gridx = 0;
+            anchor.gridy = 0;
+            anchor.weightx = 1.0;
+            anchor.weighty = 1.0;
+            anchor.anchor = GridBagConstraints.EAST;
+            east.add(control, anchor);
+            add(east, BorderLayout.EAST);
+        }
+
+        /**
+         * Registers terms this row should answer to which appear in no caption: synonyms, old
+         * names, or the words a user is most likely to type.
+         */
+        public Row keywords(String... words) {
+            for (String word : words) {
+                remember(word);
+            }
+            return this;
+        }
+
+        /** The caption currently shown. */
+        public String caption() {
+            return caption.getText();
+        }
+
+        /** Whether this row answers to the query; an empty query matches everything. */
+        public boolean matches(String needle) {
+            if (needle.isEmpty()) {
+                return true;
+            }
+            String query = needle.toLowerCase(Locale.ROOT);
+            for (String term : terms) {
+                if (term != null && term.toLowerCase(Locale.ROOT).contains(query)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void remember(String value) {
+            if (value != null && !value.isBlank()) {
+                terms.add(value);
+            }
+        }
+    }
+
+    /** A rounded card which re-lays itself around the rows a query leaves standing. */
+    public static final class Card extends JPanel {
+
+        private final List<Row> rows = new ArrayList<>();
+
+        /**
+         * The hairlines between the rows, created once and reused: the rebuild below compares the
+         * card's children by identity, and a freshly made divider would never match.
+         */
+        private final List<JPanel> hairlines = new ArrayList<>();
+
+        private boolean shown = true;
+
+        private Card(List<Row> entries) {
+            rows.addAll(entries);
+            for (int index = 1; index < entries.size(); index++) {
+                hairlines.add(divider());
+            }
+            setOpaque(true);
+            setBackground(surfaceColor());
+            setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), hairlineColor(), 1, 8));
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setAlignmentX(Component.LEFT_ALIGNMENT);
+            layout(true);
+        }
+
+        /** Rebuilds the card from the rows which are still in the query, hairlines between them. */
+        private void layout(boolean all) {
+            List<Component> wanted = new ArrayList<>();
+            int used = 0;
+            for (Row row : rows) {
+                if (!all && !row.isVisible()) {
+                    continue;
+                }
+                if (!wanted.isEmpty() && used < hairlines.size()) {
+                    wanted.add(hairlines.get(used++));
+                }
+                wanted.add(row);
+            }
+            // Rebuilding a card means removing and re-adding components, which drags the focus
+            // along with it. Only do it when the content actually changed.
+            if (same(wanted)) {
+                shown = !wanted.isEmpty();
+                setVisible(shown);
+                return;
+            }
+            removeAll();
+            for (Component component : wanted) {
+                add(component);
+            }
+            shown = !wanted.isEmpty();
+            setVisible(shown);
+            revalidate();
+            repaint();
+        }
+
+        /** Whether the card already holds exactly these components, dividers included. */
+        private boolean same(List<Component> wanted) {
+            Component[] current = getComponents();
+            if (current.length != wanted.size()) {
+                return false;
+            }
+            for (int index = 0; index < current.length; index++) {
+                if (current[index] != wanted.get(index)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /** Applies a query to the rows and reports whether the card still shows anything. */
+        public boolean filter(String needle) {
+            for (Row row : rows) {
+                row.setVisible(needle.isEmpty() || row.matches(needle));
+            }
+            layout(needle.isEmpty());
+            return shown;
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+        }
+    }
+
+    /** A block of a section which is not a card: a tile grid, a chart, anything with keywords. */
+    public static final class Block extends JPanel {
+
+        private final Set<String> terms = new LinkedHashSet<>();
+
+        private Block(Component component, List<String> keywords, String origin) {
+            setOpaque(false);
+            setLayout(new BorderLayout());
+            setAlignmentX(Component.LEFT_ALIGNMENT);
+            add(component, BorderLayout.CENTER);
+            remember(origin);
+            keywords.forEach(this::remember);
+        }
+
+        /** Registers extra words this block should answer to. */
+        public Block keywords(String... words) {
+            for (String word : words) {
+                remember(word);
+            }
+            return this;
+        }
+
+        private void remember(String value) {
+            if (value != null && !value.isBlank()) {
+                terms.add(value);
+            }
+        }
+
+        /** Whether the query touches this block. */
+        public boolean matches(String needle) {
+            if (needle.isEmpty()) {
+                return true;
+            }
+            String query = needle.toLowerCase(Locale.ROOT);
+            for (String term : terms) {
+                if (term.toLowerCase(Locale.ROOT).contains(query)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+        }
+    }
 
     /** One anchored page of the document. */
     public static final class Section extends JPanel {
@@ -59,18 +299,16 @@ public final class ARXSettingsPane extends JPanel {
 
         private final JLabel hint = new JLabel();
 
+        /** The searchable parts of the page, in document order: cards and blocks. */
+        private final List<JComponent> parts = new ArrayList<>();
+
+        private final Set<String> terms = new LinkedHashSet<>();
+
+        private String pendingGroup;
+
         private int slot;
 
-        private Section(String id, String title, String subtitle) {
-            this(id, Variable.of(title), Variable.of(subtitle));
-        }
-
-        /**
-         * A section whose heading and description follow variables: hand in
-         * {@code Lang.text("...")} and the heading, the description and the rail entry change with
-         * the interface language.
-         */
-        private Section(String id, Variable<String> title, Variable<String> subtitle) {
+        private Section(String id, ARXLang.Sentence title, ARXLang.Sentence subtitle) {
             this.id = id;
             setName(id);
             setOpaque(false);
@@ -80,39 +318,55 @@ public final class ARXSettingsPane extends JPanel {
             heading.setForeground(textColor());
             hint.setFont(subtitleFont());
             hint.setForeground(mutedColor());
-            title.observing().to(heading::setText);
-            subtitle.observing().to(hint::setText);
-            add(header(heading, hint), anchor(0, GridBagConstraints.HORIZONTAL));
+            title.text().observing().to(value -> {
+                heading.setText(value);
+                remember(value);
+            });
+            remember(title.source());
+            if (subtitle == null) {
+                hint.setVisible(false);
+            } else {
+                subtitle.text().observing().to(value -> {
+                    hint.setText(value);
+                    remember(value);
+                });
+                remember(subtitle.source());
+            }
+            add(header(heading, hint), cell(0, false));
+        }
+
+        /** Appends a card built from the given rows. */
+        public Card addCard(Row... entries) {
+            return addCard(List.of(entries));
+        }
+
+        /** Appends a card built from the given rows. */
+        public Card addCard(List<Row> entries) {
+            Card card = new Card(entries);
+            parts.add(card);
+            attach(card);
+            return card;
         }
 
         /** Appends a component which brings its own chrome, e.g. a pair of preview tiles. */
-        public void addContent(Component component) {
-            slot++;
-            add(component, anchor(slot, GridBagConstraints.HORIZONTAL));
+        public Block addContent(Component component, String... keywords) {
+            Block block = new Block(component, List.of(keywords), pendingGroup);
+            pendingGroup = null;
+            parts.add(block);
+            attach(block);
+            return block;
         }
 
-        /** Appends a rounded card built from the given rows. */
-        public void addCard(Component rows) {
-            slot++;
-            add(card(rows), anchor(slot, GridBagConstraints.HORIZONTAL));
+        /** Appends a heading above the next block, e.g. "Other options". */
+        public void addGroup(ARXLang.Sentence group) {
+            remember(group.source());
+            pendingGroup = group.source();
+            group.text().observing().to(this::remember);
         }
 
-        /** Appends a heading which groups the cards below it. */
-        public void addGroup(Variable<String> title) {
-            slot++;
-            JPanel holder = new JPanel(new BorderLayout());
-            holder.setOpaque(false);
-            JLabel label = new JLabel();
-            label.setFont(groupFont());
-            label.setForeground(textColor());
-            title.observing().to(label::setText);
-            holder.add(label, BorderLayout.CENTER);
-            add(holder, anchor(slot, GridBagConstraints.HORIZONTAL));
-        }
-
-        /** Appends a heading which groups the cards below it, e.g. "Other options". */
-        public void addGroup(String title) {
-            addGroup(Variable.of(title));
+        /** Appends a heading above the next block. */
+        public void addGroup(String group) {
+            addGroup(ARXLang.say(group));
         }
 
         /** The identifier this section registered under. */
@@ -121,26 +375,80 @@ public final class ARXSettingsPane extends JPanel {
         }
 
         /**
-         * Keep the section at its preferred height no matter how tall the column gets: a pinned
-         * maximum would go stale as soon as cards are added, and an unlimited one lets BoxLayout
-         * stretch the section, which centres its content and opens gaps between sections.
+         * Applies a query: cards drop the rows which do not answer, blocks hide themselves unless
+         * the query names the page or a card next to them still shows something. Returns whether
+         * the page shows anything.
          */
-        @Override
-        public Dimension getMaximumSize() {
-            return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+        public boolean filter(String needle) {
+            boolean named = needle.isEmpty() || matches(needle);
+            boolean anyCard = false;
+            for (JComponent part : parts) {
+                if (part instanceof Card card) {
+                    // Every card has to run through the filter: writing this as
+                    // `anyCard = anyCard || card.filter(...)` short-circuits once one card matched
+                    // and leaves the later cards stuck in their previous hidden state.
+                    boolean shown = card.filter(named ? "" : needle);
+                    anyCard = anyCard || shown;
+                }
+            }
+            boolean any = anyCard;
+            for (JComponent part : parts) {
+                if (part instanceof Block block) {
+                    // A block belongs to the page: it stays while a card next to it answers, so a
+                    // search for "theme" keeps the tile grid with the theme rows above it.
+                    boolean visible = named || anyCard || block.matches(needle);
+                    block.setVisible(visible);
+                    any = any || visible;
+                }
+            }
+            setVisible(any);
+            revalidate();
+            return any;
         }
 
-        private GridBagConstraints anchor(int row, int fill) {
+        private boolean matches(String needle) {
+            String query = needle.toLowerCase(Locale.ROOT);
+            for (String term : terms) {
+                if (term.toLowerCase(Locale.ROOT).contains(query)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void remember(String value) {
+            if (value != null && !value.isBlank()) {
+                terms.add(value);
+            }
+        }
+
+        private void attach(JComponent part) {
+            if (pendingGroup != null && part instanceof Block) {
+                // A group heading belongs to the block below it, so both share the block's terms.
+                remember(pendingGroup);
+            }
+            slot++;
+            add(part, cell(slot, true));
+            revalidate();
+            repaint();
+        }
+
+        private GridBagConstraints cell(int row, boolean gap) {
             GridBagConstraints cell = new GridBagConstraints();
             cell.gridx = 0;
             cell.gridy = row;
             cell.weightx = 1.0;
-            cell.fill = fill;
+            cell.fill = GridBagConstraints.HORIZONTAL;
             cell.anchor = GridBagConstraints.WEST;
-            if (row > 0) {
+            if (gap) {
                 cell.insets = new Insets(18, 0, 0, 0);
             }
             return cell;
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
         }
 
         /** Packs the two heading labels into the grid block the section puts on top. */
@@ -170,11 +478,18 @@ public final class ARXSettingsPane extends JPanel {
 
     private final Map<String, Section> sections = new LinkedHashMap<>();
 
-    private final JPanel document = new JPanel();
+    private final JPanel document = new JPanel(new GridBagLayout());
 
     private final JPanel column;
 
+    private final JLabel none = new JLabel();
+
+    /** The next row index in the single-column document grid. */
+    private int documentRow;
+
     private final JScrollPane scroll;
+
+    private ARXSearchField search;
 
     private Timer glide;
 
@@ -183,7 +498,7 @@ public final class ARXSettingsPane extends JPanel {
     private boolean animating;
 
     public ARXSettingsPane() {
-        this("設定", DEFAULT_RAIL_WIDTH);
+        this("Settings", DEFAULT_RAIL_WIDTH);
     }
 
     public ARXSettingsPane(String railTitle) {
@@ -206,7 +521,6 @@ public final class ARXSettingsPane extends JPanel {
 
         rail.setSection(railTitle.get());
         railTitle.observing().to(rail::setSection);
-        rail.setOnSelect(this::show);
         JPanel railPane = new JPanel(new BorderLayout());
         railPane.setOpaque(true);
         railPane.setBackground(navColor());
@@ -220,10 +534,19 @@ public final class ARXSettingsPane extends JPanel {
         add(railPane, BorderLayout.WEST);
 
         document.setOpaque(false);
-        document.setLayout(new BoxLayout(document, BoxLayout.Y_AXIS));
         document.setAlignmentX(Component.LEFT_ALIGNMENT);
         document.setMinimumSize(new Dimension(MINIMUM_COLUMN, 0));
         document.setMaximumSize(new Dimension(MAXIMUM_COLUMN, Integer.MAX_VALUE));
+        none.setFont(labelFont());
+        none.setForeground(mutedColor());
+        none.setHorizontalAlignment(SwingConstants.LEFT);
+        none.setBorder(BorderFactory.createEmptyBorder(6, 2, 6, 2));
+        none.setVisible(false);
+        // The hint lives in the document itself: GridBagLayout ignores invisible components, so it
+        // only takes space when a query truly leaves nothing on screen.
+        attach(none, 0);
+        // The hint already holds row 0, so the pages start below it.
+        documentRow = 1;
 
         column = new JPanel();
         column.setOpaque(false);
@@ -248,27 +571,86 @@ public final class ARXSettingsPane extends JPanel {
     }
 
     /**
-     * Registers a page: a rail entry, an anchored section heading and the scroll tracking between
-     * the two. Fill the returned section with {@link Section#addCard} and {@link
-     * Section#addGroup}.
+     * Installs the search field above the rail entries. Typing narrows every page to the rows
+     * which answer to the query, hides the pages and rail entries left empty, and glides to the
+     * first hit; clearing the field restores the whole document. Both captions follow their
+     * variables, so the field reads in the current language, and Ctrl+F reaches it from anywhere
+     * inside the page.
      */
-    public Section addSection(String id, String title, String subtitle, Icon icon) {
-        return addSection(id, Variable.of(title), Variable.of(subtitle), icon);
+    public final void search(ARXLang.Sentence placeholder, ARXLang.Sentence noneMessage) {
+        search = new ARXSearchField(placeholder.value(), null);
+        search.setFont(labelFont());
+        search.onTextChanged(() -> filter(search.query()));
+        placeholder.text().observing().to(search::setPlaceholder);
+        noneMessage.text().observing().to(none::setText);
+        rail.setHeader(search);
+        search.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control F"),
+                "focusSettingsSearch");
+        search.getActionMap().put("focusSettingsSearch", new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                search.reveal();
+            }
+        });
+    }
+
+    /** Applies a query to the document; an empty query shows everything again. */
+    public void filter(String needle) {
+        String query = needle == null ? "" : needle.trim();
+        // Filtering rebuilds cards and rail rows, and removing a component from the tree hands its
+        // focus elsewhere. Remember who had it, and give it back when the query is done.
+        Component owner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        String first = null;
+        for (Map.Entry<String, Section> entry : sections.entrySet()) {
+            boolean visible = entry.getValue().filter(query);
+            rail.setVisible(entry.getKey(), visible);
+            if (visible && first == null) {
+                first = entry.getKey();
+            }
+        }
+        none.setVisible(first == null && !query.isEmpty());
+        if (first != null) {
+            rail.setSelected(first);
+            show(first);
+        } else {
+            // Nothing to anchor on: take the hint into view instead of leaving the old position.
+            scroll.getVerticalScrollBar().setValue(0);
+        }
+        document.revalidate();
+        column.revalidate();
+        scroll.revalidate();
+        scroll.repaint();
+        restoreFocus(owner);
     }
 
     /**
-     * Registers a page whose heading follows a variable. The rail entry keeps the same text, so a
-     * translated heading and its navigation label never drift apart.
+     * Puts the focus back where it was before the rebuild, as long as that component is still on
+     * screen. Without this, typing one character into the search field ends the edit: the card
+     * layout takes the field's rows away and Swing moves the focus on.
      */
-    public Section addSection(String id, Variable<String> title, Variable<String> subtitle, Icon icon) {
-        if (!sections.isEmpty()) {
-            document.add(Box.createVerticalStrut(36));
+    private void restoreFocus(Component owner) {
+        if (owner == null || owner == this || !owner.isShowing()) {
+            return;
         }
+        if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner() != owner) {
+            owner.requestFocusInWindow();
+        }
+    }
+
+    /** The query currently in the search field. */
+    public String query() {
+        return search == null ? "" : search.query();
+    }
+
+    /** Registers a page: a rail entry, an anchored section heading and the scroll tracking. */
+    public Section addSection(String id, ARXLang.Sentence title, ARXLang.Sentence subtitle, Icon icon) {
         Section section = new Section(id, title, subtitle);
         sections.put(id, section);
-        document.add(section);
-        ARXNavList.Row entry = rail.add(id, title.get(), icon);
-        title.observing().to(text -> {
+        // The gap between pages comes from the cell insets: a strut added without a GridBag
+        // constraint would simply never be laid out.
+        attach(section, documentRow++);
+        ARXNavList.Row entry = rail.add(id, title.value(), icon);
+        title.text().observing().to(text -> {
             if (entry != null) {
                 entry.setTitle(text);
             }
@@ -280,7 +662,7 @@ public final class ARXSettingsPane extends JPanel {
     public void show(String id) {
         rail.setSelected(id);
         Section section = sections.get(id);
-        if (section == null) {
+        if (section == null || !section.isVisible()) {
             return;
         }
         JScrollBar bar = scroll.getVerticalScrollBar();
@@ -299,125 +681,21 @@ public final class ARXSettingsPane extends JPanel {
         return rail.getSelected();
     }
 
-    /** Moves the bar a fraction closer to the target, always landing on it without overshoot. */
-    private void glideScrollBar() {
-        JScrollBar bar = scroll.getVerticalScrollBar();
-        int current = bar.getValue();
-        int remaining = target - current;
-        if (Math.abs(remaining) <= 2) {
-            bar.setValue(target);
-            animating = false;
-            glide.stop();
-            return;
-        }
-        int step = (int) Math.copySign(Math.max(8, Math.abs(remaining) * 0.3), remaining);
-        // Clamping the step to the target is essential: a fixed minimum step would otherwise
-        // oscillate around the destination forever and keep the animation flag stuck on.
-        int next = step > 0 ? Math.min(current + step, target) : Math.max(current + step, target);
-        bar.setValue(next);
-        if (bar.getValue() == current) {
-            // The layout has not settled yet and the bar cannot move; stop instead of spinning.
-            animating = false;
-            glide.stop();
-        }
+    /** One settings row: caption and description on the left, control vertically centred right. */
+    public static Row row(ARXLang.Sentence caption, ARXLang.Sentence description, Component control) {
+        return new Row(caption == null ? null : caption.text(),
+                description == null ? null : description.text(), control);
     }
 
-    /** Highlights the rail entry which owns the section nearest the top of the viewport. */
-    private void trackVisible(int position) {
-        String current = null;
-        for (Map.Entry<String, Section> entry : sections.entrySet()) {
-            if (sectionTop(entry.getValue()) <= position) {
-                current = entry.getKey();
-            } else {
-                break;
-            }
-        }
-        if (current != null) {
-            rail.setSelected(current);
-        }
+    /** A row whose caption is translated live and whose description is a plain label. */
+    public static Row row(ARXLang.Sentence caption, String description, Component control) {
+        return new Row(caption.text(), description == null || description.isEmpty() ? null
+                : Variable.of(description), control);
     }
 
-    private int sectionTop(Section section) {
-        return SwingUtilities.convertPoint(section, 0, 0, column).y;
-    }
-
-    /** Wraps rows in a rounded, outlined card. */
-    public static JComponent card(Component rows) {
-        JPanel card = new JPanel(new BorderLayout());
-        card.setOpaque(true);
-        card.setBackground(surfaceColor());
-        card.setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), hairlineColor(), 1, 8));
-        card.setAlignmentX(Component.LEFT_ALIGNMENT);
-        card.add(rows, BorderLayout.CENTER);
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, rows.getPreferredSize().height + 2));
-        return card;
-    }
-
-    /** One settings row: label and description on the left, control vertically centred right. */
-    public static JPanel row(String title, String description, Component control) {
-        return row(Variable.of(title), Variable.of(description), control);
-    }
-
-    /** A row whose caption is a translated sentence and whose description is fixed. */
-    public static JPanel row(Variable<String> title, String description, Component control) {
-        return row(title, Variable.of(description), control);
-    }
-
-    /** A row whose description is a translated sentence and whose caption is fixed. */
-    public static JPanel row(String title, Variable<String> description, Component control) {
-        return row(Variable.of(title), description, control);
-    }
-
-    /**
-     * A row whose label and description follow variables, so a translated sentence keeps the row
-     * caption, its description and the rail entry in one language.
-     */
-    public static JPanel row(Variable<String> title, Variable<String> description, Component control) {
-        JPanel row = new JPanel(new BorderLayout(16, 0));
-        row.setOpaque(false);
-        row.setBorder(BorderFactory.createEmptyBorder(13, 16, 13, 16));
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JPanel text = new JPanel();
-        text.setOpaque(false);
-        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-        JLabel name = new JLabel();
-        name.setFont(labelFont());
-        name.setForeground(textColor());
-        name.setHorizontalAlignment(SwingConstants.LEFT);
-        name.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel hint = new JLabel();
-        hint.setFont(hintFont());
-        hint.setForeground(mutedColor());
-        hint.setHorizontalAlignment(SwingConstants.LEFT);
-        hint.setAlignmentX(Component.LEFT_ALIGNMENT);
-        title.observing().to(name::setText);
-        // A row without a description stays on one line: visibility follows the text.
-        description.observing().to(value -> {
-            hint.setText(value == null ? "" : value);
-            boolean empty = value == null || value.isEmpty();
-            hint.setVisible(!empty);
-            if (hint.isShowing()) {
-                row.revalidate();
-                row.repaint();
-            }
-        });
-        text.add(name);
-        text.add(hint);
-        row.add(text, BorderLayout.CENTER);
-        // Anchoring the control EAST keeps it flush with the right edge while the extra cell
-        // height centres it against the two-line label instead of letting it sit on top.
-        JPanel east = new JPanel(new GridBagLayout());
-        east.setOpaque(false);
-        GridBagConstraints anchor = new GridBagConstraints();
-        anchor.gridx = 0;
-        anchor.gridy = 0;
-        anchor.weightx = 1.0;
-        anchor.weighty = 1.0;
-        anchor.anchor = GridBagConstraints.EAST;
-        east.add(control, anchor);
-        row.add(east, BorderLayout.EAST);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
-        return row;
+    /** A row whose text never changes: captions and descriptions are searchable as written. */
+    public static Row row(String caption, String description, Component control) {
+        return new Row(Variable.of(caption), Variable.of(description), control);
     }
 
     /** Stacks rows with hairlines between them, the usual body of a card. */
@@ -456,30 +734,77 @@ public final class ARXSettingsPane extends JPanel {
         return label;
     }
 
-    /** A scroll pane which keeps its borderless, transparent chrome across UI updates. */
-    private static final class TransparentScrollPane extends JScrollPane {
+    /** A value label whose text follows a variable, e.g. a translated status. */
+    public static JLabel value(Variable<String> text) {
+        JLabel label = value("");
+        text.observing().to(label::setText);
+        return label;
+    }
 
-        TransparentScrollPane(Component view) {
-            super(view);
-            flatten();
+    /**
+     * Puts a component in the next row of the document column. Everything in the column needs a
+     * constraint - GridBagLayout silently leaves an unconstrained component unlaid-out - and the
+     * gap between pages is carried by the insets rather than a strut.
+     */
+    private void attach(JComponent component, int row) {
+        GridBagConstraints cell = new GridBagConstraints();
+        cell.gridx = 0;
+        cell.gridy = row;
+        cell.weightx = 1.0;
+        cell.fill = GridBagConstraints.HORIZONTAL;
+        cell.anchor = GridBagConstraints.NORTHWEST;
+        if (row > 0 && component != none) {
+            cell.insets = new Insets(36, 0, 0, 0);
         }
+        document.add(component, cell);
+        document.revalidate();
+        document.repaint();
+    }
 
-        @Override
-        public void updateUI() {
-            // Changing the theme reinstalls every UI, and the look and feel hands this scroll pane
-            // its default hairline border and an opaque viewport back. Restore the invisible chrome
-            // so the document keeps floating on the page background.
-            super.updateUI();
-            flatten();
+    /** Moves the bar a fraction closer to the target, always landing on it without overshoot. */
+    private void glideScrollBar() {
+        JScrollBar bar = scroll.getVerticalScrollBar();
+        int current = bar.getValue();
+        int remaining = target - current;
+        if (Math.abs(remaining) <= 2) {
+            bar.setValue(target);
+            animating = false;
+            glide.stop();
+            return;
         }
+        int step = (int) Math.copySign(Math.max(8, Math.abs(remaining) * 0.3), remaining);
+        // Clamping the step to the target is essential: a fixed minimum step would otherwise
+        // oscillate around the destination forever and keep the animation flag stuck on.
+        int next = step > 0 ? Math.min(current + step, target) : Math.max(current + step, target);
+        bar.setValue(next);
+        if (bar.getValue() == current) {
+            // The layout has not settled yet and the bar cannot move; stop instead of spinning.
+            animating = false;
+            glide.stop();
+        }
+    }
 
-        private void flatten() {
-            setBorder(null);
-            setOpaque(false);
-            setBackground(pageColor());
-            getViewport().setOpaque(false);
-            getViewport().setBackground(pageColor());
+    /** Highlights the rail entry which owns the section nearest the top of the viewport. */
+    private void trackVisible(int position) {
+        String current = null;
+        for (Map.Entry<String, Section> entry : sections.entrySet()) {
+            Section section = entry.getValue();
+            if (!section.isVisible()) {
+                continue;
+            }
+            if (sectionTop(section) <= position) {
+                current = entry.getKey();
+            } else {
+                break;
+            }
         }
+        if (current != null) {
+            rail.setSelected(current);
+        }
+    }
+
+    private int sectionTop(Section section) {
+        return SwingUtilities.convertPoint(section, 0, 0, column).y;
     }
 
     private static Color pageColor() {
@@ -515,10 +840,6 @@ public final class ARXSettingsPane extends JPanel {
         return font("ARX.font.title", Font.BOLD, 19);
     }
 
-    private static Font groupFont() {
-        return font("ARX.font.group", Font.BOLD, 13);
-    }
-
     private static Font subtitleFont() {
         return font("ARX.font.subtitle", Font.PLAIN, 12);
     }
@@ -543,5 +864,31 @@ public final class ARXSettingsPane extends JPanel {
         Font base = UIManager.getFont("defaultFont");
         String family = base == null ? Font.SANS_SERIF : base.getFamily();
         return new Font(family, style, size);
+    }
+
+    /** A scroll pane which keeps its borderless, transparent chrome across UI updates. */
+    private static final class TransparentScrollPane extends JScrollPane {
+
+        TransparentScrollPane(Component view) {
+            super(view);
+            flatten();
+        }
+
+        @Override
+        public void updateUI() {
+            // Changing the theme reinstalls every UI, and the look and feel hands this scroll pane
+            // its default hairline border and an opaque viewport back. Restore the invisible chrome
+            // so the document keeps floating on the page background.
+            super.updateUI();
+            flatten();
+        }
+
+        private void flatten() {
+            setBorder(null);
+            setOpaque(false);
+            setBackground(pageColor());
+            getViewport().setOpaque(false);
+            getViewport().setBackground(pageColor());
+        }
     }
 }
