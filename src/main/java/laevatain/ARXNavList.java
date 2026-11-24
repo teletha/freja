@@ -45,6 +45,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+import kiss.Variable;
+
 /**
  * A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
  * trailing annotation, hover feedback, arrow-key navigation and an optional context menu.
@@ -100,6 +102,10 @@ public final class ARXNavList extends JPanel {
 
         private final TruncatedLabel label;
 
+        private final ARXTextBinding titleBinding = new ARXTextBinding();
+
+        private final ARXTextBinding tipBinding = new ARXTextBinding();
+
         private final JLabel trailing = new JLabel();
 
         private boolean selected;
@@ -149,6 +155,14 @@ public final class ARXNavList extends JPanel {
             label.setText(text);
         }
 
+        /** Binds the row's title to a live value, e.g. a translation which arrives later. */
+        public void setTitle(Variable<String> text) {
+            if (text == null) {
+                setTitle((String) null);
+            }
+            titleBinding.bind(text, this::setTitle);
+        }
+
         /** Sets the right-aligned annotation, typically a count. Null or empty hides it. */
         public void setTrailing(String text) {
             trailing.setText(text == null ? "" : text);
@@ -167,6 +181,14 @@ public final class ARXNavList extends JPanel {
         public void setToolTipText(String text) {
             super.setToolTipText(text);
             label.setToolTipText(text);
+        }
+
+        /** Binds the tooltip to a live value, e.g. a translated hint. */
+        public void setToolTipText(Variable<String> text) {
+            if (text == null) {
+                setToolTipText((String) null);
+            }
+            tipBinding.bind(text, this::setToolTipText);
         }
 
         void setSelectedRow(boolean value) {
@@ -215,6 +237,8 @@ public final class ARXNavList extends JPanel {
     private JLabel section;
 
     private JPanel sectionHolder;
+
+    private final ARXTextBinding sectionBinding = new ARXTextBinding();
 
     /** The holder for the control inserted by {@link #setHeader}, the search field, say. */
     private JPanel headerHolder;
@@ -285,6 +309,13 @@ public final class ARXNavList extends JPanel {
         });
         rows.put(key, row);
         refreshOrder();
+        return row;
+    }
+
+    /** Appends a row whose title follows a live value, e.g. a translation. */
+    public Row add(String key, Variable<String> text, Icon icon) {
+        Row row = add(key, ARXTextBinding.get(text), icon);
+        row.setTitle(text);
         return row;
     }
 
@@ -458,6 +489,12 @@ public final class ARXNavList extends JPanel {
         revalidate();
     }
 
+    /** Binds the section heading to a live value, e.g. a translation. */
+    public void setSection(Variable<String> text) {
+        setSection(ARXTextBinding.get(text));
+        sectionBinding.bind(text, value -> setSection(value == null || value.isBlank() ? null : value));
+    }
+
     /**
      * Wraps the list in a borderless scroll pane whose view always matches the viewport width, so a
      * long row label cannot push the trailing annotation out of sight.
@@ -624,6 +661,15 @@ public final class ARXNavList extends JPanel {
         label.setFont(sectionFont());
         label.setForeground(mutedColor());
         label.setHorizontalAlignment(SwingConstants.LEFT);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return label;
+    }
+
+    /** A heading whose caption follows a live value, e.g. a translation. */
+    public static ARXLabel headingLabel(Variable<String> text) {
+        ARXLabel label = new ARXLabel(text, SwingConstants.LEFT);
+        label.setFont(sectionFont());
+        label.setForeground(mutedColor());
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
         return label;
     }

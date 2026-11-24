@@ -39,6 +39,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SpinnerNumberModel;
 
 import laevatain.ARXButton;
+import laevatain.ARXLabel;
 import laevatain.ARXLang;
 import laevatain.ARXSettingsPane;
 import laevatain.ARXToggle;
@@ -195,7 +196,7 @@ public final class SettingsPanel extends JPanel {
         for (ThemeTile tile : visible) {
             themeGrid.add(tile);
         }
-        moreButton.setText(ARXLang.of(expanded ? "Fewer themes" : "More themes"));
+        moreButton.setText(ARXLang.text(expanded ? "Fewer themes" : "More themes"));
         moreButton.setIcon(Icons.chevron(14, Theme.MUTED, expanded));
         themeCount.setText(ARXLang.format("%1$d / %2$d", visible.size(), themeTiles.size()));
         themeGrid.revalidate();
@@ -360,11 +361,11 @@ public final class SettingsPanel extends JPanel {
     /** The system section: update controls, app information and restart. */
     private void systemSection() {
         ARXToggle startup = new ARXToggle(false);
-        JLabel state = new JLabel(ARXLang.of("Off"));
+        ARXLabel state = new ARXLabel(ARXLang.text("Off"));
         state.setFont(Theme.font(Font.PLAIN, 12));
         state.setForeground(Theme.MUTED);
         startup.addActionListener(event -> {
-            state.setText(ARXLang.of(startup.isSelected() ? "On" : "Off"));
+            state.setText(ARXLang.text(startup.isSelected() ? "On" : "Off"));
             state.repaint();
         });
         JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));

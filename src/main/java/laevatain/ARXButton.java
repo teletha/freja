@@ -76,7 +76,7 @@ public final class ARXButton extends JButton {
      *            the FlatLaf button background
      */
     public ARXButton(String text, Icon icon, Variant variant, Runnable action, boolean blendWithParent) {
-        this(Variable.of(text), icon, variant, action, blendWithParent);
+        this(text == null ? null : Variable.of(text), icon, variant, action, blendWithParent);
     }
 
     /**
@@ -84,7 +84,7 @@ public final class ARXButton extends JButton {
      *            the FlatLaf button background
      */
     public ARXButton(Variable<String> text, Icon icon, Variant variant, Runnable action, boolean blendWithParent) {
-        super(text.get(), icon);
+        super(text == null ? null : text.get(), icon);
         setText(text);
         this.variant = variant;
         this.blendWithParent = blendWithParent;
@@ -111,11 +111,31 @@ public final class ARXButton extends JButton {
 
     private Disposable textBinding;
 
+    private Disposable tipBinding;
+
     public void setText(Variable<String> text) {
         if (textBinding != null) {
             textBinding.dispose();
+            textBinding = null;
         }
-        textBinding = text.observing().to(this::setText);
+        if (text == null) {
+            super.setText(null);
+        } else {
+            textBinding = text.observing().to(this::setText);
+        }
+    }
+
+    /** Binds the tooltip to a live value; passing null clears it. */
+    public void setToolTipText(Variable<String> text) {
+        if (tipBinding != null) {
+            tipBinding.dispose();
+        }
+        if (text == null) {
+            super.setToolTipText(null);
+            tipBinding = null;
+        } else {
+            tipBinding = text.observing().to(this::setToolTipText);
+        }
     }
 
     @Override

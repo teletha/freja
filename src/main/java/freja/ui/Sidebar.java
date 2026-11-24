@@ -36,7 +36,10 @@ import freja.model.Folder;
 import freja.model.LibraryStats;
 import freja.model.PhotoFilter.SortOrder;
 import laevatain.ARXButton;
+import laevatain.ARXLabel;
 import laevatain.ARXLang;
+import laevatain.ARXMenu;
+import laevatain.ARXMenuItem;
 import laevatain.ARXNavList;
 
 /**
@@ -137,15 +140,12 @@ public final class Sidebar extends JPanel {
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setBorder(BorderFactory.createEmptyBorder(18, 16, 8, 16));
-        // The captions are written in English and translated by ARXLang; bindings keep the sidebar
-        // in the chosen language without a restart.
-        ARXLang.on("Library", library::setSection);
-        ARXLang.on("All photos",
-                library.add("ALL", ARXLang.of("All photos"), Icons.grid(17, Theme.MUTED))::setTitle);
-        ARXLang.on("Favorites",
-                library.add("FAVORITES", ARXLang.of("Favorites"), Icons.star(17, Theme.MUTED, true))::setTitle);
-        ARXLang.on("Recent photos",
-                library.add("RECENT", ARXLang.of("Recent photos"), Icons.clock(17, Theme.MUTED))::setTitle);
+        // The captions are written in English; each row binds its own live translation, so a
+        // language change reaches them without a restart and without ARXLang callbacks here.
+        library.setSection(ARXLang.text("Library"));
+        library.add("ALL", ARXLang.text("All photos"), Icons.grid(17, Theme.MUTED));
+        library.add("FAVORITES", ARXLang.text("Favorites"), Icons.star(17, Theme.MUTED, true));
+        library.add("RECENT", ARXLang.text("Recent photos"), Icons.clock(17, Theme.MUTED));
         library.setOnSelect(key -> select(Mode.valueOf(key), -1));
         // A BoxLayout column hands a child only what it asked for and centres the sliver, so the
         // list goes into a stretching holder: the rows then span the sidebar instead of parking on
@@ -162,8 +162,7 @@ public final class Sidebar extends JPanel {
         folders.setOnSelect(key -> select(Mode.FOLDER, Long.parseLong(key)));
         folderScroll = folders.scrolled();
 
-        JLabel empty = new JLabel();
-        ARXLang.bind(empty, "No folders are registered");
+        ARXLabel empty = new ARXLabel(ARXLang.text("No folders are registered"));
         empty.setForeground(Theme.FAINT);
         empty.setFont(Theme.font(Font.PLAIN, 11));
         empty.setBorder(BorderFactory.createEmptyBorder(10, 12, 0, 0));
@@ -188,8 +187,7 @@ public final class Sidebar extends JPanel {
         panel.setOpaque(false);
         JPanel heading = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         heading.setOpaque(false);
-        JLabel title = ARXNavList.headingLabel(ARXLang.of("Folders"));
-        ARXLang.bind(title, "Folders");
+        ARXLabel title = ARXNavList.headingLabel(ARXLang.text("Folders"));
         heading.add(title);
         folderCount.setFont(Theme.font(Font.PLAIN, 11));
         folderCount.setForeground(Theme.MUTED);
@@ -207,10 +205,10 @@ public final class Sidebar extends JPanel {
     /** A small flat header button whose background and text change on hover. */
     private ARXButton headerButton(String text, javax.swing.Icon icon, String tooltip, Runnable action) {
         // A null label keeps the button icon-only, so there is nothing to translate.
-        ARXButton button = new ARXButton(text == null ? null : ARXLang.of(text), icon,
+        ARXButton button = new ARXButton(text == null ? null : ARXLang.text(text), icon,
                 ARXButton.Variant.SECONDARY, action);
         button.setFont(Theme.font(Font.PLAIN, 12));
-        ARXLang.tooltip(button, tooltip);
+        button.setToolTipText(ARXLang.text(tooltip));
         return button;
     }
 
@@ -323,7 +321,7 @@ public final class Sidebar extends JPanel {
     }
 
     private JMenu sortMenu(Folder folder) {
-        JMenu menu = new JMenu(ARXLang.of("Sort order"));
+        JMenu menu = new ARXMenu(ARXLang.text("Sort order"));
         ButtonGroup group = new ButtonGroup();
         for (SortOrder sort : SortOrder.values()) {
             JRadioButtonMenuItem item = new JRadioButtonMenuItem(label(sort), sort == folder.sort());
@@ -349,7 +347,7 @@ public final class Sidebar extends JPanel {
 
     /** A menu item whose English caption is translated on the way in. */
     private javax.swing.JMenuItem item(String sentence, Runnable action) {
-        javax.swing.JMenuItem item = new javax.swing.JMenuItem(ARXLang.of(sentence));
+        javax.swing.JMenuItem item = new ARXMenuItem(ARXLang.text(sentence));
         item.addActionListener(event -> action.run());
         return item;
     }
