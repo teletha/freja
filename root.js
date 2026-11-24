@@ -18,7 +18,7 @@ const root = {
 			"type": "Class"
 		},
 		{
-			"name": "Language.SupportedLaguage",
+			"name": "Language.Supported",
 			"packageName": "laevatain.util",
 			"type": "Record"
 		},
