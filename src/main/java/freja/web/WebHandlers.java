@@ -879,6 +879,7 @@ public final class WebHandlers {
     private Comparator<Photo> comparator(SortOrder order) {
         Comparator<Photo> name = Comparator.comparing(Photo::fileName, String.CASE_INSENSITIVE_ORDER);
         return switch (order) {
+        case NAME -> name.thenComparing(Comparator.comparingLong(Photo::capturedAt).reversed());
         case DATE_OLDEST -> Comparator.comparingLong(Photo::capturedAt).thenComparing(name);
         case SIZE -> Comparator.comparingLong(Photo::byteSize).reversed().thenComparing(name);
         default -> Comparator.comparingLong(Photo::capturedAt).reversed().thenComparing(name);

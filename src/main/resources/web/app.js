@@ -241,6 +241,7 @@
         page: 'viewer',
         mode: 'ALL',
         folderId: null,
+        previousFolderId: null,
         sort: 'NAME',
         search: '',
         tagIds: [],
@@ -384,8 +385,10 @@
         S.thumb = parseInt(S.settings.thumbSize, 10) || 170;
         S.sort = S.settings.sort || 'NAME';
         S.inspector = S.settings.inspectorVisible !== 'false';
+        applyInspector();
         S.mode = 'ALL';
         S.folderId = null;
+        S.previousFolderId = null;
         var selectedPath = S.settings.selectedFolder;
         if (selectedPath) {
             for (var i = 0; i < S.folders.length; i++) {
@@ -661,11 +664,14 @@
     /* =================================================== select / browse ==== */
 
     function selectMode(mode, folderId) {
+        // Remember where the jump starts: smoothness is decided by folder order, not pixel distance.
+        S.previousFolderId = S.mode === 'FOLDER' ? S.folderId : null;
         if (S.mode === mode && S.folderId === folderId) {
             if (mode === 'FOLDER' && folderId) {
                 if (!scrollToSection('F' + folderId)) { browse(); }
                 else { ensureFolderPhotos(folderId); }
             } else {
+                stopScrollTween();
                 $('grid-wrap').scrollTop = 0;
             }
             return;
@@ -771,6 +777,51 @@
         S.loadedThrough = Math.max(S.loadedThrough || 0, offset + rows.length);
     }
 
+    /** Folder jumps up to this many positions apart animate; farther jumps teleport. */
+    var SMOOTH_FOLDER_DISTANCE = 5;
+
+    /** Positions between two folders in the displayed folder order (fileName-independent). */
+    function folderDistance(from, to) {
+        if (from === null || from === undefined || to === null || to === undefined) { return Infinity; }
+        var a = -1;
+        var b = -1;
+        for (var i = 0; i < S.folders.length; i++) {
+            if (S.folders[i].id === from) { a = i; }
+            if (S.folders[i].id === to) { b = i; }
+        }
+        if (a < 0 || b < 0) { return Infinity; }
+        return Math.abs(a - b);
+    }
+
+    var scrollTween = 0;
+
+    function stopScrollTween() {
+        if (scrollTween) { cancelAnimationFrame(scrollTween); scrollTween = 0; }
+    }
+
+    /** Short eased tween. Native smooth scrolling was both too slow and easy to interrupt, which
+     * left the previous section's cards visible above the target header. */
+    function animateScroll(wrap, target) {
+        stopScrollTween();
+        var start = wrap.scrollTop;
+        var delta = target - start;
+        if (!delta) { return; }
+        var duration = Math.min(500, Math.max(200, 200 + Math.abs(delta) / 4));
+        var began = performance.now();
+        function frame(now) {
+            var t = Math.min(1, (now - began) / duration);
+            var eased = 1 - Math.pow(1 - t, 3);
+            wrap.scrollTop = start + delta * eased;
+            if (t < 1) {
+                scrollTween = requestAnimationFrame(frame);
+            } else {
+                wrap.scrollTop = target;
+                scrollTween = 0;
+            }
+        }
+        scrollTween = requestAnimationFrame(frame);
+    }
+
     function scrollToSection(key) {
         var anchor = $('grid').querySelector('[data-section="' + CSS.escape(key) + '"]');
         if (!anchor) { return false; }
@@ -779,7 +830,15 @@
         // wrap.offsetTop belongs to a different offset parent; subtracting it stopped the jump short
         // and left the previous section's sticky header pinned at the top.
         var top = anchor.getBoundingClientRect().top - wrap.getBoundingClientRect().top + wrap.scrollTop;
-        wrap.scrollTop = Math.max(0, top);
+        var target = Math.max(0, top);
+        var toFolder = key.charAt(0) === 'F' ? Number(key.slice(1)) : null;
+        var near = folderDistance(S.previousFolderId, toFolder) <= SMOOTH_FOLDER_DISTANCE;
+        if (near && Math.abs(target - wrap.scrollTop) > 0) {
+            animateScroll(wrap, target);
+        } else {
+            stopScrollTween();
+            wrap.scrollTop = target;
+        }
         // A programmatic scroll does not always schedule a scroll event (for example when the
         // layout has just been rebuilt), so refresh the virtual window explicitly as well.
         scheduleVirtualUpdate(false);
@@ -839,6 +898,9 @@
     var virtualGeometryDirty = false;
     var virtualLastWidth = -1;
     var OVERSCAN_ROWS = 2;
+    /** Fullscreen changes the webview width before the viewer covers the grid and back again after
+     * the viewer is hidden. Recomputing columns in that window flashes a wrong column count. */
+    var gridGeometryLock = false;
 
     function gridGap() {
         var cells = gridWrap.querySelector('.cells');
@@ -869,9 +931,8 @@
             v.rowHeight = size + gap;
             v.rows = Math.ceil(v.count / v.cols);
             v.cells.style.height = Math.max(0, v.rows * v.rowHeight - gap) + 'px';
-            // Positions change with the geometry, so every pooled node has to be rebuilt.
-            v.nodes.forEach(function (node) { node.remove(); });
-            v.nodes = new Map();
+            // Cards keep their <img> elements; updateVirtualWindow repositions them. Rebuilding the
+            // pool here made every tag toggle reload and decode every thumbnail again.
         });
     }
 
@@ -902,12 +963,16 @@
         var missing = -1;
 
         virtualSections.forEach(function (v) {
-            if (!v.rows) { return; }
+            if (!v.rows) {
+                v.nodes.forEach(function (node) { node.remove(); });
+                v.nodes.clear();
+                return;
+            }
             var cellsTop = v.cells.getBoundingClientRect().top - wrapTop + gridWrap.scrollTop;
             var cellsBottom = cellsTop + v.rows * v.rowHeight;
             if (cellsBottom < top || cellsTop > bottom) {
                 v.nodes.forEach(function (node) { node.remove(); });
-                v.nodes = new Map();
+                v.nodes.clear();
                 return;
             }
             var fromRow = Math.max(0, Math.floor((top - cellsTop) / v.rowHeight));
@@ -915,11 +980,13 @@
             var from = v.start + fromRow * v.cols;
             var to = Math.min(v.start + v.count, v.start + (toRow + 1) * v.cols);
 
-            // Release the cards which scrolled out of the window.
-            v.nodes.forEach(function (node, index) {
+            // Release the cards which scrolled out of the window. The pool is keyed by photo id so
+            // a filter change can move an existing card to a new index without reloading its image.
+            v.nodes.forEach(function (node, key) {
+                var index = Number(node.dataset.index);
                 if (index < from || index >= to) {
                     node.remove();
-                    v.nodes.delete(index);
+                    v.nodes.delete(key);
                 }
             });
             for (var i = from; i < to; i++) {
@@ -929,21 +996,24 @@
                 var photo = S.photos[i];
                 var ready = !!photo;
                 if (!ready && missing < 0) { missing = i; }
-                var card = v.nodes.get(i);
-                // A placeholder becomes a real card as soon as its page arrives.
-                if (card && (card.dataset.placeholder === '1') === !ready) {
+                var key = ready ? photo.id : 'p' + i;
+                var card = v.nodes.get(key);
+                var usable = card && (card.dataset.placeholder === '1') === !ready;
+                if (usable) {
+                    card.dataset.index = i;
                     if (card.style.left !== left + 'px') { card.style.left = left + 'px'; }
                     if (card.style.top !== upper + 'px') { card.style.top = upper + 'px'; }
                     continue;
                 }
                 if (card) { card.remove(); }
                 card = ready ? cardEl(photo) : el('div', 'card placeholder');
+                card.dataset.index = i;
                 if (!ready) { card.dataset.placeholder = '1'; }
                 card.style.position = 'absolute';
                 card.style.left = left + 'px';
                 card.style.top = upper + 'px';
                 v.cells.appendChild(card);
-                v.nodes.set(i, card);
+                v.nodes.set(key, card);
             }
         });
         // A hole means the viewport reached metadata that was never fetched (for example after a
@@ -962,6 +1032,11 @@
     if (typeof ResizeObserver !== 'undefined') {
         new ResizeObserver(function () {
             var width = Math.round(gridWrap.clientWidth);
+            if (gridGeometryLock) {
+                // Keep the pre-fullscreen columns until the webview returns to its original width.
+                if (Math.abs(width - virtualLastWidth) <= 2) { gridGeometryLock = false; }
+                return;
+            }
             if (width !== virtualLastWidth) {
                 virtualLastWidth = width;
                 scheduleVirtualUpdate(true);
@@ -970,42 +1045,81 @@
     }
 
     function renderGrid() {
-        clear($('grid'));
-        $('grid').style.setProperty('--thumb', S.thumb + 'px');
-        virtualSections = [];
+        var grid = $('grid');
+        var previous = new Map();
+        virtualSections.forEach(function (v) { previous.set(v.key, v); });
+        var used = new Set();
+        grid.style.setProperty('--thumb', S.thumb + 'px');
         if (S.sections.length === 0 && S.stats && S.stats.folders > 0) {
-            $('grid').appendChild(el('div', 'grid-empty', t('No photos match the current filter')));
+            clear(grid);
+            virtualSections = [];
+            grid.appendChild(el('div', 'grid-empty', t('No photos match the current filter')));
             return;
         }
+        var next = [];
         S.sections.forEach(function (section, sectionIndex) {
             var key = section.folderId >= 0 ? 'F' + section.folderId : 'S' + sectionIndex + '-' + (section.label || '');
-            var block = el('div', 'section');
-            block.dataset.section = key;
-            if (section.label) {
-                block.appendChild(sectionHead(section));
+            used.add(key);
+            var v = previous.get(key);
+            var block;
+            if (v) {
+                // Keep the cells (and their <img> children) so a tag toggle only moves cards.
+                block = v.cells.parentElement;
+                var oldHead = block.querySelector('.section-head');
+                if (oldHead) { oldHead.remove(); }
+                if (section.label) { block.insertBefore(sectionHead(section), v.cells); }
+                v.start = section.start || 0;
+                v.count = section.count || 0;
+            } else {
+                block = el('div', 'section');
+                block.dataset.section = key;
+                if (section.label) { block.appendChild(sectionHead(section)); }
+                var cells = el('div', 'cells');
+                // The flex wrap of the CSS layout is replaced by absolute rows inside a full-height
+                // spacer: the scroll range covers every photo, even the ones not fetched yet.
+                cells.style.display = 'block';
+                cells.style.position = 'relative';
+                block.appendChild(cells);
+                v = {
+                    key: key, cells: cells, start: section.start || 0, count: section.count || 0,
+                    cols: 1, rows: 0, rowHeight: 0, nodes: new Map()
+                };
             }
-            var cells = el('div', 'cells');
-            // The flex wrap of the CSS layout is replaced by absolute rows inside a full-height
-            // spacer: the scroll range covers every photo, even the ones not fetched yet.
-            cells.style.display = 'block';
-            cells.style.position = 'relative';
-            block.appendChild(cells);
-            $('grid').appendChild(block);
-            virtualSections.push({
-                key: key, cells: cells, start: section.start || 0, count: section.count || 0,
-                cols: 1, rows: 0, rowHeight: 0, nodes: new Map()
-            });
+            // appendChild also moves an existing block, restoring the requested section order.
+            grid.appendChild(block);
+            next.push(v);
         });
+        previous.forEach(function (v, key) {
+            if (!used.has(key) && v.cells.parentElement) { v.cells.parentElement.remove(); }
+        });
+        virtualSections = next;
         updateVirtualGeometry();
         updateVirtualWindow();
     }
 
     function sectionHead(section) {
-        var head = el('div', 'section-head' + (section.folderId >= 0 ? ' clickable' : ''));
-        head.appendChild(el('span', 'section-title', section.label));
-        head.appendChild(el('span', 'section-count', t('{0} photos', [section.count])));
-        head.appendChild(el('span', 'grow'));
-        if (section.folderId >= 0) {
+        var folder = section.folderId >= 0;
+        var head = el('div', 'section-head' + (folder ? ' clickable folder-head' : ' date-head'));
+
+        // First line: identity and size.
+        var main = el('div', 'section-head-main');
+        main.appendChild(el('span', 'section-icon', folder ? '📁' : '🗓'));
+        var title = el('span', 'section-title', section.label);
+        title.title = section.label || '';
+        main.appendChild(title);
+        main.appendChild(el('span', 'section-count', t('{0} photos', [section.count])));
+        main.appendChild(el('span', 'grow'));
+        main.appendChild(el('span', 'section-chevron', '›'));
+        head.appendChild(main);
+
+        // Second line: where the section comes from and its tags.
+        var sub = el('div', 'section-head-sub');
+        var found = folder ? findFolder(section.folderId) : null;
+        var detail = folder ? (found ? found.path : '') : t('Capture');
+        var path = el('span', 'section-path', detail);
+        path.title = detail;
+        sub.appendChild(path);
+        if (folder) {
             var chips = el('span', 'chips');
             if (section.tags.length === 0) {
                 var empty = el('span', 'chip empty', '#+');
@@ -1016,24 +1130,28 @@
                 chips.appendChild(empty);
             }
             section.tags.forEach(function (tag) {
-                var chip = el('span', 'chip', '#' + tag);
-                chip.style.color = tagColor(tag);
+                var chip = el('span', 'chip');
+                var dot = el('span', 'chip-dot');
+                dot.style.background = tagColor(tag);
+                chip.appendChild(dot);
+                chip.appendChild(document.createTextNode('#' + tag));
                 chip.addEventListener('click', function (event) {
                     event.stopPropagation();
                     openTagPicker(section.folderId, event.clientX, event.clientY);
                 });
                 chips.appendChild(chip);
             });
-            head.appendChild(chips);
+            sub.appendChild(chips);
             head.addEventListener('click', function () {
+                S.previousFolderId = S.mode === 'FOLDER' ? S.folderId : null;
                 S.mode = 'FOLDER';
                 S.folderId = section.folderId;
-                var folder = findFolder(section.folderId);
-                if (folder) { setSetting('selectedFolder', folder.path); }
+                if (found) { setSetting('selectedFolder', found.path); }
                 renderLibraryRows();
                 renderFolders();
             });
         }
+        head.appendChild(sub);
         return head;
     }
 
@@ -1043,7 +1161,7 @@
         var img = el('img');
         // Virtualisation already bounds the number of cards to the visible rows. Native lazy
         // loading delays images inserted during a scroll jump (e.g. selecting a folder), which
-        // leaves only the filename badge visible until the next scroll; eager avoids that.
+        // leaves only an empty card until the next scroll; eager avoids that.
         img.loading = 'eager';
         img.decoding = 'async';
         img.alt = photo.fileName;
@@ -1059,8 +1177,6 @@
         });
         card.appendChild(img);
         if (photo.favorite) { card.appendChild(el('span', 'badge-fav', '★')); }
-        if (photo.extension) { card.appendChild(el('span', 'badge-fmt', photo.extension.toUpperCase())); }
-        card.appendChild(el('span', 'badge-name', photo.fileName));
         if (S.selected.has(photo.id)) { card.classList.add('selected'); }
         card.addEventListener('click', function (event) {
             if (event.ctrlKey || event.metaKey) { toggleSelection(photo); }
@@ -1468,6 +1584,7 @@
         }
         V.photos = list;
         V.open = true;
+        gridGeometryLock = true;
         $('viewer').hidden = false;
         setFullscreen(true);
         showPhoto(index);
@@ -1479,6 +1596,11 @@
         stopSlideshow();
         $('viewer').hidden = true;
         viewerImage.hidden = true;
+        // Normally the ResizeObserver releases the lock when the webview regains its original
+        // width. This is a safety net for the case where no resize notification arrives.
+        setTimeout(function () {
+            if (!V.open) { gridGeometryLock = false; }
+        }, 1000);
     }
 
     /** Switches the native window between normal and fullscreen while the viewer is open. */
@@ -2384,11 +2506,15 @@
         syncSettingsPage();
     }
 
+    function applyInspector() {
+        $('inspector').hidden = !S.inspector;
+        $('split-inspector').hidden = !S.inspector;
+    }
+
     function toggleInspector() {
         S.inspector = !S.inspector;
         setSetting('inspectorVisible', String(S.inspector));
-        $('inspector').hidden = !S.inspector;
-        $('split-inspector').hidden = !S.inspector;
+        applyInspector();
     }
 
     $('manage-tags').addEventListener('click', function (event) { event.stopPropagation(); openTagManager(); });
@@ -2542,8 +2668,7 @@
     setStatus(t('Connecting to the library…'));
     updateTagButton();
     applyThumb(S.thumb);
-    $('inspector').hidden = !S.inspector;
-    $('split-inspector').hidden = !S.inspector;
+    applyInspector();
     $('brand-version').textContent = apocrypha.app.version || '';
     $('viewer-help').textContent = t('← → or scroll to move   ·   drag to pan   ·   +/- to zoom   ·   0 or F to fit   ·   Space for slideshow   ·   F11 for fullscreen   ·   Esc to close');
 

@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.swing.SwingUtilities;
 
 import kiss.I;
+import kiss.JSON;
 
 /**
  * The settings store of the Web edition, persisted as {@code settings.json} in the data directory.
@@ -48,9 +49,15 @@ public final class WebSettings {
         values.putAll(DEFAULTS);
         if (Files.isRegularFile(file)) {
             try (InputStream input = Files.newInputStream(file)) {
-                Map<String, String> read = I.json(new java.io.InputStreamReader(input, java.nio.charset.StandardCharsets.UTF_8), Map.class);
-                if (read != null) {
-                    values.putAll(read);
+                // JSON.asMap keeps the String value type. I.json(reader, Map.class) loses it and
+                // turns every value into a plain Object, which silently corrupts this store.
+                Map<String, String> read = I.json(new java.io.InputStreamReader(input, java.nio.charset.StandardCharsets.UTF_8))
+                        .asMap(String.class);
+                for (Map.Entry<String, String> entry : read.entrySet()) {
+                    String key = entry.getKey();
+                    if (key != null && key.indexOf('@') < 0) {
+                        values.put(key, entry.getValue());
+                    }
                 }
             } catch (IOException | RuntimeException e) {
                 I.error("freja", new IOException("Cannot read the settings " + file, e));
@@ -81,8 +88,8 @@ public final class WebSettings {
             return;
         }
         for (Map.Entry<String, String> entry : received.entrySet()) {
-            if (entry.getValue() != null) {
-                values.put(entry.getKey(), entry.getValue());
+            if (entry.getKey() != null && entry.getValue() instanceof String value) {
+                values.put(entry.getKey(), value);
             }
         }
         store();
@@ -93,7 +100,11 @@ public final class WebSettings {
      */
     public synchronized void store() {
         try (OutputStream output = Files.newOutputStream(file)) {
-            I.write(values, new java.io.OutputStreamWriter(output, java.nio.charset.StandardCharsets.UTF_8));
+            // JSON's MapModel writes values as Strings. I.write(values, ..) uses the raw map model,
+            // which serializes every String as {} and makes the next load unreadable.
+            JSON json = new JSON();
+            values.forEach(json::set);
+            output.write(json.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
         } catch (IOException e) {
             I.error("freja", new IOException("Cannot write the settings " + file, e));
         }
