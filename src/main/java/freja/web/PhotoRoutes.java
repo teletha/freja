@@ -90,11 +90,29 @@ public final class PhotoRoutes implements Route {
      */
     private Response thumbnail(Library library, long id) {
         Optional<Library.Thumbnail> thumbnail = library.thumbnail(id);
-        if (thumbnail.isEmpty()) {
+        if (thumbnail.isPresent()) {
+            return Response.ok("image/webp", thumbnail.get().data()).cache("public, max-age=86400");
+        }
+        // Photos imported before thumbnailing, or entries whose thumbnail was invalidated, still
+        // deserve a visible card. Decode the original once and let the browser keep the result.
+        Optional<Photo> photo = library.photo(id);
+        if (photo.isEmpty()) {
             return Response.notFound();
         }
-        Library.Thumbnail data = thumbnail.get();
-        return Response.ok("image/webp", data.data()).cache("public, max-age=86400");
+        Path file = photo.get().path();
+        if (file == null || !Files.isRegularFile(file)) {
+            return Response.notFound();
+        }
+        try {
+            BufferedImage decoded = Imagify.read(Files.readAllBytes(file)).toBufferedImage();
+            BufferedImage oriented = ImageTransforms.orient(decoded, photo.get().orientation());
+            BufferedImage scaled = ImageTransforms.scale(oriented, 320);
+            byte[] jpeg = ImageWriter.toBytes(scaled, ImageFormat.JPEG, 0.85);
+            return Response.ok("image/jpeg", jpeg).cache("public, max-age=3600");
+        } catch (IOException | RuntimeException | Error e) {
+            I.error("freja", new IOException("Cannot create a thumbnail for " + file, e));
+            return Response.notFound();
+        }
     }
 
     /**

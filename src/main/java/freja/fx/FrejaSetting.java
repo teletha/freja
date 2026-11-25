@@ -9,8 +9,6 @@
  */
 package freja.fx;
 
-import java.util.Locale;
-
 import freja.model.PhotoFilter;
 import viewtify.preference.Preferences;
 
@@ -30,7 +28,7 @@ public class FrejaSetting extends Preferences {
     public final IntPreference thumbSize = initialize(170);
 
     /** The order used by the whole-library views. */
-    public final Preference<String> sort = initialize(PhotoFilter.SortOrder.NAME.name());
+    public final Preference<PhotoFilter.SortOrder> sort = initialize(PhotoFilter.SortOrder.NAME);
 
     /** Whether the inspector is docked on the right. */
     public final Preference<Boolean> inspectorVisible = initialize(true);
@@ -38,12 +36,9 @@ public class FrejaSetting extends Preferences {
     /** The path of the folder selected before the last shutdown. */
     public final Preference<String> selectedFolder = initialize("");
 
-    /** The active order as an enum, or {@code NAME} when the stored name is unknown. */
+    /** The active order, falling back to {@code NAME} when the stored value is absent. */
     public PhotoFilter.SortOrder order() {
-        try {
-            return PhotoFilter.SortOrder.valueOf(sort.get().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return PhotoFilter.SortOrder.NAME;
-        }
+        PhotoFilter.SortOrder order = sort.get();
+        return order == null ? PhotoFilter.SortOrder.NAME : order;
     }
 }

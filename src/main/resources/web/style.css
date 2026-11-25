@@ -369,6 +369,12 @@ select:focus, input:focus, textarea:focus { border-color: var(--accent); }
 .card:hover { border-color: var(--accent-hover); }
 .card.selected { border-color: var(--accent); }
 
+/* Rows reserved for metadata pages which have not arrived yet. */
+.card.placeholder { background: var(--hover); border-color: transparent; opacity: .35; }
+
+/* A thumbnail which is absent from the catalog or cannot be decoded. */
+.card.image-error::before { content: '🖼'; font-size: 32px; opacity: .25; }
+
 .card img {
     max-width: calc(var(--thumb, 170px) - 10px);
     max-height: calc(var(--thumb, 170px) - 10px);

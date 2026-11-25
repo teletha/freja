@@ -72,14 +72,19 @@ public final class WebModels {
      * @param sort the name of the {@code PhotoFilter.SortOrder} in effect
      * @param search the free-text search, or null for none
      * @param tagIds the tag identifiers currently selected, or empty for none
+     * @param offset the index of the first photo to return, from the ordered result set
+     * @param limit the maximum number of photo rows in the reply
      */
-    public record BrowseRequest(String mode, String folderId, String sort, String search, List<Long> tagIds) {
+    public record BrowseRequest(String mode, String folderId, String sort, String search, List<Long> tagIds, int offset,
+            int limit) {
 
         public BrowseRequest {
             mode = mode == null || mode.isBlank() ? "ALL" : mode.toUpperCase();
             folderId = folderId == null || folderId.isBlank() ? null : folderId.trim();
             sort = sort == null || sort.isBlank() ? "NAME" : sort.toUpperCase();
             tagIds = tagIds == null ? List.of() : List.copyOf(tagIds);
+            offset = Math.max(0, offset);
+            limit = limit <= 0 ? 300 : Math.min(2000, limit);
         }
     }
 
@@ -90,32 +95,48 @@ public final class WebModels {
      * @param folderId the effective folder, or null
      * @param stats the aggregate counters
      * @param folders the visible folders of the catalog
-     * @param sections the photo sections rendered by the grid
+     * @param sections the ordered section descriptors of the grid, without photo metadata
+     * @param photos the current page of photos, flattened in section order
+     * @param photoSections the section index of each photo in {@code photos}
+     * @param offset the index of the first returned photo
+     * @param total the total number of photos matching the query
+     * @param hasMore whether another page is available
      */
     public record BrowseResult(String mode, Long folderId, LibraryStats stats, List<freja.model.Folder> folders,
-            List<Section> sections) {
+            List<Section> sections, List<Photo> photos, List<Integer> photoSections, int offset, int total, boolean hasMore) {
 
         public BrowseResult {
             mode = mode == null ? "ALL" : mode;
             stats = stats == null ? new LibraryStats(0, 0, 0, 0, 0) : stats;
             folders = folders == null ? List.of() : List.copyOf(folders);
             sections = sections == null ? List.of() : List.copyOf(sections);
+            photos = photos == null ? List.of() : List.copyOf(photos);
+            photoSections = photoSections == null ? List.of() : List.copyOf(photoSections);
+            offset = Math.max(0, offset);
+            total = Math.max(0, total);
         }
     }
 
     /**
-     * One photo section: a label, the folder it belongs to, its tags and the photos inside.
+     * One photo section descriptor: a heading, the folder it belongs to, its tags and its size.
+     * <p>
+     * Photo metadata is no longer carried here. {@code start} is the section's first index in the
+     * flattened result set, so the renderer can reserve the full scroll height and request only
+     * the pages which are actually visible.
+     * </p>
      *
      * @param folderId the folder identifier, or -1 for a synthetic section
      * @param label the section heading, or null when the section is unnamed
      * @param tags the tags attached to the folder, or empty
-     * @param photos the photos grouped under the heading
+     * @param start the index of the section's first photo in the ordered result
+     * @param count the number of photos under the heading
      */
-    public record Section(long folderId, String label, List<String> tags, List<Photo> photos) {
+    public record Section(long folderId, String label, List<String> tags, int start, int count) {
 
         public Section {
             tags = tags == null ? List.of() : List.copyOf(tags);
-            photos = photos == null ? List.of() : List.copyOf(photos);
+            start = Math.max(0, start);
+            count = Math.max(0, count);
         }
     }
 

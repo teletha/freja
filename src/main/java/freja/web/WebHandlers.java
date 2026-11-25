@@ -26,6 +26,7 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import apocrypha.IpcChannel;
+import apocrypha.Window;
 import freja.model.Folder;
 import freja.model.LibraryStats;
 import freja.model.Photo;
@@ -49,6 +50,8 @@ import kiss.I;
 public final class WebHandlers {
 
     private final FrejaWeb app;
+
+    private final WebFullscreen fullscreen = new WebFullscreen();
 
     /**
      * Creates the handlers.
@@ -82,8 +85,10 @@ public final class WebHandlers {
     }
 
     /**
-     * Browse the catalog: read the request, apply the filter and hand back the sections and the
-     * visible folders for the grid, exactly like the JavaFX edition's browse.
+     * Browse the catalog: read the request, apply the filter and hand back the ordered section
+     * descriptors plus one page of photo metadata. The renderer reserves the full scroll height from
+     * the section counts and asks for further pages as it scrolls, so neither the JSON payload nor
+     * the DOM grows with the whole library.
      *
      * @param request the browse request, or null for none
      * @return the browse result
@@ -92,7 +97,7 @@ public final class WebHandlers {
     public WebModels.BrowseResult browse(WebModels.BrowseRequest request) {
         Library library = library();
         if (library == null || request == null) {
-            return new WebModels.BrowseResult("ALL", null, null, List.of(), List.of());
+            return new WebModels.BrowseResult("ALL", null, null, List.of(), List.of(), List.of(), List.of(), 0, 0, false);
         }
         SortOrder order = resolveOrder(request.sort());
         Long requestedFolder = parseFolderId(request.folderId());
@@ -119,7 +124,13 @@ public final class WebHandlers {
         String effectiveMode = fallback ? "ALL" : request.mode();
         Long effectiveFolder = fallback ? null : requestedFolder;
 
-        List<WebModels.Section> sections = new ArrayList<>();
+        // Groups are collected first, then flattened into one ordered result. That keeps the
+        // section starts and their photo pages in exactly the same order as the grid renders.
+        List<Long> sectionFolders = new ArrayList<>();
+        List<String> sectionLabels = new ArrayList<>();
+        List<List<String>> sectionTags = new ArrayList<>();
+        List<List<Photo>> sectionPhotos = new ArrayList<>();
+
         if ("ALL".equals(effectiveMode) || "FOLDER".equals(effectiveMode)) {
             List<Photo> ordered = orderByFolder(photos, visibleFolders, "FOLDER".equals(effectiveMode));
             Map<Long, List<Photo>> grouped = new HashMap<>();
@@ -129,13 +140,19 @@ public final class WebHandlers {
             for (Folder folder : visibleFolders) {
                 List<Photo> list = grouped.remove(folder.id());
                 if (list != null && !list.isEmpty()) {
-                    sections.add(new WebModels.Section(folder.id(), folder.name(), folder.tags(), list));
+                    sectionFolders.add(folder.id());
+                    sectionLabels.add(folder.name());
+                    sectionTags.add(folder.tags());
+                    sectionPhotos.add(list);
                 }
             }
             List<Photo> rest = new ArrayList<>();
             grouped.values().forEach(rest::addAll);
             if (!rest.isEmpty()) {
-                sections.add(new WebModels.Section(-1, null, List.of(), rest));
+                sectionFolders.add(-1L);
+                sectionLabels.add(null);
+                sectionTags.add(List.of());
+                sectionPhotos.add(rest);
             }
         } else if (filter.groupsByDate()) {
             List<Photo> current = new ArrayList<>();
@@ -143,7 +160,10 @@ public final class WebHandlers {
             for (Photo photo : photos) {
                 if (label == null || !label.equals(photo.dateLabel())) {
                     if (label != null) {
-                        sections.add(new WebModels.Section(-1, label, List.of(), List.copyOf(current)));
+                        sectionFolders.add(-1L);
+                        sectionLabels.add(label);
+                        sectionTags.add(List.of());
+                        sectionPhotos.add(List.copyOf(current));
                     }
                     label = photo.dateLabel();
                     current = new ArrayList<>();
@@ -151,12 +171,35 @@ public final class WebHandlers {
                 current.add(photo);
             }
             if (label != null) {
-                sections.add(new WebModels.Section(-1, label, List.of(), List.copyOf(current)));
+                sectionFolders.add(-1L);
+                sectionLabels.add(label);
+                sectionTags.add(List.of());
+                sectionPhotos.add(List.copyOf(current));
             }
         } else {
-            sections.add(new WebModels.Section(-1, null, List.of(), photos));
+            sectionFolders.add(-1L);
+            sectionLabels.add(null);
+            sectionTags.add(List.of());
+            sectionPhotos.add(photos);
         }
-        return new WebModels.BrowseResult(effectiveMode, effectiveFolder, library.stats(), visibleFolders, sections);
+
+        List<WebModels.Section> sections = new ArrayList<>(sectionPhotos.size());
+        List<Photo> orderedPhotos = new ArrayList<>(photos.size());
+        List<Integer> sectionIndexes = new ArrayList<>(photos.size());
+        for (int i = 0; i < sectionPhotos.size(); i++) {
+            List<Photo> group = sectionPhotos.get(i);
+            sections.add(new WebModels.Section(sectionFolders.get(i), sectionLabels.get(i), sectionTags.get(i), orderedPhotos
+                    .size(), group.size()));
+            for (Photo photo : group) {
+                orderedPhotos.add(photo);
+                sectionIndexes.add(i);
+            }
+        }
+        int total = orderedPhotos.size();
+        int from = Math.min(request.offset(), total);
+        int to = Math.min(total, from + request.limit());
+        return new WebModels.BrowseResult(effectiveMode, effectiveFolder, library.stats(), visibleFolders, sections, from >= to ? List
+                .of() : orderedPhotos.subList(from, to), from >= to ? List.of() : sectionIndexes.subList(from, to), from, total, to < total);
     }
 
     /**
@@ -191,6 +234,17 @@ public final class WebHandlers {
     public LibraryStats stats() {
         Library library = library();
         return library == null ? null : library.stats();
+    }
+
+    /** Enters or leaves the native fullscreen window used by the photo viewer. */
+    @IpcChannel("freja:fullscreen")
+    public void fullscreen(boolean enter) {
+        Window window = app == null ? null : app.window();
+        if (enter) {
+            fullscreen.enter(window);
+        } else {
+            fullscreen.exit(window);
+        }
     }
 
     /**

@@ -116,11 +116,9 @@ public final class PhotoViewerView extends View {
     /** Opens a viewer covering the screen of the owner. */
     public static PhotoViewerView open(Stage owner, List<Photo> photos, Photo start, Listener listener, Image placeholder) {
         PhotoViewerView view = new PhotoViewerView(photos, start, listener);
-        if (placeholder != null) {
-            view.showImage(placeholder);
-        } else {
-            view.showStatus("読み込み中…");
-        }
+        // Showing the small catalog thumbnail here made it flash in the centre before the full
+        // image arrived. Keep the canvas empty with a loading note until the real image is ready.
+        view.showStatus("読み込み中…");
         view.present(owner);
         return view;
     }
@@ -143,8 +141,12 @@ public final class PhotoViewerView extends View {
             }
         }
         Scene scene = new Scene((javafx.scene.Parent) ui(), 1280, 800);
-        Viewtify.manage("viewer", scene, true);
+        // Without this the Stage still opens and grabs input (it is undecorated, full-screen and
+        // always-on-top) but has nothing to paint: an invisible window blocking the whole display.
+        // Viewtify.manage also needs the scene attached so it can find the owning Stage.
+        stage.setScene(scene);
         scene.setFill(javafx.scene.paint.Color.web("#0D0E10"));
+        Viewtify.manage("viewer", scene, true);
         Node root = scene.getRoot();
         root.setFocusTraversable(true);
 
@@ -156,19 +158,28 @@ public final class PhotoViewerView extends View {
                 screen = candidates.get(0);
             }
         }
+        // Position only: JavaFX decides the actual full-screen size in logical pixels. Using
+        // Screen bounds for the size double-counts HiDPI scaling and made the image ~2x too large.
         Rectangle2D bounds = screen.getVisualBounds();
         stage.setX(bounds.getMinX());
         stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
         stage.setAlwaysOnTop(true);
+        stage.setFullScreenExitHint("");
+        stage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
         stage.setOnShown(event -> root.requestFocus());
         stage.setOnHidden(event -> shutdown());
 
         installInput(scene);
         showPhoto(index);
         stage.show();
-        root.requestFocus();
+        stage.setFullScreen(true);
+        // The canvas had no size while the scene was built, so the fit scale computed from the
+        // thumbnail placeholder was wrong. Recompute once the window has been laid out and on
+        // every later resize (including entering/leaving full screen).
+        javafx.application.Platform.runLater(() -> {
+            applyTransform();
+            root.requestFocus();
+        });
     }
 
     private void installInput(Scene scene) {
@@ -264,6 +275,15 @@ public final class PhotoViewerView extends View {
         }
         picture.setPreserveRatio(true);
         picture.setSmooth(true);
+        // The picture is positioned explicitly in applyTransform() so centering does not depend on
+        // how StackPane combines the image's layout bounds with a scale transform.
+        picture.setManaged(false);
+        // Without vgrow the canvas keeps its preferred height (~the placeholder image) and the fit
+        // scale is computed from a tiny strip instead of the whole screen.
+        javafx.scene.layout.VBox.setVgrow(canvas, Priority.ALWAYS);
+        canvas.setMinHeight(0);
+        canvas.widthProperty().addListener((o, old, value) -> applyTransform());
+        canvas.heightProperty().addListener((o, old, value) -> applyTransform());
         canvas.setAlignment(Pos.CENTER);
         canvas.getChildren().add(picture);
         status.style(style.loading);
@@ -427,6 +447,13 @@ public final class PhotoViewerView extends View {
         if (fitMode) {
             zoom = fitScale();
         }
+        Image image = picture.getImage();
+        double width = image == null ? 0 : image.getWidth();
+        double height = image == null ? 0 : image.getHeight();
+        // JavaFX scales around the node's centre, so positioning the unscaled image at the centre
+        // keeps the scaled image centred too (for both portrait and landscape).
+        picture.setLayoutX((canvas.getWidth() - width) / 2);
+        picture.setLayoutY((canvas.getHeight() - height) / 2);
         picture.setScaleX(zoom);
         picture.setScaleY(zoom);
         picture.setTranslateX(panX);

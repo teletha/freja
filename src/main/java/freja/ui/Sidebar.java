@@ -14,11 +14,7 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -45,9 +41,10 @@ import laevatain.ARXRadioButtonMenuItem;
 import laevatain.ARXTextBinding;
 
 /**
- * The navigation sidebar: a library list and the registered folders, both built from the reusable
- * {@link ARXNavList}, with captions bound to live translations from
- * {@link I#translate(String, Object...)}.
+ * The navigation sidebar: a library list built from the reusable {@link ARXNavList} and the
+ * registered folders, which use the virtualized {@link FolderList} so a library with tens of
+ * thousands of directories paints only what the viewport shows. Captions are bound to live
+ * translations from {@link I#translate(String, Object...)}.
  */
 public final class Sidebar extends JPanel {
 
@@ -80,16 +77,11 @@ public final class Sidebar extends JPanel {
 
     private final ARXNavList library = new ARXNavList();
 
-    private final ARXNavList folders = new ARXNavList();
-
-    private final JScrollPane folderScroll;
+    private final FolderList folders = new FolderList();
 
     private final JPanel folderCard = new JPanel(new CardLayout());
 
     private final JLabel folderCount = new JLabel();
-
-    /** The folders behind the current rows, so a menu can be rebuilt from a row key. */
-    private final Map<Long, Folder> known = new HashMap<>();
 
     private Listener listener = new Listener() {
         @Override
@@ -161,9 +153,9 @@ public final class Sidebar extends JPanel {
         top.add(folderHeader());
         add(top, BorderLayout.NORTH);
 
-        folders.setMenu(row -> folderMenu(Long.parseLong(row.key())));
-        folders.setOnSelect(key -> select(Mode.FOLDER, Long.parseLong(key)));
-        folderScroll = folders.scrolled();
+        folders.setMenu(this::folderMenu);
+        folders.setOnSelect(folder -> select(Mode.FOLDER, folder.id()));
+        JScrollPane folderScroll = folders.scrolled();
 
         ARXLabel empty = new ARXLabel(I.translate("No folders are registered"));
         empty.setForeground(Theme.FAINT);
@@ -228,7 +220,7 @@ public final class Sidebar extends JPanel {
         mode = Mode.FOLDER;
         folderId = id;
         updateSelection();
-        folders.reveal(String.valueOf(id));
+        folders.reveal(id);
     }
 
     /**
@@ -247,69 +239,26 @@ public final class Sidebar extends JPanel {
         library.row("RECENT").setTrailing(Integer.toString(stats.recent()));
         folderCount.setText(Integer.toString(registered.size()));
 
-        int previousViewY = folderScroll.getViewport().getViewPosition().y;
-        String focused = focusedRow();
-        // Rows are updated in place rather than cleared and rebuilt. A refresh arrives often while
-        // the scanner reports progress, and replacing every panel discarded the click which had
-        // just landed on one of them - the sidebar then looked dead for no reason at all.
-        List<String> order = new ArrayList<>(registered.size());
-        for (Folder folder : registered) {
-            String key = Long.toString(folder.id());
-            order.add(key);
-            ARXNavList.Row row = folders.row(key);
-            if (row == null) {
-                row = folders.add(key, folder.name(), Icons.folder(17, Theme.MUTED));
-            } else {
-                row.setTitle(folder.name());
-            }
-            row.setToolTipText(folder.path()
-                    + (folder.explicit() ? "" : "  " + I.translate("(auto-detected)").get())
-                    + (folder.tags().isEmpty() ? "" : "\n" + I.translate("Tags").get() + ": "
-                            + String.join(", ", folder.tags())));
-            row.setTrailing(Integer.toString(folder.photoCount()));
-        }
-        for (String key : folders.keys()) {
-            if (!order.contains(key)) {
-                folders.remove(key);
-            }
-        }
-        folders.align(order);
-        known.keySet().removeIf(id -> folders.row(Long.toString(id)) == null);
-        for (Folder folder : registered) {
-            known.put(folder.id(), folder);
-        }
+        // The rows are virtualized now, so a refresh only replaces records and repaints the cells
+        // on screen. Keeping the first visible row stable means a scan which appends a folder far
+        // below the viewport does not yank the rail back to the top.
+        int firstVisible = folders.getFirstVisibleIndex();
+        boolean hadFocus = folders.isFocusOwner();
+        folders.setFolders(registered);
         updateSelection();
         showFolders(!registered.isEmpty());
-        folders.revalidate();
-        folders.repaint();
-        // Rebuilding the rows briefly shrinks the view, which resets the viewport to the top.
-        // Restore the old position after layout, then only move if the selected row is out of view.
         SwingUtilities.invokeLater(() -> {
-            JScrollPane scroll = folderScroll;
-            int maximum = Math.max(0, scroll.getViewport().getViewSize().height - scroll.getViewport().getExtentSize().height);
-            int y = Math.max(0, Math.min(previousViewY, maximum));
-            scroll.getViewport().setViewPosition(new Point(scroll.getViewport().getViewPosition().x, y));
-            if (mode == Mode.FOLDER) {
-                folders.reveal(Long.toString(folderId));
+            int size = folders.getModel().getSize();
+            if (firstVisible >= 0 && size > 0) {
+                folders.ensureIndexIsVisible(Math.min(firstVisible, size - 1));
             }
-            if (focused != null) {
-                ARXNavList.Row row = folders.row(focused);
-                if (row != null) {
-                    row.requestFocusInWindow();
-                }
+            if (mode == Mode.FOLDER) {
+                folders.reveal(folderId);
+            }
+            if (hadFocus) {
+                folders.requestFocusInWindow();
             }
         });
-    }
-
-    /** The key of the folder row which currently owns the focus, or null. */
-    private String focusedRow() {
-        for (String key : folders.keys()) {
-            ARXNavList.Row row = folders.row(key);
-            if (row != null && row.isFocusOwner()) {
-                return key;
-            }
-        }
-        return null;
     }
 
     /** Swaps between the folder list and the empty hint. */
@@ -318,11 +267,7 @@ public final class Sidebar extends JPanel {
     }
 
     /** isPopupTrigger is platform specific: only one of press and release reports it. */
-    private JPopupMenu folderMenu(long id) {
-        Folder folder = known.get(id);
-        if (folder == null) {
-            return null;
-        }
+    private JPopupMenu folderMenu(Folder folder) {
         // The menu is rebuilt on every popup, so a snapshot of the translation is enough here.
         JPopupMenu menu = new JPopupMenu();
         menu.add(sortMenu(folder));
@@ -372,9 +317,6 @@ public final class Sidebar extends JPanel {
 
     private void updateSelection() {
         library.setSelected(mode == Mode.FOLDER ? null : mode.name());
-        folders.setSelected(mode == Mode.FOLDER ? Long.toString(folderId) : null);
-        // Repaint the whole strip as well: rapid key repeats can otherwise leave stale highlight
-        // pixels from rows that scrolled past in the meantime.
-        folders.repaint();
+        folders.setSelectedId(mode == Mode.FOLDER ? folderId : -1);
     }
 }

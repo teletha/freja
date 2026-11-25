@@ -45,6 +45,11 @@ sinobu reactive variables, `Viewtify.dialog` and toasts. The UI code lives in th
 package (`MainView`, `SidebarView`, `PhotoGridView`, `InspectorView`, `PhotoViewerView`,
 `ScanFoldersView`, `TagManagerView`, `TagPickerView`, `TagFilterView`, `SettingsView`).
 
+The browser edition (`freja.web.FrejaWeb`, `src/main/resources/web`) uses the same catalog over
+IPC. Its grid is virtualized in two layers: only near-viewport rows own DOM card nodes, and photo
+metadata is fetched through `freja:browse` in 300-row pages as the user scrolls (section headers
+and scroll height are computed from the section counts returned with every reply).
+
 The browser edition is built with Apocrypha: the frontend is plain HTML/CSS/JS served from the
 classpath resource root `web`, and every request and response crosses the `freja:*` IPC channels.
 The UI code lives in the `freja.web` package (`FrejaWeb`, `WebHandlers`, `WebModels`,

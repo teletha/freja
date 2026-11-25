@@ -146,14 +146,16 @@ public final class TagFilterView extends View {
     interface style extends StyleDSL {
 
         Style root = () -> {
-            display.width(320, px);
-            display.height(420, px);
+            display.width(280, px);
+            display.height(344, px);
             padding.vertical(12, px).horizontal(12, px);
-            background.color("-fx-control-inner-background");
+            background.color("-freja-surface");
+            border.width(1, px).color("-freja-border");
+            border.radius(8, px);
         };
 
         Style heading = () -> {
-            font.size(14, px).weight(700);
+            font.size(13, px).weight(700).color("-freja-text");
             padding.bottom(8, px);
         };
 
@@ -166,8 +168,8 @@ public final class TagFilterView extends View {
             margin.top(4, px);
         };
 
-        Style count = () -> font.size(11, px).color("-fx-mid-text-color");
+        Style count = () -> font.size(11, px).color("-freja-muted");
 
-        Style clear = () -> font.size(12, px);
+        Style clear = () -> font.size(12, px).color("-freja-accent-dark");
     }
 }

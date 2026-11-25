@@ -301,7 +301,7 @@ public final class InspectorView extends View {
         for (int i = 0; i < stars.length; i++) {
             boolean filled = enabled && i < rating;
             stars[i].text(filled ? "★" : "☆");
-            stars[i].ui().setStyle("-fx-text-fill: " + (filled ? "#F1B64A" : enabled ? "#8B929C" : "#4A4F57") + ";");
+            stars[i].ui().setStyle("-fx-text-fill: " + (filled ? "-freja-gold" : enabled ? "-freja-muted" : "-freja-faint") + ";");
             stars[i].enable(enabled);
         }
     }
@@ -346,7 +346,7 @@ public final class InspectorView extends View {
     /** Visual language of the inspector. */
     interface style extends StyleDSL {
 
-        Style panel = () -> background.color("derive(-fx-base, 2%)");
+        Style panel = () -> background.color("-freja-surface");
 
         Style body = () -> padding.vertical(14, px).horizontal(16, px);
 
@@ -355,18 +355,21 @@ public final class InspectorView extends View {
             margin.bottom(6, px);
         };
 
-        Style fileName = () -> font.size(15, px).weight(700);
+        Style fileName = () -> font.size(16, px).weight(700).color("-freja-text");
 
-        Style placeholder = () -> font.color("-fx-mid-text-color");
+        Style placeholder = () -> font.color("-freja-muted");
 
         Style folder = () -> {
-            font.size(11, px).color("-fx-mid-text-color");
+            font.size(12, px).color("-freja-muted");
             margin.bottom(6, px);
         };
 
         Style actions = () -> display.width(360, px);
 
-        Style primary = () -> background.color("-fx-accent");
+        Style primary = () -> {
+            background.color("-freja-accent");
+            font.color("white");
+        };
 
         Style rating = () -> padding.vertical(4, px);
 
@@ -380,25 +383,25 @@ public final class InspectorView extends View {
 
         Style info = () -> padding.vertical(6, px);
 
-        Style infoLabel = () -> font.size(11, px).color("-fx-mid-text-color");
+        Style infoLabel = () -> font.size(12, px).color("-freja-muted");
 
         Style captionTitle = () -> {
-            font.size(11, px).weight(700).color("-fx-mid-text-color");
+            font.size(11, px).weight(700).color("-freja-muted");
             padding.vertical(6, px);
         };
 
-        Style caption = () -> display.height(80, px);
+        Style caption = () -> display.height(90, px);
 
         Style footer = () -> display.width(360, px);
 
-        Style small = () -> font.size(11, px);
+        Style small = () -> font.size(11, px).color("-freja-muted");
 
         Style link = () -> {
             background.color("transparent");
             border.none();
-            font.color("derive(-fx-accent, 8%)");
+            font.color("-freja-accent-dark");
             cursor.pointer();
-            $.hover(() -> font.color("derive(-fx-accent, 15%)"));
+            $.hover(() -> font.color("-freja-accent"));
         };
     }
 }

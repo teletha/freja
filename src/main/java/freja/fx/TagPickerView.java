@@ -57,6 +57,8 @@ public final class TagPickerView extends View {
 
     private UILabel heading;
 
+    private UILabel close;
+
     private UIText<String> search;
 
     /** Creates a picker for one folder. */
@@ -75,7 +77,11 @@ public final class TagPickerView extends View {
         return new ViewDSL() {
             {
                 $(vbox, style.root, () -> {
-                    $(heading);
+                    $(hbox, () -> {
+                        $(heading);
+                        $(ui(grow()));
+                        $(close);
+                    });
                     $(search);
                     $(list, style.list, () -> {
                         $(rows);
@@ -91,9 +97,12 @@ public final class TagPickerView extends View {
     @Override
     protected void initialize() {
         heading.text(en("Select labels")).style(style.heading);
+        close.text("✕").style(style.close).tooltip(en("Close"));
+        close.when(User.LeftClick, event -> Viewtify.dialog().close());
         search.placeholder(en("Search or create labels…")).clearable().prefix(FontAwesomeSolid.SEARCH);
         search.when(User.Input, event -> render());
         search.keybind(Key.Enter, () -> createLabel());
+        search.keybind(Key.Escape, () -> Viewtify.dialog().close());
         list.ui().setFitToWidth(true);
         rows.ui().setSpacing(2);
         selected.addAll(library.folderTags(folderId));
@@ -202,14 +211,23 @@ public final class TagPickerView extends View {
     interface style extends StyleDSL {
 
         Style root = () -> {
-            display.width(300, px);
+            display.width(280, px);
             padding.vertical(12, px).horizontal(12, px);
-            background.color("-fx-control-inner-background");
+            background.color("-freja-surface");
+            border.width(1, px).color("-freja-border");
+            border.radius(8, px);
         };
 
         Style heading = () -> {
-            font.size(14, px).weight(700);
+            font.size(13, px).weight(700).color("-freja-text");
             padding.bottom(8, px);
+        };
+
+        Style close = () -> {
+            font.size(13, px).color("-freja-muted");
+            padding.horizontal(4, px);
+            cursor.pointer();
+            $.hover(() -> font.color("-freja-text"));
         };
 
         Style list = () -> {
@@ -221,20 +239,20 @@ public final class TagPickerView extends View {
             font.size(12, px);
             padding.vertical(5, px).horizontal(6, px);
             cursor.pointer();
-            $.hover(() -> background.color("derive(-fx-base, 8%)"));
+            $.hover(() -> background.color("-freja-hover"));
         };
 
-        Style linked = () -> font.size(10, px).color("-fx-mid-text-color");
+        Style linked = () -> font.size(11, px).color("-freja-muted");
 
         Style remove = () -> {
-            font.size(13, px).weight(700).color("-fx-mid-text-color");
+            font.size(13, px).weight(700).color("-freja-muted");
             padding.horizontal(6, px);
             cursor.pointer();
-            $.hover(() -> font.color("#C43D3D"));
+            $.hover(() -> font.color("-freja-danger"));
         };
 
         Style empty = () -> {
-            font.size(12, px).color("-fx-mid-text-color");
+            font.size(12, px).color("-freja-muted");
             padding.vertical(12, px).horizontal(4, px);
         };
     }

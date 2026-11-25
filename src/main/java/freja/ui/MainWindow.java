@@ -87,6 +87,8 @@ public final class MainWindow extends JFrame {
 
     private static final String SELECTED_FOLDER_PREFERENCE = "view.selectedFolderPath";
 
+    private static final String VIEW_MODE_PREFERENCE = "view.mode";
+
     private static final String SIDEBAR_DIVIDER_PREFERENCE = "view.sidebarDivider";
 
     private static final String INSPECTOR_VISIBLE_PREFERENCE = "view.inspectorVisible";
@@ -248,7 +250,7 @@ public final class MainWindow extends JFrame {
         });
 
         applyState(scanner.state());
-        restoreSelectedFolder();
+        restoreViewSelection();
         refreshAll();
     }
 
@@ -678,6 +680,7 @@ public final class MainWindow extends JFrame {
             sidebar.selectFolderSilently(folderId);
             mode = Sidebar.Mode.FOLDER;
             this.folderId = folderId;
+            rememberSelection();
         });
         grid.setOnTagFolder((folderId, point) -> library.folder(folderId)
                 .ifPresent(folder -> TagPicker.show(grid, point.x, point.y + 8, library, folderId, this::tagsChanged)));
@@ -945,9 +948,7 @@ public final class MainWindow extends JFrame {
         this.mode = mode;
         this.folderId = folderId;
         this.scrollToSelectedFolder = mode == Sidebar.Mode.FOLDER && folderId >= 0;
-        if (this.scrollToSelectedFolder) {
-            rememberSelectedFolder(folderId);
-        }
+        rememberSelection();
         applySortForCurrentView();
         if (folderToFolder && grid.scrollToFolder(folderId)) {
             // The grid already contains every folder section. Moving between them only needs a
@@ -977,15 +978,49 @@ public final class MainWindow extends JFrame {
         grid.scrollToTop();
     }
 
-    /** Remembers the last selected folder by path, so a rebuilt catalog can still resolve it. */
-    private void rememberSelectedFolder(long id) {
-        library.folder(id).ifPresent(folder -> PREFERENCES.put(SELECTED_FOLDER_PREFERENCE, folder.path().toString()));
+    /**
+     * Remembers the sidebar selection - the view mode and, for a folder, its path - so the next
+     * launch opens the same place even when the catalog is rebuilt with fresh identifiers.
+     */
+    private void rememberSelection() {
+        PREFERENCES.put(VIEW_MODE_PREFERENCE, mode.name());
+        if (mode == Sidebar.Mode.FOLDER && folderId >= 0) {
+            java.util.Optional<Folder> folder = library.folder(folderId);
+            if (folder.isPresent()) {
+                PREFERENCES.put(SELECTED_FOLDER_PREFERENCE, folder.get().path().toString());
+                return;
+            }
+        }
+        // The whole-library views win over an older folder: opening the previous folder after
+        // quitting from "All photos" would not be what the window was showing.
+        PREFERENCES.remove(SELECTED_FOLDER_PREFERENCE);
     }
 
-    /** Restores the folder selected before the previous launch, when it still exists. */
-    private void restoreSelectedFolder() {
+    /** Restores the selection saved by the previous launch, when it still exists. */
+    private void restoreViewSelection() {
+        Sidebar.Mode saved = Sidebar.Mode.ALL;
+        String modeName = PREFERENCES.get(VIEW_MODE_PREFERENCE, "");
+        if (modeName.isBlank()) {
+            // A library saved before the mode existed always reopened the remembered folder.
+            if (!PREFERENCES.get(SELECTED_FOLDER_PREFERENCE, "").isBlank()) {
+                saved = Sidebar.Mode.FOLDER;
+            }
+        } else {
+            try {
+                saved = Sidebar.Mode.valueOf(modeName);
+            } catch (IllegalArgumentException e) {
+                saved = Sidebar.Mode.ALL;
+            }
+        }
+        if (saved != Sidebar.Mode.FOLDER) {
+            mode = saved;
+            folderId = -1;
+            return;
+        }
         String path = PREFERENCES.get(SELECTED_FOLDER_PREFERENCE, "");
         if (path.isBlank()) {
+            mode = Sidebar.Mode.ALL;
+            folderId = -1;
             return;
         }
         try {
@@ -1000,8 +1035,11 @@ public final class MainWindow extends JFrame {
                 }
             }
         } catch (RuntimeException e) {
-            // A stale or malformed preference is simply ignored; the library view stays as it was.
+            // A stale or malformed preference is simply ignored.
         }
+        // The folder was removed from the library in the meantime: show the whole library.
+        mode = Sidebar.Mode.ALL;
+        folderId = -1;
     }
 
     private void applySortForCurrentView() {
@@ -1606,6 +1644,9 @@ public final class MainWindow extends JFrame {
     }
 
     private void savePreferences() {
+        // Save the sidebar selection at exit: the folder the window was showing, or the library
+        // view, so the next launch resumes exactly there.
+        rememberSelection();
         PREFERENCES.putInt("view.thumbSize", zoom.getValue());
         if (mode != Sidebar.Mode.FOLDER) {
             PREFERENCES.put(SORT_PREFERENCE, (sort.getSelectedItem() instanceof SortOrder order ? order : SortOrder.NAME).name());

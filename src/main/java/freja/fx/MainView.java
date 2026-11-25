@@ -202,6 +202,9 @@ public final class MainView extends View {
 
     private final Window1 viewer = new Window1();
 
+    /** Guards against a second open triggered by the same double click. */
+    private boolean viewerOpening;
+
     private final Window2 scanFoldersDialog = new Window2();
 
     private boolean scrollToSelectedFolder;
@@ -372,8 +375,12 @@ public final class MainView extends View {
         HBox.setHgrow(settings.ui(), Priority.ALWAYS);
         VBox.setVgrow(contentRow.ui(), Priority.ALWAYS);
         HBox.setHgrow(pageStack.ui(), Priority.ALWAYS);
-        outerSplit.horizontal().positions(0.17);
-        innerSplit.horizontal().positions(0.77);
+        // UISplitPane.horizontal() only exists in newer Viewtify builds; set the JavaFX node
+        // directly so the application also runs against the released 2.35.1 artifact.
+        outerSplit.ui().setOrientation(javafx.geometry.Orientation.HORIZONTAL);
+        outerSplit.ui().setDividerPositions(0.17);
+        innerSplit.ui().setOrientation(javafx.geometry.Orientation.HORIZONTAL);
+        innerSplit.ui().setDividerPositions(0.77);
 
         addFolder.when(User.Action, event -> openScanFolders());
         rescan.when(User.Action, event -> rescanAll());
@@ -388,6 +395,11 @@ public final class MainView extends View {
         slideshow.when(User.Action, event -> openSlideshow());
         themeToggle.when(User.LeftClick, event -> appearance.theme.set(appearance.theme.get() == Theme.Dark ? Theme.Light : Theme.Dark));
         appearance.theme.observe().on(Viewtify.UIThread).to(theme -> themeToggle.text(theme == Theme.Dark ? "☀" : "☾"));
+        // Keep the Swing palette, which FxPalette mirrors, in sync with the JavaFX theme switch.
+        appearance.theme.observe().on(Viewtify.UIThread).to(theme -> {
+            freja.ui.Theme.setDark(theme == Theme.Dark);
+            FxPalette.refresh();
+        });
         photoPageButton.when(User.LeftClick, event -> showPage(Page.VIEWER));
         settingsPageButton.when(User.LeftClick, event -> showPage(Page.SETTINGS));
         photoPageButton.styleWhile(page.observe().map(p -> p == Page.VIEWER), style.activitySelected);
@@ -404,7 +416,7 @@ public final class MainView extends View {
             if (mode == SidebarView.Mode.FOLDER && folderId >= 0) {
                 library.setFolderSort(folderId, order);
             } else {
-                setting.sort.set(order.name());
+                setting.sort.set(order);
                 setting.store();
             }
             refreshAll();
@@ -456,7 +468,7 @@ public final class MainView extends View {
         setInspectorVisible(setting.inspectorVisible.get());
         showPage(Page.VIEWER);
         pendingFolders.addAll(FrejaFX.startupFolders());
-        // openLibrary();
+        openLibrary();
     }
 
     /** Opens the catalog and the scanner off the UI thread, then wires them in. */
@@ -866,20 +878,39 @@ public final class MainView extends View {
     }
 
     private void openViewer(Photo photo, List<Photo> selection) {
-        if (photo == null) {
+        openViewer(photo, selection, null);
+    }
+
+    private void openViewer(Photo photo, List<Photo> selection, Runnable afterOpen) {
+        if (photo == null || viewerOpening) {
             return;
         }
-        if (viewer.value != null) {
-            viewer.value.close();
-        }
-        List<Photo> photos = selection == null || selection.isEmpty() ? grid.photos() : selection;
-        if (photos.isEmpty()) {
-            photos = List.of(photo);
-        }
-        viewer.value = PhotoViewerView.open(stage().get(), photos, photo, (updated, favorite) -> {
-            library.setFavorite(updated.id(), favorite);
-            refreshAll();
-        }, thumbs == null ? null : thumbs.peek(photo));
+        viewerOpening = true;
+        // A double click fires two clicks before the double-click action. Opening a new Stage from
+        // inside that mouse event used to re-enter the grid's event handling; defer it to the next
+        // pulse and ignore any additional open request until this one has completed.
+        javafx.application.Platform.runLater(() -> {
+            try {
+                if (viewer.value != null) {
+                    viewer.value.close();
+                }
+                List<Photo> photos = selection == null || selection.isEmpty() ? grid.photos() : selection;
+                if (photos.isEmpty()) {
+                    photos = List.of(photo);
+                }
+                viewer.value = PhotoViewerView.open(stage().get(), photos, photo, (updated, favorite) -> {
+                    library.setFavorite(updated.id(), favorite);
+                    refreshAll();
+                }, null);
+                if (afterOpen != null) {
+                    afterOpen.run();
+                }
+            } catch (RuntimeException e) {
+                statusMessage.text("ビューアを開けませんでした: " + e.getMessage());
+            } finally {
+                viewerOpening = false;
+            }
+        });
     }
 
     private void openSlideshow() {
@@ -889,10 +920,11 @@ public final class MainView extends View {
             return;
         }
         Photo start = grid.selectedPhoto() == null ? photos.get(0) : grid.selectedPhoto();
-        openViewer(start);
-        if (viewer.value != null) {
-            viewer.value.startSlideshow();
-        }
+        openViewer(start, photos, () -> {
+            if (viewer.value != null) {
+                viewer.value.startSlideshow();
+            }
+        });
     }
 
     private void setFavorite(Photo photo, boolean favorite) {
@@ -1072,6 +1104,7 @@ public final class MainView extends View {
     /** Opens the watched-folder manager. */
     public void openScanFolders() {
         if (library == null) {
+            statusMessage.text("ライブラリを読み込み中です。少し待ってからもう一度お試しください。");
             return;
         }
         if (scanFoldersDialog.value == null) {
@@ -1121,7 +1154,7 @@ public final class MainView extends View {
             });
         }
         scanFoldersDialog.value.reload();
-        Viewtify.dialog().title("監視フォルダの管理").button("閉じる").size(620, 560).show(scanFoldersDialog.value).to(changed -> {
+        Viewtify.dialog().title("監視フォルダの管理").button("閉じる").size(560, 520).show(scanFoldersDialog.value).to(changed -> {
             if (Boolean.TRUE.equals(changed)) {
                 refreshAll();
             }
@@ -1133,7 +1166,7 @@ public final class MainView extends View {
         if (library == null) {
             return;
         }
-        Viewtify.dialog().title("タグを管理").button("閉じる").size(540, 560).show(TagManagerView.class).to(changed -> {
+        Viewtify.dialog().title("タグを管理").button("閉じる").size(680, 500).show(TagManagerView.class).to(changed -> {
             if (Boolean.TRUE.equals(changed)) {
                 tagsChanged();
             }
@@ -1336,68 +1369,75 @@ public final class MainView extends View {
         return region;
     }
 
-    /** Visual language of the main window. */
+    /** Visual language of the main window, mirroring {@code freja.ui.Theme}. */
     interface style extends StyleDSL {
 
-        Style root = () -> background.color("-fx-background");
+        Style root = () -> background.color("-freja-background");
 
         Style content = () -> display.minHeight(0, px);
 
         Style activityBar = () -> {
-            background.color("derive(-fx-base, -6%)");
-            padding.vertical(10, px);
-            display.minWidth(46, px);
-            display.maxWidth(46, px);
+            background.color("-freja-sidebar");
+            padding.vertical(8, px);
+            display.minWidth(48, px);
+            display.maxWidth(48, px);
         };
 
         Style activityButton = () -> {
+            background.color("transparent");
             padding.vertical(11, px).horizontal(14, px);
-            font.size(17, px).color("-fx-mid-text-color");
+            font.size(17, px).color("-freja-muted");
             cursor.pointer();
-            $.hover(() -> font.color("-fx-text-base-color"));
+            $.hover(() -> {
+                background.color("-freja-hover");
+                font.color("-freja-text");
+            });
         };
 
-        Style activitySelected = () -> font.color("-fx-text-base-color");
+        Style activitySelected = () -> {
+            background.color("-freja-accent-soft");
+            font.color("-freja-accent-dark");
+        };
 
-        Style splits = () -> background.color("-fx-background");
+        Style splits = () -> background.color("-freja-background");
 
         Style center = () -> display.minWidth(420, px);
 
         Style toolbar = () -> {
-            background.color("derive(-fx-base, -4%)");
-            padding.vertical(7, px).horizontal(14, px);
+            background.color("-freja-sidebar");
+            padding.vertical(7, px).horizontal(12, px);
         };
 
-        Style search = () -> display.maxWidth(320, px).minWidth(180, px);
+        Style search = () -> display.maxWidth(300, px).minWidth(180, px);
 
         Style sortBox = () -> display.maxWidth(190, px);
 
-        Style zoom = () -> display.maxWidth(220, px);
+        Style zoom = () -> display.maxWidth(130, px);
 
-        Style gridStack = () -> background.color("-fx-background");
+        Style gridStack = () -> background.color("-freja-background");
 
         Style statusbar = () -> {
-            background.color("derive(-fx-base, 2%)");
+            background.color("-freja-surface");
             padding.vertical(6, px).horizontal(14, px);
         };
 
-        Style selection = () -> font.size(11, px).color("-fx-mid-text-color");
+        Style selection = () -> font.size(11, px).color("-freja-muted");
 
         Style themeToggle = () -> {
-            font.size(15, px).color("-fx-mid-text-color");
+            font.size(15, px).color("-freja-muted");
             padding.vertical(4, px).horizontal(8, px);
             cursor.pointer();
-            $.hover(() -> font.color("-fx-text-base-color"));
+            $.hover(() -> font.color("-freja-text"));
         };
 
         Style grow = () -> display.minWidth(10, px);
 
-        Style welcomeIcon = () -> font.size(64, px);
+        Style welcomeIcon = () -> font.size(72, px).color("-freja-accent");
 
-        Style welcomeTitle = () -> font.size(26, px).weight(700);
+        Style welcomeTitle = () -> font.size(19, px).weight(700).color("-freja-text");
 
         Style welcomeAdd = () -> margin.vertical(6, px);
 
-        Style welcomePath = () -> font.size(10, px).color("-fx-mid-text-color");
+        Style welcomePath = () -> font.size(10, px).color("-freja-muted");
     }
 }

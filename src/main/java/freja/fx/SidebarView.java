@@ -215,6 +215,9 @@ public final class SidebarView extends View {
         label.style(style.navTitle);
         trailing.style(style.trailing);
         box.styleWhile(selectedKey.observe().map(key::equals), style.navSelected);
+        // The caller passes the list the row belongs to; without attaching it here the row is
+        // built and wired but never appears in the scene graph.
+        parent.getChildren().add(box.ui());
         return new Row(box, label, trailing, key);
     }
 
@@ -283,12 +286,12 @@ public final class SidebarView extends View {
             keep.add(folder.id());
             Row row = folderRows.get(folder.id());
             if (row == null) {
-                folderRows.put(folder.id(), folderRow(folder));
-            } else {
-                refreshFolderRow(row, folder);
-                folderList.ui().getChildren().remove(row.box.ui());
-                folderList.ui().getChildren().add(row.box.ui());
+                row = folderRow(folder);
+                folderRows.put(folder.id(), row);
             }
+            refreshFolderRow(row, folder);
+            folderList.ui().getChildren().remove(row.box.ui());
+            folderList.ui().getChildren().add(row.box.ui());
         }
         List<Long> gone = new ArrayList<>(folderRows.keySet());
         gone.removeAll(keep);
@@ -339,55 +342,55 @@ public final class SidebarView extends View {
         return region;
     }
 
-    /** Visual language of the sidebar. */
+    /** Visual language of the navigation sidebar. */
     interface style extends StyleDSL {
 
         Style root = () -> {
-            background.color("derive(-fx-base, -3%)");
+            background.color("-freja-sidebar");
             display.minWidth(180, px);
         };
 
-        Style section = () -> padding.vertical(10, px).horizontal(14, px);
+        Style section = () -> padding.vertical(10, px).horizontal(16, px);
 
         Style heading = () -> {
-            font.size(11, px).color("-fx-mid-text-color");
+            font.size(13, px).weight(700).color("-freja-muted");
             padding.vertical(6, px);
         };
 
         Style folderHeader = () -> padding.vertical(4, px);
 
         Style toolButton = () -> {
-            font.size(12, px).color("-fx-mid-text-color");
+            font.size(12, px).color("-freja-muted");
             padding.vertical(2, px).horizontal(6, px);
             cursor.pointer();
-            $.hover(() -> font.color("-fx-text-base-color"));
+            $.hover(() -> font.color("-freja-text"));
         };
 
         Style listArea = () -> overflow.auto();
 
         Style navRow = () -> {
-            padding.vertical(5, px).horizontal(8, px);
+            padding.vertical(6, px).horizontal(12, px);
             cursor.pointer();
             font.size(13, px);
-            $.hover(() -> background.color("derive(-fx-base, 6%)"));
+            $.hover(() -> background.color("-freja-hover"));
         };
 
         Style navSelected = () -> {
-            background.color("-fx-accent");
-            font.weight(700);
+            background.color("-freja-accent-soft");
+            font.weight(700).color("-freja-text");
         };
 
-        Style navIcon = () -> font.size(12, px).color("-fx-mid-text-color");
+        Style navIcon = () -> font.size(12, px).color("-freja-muted");
 
         Style navTitle = () -> {
             display.maxWidth(150, px);
             overflow.hidden();
         };
 
-        Style trailing = () -> font.size(11, px).color("-fx-mid-text-color");
+        Style trailing = () -> font.size(11, px).color("-freja-muted");
 
         Style empty = () -> {
-            font.size(11, px).color("-fx-mid-text-color");
+            font.size(11, px).color("-freja-muted");
             padding.vertical(10, px).horizontal(12, px);
         };
 

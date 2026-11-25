@@ -233,7 +233,8 @@
 
     /* =========================================================== state ==== */
 
-    const SECTION_LIMIT = 250;
+    /** Photos per IPC page: metadata for the rest of the catalog is fetched as the user scrolls. */
+    const PAGE_SIZE = 300;
 
     const S = {
         ready: false,
@@ -251,9 +252,13 @@
         folders: [],
         sections: [],
         photos: [],
+        photoSections: [],
+        total: 0,
+        hasMore: false,
+        loadingMore: false,
+        generation: 0,
         selected: new Map(),
         anchor: null,
-        expanded: new Set(),
         scrollFolder: null,
         scrollPending: false,
         tags: [],
@@ -657,6 +662,7 @@
         if (S.mode === mode && S.folderId === folderId) {
             if (mode === 'FOLDER' && folderId) {
                 if (!scrollToSection('F' + folderId)) { browse(); }
+                else { ensureFolderPhotos(folderId); }
             } else {
                 $('grid-wrap').scrollTop = 0;
             }
@@ -677,24 +683,52 @@
         renderFolders();
         if (folderJump && scrollToSection('F' + folderId)) {
             S.scrollFolder = null;
+            ensureFolderPhotos(folderId);
             return;
         }
         browse();
     }
 
-    function browse() {
+    /**
+     * Loads a browse result. A normal call resets the query and fetches its first metadata page;
+     * {@code append = true} fetches the next page as the grid approaches the end of loaded data.
+     */
+    function browse(append) {
         if (!S.ready) { return Promise.resolve(); }
+        if (append && (!S.hasMore || S.loadingMore)) { return Promise.resolve(); }
+        var generation = append ? S.generation : ++S.generation;
+        var offset = append ? S.photos.length : 0;
+        if (append) { S.loadingMore = true; }
         syncSortSelect();
         return call('freja:browse', {
-            mode: S.mode, folderId: S.folderId, sort: S.sort, search: S.search || null, tagIds: S.tagIds
+            mode: S.mode, folderId: S.folderId, sort: S.sort, search: S.search || null, tagIds: S.tagIds,
+            offset: offset, limit: PAGE_SIZE
         }).then(function (result) {
+            if (append) { S.loadingMore = false; }
+            if (generation !== S.generation) { return; }
+            if (append) {
+                if (result.offset !== offset) { return; }
+                var rows = result.photos || [];
+                var indexes = result.photoSections || [];
+                for (var i = 0; i < rows.length; i++) {
+                    S.photos.push(rows[i]);
+                    S.photoSections.push(indexes[i]);
+                }
+                S.hasMore = !!result.hasMore;
+                S.total = result.total || S.total;
+                updateVirtualWindow();
+                updateSelectionInfo();
+                return;
+            }
             S.mode = result.mode;
             S.folderId = result.folderId;
             S.stats = result.stats;
             S.folders = result.folders;
             S.sections = result.sections || [];
-            S.photos = [];
-            S.sections.forEach(function (section) { S.photos = S.photos.concat(section.photos); });
+            S.photos = (result.photos || []).slice();
+            S.photoSections = (result.photoSections || []).slice();
+            S.total = result.total || S.photos.length;
+            S.hasMore = !!result.hasMore;
             // keep the selection alive across refreshes
             var alive = new Map();
             S.photos.forEach(function (p) { if (S.selected.has(p.id)) { alive.set(p.id, p); } });
@@ -709,11 +743,15 @@
             showInspector(S.anchor);
             if (S.scrollFolder !== null && S.scrollFolder !== undefined) {
                 var key = 'F' + S.scrollFolder;
+                // Preload the selected folder's rows; the scroll jump itself may not fire an event.
+                ensureFolderPhotos(S.scrollFolder);
                 requestAnimationFrame(function () {
                     if (scrollToSection(key)) { S.scrollFolder = null; }
                 });
             }
-        }).catch(function () { });
+        }, function () {
+            if (append) { S.loadingMore = false; }
+        });
     }
 
     function scrollToSection(key) {
@@ -721,7 +759,34 @@
         if (!anchor) { return false; }
         var wrap = $('grid-wrap');
         wrap.scrollTop = anchor.offsetTop - wrap.offsetTop - 4;
+        // A programmatic scroll does not always schedule a scroll event (for example when the
+        // layout has just been rebuilt), so refresh the virtual window explicitly as well.
+        scheduleVirtualUpdate(false);
         return true;
+    }
+
+    /** Fetches metadata pages until the given flat photo index is reachable in the grid. */
+    function ensurePhotosThrough(index) {
+        var generation = S.generation;
+        function step() {
+            if (generation !== S.generation || !S.hasMore || S.photos.length > index) { return; }
+            if (S.loadingMore) { setTimeout(step, 80); return; }
+            browse(true).then(step);
+        }
+        step();
+    }
+
+    /** Starts loading the photos of a folder section selected from the sidebar. */
+    function ensureFolderPhotos(folderId) {
+        if (folderId === null || folderId === undefined) { return; }
+        for (var i = 0; i < S.sections.length; i++) {
+            var section = S.sections[i];
+            if (section.folderId == folderId) {
+                // The first rows of the section are enough to show; further rows follow on scroll.
+                ensurePhotosThrough((section.start || 0) + Math.min(section.count || 0, 60));
+                return;
+            }
+        }
     }
 
     function updateCounts() {
@@ -735,9 +800,143 @@
 
     var gridWrap = $('grid-wrap');
 
+    /**
+     * Virtual grid. Every section keeps its full height via a spacer, but only the rows inside
+     * (or near) the viewport own real card nodes. The pool is indexed by photo position, so a card
+     * is created once when it scrolls into view and removed again when it leaves the window.
+     */
+    var virtualSections = [];
+    var virtualPending = false;
+    var virtualGeometryDirty = false;
+    var virtualLastWidth = -1;
+    var OVERSCAN_ROWS = 2;
+
+    function gridGap() {
+        var cells = gridWrap.querySelector('.cells');
+        return cells ? parseFloat(getComputedStyle(cells).columnGap) || 10 : 10;
+    }
+
+    function scheduleVirtualUpdate(geometry) {
+        if (geometry) { virtualGeometryDirty = true; }
+        if (virtualPending) { return; }
+        virtualPending = true;
+        requestAnimationFrame(function () {
+            virtualPending = false;
+            if (virtualGeometryDirty) {
+                virtualGeometryDirty = false;
+                updateVirtualGeometry();
+            }
+            updateVirtualWindow();
+        });
+    }
+
+    /** Recomputes columns and placeholder heights after a resize or a thumbnail-size change. */
+    function updateVirtualGeometry() {
+        var size = S.thumb || 170;
+        var gap = gridGap();
+        virtualSections.forEach(function (v) {
+            var available = v.cells.clientWidth || 0;
+            v.cols = Math.max(1, Math.floor((available + gap) / (size + gap)));
+            v.rowHeight = size + gap;
+            v.rows = Math.ceil(v.count / v.cols);
+            v.cells.style.height = Math.max(0, v.rows * v.rowHeight - gap) + 'px';
+            // Positions change with the geometry, so every pooled node has to be rebuilt.
+            v.nodes.forEach(function (node) { node.remove(); });
+            v.nodes = new Map();
+        });
+    }
+
+    /** Pixel offset of the first row whose metadata has not been fetched yet. */
+    function loadedEnd() {
+        var loaded = S.photos.length;
+        for (var i = 0; i < virtualSections.length; i++) {
+            var v = virtualSections[i];
+            if (loaded < v.start) { break; }
+            if (loaded <= v.start + v.count) {
+                var wrapTop = gridWrap.getBoundingClientRect().top;
+                var cellsTop = v.cells.getBoundingClientRect().top - wrapTop + gridWrap.scrollTop;
+                return cellsTop + Math.ceil((loaded - v.start) / v.cols) * v.rowHeight;
+            }
+        }
+        return gridWrap.scrollHeight;
+    }
+
+    /** Materializes only the rows intersecting the scroll viewport, with a small overscan. */
+    function updateVirtualWindow() {
+        if (!virtualSections.length) { return; }
+        var size = S.thumb || 170;
+        var gap = gridGap();
+        var wrapTop = gridWrap.getBoundingClientRect().top;
+        var margin = OVERSCAN_ROWS * (size + gap);
+        var top = gridWrap.scrollTop - margin;
+        var bottom = gridWrap.scrollTop + gridWrap.clientHeight + margin;
+
+        virtualSections.forEach(function (v) {
+            if (!v.rows) { return; }
+            var cellsTop = v.cells.getBoundingClientRect().top - wrapTop + gridWrap.scrollTop;
+            var cellsBottom = cellsTop + v.rows * v.rowHeight;
+            if (cellsBottom < top || cellsTop > bottom) {
+                v.nodes.forEach(function (node) { node.remove(); });
+                v.nodes = new Map();
+                return;
+            }
+            var fromRow = Math.max(0, Math.floor((top - cellsTop) / v.rowHeight));
+            var toRow = Math.min(v.rows - 1, Math.floor((bottom - cellsTop) / v.rowHeight));
+            var from = v.start + fromRow * v.cols;
+            var to = Math.min(v.start + v.count, v.start + (toRow + 1) * v.cols);
+
+            // Release the cards which scrolled out of the window.
+            v.nodes.forEach(function (node, index) {
+                if (index < from || index >= to) {
+                    node.remove();
+                    v.nodes.delete(index);
+                }
+            });
+            for (var i = from; i < to; i++) {
+                var local = i - v.start;
+                var left = (local % v.cols) * (size + gap);
+                var upper = Math.floor(local / v.cols) * v.rowHeight;
+                var ready = i < S.photos.length;
+                var card = v.nodes.get(i);
+                // A placeholder becomes a real card as soon as its page arrives.
+                if (card && (card.dataset.placeholder === '1') === !ready) {
+                    if (card.style.left !== left + 'px') { card.style.left = left + 'px'; }
+                    if (card.style.top !== upper + 'px') { card.style.top = upper + 'px'; }
+                    continue;
+                }
+                if (card) { card.remove(); }
+                card = ready ? cardEl(S.photos[i]) : el('div', 'card placeholder');
+                if (!ready) { card.dataset.placeholder = '1'; }
+                card.style.position = 'absolute';
+                card.style.left = left + 'px';
+                card.style.top = upper + 'px';
+                v.cells.appendChild(card);
+                v.nodes.set(i, card);
+            }
+        });
+        paintSelection();
+        // The scroll height already covers the full catalog; ask for the next metadata page when
+        // the viewport approaches the end of the rows loaded so far, not the end of the catalog.
+        if (S.hasMore && !S.loadingMore && gridWrap.scrollTop + gridWrap.clientHeight * 1.5 >= loadedEnd()) {
+            browse(true);
+        }
+    }
+
+    gridWrap.addEventListener('scroll', function () { scheduleVirtualUpdate(false); }, { passive: true });
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(function () {
+            var width = Math.round(gridWrap.clientWidth);
+            if (width !== virtualLastWidth) {
+                virtualLastWidth = width;
+                scheduleVirtualUpdate(true);
+            }
+        }).observe(gridWrap);
+    }
+
     function renderGrid() {
         clear($('grid'));
         $('grid').style.setProperty('--thumb', S.thumb + 'px');
+        virtualSections = [];
         if (S.sections.length === 0 && S.stats && S.stats.folders > 0) {
             $('grid').appendChild(el('div', 'grid-empty', t('No photos match the current filter')));
             return;
@@ -750,26 +949,25 @@
                 block.appendChild(sectionHead(section));
             }
             var cells = el('div', 'cells');
-            var expanded = section.folderId < 0 || S.expanded.has(key);
-            var visible = expanded ? section.photos : section.photos.slice(0, SECTION_LIMIT);
-            visible.forEach(function (photo) { cells.appendChild(cardEl(photo)); });
+            // The flex wrap of the CSS layout is replaced by absolute rows inside a full-height
+            // spacer: the scroll range covers every photo, even the ones not fetched yet.
+            cells.style.display = 'block';
+            cells.style.position = 'relative';
             block.appendChild(cells);
-            if (visible.length < section.photos.length) {
-                var more = el('div', 'more-row');
-                var button = el('button', null, t('Show {0} more', [section.photos.length - visible.length]));
-                button.addEventListener('click', function () { S.expanded.add(key); renderGrid(); });
-                more.appendChild(button);
-                block.appendChild(more);
-            }
             $('grid').appendChild(block);
+            virtualSections.push({
+                key: key, cells: cells, start: section.start || 0, count: section.count || 0,
+                cols: 1, rows: 0, rowHeight: 0, nodes: new Map()
+            });
         });
-        paintSelection();
+        updateVirtualGeometry();
+        updateVirtualWindow();
     }
 
     function sectionHead(section) {
         var head = el('div', 'section-head' + (section.folderId >= 0 ? ' clickable' : ''));
         head.appendChild(el('span', 'section-title', section.label));
-        head.appendChild(el('span', 'section-count', t('{0} photos', [section.photos.length])));
+        head.appendChild(el('span', 'section-count', t('{0} photos', [section.count])));
         head.appendChild(el('span', 'grow'));
         if (section.folderId >= 0) {
             var chips = el('span', 'chips');
@@ -807,7 +1005,11 @@
         var card = el('div', 'card');
         card.dataset.id = photo.id;
         var img = el('img');
-        img.loading = 'lazy';
+        // Virtualisation already bounds the number of cards to the visible rows. Native lazy
+        // loading delays images inserted during a scroll jump (e.g. selecting a folder), which
+        // leaves only the filename badge visible until the next scroll; eager avoids that.
+        img.loading = 'eager';
+        img.decoding = 'async';
         img.alt = photo.fileName;
         img.src = thumbUrl(photo);
         img.addEventListener('error', function () {
@@ -815,6 +1017,7 @@
                 img.dataset.retry = '1';
                 img.src = thumbUrl(photo) + '&retry=1';
             } else {
+                card.classList.add('image-error');
                 img.style.visibility = 'hidden';
             }
         });
@@ -1210,7 +1413,7 @@
 
     /* ======================================================== viewer ==== */
 
-    const V = { photos: [], index: 0, open: false, fit: true, zoom: 1, panX: 0, panY: 0, timer: 0, generation: 0 };
+    const V = { photos: [], index: 0, open: false, fit: true, zoom: 1, panX: 0, panY: 0, timer: 0, generation: 0, fullscreen: false, cache: new Map() };
 
     var viewerImage = $('viewer-image');
     var viewerCanvas = $('viewer-canvas');
@@ -1226,45 +1429,89 @@
         V.photos = list;
         V.open = true;
         $('viewer').hidden = false;
+        setFullscreen(true);
         showPhoto(index);
     }
 
     function closeViewer() {
         V.open = false;
+        setFullscreen(false);
         stopSlideshow();
         $('viewer').hidden = true;
         viewerImage.hidden = true;
+    }
+
+    /** Switches the native window between normal and fullscreen while the viewer is open. */
+    function setFullscreen(on) {
+        if (V.fullscreen === on) { return; }
+        V.fullscreen = on;
+        var button = $('v-fullscreen');
+        button.classList.toggle('on', on);
+        button.title = t(on ? 'Exit fullscreen' : 'Fullscreen');
+        call('freja:fullscreen', on).catch(function () { });
+    }
+
+    function toggleFullscreen() {
+        setFullscreen(!V.fullscreen);
+    }
+
+    /** Decoded originals kept warm so back-and-forth navigation never blanks the canvas. */
+    function loadOriginal(photo) {
+        var cached = V.cache.get(photo.id);
+        if (cached && cached.complete && cached.naturalWidth) { return Promise.resolve(cached); }
+        var url = '/photo/' + photo.id + '/original?v=' + photo.modifiedAt;
+        return new Promise(function (resolve, reject) {
+            var img = new Image();
+            img.onload = function () {
+                // decode() waits for a paintable frame; without it the swap can show a blank frame.
+                if (img.decode) { img.decode().then(function () { resolve(img); }, function () { resolve(img); }); }
+                else { resolve(img); }
+            };
+            img.onerror = function () { reject(new Error('Cannot load the image')); };
+            img.src = url;
+        }).then(function (img) {
+            V.cache.delete(photo.id);
+            V.cache.set(photo.id, img);
+            while (V.cache.size > 6) { V.cache.delete(V.cache.keys().next().value); }
+            return img;
+        });
+    }
+
+    function prefetchNeighbours() {
+        [-1, 1].forEach(function (delta) {
+            var photo = V.photos[V.index + delta];
+            if (photo && !V.cache.has(photo.id)) { loadOriginal(photo).catch(function () { }); }
+        });
     }
 
     function showPhoto(index) {
         if (!V.photos.length || index < 0 || index >= V.photos.length) { return; }
         V.index = index;
         var photo = V.photos[index];
-        V.fit = true;
-        V.zoom = 1;
-        V.panX = 0;
-        V.panY = 0;
-        applyTransform();
         updateViewerToolbar();
         var token = ++V.generation;
-        viewerImage.hidden = true;
-        $('viewer-status').textContent = t('Loading…');
-        $('viewer-status').hidden = false;
-        var url = '/photo/' + photo.id + '/original?v=' + photo.modifiedAt;
-        var loader = new Image();
-        loader.onload = function () {
+        // Keep the previous frame on screen while the next one is being decoded. Only the very
+        // first photo shows the loading text; later navigation replaces the image in place.
+        if (viewerImage.hidden) {
+            $('viewer-status').textContent = t('Loading…');
+            $('viewer-status').hidden = false;
+        }
+        loadOriginal(photo).then(function (img) {
             if (token !== V.generation) { return; }
-            viewerImage.src = url;
-            viewerImage.hidden = false;
+            V.fit = true;
+            V.zoom = 1;
+            V.panX = 0;
+            V.panY = 0;
+            viewerImage.src = img.src;
+            if (viewerImage.hidden) { viewerImage.hidden = false; }
             $('viewer-status').hidden = true;
             applyTransform();
-        };
-        loader.onerror = function () {
+            prefetchNeighbours();
+        }).catch(function () {
             if (token !== V.generation) { return; }
             $('viewer-status').textContent = t('Cannot load the image');
-            $('viewer-status').hidden = false;
-        };
-        loader.src = url;
+            $('viewer-status').hidden = viewerImage.hidden;
+        });
     }
 
     function updateViewerToolbar() {
@@ -1332,6 +1579,7 @@
     $('v-fit').addEventListener('click', setFit);
     $('v-close').addEventListener('click', closeViewer);
     $('v-slideshow').addEventListener('click', toggleSlideshow);
+    $('v-fullscreen').addEventListener('click', toggleFullscreen);
 
     function toggleSlideshow() {
         if (V.timer) {
@@ -2073,6 +2321,7 @@
         $('set-thumb').value = px;
         $('set-thumb-value').textContent = px + ' px';
         $('zoom').title = t('Thumbnail size') + ': ' + px + ' px';
+        scheduleVirtualUpdate(true);
     }
 
     $('zoom').addEventListener('input', function () {
@@ -2113,6 +2362,7 @@
         $('page-photos').classList.toggle('selected', page === 'viewer');
         $('page-settings-btn').classList.toggle('selected', page === 'settings');
         if (page === 'settings') { syncSettingsPage(); }
+        else { scheduleVirtualUpdate(true); }
     }
 
     $('page-photos').addEventListener('click', function () { showPage('viewer'); });
@@ -2198,6 +2448,7 @@
             else if (event.key === '+' || event.key === '=') { zoomBy(1.18); }
             else if (event.key === '-' || event.key === '_') { zoomBy(1 / 1.18); }
             else if (event.key === '0' || event.key === 'f' || event.key === 'F') { setFit(); }
+            else if (event.key === 'F11') { toggleFullscreen(); event.preventDefault(); }
             return;
         }
         var typing = event.target && (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA');
@@ -2239,7 +2490,7 @@
     $('inspector').hidden = !S.inspector;
     $('split-inspector').hidden = !S.inspector;
     $('brand-version').textContent = apocrypha.app.version || '';
-    $('viewer-help').textContent = t('← → or scroll to move   ·   drag to pan   ·   +/- to zoom   ·   0 or F to fit   ·   Space for slideshow   ·   Esc to close');
+    $('viewer-help').textContent = t('← → or scroll to move   ·   drag to pan   ·   +/- to zoom   ·   0 or F to fit   ·   Space for slideshow   ·   F11 for fullscreen   ·   Esc to close');
 
     document.addEventListener('contextmenu', function (event) {
         // allow the native menu on inputs so text fields keep cut / copy / paste
