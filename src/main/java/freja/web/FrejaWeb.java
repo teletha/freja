@@ -71,6 +71,8 @@ public class FrejaWeb extends Application {
 
     private final AtomicReference<LibraryScanner> scanner = new AtomicReference<>();
 
+    private final AtomicReference<WebHandlers> handlers = new AtomicReference<>();
+
     private final AtomicReference<WebSettings> settings = new AtomicReference<>();
 
     private final AtomicReference<Window> window = new AtomicReference<>();
@@ -171,7 +173,9 @@ public class FrejaWeb extends Application {
         opener.setDaemon(true);
         opener.start();
 
-        ipc().register(new WebHandlers(this));
+        WebHandlers registered = new WebHandlers(this);
+        handlers.set(registered);
+        ipc().register(registered);
         serve("/photo/", new PhotoRoutes(this));
 
         Window frame = createWindow();
@@ -259,6 +263,10 @@ public class FrejaWeb extends Application {
      * renderer can refresh its view.
      */
     public void refreshBootstrap() {
+        WebHandlers registered = handlers.get();
+        if (registered != null) {
+            registered.invalidate();
+        }
         if (window.get() != null) {
             window.get().emit("freja:ready", bootstrap());
         }

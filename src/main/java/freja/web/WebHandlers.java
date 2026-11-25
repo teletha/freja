@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -52,6 +53,24 @@ public final class WebHandlers {
     private final FrejaWeb app;
 
     private final WebFullscreen fullscreen = new WebFullscreen();
+
+    /** The query signature of one cached browse snapshot. The revision makes every catalog change
+     * start a fresh generation of entries without having to clear the map under a catalog lock. */
+    private record BrowseKey(long revision, String mode, String folderId, SortOrder sort, String search,
+            List<Long> tagIds) {
+    }
+
+    /** A fully ordered result. Page requests only slice {@code photos} and {@code photoSections}. */
+    private record Snapshot(String mode, Long folderId, LibraryStats stats, List<Folder> folders,
+            List<WebModels.Section> sections, List<Photo> photos, List<Integer> photoSections) {
+    }
+
+    /** Cached ordered results, keyed by query signature. {@code computeIfAbsent} makes the first
+     * computation single-flight, so concurrent pages never walk the catalog more than once. */
+    private final ConcurrentHashMap<BrowseKey, Snapshot> snapshots = new ConcurrentHashMap<>();
+
+    /** Bumped on every catalog change so a snapshot computed during an invalidation is discarded. */
+    private volatile long revision;
 
     /**
      * Creates the handlers.
@@ -85,10 +104,9 @@ public final class WebHandlers {
     }
 
     /**
-     * Browse the catalog: read the request, apply the filter and hand back the ordered section
-     * descriptors plus one page of photo metadata. The renderer reserves the full scroll height from
-     * the section counts and asks for further pages as it scrolls, so neither the JSON payload nor
-     * the DOM grows with the whole library.
+     * Browse the catalog. Querying, ordering and grouping the whole matching catalog is done once
+     * per query signature and cached; each page request only slices that snapshot. Scroll jumps to
+     * a distant section therefore stay cheap no matter how many photos precede it.
      *
      * @param request the browse request, or null for none
      * @return the browse result
@@ -99,14 +117,46 @@ public final class WebHandlers {
         if (library == null || request == null) {
             return new WebModels.BrowseResult("ALL", null, null, List.of(), List.of(), List.of(), List.of(), 0, 0, false);
         }
+        long current = revision;
         SortOrder order = resolveOrder(request.sort());
-        Long requestedFolder = parseFolderId(request.folderId());
-        PhotoFilter filter = switch (request.mode()) {
+        BrowseKey key = new BrowseKey(current, request.mode(), request.folderId(), order, request.search(),
+                request.tagIds());
+        if (snapshots.size() > 8) {
+            snapshots.clear();
+        }
+        Snapshot snapshot = snapshots.computeIfAbsent(key, this::snapshot);
+        if (current != revision) {
+            BrowseKey fresh = new BrowseKey(revision, request.mode(), request.folderId(), order, request.search(),
+                    request.tagIds());
+            snapshot = snapshots.computeIfAbsent(fresh, this::snapshot);
+        }
+        int total = snapshot.photos().size();
+        int from = Math.min(request.offset(), total);
+        int to = Math.min(total, from + request.limit());
+        return new WebModels.BrowseResult(snapshot.mode(), snapshot.folderId(), snapshot.stats(), snapshot.folders(),
+                snapshot.sections(), from >= to ? List.of() : snapshot.photos().subList(from, to),
+                from >= to ? List.of() : snapshot.photoSections().subList(from, to), from, total, to < total);
+    }
+
+    /**
+     * Computes the full ordered result for one query signature. This is the only place which walks
+     * the whole catalog; {@link #browse(WebModels.BrowseRequest)} reuses it for every page.
+     *
+     * @param key the normalized query signature
+     * @return the ordered snapshot
+     */
+    private Snapshot snapshot(BrowseKey key) {
+        Library library = library();
+        if (library == null) {
+            return new Snapshot("ALL", null, new LibraryStats(0, 0, 0, 0, 0), List.of(), List.of(), List.of(), List.of());
+        }
+        Long requestedFolder = parseFolderId(key.folderId());
+        PhotoFilter filter = switch (key.mode()) {
         case "FAVORITES" -> PhotoFilter.favorites();
         case "RECENT" -> PhotoFilter.recent();
         default -> PhotoFilter.all();
         };
-        filter = filter.withSort(order).withSearch(request.search()).withTags(request.tagIds());
+        filter = filter.withSort(key.sort()).withSearch(key.search()).withTags(key.tagIds());
 
         List<Folder> folders = library.folders();
         List<Photo> photos = library.photos(filter);
@@ -119,9 +169,9 @@ public final class WebHandlers {
             final List<Long> matched = folderIds;
             visibleFolders = folders.stream().filter(folder -> matched.contains(folder.id())).toList();
         }
-        boolean fallback = "FOLDER".equals(request.mode()) && requestedFolder != null
+        boolean fallback = "FOLDER".equals(key.mode()) && requestedFolder != null
                 && visibleFolders.stream().noneMatch(folder -> folder.id() == requestedFolder);
-        String effectiveMode = fallback ? "ALL" : request.mode();
+        String effectiveMode = fallback ? "ALL" : key.mode();
         Long effectiveFolder = fallback ? null : requestedFolder;
 
         // Groups are collected first, then flattened into one ordered result. That keeps the
@@ -195,11 +245,14 @@ public final class WebHandlers {
                 sectionIndexes.add(i);
             }
         }
-        int total = orderedPhotos.size();
-        int from = Math.min(request.offset(), total);
-        int to = Math.min(total, from + request.limit());
-        return new WebModels.BrowseResult(effectiveMode, effectiveFolder, library.stats(), visibleFolders, sections, from >= to ? List
-                .of() : orderedPhotos.subList(from, to), from >= to ? List.of() : sectionIndexes.subList(from, to), from, total, to < total);
+        return new Snapshot(effectiveMode, effectiveFolder, library.stats(), visibleFolders, sections, orderedPhotos,
+                sectionIndexes);
+    }
+
+    /** Starts a new generation of snapshots after a catalog mutation. Old entries are left to the
+     * size bound instead of being cleared while a catalog lock might be held. */
+    void invalidate() {
+        revision++;
     }
 
     /**
@@ -833,6 +886,7 @@ public final class WebHandlers {
     }
 
     private void refreshBootstrap() {
+        invalidate();
         if (app != null) {
             app.refreshBootstrap();
         }

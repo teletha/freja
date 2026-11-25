@@ -24,7 +24,6 @@ public class Project extends bee.api.Project {
         require("io.github.teletha", "apocrypha");
         require("com.formdev", "flatlaf");
         require("com.formdev", "flatlaf-intellij-themes");
-        require("io.github.globaltcad", "swing-tree");
         require("org.xerial", "sqlite-jdbc");
         require("io.github.teletha", "antibug").atTest();
     }

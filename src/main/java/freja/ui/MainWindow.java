@@ -1171,7 +1171,8 @@ public final class MainWindow extends JFrame {
         if (photo == null) {
             return;
         }
-        if (viewer != null && viewer.isDisplayable()) {
+        if (viewer != null) {
+            // A viewer waiting on its first decode is not displayable yet; it still has to go.
             viewer.dispose();
         }
         List<Photo> photos = selection == null || selection.isEmpty() ? grid.photos() : selection;
@@ -1181,7 +1182,7 @@ public final class MainWindow extends JFrame {
         viewer = PhotoViewer.open(this, photos, photo, (updated, favorite) -> {
             library.setFavorite(updated.id(), favorite);
             refreshAll();
-        }, cache.get(photo.id(), photo.modifiedAt()));
+        });
     }
 
     private void openSlideshow() {

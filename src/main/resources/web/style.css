@@ -216,6 +216,9 @@ body {
     flex: none;
 }
 
+/* Buttons keep their label on one line and are never squeezed by a flex row. */
+button { white-space: nowrap; flex: none; }
+
 button.tool, .settings-body button, .modal button, .popover button, #welcome button {
     background: var(--panel-2);
     color: var(--text);
@@ -470,7 +473,7 @@ select:focus, input:focus, textarea:focus { border-color: var(--accent); }
 .insp-name.placeholder { color: var(--muted); }
 .insp-folder { font-size: 11px; color: var(--muted); min-height: 14px; overflow-wrap: anywhere; }
 
-.insp-actions { display: flex; gap: 8px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
+.insp-actions { display: flex; gap: 8px; margin-top: 6px; align-items: center; flex-wrap: nowrap; }
 
 .insp-rating { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
 .insp-rating #insp-rating-label { font-size: 11px; color: var(--muted); }

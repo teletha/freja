@@ -253,6 +253,7 @@
         sections: [],
         photos: [],
         photoSections: [],
+        loadedThrough: 0,
         total: 0,
         hasMore: false,
         loadingMore: false,
@@ -448,6 +449,7 @@
         document.documentElement.dataset.theme = S.theme;
         $('tb-theme').textContent = S.theme === 'dark' ? '☀' : '☾';
         document.documentElement.lang = LANG.indexOf('ja') === 0 ? 'ja' : LANG;
+        applySplitters();
         translateStatic();
         renderSortOptions();
         renderLibraryRows();
@@ -690,90 +692,117 @@
     }
 
     /**
-     * Loads a browse result. A normal call resets the query and fetches its first metadata page;
-     * {@code append = true} fetches the next page as the grid approaches the end of loaded data.
+     * Loads one metadata page. 'reset' replaces the whole grid state, 'append' takes the next
+     * contiguous page and 'window' takes a page at an explicit absolute offset. The backend
+     * already supports arbitrary offsets, so a jump to a distant section costs one call instead of
+     * walking through every preceding page.
      */
-    function browse(append) {
+    function browse(mode, offset) {
         if (!S.ready) { return Promise.resolve(); }
-        if (append && (!S.hasMore || S.loadingMore)) { return Promise.resolve(); }
-        var generation = append ? S.generation : ++S.generation;
-        var offset = append ? S.photos.length : 0;
-        if (append) { S.loadingMore = true; }
+        mode = mode || 'reset';
+        if (mode === 'append' && (!S.hasMore || S.loadingMore)) { return Promise.resolve(); }
+        var generation = mode === 'append' ? S.generation : ++S.generation;
+        var at = mode === 'append' ? S.loadedThrough : (offset || 0);
+        if (mode === 'append') { S.loadingMore = true; }
         syncSortSelect();
         return call('freja:browse', {
             mode: S.mode, folderId: S.folderId, sort: S.sort, search: S.search || null, tagIds: S.tagIds,
-            offset: offset, limit: PAGE_SIZE
+            offset: at, limit: PAGE_SIZE
         }).then(function (result) {
-            if (append) { S.loadingMore = false; }
+            if (mode === 'append') { S.loadingMore = false; }
             if (generation !== S.generation) { return; }
-            if (append) {
-                if (result.offset !== offset) { return; }
-                var rows = result.photos || [];
-                var indexes = result.photoSections || [];
-                for (var i = 0; i < rows.length; i++) {
-                    S.photos.push(rows[i]);
-                    S.photoSections.push(indexes[i]);
-                }
+            var rows = result.photos || [];
+            var indexes = result.photoSections || [];
+            if (mode === 'reset') {
+                S.mode = result.mode;
+                S.folderId = result.folderId;
+                S.stats = result.stats;
+                S.folders = result.folders;
+                S.sections = result.sections || [];
+                S.photos = rows.slice();
+                S.photoSections = indexes.slice();
+                S.loadedThrough = rows.length;
+                S.total = result.total || rows.length;
                 S.hasMore = !!result.hasMore;
-                S.total = result.total || S.total;
-                updateVirtualWindow();
+                // keep the selection alive across refreshes
+                var alive = new Map();
+                S.photos.forEach(function (p) { if (S.selected.has(p.id)) { alive.set(p.id, p); } });
+                S.selected = alive;
+                S.anchor = null;
+                alive.forEach(function (p) { S.anchor = p; });
+                renderLibraryRows();
+                renderFolders();
+                renderGrid();
+                updateCounts();
                 updateSelectionInfo();
+                showInspector(S.anchor);
+                if (S.scrollFolder !== null && S.scrollFolder !== undefined) {
+                    var key = 'F' + S.scrollFolder;
+                    // Preload the selected folder's rows; the scroll jump itself may not fire an event.
+                    ensureFolderPhotos(S.scrollFolder);
+                    requestAnimationFrame(function () {
+                        if (scrollToSection(key)) { S.scrollFolder = null; }
+                    });
+                }
                 return;
             }
-            S.mode = result.mode;
-            S.folderId = result.folderId;
-            S.stats = result.stats;
-            S.folders = result.folders;
-            S.sections = result.sections || [];
-            S.photos = (result.photos || []).slice();
-            S.photoSections = (result.photoSections || []).slice();
-            S.total = result.total || S.photos.length;
+            if (result.offset !== at) { return; }
+            fillWindow(at, rows, indexes);
+            S.total = result.total || S.total;
             S.hasMore = !!result.hasMore;
-            // keep the selection alive across refreshes
-            var alive = new Map();
-            S.photos.forEach(function (p) { if (S.selected.has(p.id)) { alive.set(p.id, p); } });
-            S.selected = alive;
-            S.anchor = null;
-            alive.forEach(function (p) { S.anchor = p; });
-            renderLibraryRows();
-            renderFolders();
-            renderGrid();
-            updateCounts();
+            updateVirtualWindow();
             updateSelectionInfo();
-            showInspector(S.anchor);
-            if (S.scrollFolder !== null && S.scrollFolder !== undefined) {
-                var key = 'F' + S.scrollFolder;
-                // Preload the selected folder's rows; the scroll jump itself may not fire an event.
-                ensureFolderPhotos(S.scrollFolder);
-                requestAnimationFrame(function () {
-                    if (scrollToSection(key)) { S.scrollFolder = null; }
-                });
-            }
         }, function () {
-            if (append) { S.loadingMore = false; }
+            if (mode === 'append') { S.loadingMore = false; }
         });
+    }
+
+    /** Windows currently being fetched, keyed by their aligned absolute offset. */
+    var pendingWindows = new Set();
+
+    /** Merges a metadata page into the sparse absolute-index arrays. */
+    function fillWindow(offset, rows, indexes) {
+        if (S.photos.length < offset) { S.photos.length = offset; }
+        if (S.photoSections.length < offset) { S.photoSections.length = offset; }
+        for (var i = 0; i < rows.length; i++) {
+            S.photos[offset + i] = rows[i];
+            S.photoSections[offset + i] = indexes[i];
+        }
+        S.loadedThrough = Math.max(S.loadedThrough || 0, offset + rows.length);
     }
 
     function scrollToSection(key) {
         var anchor = $('grid').querySelector('[data-section="' + CSS.escape(key) + '"]');
         if (!anchor) { return false; }
         var wrap = $('grid-wrap');
-        wrap.scrollTop = anchor.offsetTop - wrap.offsetTop - 4;
+        // Measure in viewport coordinates. offsetTop is relative to #grid-wrap's padding box, while
+        // wrap.offsetTop belongs to a different offset parent; subtracting it stopped the jump short
+        // and left the previous section's sticky header pinned at the top.
+        var top = anchor.getBoundingClientRect().top - wrap.getBoundingClientRect().top + wrap.scrollTop;
+        wrap.scrollTop = Math.max(0, top);
         // A programmatic scroll does not always schedule a scroll event (for example when the
         // layout has just been rebuilt), so refresh the virtual window explicitly as well.
         scheduleVirtualUpdate(false);
         return true;
     }
 
-    /** Fetches metadata pages until the given flat photo index is reachable in the grid. */
+    /** Fetches the single metadata page containing the given absolute photo index. */
     function ensurePhotosThrough(index) {
-        var generation = S.generation;
-        function step() {
-            if (generation !== S.generation || !S.hasMore || S.photos.length > index) { return; }
-            if (S.loadingMore) { setTimeout(step, 80); return; }
-            browse(true).then(step);
+        if (index === null || index === undefined || index < 0) { return Promise.resolve(); }
+        var start = Math.floor(index / PAGE_SIZE) * PAGE_SIZE;
+        if (pendingWindows.has(start) || start >= (S.total || 0)) { return Promise.resolve(); }
+        var end = Math.min(start + PAGE_SIZE, S.total || start + PAGE_SIZE);
+        var complete = true;
+        for (var i = start; i < end; i++) {
+            if (!S.photos[i]) { complete = false; break; }
         }
-        step();
+        if (complete) { return Promise.resolve(); }
+        pendingWindows.add(start);
+        return browse('window', start).then(function () {
+            pendingWindows.delete(start);
+        }, function () {
+            pendingWindows.delete(start);
+        });
     }
 
     /** Starts loading the photos of a folder section selected from the sidebar. */
@@ -848,7 +877,7 @@
 
     /** Pixel offset of the first row whose metadata has not been fetched yet. */
     function loadedEnd() {
-        var loaded = S.photos.length;
+        var loaded = S.loadedThrough || S.photos.length;
         for (var i = 0; i < virtualSections.length; i++) {
             var v = virtualSections[i];
             if (loaded < v.start) { break; }
@@ -870,6 +899,7 @@
         var margin = OVERSCAN_ROWS * (size + gap);
         var top = gridWrap.scrollTop - margin;
         var bottom = gridWrap.scrollTop + gridWrap.clientHeight + margin;
+        var missing = -1;
 
         virtualSections.forEach(function (v) {
             if (!v.rows) { return; }
@@ -896,7 +926,9 @@
                 var local = i - v.start;
                 var left = (local % v.cols) * (size + gap);
                 var upper = Math.floor(local / v.cols) * v.rowHeight;
-                var ready = i < S.photos.length;
+                var photo = S.photos[i];
+                var ready = !!photo;
+                if (!ready && missing < 0) { missing = i; }
                 var card = v.nodes.get(i);
                 // A placeholder becomes a real card as soon as its page arrives.
                 if (card && (card.dataset.placeholder === '1') === !ready) {
@@ -905,7 +937,7 @@
                     continue;
                 }
                 if (card) { card.remove(); }
-                card = ready ? cardEl(S.photos[i]) : el('div', 'card placeholder');
+                card = ready ? cardEl(photo) : el('div', 'card placeholder');
                 if (!ready) { card.dataset.placeholder = '1'; }
                 card.style.position = 'absolute';
                 card.style.left = left + 'px';
@@ -914,11 +946,15 @@
                 v.nodes.set(i, card);
             }
         });
+        // A hole means the viewport reached metadata that was never fetched (for example after a
+        // jump). Fetch just that aligned page instead of walking from index zero.
+        if (missing >= 0) { ensurePhotosThrough(missing); }
         paintSelection();
         // The scroll height already covers the full catalog; ask for the next metadata page when
         // the viewport approaches the end of the rows loaded so far, not the end of the catalog.
-        if (S.hasMore && !S.loadingMore && gridWrap.scrollTop + gridWrap.clientHeight * 1.5 >= loadedEnd()) {
-            browse(true);
+        if (missing < 0 && S.hasMore && !S.loadingMore
+                && gridWrap.scrollTop + gridWrap.clientHeight * 1.5 >= loadedEnd()) {
+            browse('append');
         }
     }
 
@@ -1075,7 +1111,10 @@
         if (from < 0 || to < 0) { selectOnly(photo); return; }
         if (from > to) { var swap = from; from = to; to = swap; }
         S.selected = new Map();
-        for (var i = from; i <= to; i++) { S.selected.set(S.photos[i].id, S.photos[i]); }
+        for (var i = from; i <= to; i++) {
+            var p = S.photos[i];
+            if (p) { S.selected.set(p.id, p); }
+        }
         S.anchor = photo;
         paintSelection();
         updateSelectionInfo();
@@ -1085,7 +1124,8 @@
     function indexOf(photo) {
         if (!photo) { return -1; }
         for (var i = 0; i < S.photos.length; i++) {
-            if (S.photos[i].id === photo.id) { return i; }
+            var p = S.photos[i];
+            if (p && p.id === photo.id) { return i; }
         }
         return -1;
     }
@@ -1144,7 +1184,7 @@
     function setFavorites(ids, value) {
         call('freja:favorite', { ids: ids, value: value }).then(function () {
             ids.forEach(function (id) {
-                var photo = S.photos.find(function (p) { return p.id === id; });
+                var photo = S.photos.find(function (p) { return p && p.id === id; });
                 if (photo) { photo.favorite = value; }
                 S.selected.forEach(function (p, key) { if (key === id) { p.favorite = value; } });
                 var card = gridWrap.querySelector('.card[data-id="' + id + '"]');
@@ -1296,7 +1336,7 @@
                     var next = photo.rating === value ? 0 : value;
                     call('freja:rating', photo.id, next).then(function () {
                         photo.rating = next;
-                        var card = S.photos.find(function (p) { return p.id === photo.id; });
+                        var card = S.photos.find(function (p) { return p && p.id === photo.id; });
                         if (card) { card.rating = next; }
                         renderStars(next, true);
                     }).catch(function () { });
@@ -1327,7 +1367,7 @@
         var value = $('insp-caption').value.trim();
         call('freja:caption', photo.id, value).then(function () {
             photo.caption = value || null;
-            var card = S.photos.find(function (p) { return p.id === photo.id; });
+            var card = S.photos.find(function (p) { return p && p.id === photo.id; });
             if (card) { card.caption = value || null; }
             $('insp-save-caption').style.display = 'none';
         }).catch(function () { });
@@ -1419,7 +1459,7 @@
     var viewerCanvas = $('viewer-canvas');
 
     function openViewer(photo, subset) {
-        var list = subset && subset.length ? subset.slice() : S.photos.slice();
+        var list = subset && subset.length ? subset.slice() : S.photos.filter(Boolean).slice();
         if (list.length === 0 && photo) { list = [photo]; }
         if (list.length === 0) { return; }
         var index = 0;
@@ -1525,7 +1565,7 @@
         favorite.classList.toggle('on', photo.favorite);
         favorite.title = t(photo.favorite ? 'Remove from favorites' : 'Add to favorites');
         // keep the grid card in sync after in-viewer favorites
-        var card = S.photos.find(function (p) { return p.id === photo.id; });
+        var card = S.photos.find(function (p) { return p && p.id === photo.id; });
         if (card) { card.favorite = photo.favorite; }
     }
 
@@ -2381,6 +2421,7 @@
             function up() {
                 window.removeEventListener('mousemove', move);
                 window.removeEventListener('mouseup', up);
+                setSetting(widthKey, Math.round(target.getBoundingClientRect().width));
             }
             window.addEventListener('mousemove', move);
             window.addEventListener('mouseup', up);
@@ -2389,6 +2430,20 @@
 
     splitter($('split-sidebar'), $('sidebar'), 180, 460, 'sidebarWidth', 'left');
     splitter($('split-inspector'), $('inspector'), 240, 520, 'inspectorWidth', 'right');
+
+    /** Restores one persisted divider position, clamped to the same range as the drag handler. */
+    function restoreSplitter(target, key, min, max) {
+        var raw = S.settings[key];
+        if (raw === undefined || raw === null || raw === '') { return; }
+        var width = parseInt(raw, 10);
+        if (!isFinite(width)) { return; }
+        target.style.width = Math.max(min, Math.min(max, width)) + 'px';
+    }
+
+    function applySplitters() {
+        restoreSplitter($('sidebar'), 'sidebarWidth', 180, 460);
+        restoreSplitter($('inspector'), 'inspectorWidth', 240, 520);
+    }
 
     /* settings page bindings */
 

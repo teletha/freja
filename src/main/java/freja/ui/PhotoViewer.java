@@ -86,17 +86,27 @@ public final class PhotoViewer extends JDialog {
         return thread;
     });
 
+    /** How long a failed or very slow decode holds the window back before it is shown anyway. */
+    private static final int REVEAL_DELAY_MS = Integer.getInteger("freja.viewer.revealDelayMs", 1500);
+
     private final AtomicLong generation = new AtomicLong();
 
     private final Timer slideshowTimer;
+
+    /** Shows the window once the first decode is in place, or after a short safety delay. */
+    private final Timer revealTimer;
+
+    /** Whether the window has been made visible yet. */
+    private boolean revealed;
+
+    /** Set by {@link #dispose()}, so a pending reveal never shows a closed window. */
+    private boolean closed;
 
     private Photo photo;
 
     private BufferedImage image;
 
     private long loadedPhotoId = -1;
-
-    private boolean loading;
 
     private String error;
 
@@ -120,10 +130,6 @@ public final class PhotoViewer extends JDialog {
     };
 
     public PhotoViewer(Window owner, List<Photo> photos, Photo start) {
-        this(owner, photos, start, null);
-    }
-
-    public PhotoViewer(Window owner, List<Photo> photos, Photo start, BufferedImage placeholder) {
         super(owner, "Freja", ModalityType.MODELESS);
         setIconImage(Icons.applicationImage());
         this.photos = List.copyOf(photos);
@@ -184,6 +190,8 @@ public final class PhotoViewer extends JDialog {
 
         slideshowTimer = new Timer(3600, event -> move(1));
         slideshowTimer.setInitialDelay(3600);
+        revealTimer = new Timer(REVEAL_DELAY_MS, event -> reveal());
+        revealTimer.setRepeats(false);
 
         installKeys();
         canvas.addMouseListener(new MouseAdapter() {
@@ -224,9 +232,9 @@ public final class PhotoViewer extends JDialog {
             }
         });
 
-        // Never read a file on the event dispatch thread. The cached thumbnail, when available, is
-        // shown immediately and replaced by the full image once the background decode finishes.
-        image = placeholder;
+        // Never read a file on the event dispatch thread. Nothing is painted until the full decode
+        // arrives: showing the cached thumbnail in the meantime meant a small, stretched version of
+        // the photo flashed ahead of the real one.
         showPhoto(index);
     }
 
@@ -257,15 +265,32 @@ public final class PhotoViewer extends JDialog {
      * @return the visible viewer
      */
     public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener) {
-        return open(owner, photos, start, listener, null);
+        PhotoViewer viewer = new PhotoViewer(owner, photos, start);
+        viewer.setListener(listener);
+        viewer.startReveal();
+        return viewer;
     }
 
-    public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener,
-            BufferedImage placeholder) {
-        PhotoViewer viewer = new PhotoViewer(owner, photos, start, placeholder);
-        viewer.setListener(listener);
-        viewer.coverScreen();
-        return viewer;
+    /**
+     * Keeps the window hidden until the first full image has been decoded, so the viewer opens with
+     * the finished photograph instead of an empty or loading frame. The timer is the safety net for
+     * an unreadable file: the window still arrives, with the error on the canvas.
+     */
+    private void startReveal() {
+        if (image != null) {
+            reveal();
+        } else {
+            revealTimer.start();
+        }
+    }
+
+    private void reveal() {
+        if (revealed || closed) {
+            return;
+        }
+        revealed = true;
+        revealTimer.stop();
+        coverScreen();
     }
 
     /**
@@ -345,7 +370,6 @@ public final class PhotoViewer extends JDialog {
         boolean ready = image != null && loadedPhotoId == photo.id();
         // Keep the previous frame on screen until the next one is decoded; clearing it here makes
         // every arrow press flash the viewer background.
-        loading = !ready;
         if (ready) {
             error = null;
         }
@@ -376,7 +400,6 @@ public final class PhotoViewer extends JDialog {
                 if (token != generation.get()) {
                     return;
                 }
-                loading = false;
                 error = message;
                 image = result;
                 loadedPhotoId = image == null ? -1 : id;
@@ -384,6 +407,9 @@ public final class PhotoViewer extends JDialog {
                     zoom = fitScale();
                 }
                 canvas.repaint();
+                // The first decoded frame is what the window opens on; later navigations find the
+                // window already revealed and this call does nothing.
+                reveal();
             });
         });
     }
@@ -464,6 +490,8 @@ public final class PhotoViewer extends JDialog {
 
     @Override
     public void dispose() {
+        closed = true;
+        revealTimer.stop();
         slideshowTimer.stop();
         generation.incrementAndGet();
         loader.shutdownNow();
@@ -502,9 +530,9 @@ public final class PhotoViewer extends JDialog {
                 g.setColor(Theme.VIEWER);
                 g.fillRect(0, 0, getWidth(), getHeight());
                 if (image == null) {
-                    if (loading) {
-                        paintCentered(g, "読み込み中…", Theme.FAINT);
-                    } else if (error != null) {
+                    // Nothing intermediate is painted: the window only appears once the full image
+                    // is ready, or when there is an error to report.
+                    if (error != null) {
                         paintCentered(g, "画像を読み込めません", new Color(0xC9CDD3));
                         paintCentered(g, error, new Color(0x777D86), 24);
                     } else {
