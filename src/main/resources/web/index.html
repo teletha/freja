@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ja" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Freja</title>
+    <!-- Suppress the browser's automatic /favicon.ico request, which otherwise logs a
+         harmless 404 to the console on every page load. -->
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="menubar">
+        <div class="menu" data-menu="file"><span id="menu-file">ファイル</span></div>
+        <div class="menu" data-menu="view"><span id="menu-view">表示</span></div>
+        <div class="menu" data-menu="help"><span id="menu-help">ヘルプ</span></div>
+        <div class="grow"></div>
+        <div class="brand">Freja <span class="pill" id="brand-version"></span></div>
+    </div>
+
+    <div id="content">
+        <nav id="activity">
+            <button class="activity-button selected" id="page-photos" title="写真ライブラリ">🖼</button>
+            <button class="activity-button" id="page-settings-btn" title="設定">⚙</button>
+        </nav>
+
+        <div id="pages">
+            <!-- ============ photo page ============ -->
+            <section class="page active" id="page-viewer">
+                <aside id="sidebar">
+                    <div class="side-section">
+                        <div class="side-heading" id="heading-library">ライブラリ</div>
+                        <div id="library-list"></div>
+                    </div>
+                    <div class="side-sep"></div>
+                    <div class="side-section side-folders">
+                        <div class="side-heading folder-header">
+                            <span id="heading-folders">フォルダ</span>
+                            <span class="count-badge" id="folder-count"></span>
+                            <span class="grow"></span>
+                            <button class="icon-tool" id="manage-tags" title="タグを管理">🏷</button>
+                            <button class="icon-tool" id="add-folder" title="監視フォルダを管理">＋</button>
+                        </div>
+                        <div id="folder-list" class="scroll-y"></div>
+                        <div class="side-empty" id="folder-empty">フォルダが登録されていません</div>
+                    </div>
+                </aside>
+                <div class="drag-split" id="split-sidebar"></div>
+
+                <div id="center">
+                    <div id="toolbar">
+                        <button class="tool" id="tb-add"><span class="i">📁</span><span id="tb-add-label">フォルダを追加</span></button>
+                        <button class="tool" id="tb-rescan" title="すべてのフォルダを再スキャン (F5)"><span class="i">↻</span><span id="tb-rescan-label">再スキャン</span></button>
+                        <div class="search-box">
+                            <span class="i">🔍</span>
+                            <input id="search" type="text" placeholder="検索" autocomplete="off" spellcheck="false">
+                            <button class="clear" id="search-clear" title="消去">×</button>
+                        </div>
+                        <button class="tool" id="tb-tags" title="タグで絞り込む"><span class="i">🏷</span><span id="tb-tags-label">タグ</span></button>
+                        <div class="grow"></div>
+                        <select id="sort" title="並び順"></select>
+                        <input id="zoom" type="range" min="120" max="220" step="10" value="170" title="サムネイルサイズ">
+                        <button class="tool" id="tb-slideshow" title="スライドショー (F11)"><span class="i">▶</span><span id="tb-slideshow-label">スライドショー</span></button>
+                        <button class="tool icon-only" id="tb-theme" title="ダーク / ライト">☀</button>
+                    </div>
+
+                    <div id="mid">
+                        <div id="grid-wrap" class="scroll-y">
+                            <div id="grid"></div>
+                            <div id="welcome" hidden>
+                                <div class="welcome-icon">🖼</div>
+                                <div class="welcome-title" id="welcome-title">写真をまとめて、すぐに見つける</div>
+                                <p id="welcome-line1">フォルダを登録すると、サムネイルとメタデータを自動で作成し、</p>
+                                <p id="welcome-line2">その後の追加・変更・削除もバックグラウンドで追跡します。</p>
+                                <button class="primary" id="welcome-add">フォルダを追加</button>
+                                <div class="welcome-path" id="welcome-library"></div>
+                                <div class="welcome-path" id="welcome-note"></div>
+                            </div>
+                        </div>
+                        <div class="drag-split" id="split-inspector"></div>
+                        <aside id="inspector">
+                            <div class="insp-body scroll-y">
+                                <img id="insp-preview" class="insp-preview" alt="" hidden>
+                                <div id="insp-name" class="insp-name">写真を選択してください</div>
+                                <div id="insp-folder" class="insp-folder"></div>
+                                <div class="insp-actions">
+                                    <button class="primary" id="insp-open">開く</button>
+                                    <button id="insp-favorite">お気に入り</button>
+                                </div>
+                                <div class="insp-rating">
+                                    <span id="insp-rating-label">評価</span>
+                                    <span id="insp-stars" class="stars"></span>
+                                </div>
+                                <div class="insp-sep"></div>
+                                <dl class="insp-info">
+                                    <div><dt id="lbl-capture">撮影日</dt><dd id="val-capture">—</dd></div>
+                                    <div><dt id="lbl-dimensions">サイズ</dt><dd id="val-dimensions">—</dd></div>
+                                    <div><dt id="lbl-size">ファイルサイズ</dt><dd id="val-size">—</dd></div>
+                                    <div><dt id="lbl-camera">カメラ</dt><dd id="val-camera">—</dd></div>
+                                    <div><dt id="lbl-lens">レンズ</dt><dd id="val-lens">—</dd></div>
+                                    <div><dt id="lbl-exposure">露出</dt><dd id="val-exposure">—</dd></div>
+                                </dl>
+                                <div class="insp-sep"></div>
+                                <div class="insp-caption-title" id="lbl-caption">キャプション</div>
+                                <textarea id="insp-caption" rows="3" disabled></textarea>
+                                <div class="insp-actions">
+                                    <button id="insp-save-caption">保存</button>
+                                    <button class="link" id="insp-reveal">エクスプローラーで表示</button>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+
+                    <div id="statusbar">
+                        <span id="status-message">準備完了</span>
+                        <div class="grow"></div>
+                        <span id="status-selection" class="muted"></span>
+                        <div class="grow"></div>
+                        <span id="status-progress" hidden><span class="bar"><span class="bar-fill" id="progress-fill"></span></span></span>
+                        <span id="status-count" class="muted"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ settings page ============ -->
+            <section class="page" id="page-settings">
+                <div class="settings-body scroll-y">
+                    <h1 id="settings-title">設定</h1>
+
+                    <h2 id="settings-appearance">外観</h2>
+                    <p class="settings-note" id="settings-appearance-note">テーマと色使いを調整します。</p>
+                    <div class="setting-row"><label id="lbl-theme">テーマ</label>
+                        <select id="set-theme">
+                            <option value="dark">ダーク</option>
+                            <option value="light">ライト</option>
+                        </select>
+                    </div>
+
+                    <h2 id="settings-library">ライブラリ</h2>
+                    <p class="settings-note" id="settings-library-note">スキャンと監視フォルダの設定です。</p>
+                    <div class="setting-row"><label id="lbl-scan-start">起動時にスキャン</label><input type="checkbox" id="set-scan-start"></div>
+                    <div class="setting-row"><label id="lbl-sweep">定期見回りスキャン</label><input type="checkbox" id="set-sweep"></div>
+                    <div class="setting-row"><label id="lbl-watch">監視フォルダ</label><button id="set-manage-folders">監視フォルダを管理…</button></div>
+
+                    <h2 id="settings-grid">グリッド</h2>
+                    <p class="settings-note" id="settings-grid-note">写真ウォールのサムネイルサイズです。</p>
+                    <div class="setting-row"><label id="lbl-thumb">サムネイルサイズ</label>
+                        <input type="range" id="set-thumb" min="120" max="220" step="10"><span id="set-thumb-value">170 px</span>
+                    </div>
+
+                    <h2 id="settings-language">言語</h2>
+                    <p class="settings-note" id="settings-language-note">表示言語を選ぶと、翻訳済みラベルがその場で更新されます。</p>
+                    <div class="setting-row"><label id="lbl-language">表示言語</label><select id="set-language"></select></div>
+
+                    <h2 id="settings-system">システム</h2>
+                    <p class="settings-note" id="settings-system-note">アプリケーション情報の確認と再起動です。</p>
+                    <div class="setting-row"><label></label>
+                        <button id="set-about">Freja について</button>
+                        <button id="set-restart">再起動</button>
+                    </div>
+                    <div class="settings-note" id="settings-library-path"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ============ photo viewer overlay ============ -->
+    <div id="viewer" hidden>
+        <div class="viewer-bar top">
+            <div class="viewer-caption">
+                <div id="viewer-title"></div>
+                <div id="viewer-counter"></div>
+            </div>
+            <div class="grow"></div>
+            <button class="vtool" id="v-prev" title="前へ">‹</button>
+            <button class="vtool" id="v-next" title="次へ">›</button>
+            <button class="vtool" id="v-favorite" title="お気に入り">☆</button>
+            <button class="vtool" id="v-fit">フィット</button>
+            <button class="vtool" id="v-slideshow" title="スライドショー">▶</button>
+            <button class="vtool" id="v-close" title="閉じる">✕</button>
+        </div>
+        <div id="viewer-canvas">
+            <img id="viewer-image" alt="" draggable="false" hidden>
+            <div id="viewer-status"></div>
+        </div>
+        <div class="viewer-bar bottom"><span id="viewer-help"></span></div>
+    </div>
+
+    <div id="floating"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

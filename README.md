@@ -15,6 +15,43 @@ A fast, local-first photo library for the desktop.
 
 
 
+## Editions
+Freja ships three interchangeable user interfaces on top of the same SQLite catalog and scanner:
+
+| Edition | Entry point | Toolkit |
+|---|---|---|
+| Swing (default) | `freja.Freja` | Swing + FlatLaf |
+| JavaFX (Viewtify) | `freja.fx.FrejaFX` | JavaFX via [Viewtify](https://github.com/teletha/viewtify) |
+| Browser (Apocrypha) | `freja.web.FrejaWeb` | HTML/CSS/JS via [Apocrypha](https://github.com/teletha/apocrypha) |
+
+All editions read and write the same library (`%LOCALAPPDATA%\Freja\library.db` by default), so
+you can switch between them freely. They share the single-instance port, meaning starting one
+asks the other to close (disable with `-Dfreja.singleInstance=false` for testing).
+
+To start the JavaFX edition:
+
+```
+java --enable-native-access=ALL-UNNAMED -cp <dependencies> freja.fx.FrejaFX [options] [photo folders...]
+```
+
+To start the browser edition:
+
+```
+java --enable-native-access=ALL-UNNAMED -cp <dependencies> freja.web.FrejaWeb --library=<path> [photo folders...]
+```
+
+The JavaFX edition is built with Viewtify's declarative `View`/`ViewDSL` UIs, Stylist CSS,
+sinobu reactive variables, `Viewtify.dialog` and toasts. The UI code lives in the `freja.fx`
+package (`MainView`, `SidebarView`, `PhotoGridView`, `InspectorView`, `PhotoViewerView`,
+`ScanFoldersView`, `TagManagerView`, `TagPickerView`, `TagFilterView`, `SettingsView`).
+
+The browser edition is built with Apocrypha: the frontend is plain HTML/CSS/JS served from the
+classpath resource root `web`, and every request and response crosses the `freja:*` IPC channels.
+The UI code lives in the `freja.web` package (`FrejaWeb`, `WebHandlers`, `WebModels`,
+`PhotoRoutes`, `WebSettings`), and the browser itself is a native webview window with its own
+developer tools (`F12`).
+
+
 ## Prerequisites
 Freja runs on all major operating systems and requires only [Java version 25](https://docs.oracle.com/en/java/javase/25/) or later to run.
 To check, please run `java -version` on your terminal.
@@ -102,6 +139,9 @@ If you think something might be a bug, but you're not sure, ask on StackOverflow
 Freja depends on the following products on runtime.
 * [BorderlessSceneFX-1.0.0](https://mvnrepository.com/artifact/com.catwithawand/BorderlessSceneFX/1.0.0)
 * [altfx-1.6.2](https://mvnrepository.com/artifact/io.github.teletha/altfx/1.6.2)
+* [apocrypha-0.1](https://mvnrepository.com/artifact/io.github.teletha/apocrypha/0.1)
+* [avaje-webview-0.19](https://mvnrepository.com/artifact/io.avaje.webview/avaje-webview/0.19)
+* [avaje-webview-windows-x86_64-0.19](https://mvnrepository.com/artifact/io.avaje.webview/avaje-webview-windows-x86_64/0.19)
 * [conjure-1.2.2](https://mvnrepository.com/artifact/io.github.teletha/conjure/1.2.2)
 * [controlsfx-11.2.5](https://mvnrepository.com/artifact/org.controlsfx/controlsfx/11.2.5)
 * [error_prone_annotations-2.27.0](https://mvnrepository.com/artifact/com.google.errorprone/error_prone_annotations/2.27.0)

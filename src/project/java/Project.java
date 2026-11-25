@@ -21,6 +21,7 @@ public class Project extends bee.api.Project {
         require("io.github.teletha", "psychopath");
         require("io.github.teletha", "imagify");
         require("io.github.teletha", "viewtify");
+        require("io.github.teletha", "apocrypha");
         require("com.formdev", "flatlaf");
         require("com.formdev", "flatlaf-intellij-themes");
         require("io.github.globaltcad", "swing-tree");
