@@ -142,7 +142,7 @@ public final class MainView extends View {
 
     private UIVBox centerColumn;
 
-    private UIVBox toolbar;
+    private UIHBox toolbar;
 
     private UIVBox statusbar;
 
@@ -372,7 +372,8 @@ public final class MainView extends View {
         HBox.setHgrow(settings.ui(), Priority.ALWAYS);
         VBox.setVgrow(contentRow.ui(), Priority.ALWAYS);
         HBox.setHgrow(pageStack.ui(), Priority.ALWAYS);
-        outerSplit.ui().setDividerPositions(0.17);
+        outerSplit.horizontal().positions(0.17);
+        innerSplit.horizontal().positions(0.77);
 
         addFolder.when(User.Action, event -> openScanFolders());
         rescan.when(User.Action, event -> rescanAll());

@@ -60,6 +60,7 @@ public final class FrejaFX {
      *
      * @param args optional photo folders, plus {@code --library=<path>}
      */
+    @Deprecated
     public static void main(String[] args) {
         launchArgs = args.clone();
         List<Path> folders = new ArrayList<>();
@@ -99,7 +100,8 @@ public final class FrejaFX {
         }
 
         if (!"false".equals(System.getProperty("freja.singleInstance", "true")) && !claimInstance()) {
-            // A newer launch takes over: ask the old process (Swing or FX) to close, then take the port.
+            // A newer launch takes over: ask the old process (Swing or FX) to close, then take the
+            // port.
             retireExistingInstance();
             boolean reclaimed = false;
             for (int attempt = 0; attempt < 30 && !reclaimed; attempt++) {
@@ -148,31 +150,37 @@ public final class FrejaFX {
     }
 
     /** Called by the main view once it is ready. */
+    @Deprecated
     static void installed(MainView view) {
         main = view;
     }
 
     /** @return the running main view, or null before it is ready */
+    @Deprecated
     public static MainView main() {
         return main;
     }
 
     /** @return the database location to open at startup */
+    @Deprecated
     public static Path database() {
         return database;
     }
 
     /** @return photo folders to register right after startup */
+    @Deprecated
     public static List<Path> startupFolders() {
         return startupFolders;
     }
 
     /** @return the platform's default database location, shared with the Swing edition */
+    @Deprecated
     public static Path defaultDatabase() {
         return freja.Freja.defaultDatabase();
     }
 
     /** Restarts the application with the same arguments and JVM options. */
+    @Deprecated
     public static void restart() {
         try {
             List<String> command = new ArrayList<>();
