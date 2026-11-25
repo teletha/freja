@@ -242,7 +242,7 @@ public final class ScanFoldersView extends DialogView<Boolean> {
         Style root = () -> {
             display.width(560, px);
             padding.size(12, px);
-            background.color("-freja-background");
+            background.color("-fx-background");
         };
 
         Style table = () -> {
@@ -252,6 +252,6 @@ public final class ScanFoldersView extends DialogView<Boolean> {
 
         Style buttons = () -> margin.vertical(6, px);
 
-        Style muted = () -> font.size(11, px).color("-freja-muted");
+        Style muted = () -> font.size(11, px).color("-fx-mid-text-color");
     }
 }

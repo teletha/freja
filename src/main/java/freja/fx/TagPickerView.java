@@ -213,21 +213,21 @@ public final class TagPickerView extends View {
         Style root = () -> {
             display.width(280, px);
             padding.vertical(12, px).horizontal(12, px);
-            background.color("-freja-surface");
-            border.width(1, px).color("-freja-border");
+            background.color("-fx-control-inner-background");
+            border.width(1, px).color("derive(-fx-base, 12%)");
             border.radius(8, px);
         };
 
         Style heading = () -> {
-            font.size(13, px).weight(700).color("-freja-text");
+            font.size(13, px).weight(700).color("-fx-light-text-color");
             padding.bottom(8, px);
         };
 
         Style close = () -> {
-            font.size(13, px).color("-freja-muted");
+            font.size(13, px).color("-fx-mid-text-color");
             padding.horizontal(4, px);
             cursor.pointer();
-            $.hover(() -> font.color("-freja-text"));
+            $.hover(() -> font.color("-fx-light-text-color"));
         };
 
         Style list = () -> {
@@ -239,20 +239,20 @@ public final class TagPickerView extends View {
             font.size(12, px);
             padding.vertical(5, px).horizontal(6, px);
             cursor.pointer();
-            $.hover(() -> background.color("-freja-hover"));
+            $.hover(() -> background.color("derive(-fx-base, 8%)"));
         };
 
-        Style linked = () -> font.size(11, px).color("-freja-muted");
+        Style linked = () -> font.size(11, px).color("-fx-mid-text-color");
 
         Style remove = () -> {
-            font.size(13, px).weight(700).color("-freja-muted");
+            font.size(13, px).weight(700).color("-fx-mid-text-color");
             padding.horizontal(6, px);
             cursor.pointer();
-            $.hover(() -> font.color("-freja-danger"));
+            $.hover(() -> font.color("#FF7676"));
         };
 
         Style empty = () -> {
-            font.size(12, px).color("-freja-muted");
+            font.size(12, px).color("-fx-mid-text-color");
             padding.vertical(12, px).horizontal(4, px);
         };
     }

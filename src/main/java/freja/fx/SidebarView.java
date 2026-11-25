@@ -346,24 +346,24 @@ public final class SidebarView extends View {
     interface style extends StyleDSL {
 
         Style root = () -> {
-            background.color("-freja-sidebar");
+            background.color("derive(-fx-base, -3%)");
             display.minWidth(180, px);
         };
 
         Style section = () -> padding.vertical(10, px).horizontal(16, px);
 
         Style heading = () -> {
-            font.size(13, px).weight(700).color("-freja-muted");
+            font.size(13, px).weight(700).color("-fx-mid-text-color");
             padding.vertical(6, px);
         };
 
         Style folderHeader = () -> padding.vertical(4, px);
 
         Style toolButton = () -> {
-            font.size(12, px).color("-freja-muted");
+            font.size(12, px).color("-fx-mid-text-color");
             padding.vertical(2, px).horizontal(6, px);
             cursor.pointer();
-            $.hover(() -> font.color("-freja-text"));
+            $.hover(() -> font.color("-fx-light-text-color"));
         };
 
         Style listArea = () -> overflow.auto();
@@ -372,25 +372,25 @@ public final class SidebarView extends View {
             padding.vertical(6, px).horizontal(12, px);
             cursor.pointer();
             font.size(13, px);
-            $.hover(() -> background.color("-freja-hover"));
+            $.hover(() -> background.color("derive(-fx-base, 8%)"));
         };
 
         Style navSelected = () -> {
-            background.color("-freja-accent-soft");
-            font.weight(700).color("-freja-text");
+            background.color("derive(-fx-accent, -40%)");
+            font.weight(700).color("-fx-light-text-color");
         };
 
-        Style navIcon = () -> font.size(12, px).color("-freja-muted");
+        Style navIcon = () -> font.size(12, px).color("-fx-mid-text-color");
 
         Style navTitle = () -> {
             display.maxWidth(150, px);
             overflow.hidden();
         };
 
-        Style trailing = () -> font.size(11, px).color("-freja-muted");
+        Style trailing = () -> font.size(11, px).color("-fx-mid-text-color");
 
         Style empty = () -> {
-            font.size(11, px).color("-freja-muted");
+            font.size(11, px).color("-fx-mid-text-color");
             padding.vertical(10, px).horizontal(12, px);
         };
 

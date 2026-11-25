@@ -29,8 +29,6 @@ import viewtify.ActivationPolicy;
 import viewtify.Theme;
 import viewtify.ThemeType;
 import viewtify.Viewtify;
-import viewtify.preference.Preferences;
-import viewtify.ui.view.AppearanceSetting;
 
 /**
  * The application entry point of the JavaFX edition. It shares the SQLite catalog and the scanner
@@ -127,15 +125,11 @@ public final class FrejaFX {
             Viewtify.UserPreference.set(Locator.directory(".freja-fx"));
         }
 
-        // The JavaFX edition paints with the same palette and font preference as the Swing edition.
-        freja.ui.Theme.install();
-        Theme fxTheme = freja.ui.Theme.isDark() ? Theme.Dark : Theme.Light;
-
         Viewtify.application()
                 .title("Freja")
                 .version(freja.Freja.VERSION)
                 .use(ActivationPolicy.Multiple)
-                .use(fxTheme)
+                .use(Theme.Dark)
                 .use(ThemeType.Flat)
                 .onClosing(() -> {
                     MainView view = main;
@@ -151,12 +145,6 @@ public final class FrejaFX {
                         view.cleanup();
                     }
                     releaseInstance();
-                })
-                .onInitialize((stage, scene) -> {
-                    // Viewtify's own preference is only a default; the Swing palette is
-                    // authoritative.
-                    Preferences.of(AppearanceSetting.class).theme.set(fxTheme);
-                    // FxPalette.installGlobal(scene);
                 })
                 .activate(MainView.class);
     }

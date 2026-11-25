@@ -149,13 +149,13 @@ public final class TagFilterView extends View {
             display.width(280, px);
             display.height(344, px);
             padding.vertical(12, px).horizontal(12, px);
-            background.color("-freja-surface");
-            border.width(1, px).color("-freja-border");
+            background.color("-fx-control-inner-background");
+            border.width(1, px).color("derive(-fx-base, 12%)");
             border.radius(8, px);
         };
 
         Style heading = () -> {
-            font.size(13, px).weight(700).color("-freja-text");
+            font.size(13, px).weight(700).color("-fx-light-text-color");
             padding.bottom(8, px);
         };
 
@@ -168,8 +168,8 @@ public final class TagFilterView extends View {
             margin.top(4, px);
         };
 
-        Style count = () -> font.size(11, px).color("-freja-muted");
+        Style count = () -> font.size(11, px).color("-fx-mid-text-color");
 
-        Style clear = () -> font.size(12, px).color("-freja-accent-dark");
+        Style clear = () -> font.size(12, px).color("derive(-fx-accent, 10%)");
     }
 }

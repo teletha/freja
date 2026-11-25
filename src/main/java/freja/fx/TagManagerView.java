@@ -302,7 +302,7 @@ public final class TagManagerView extends DialogView<Boolean> {
         Style root = () -> {
             display.width(640, px);
             padding.size(20, px);
-            background.color("-freja-background");
+            background.color("-fx-background");
         };
 
         Style input = () -> margin.bottom(6, px);
@@ -315,12 +315,12 @@ public final class TagManagerView extends DialogView<Boolean> {
 
         Style buttons = () -> margin.bottom(6, px);
 
-        Style muted = () -> font.size(11, px).color("-freja-muted");
+        Style muted = () -> font.size(11, px).color("-fx-mid-text-color");
 
         Style linkPopup = () -> {
             display.width(280, px);
             padding.size(12, px);
-            background.color("-freja-surface");
+            background.color("-fx-control-inner-background");
             overflow.hidden();
         };
     }

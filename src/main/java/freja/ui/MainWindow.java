@@ -677,10 +677,11 @@ public final class MainWindow extends JFrame {
         });
         grid.setOnStickyFolder(folderId -> {
             // Following the sticky header keeps the sidebar in sync while the grid is scrolled.
+            // The preference is written by explicit selections and at exit, not here: this also
+            // fires for every section a folder jump passes through on its way.
             sidebar.selectFolderSilently(folderId);
             mode = Sidebar.Mode.FOLDER;
             this.folderId = folderId;
-            rememberSelection();
         });
         grid.setOnTagFolder((folderId, point) -> library.folder(folderId)
                 .ifPresent(folder -> TagPicker.show(grid, point.x, point.y + 8, library, folderId, this::tagsChanged)));
@@ -948,6 +949,9 @@ public final class MainWindow extends JFrame {
         this.mode = mode;
         this.folderId = folderId;
         this.scrollToSelectedFolder = mode == Sidebar.Mode.FOLDER && folderId >= 0;
+        if (mode != Sidebar.Mode.FOLDER) {
+            grid.clearPinnedFolder();
+        }
         rememberSelection();
         applySortForCurrentView();
         if (folderToFolder && grid.scrollToFolder(folderId)) {
@@ -1467,6 +1471,18 @@ public final class MainWindow extends JFrame {
             refreshAll();
             return;
         }
+        if (scrollToSelectedFolder) {
+            // The folder which triggered this load wins over a sticky header reported while the
+            // previous rows were still on screen; otherwise a background paint would overwrite the
+            // selection before the scroll below runs.
+            mode = data.mode();
+            folderId = data.folderId();
+            if (mode == Sidebar.Mode.FOLDER && folderId >= 0) {
+                grid.pinFolder(folderId);
+            }
+        } else if (data.mode() != Sidebar.Mode.FOLDER) {
+            grid.clearPinnedFolder();
+        }
         grid.setPhotos(data.photos(), data.grouping(), data.sections());
         // Only folders with a matching photo are shown while searching.
         sidebar.setData(data.stats(), data.visibleFolders(), data.mode(), data.folderId());
@@ -1644,6 +1660,20 @@ public final class MainWindow extends JFrame {
     }
 
     private void savePreferences() {
+        // A folder jump animates through the sections between the old and the new selection. When
+        // the window closes mid-glide the sticky header still names a folder on the way, so persist
+        // the animation's destination instead: that is the folder the user picked.
+        if (mode == Sidebar.Mode.FOLDER) {
+            // A pinned selection survives the glide, even when the folder is too close to the end
+            // of the library to reach the top of the viewport.
+            long target = grid.scrollTargetFolder();
+            if (target < 0) {
+                target = grid.visibleFolderId();
+            }
+            if (target >= 0) {
+                folderId = target;
+            }
+        }
         // Save the sidebar selection at exit: the folder the window was showing, or the library
         // view, so the next launch resumes exactly there.
         rememberSelection();

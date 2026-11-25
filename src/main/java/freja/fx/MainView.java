@@ -395,11 +395,6 @@ public final class MainView extends View {
         slideshow.when(User.Action, event -> openSlideshow());
         themeToggle.when(User.LeftClick, event -> appearance.theme.set(appearance.theme.get() == Theme.Dark ? Theme.Light : Theme.Dark));
         appearance.theme.observe().on(Viewtify.UIThread).to(theme -> themeToggle.text(theme == Theme.Dark ? "☀" : "☾"));
-        // Keep the Swing palette, which FxPalette mirrors, in sync with the JavaFX theme switch.
-        appearance.theme.observe().on(Viewtify.UIThread).to(theme -> {
-            freja.ui.Theme.setDark(theme == Theme.Dark);
-            FxPalette.refresh();
-        });
         photoPageButton.when(User.LeftClick, event -> showPage(Page.VIEWER));
         settingsPageButton.when(User.LeftClick, event -> showPage(Page.SETTINGS));
         photoPageButton.styleWhile(page.observe().map(p -> p == Page.VIEWER), style.activitySelected);
@@ -1369,15 +1364,15 @@ public final class MainView extends View {
         return region;
     }
 
-    /** Visual language of the main window, mirroring {@code freja.ui.Theme}. */
+    /** Visual language of the main window, following Viewtify's theme lookups. */
     interface style extends StyleDSL {
 
-        Style root = () -> background.color("-freja-background");
+        Style root = () -> background.color("-fx-background");
 
         Style content = () -> display.minHeight(0, px);
 
         Style activityBar = () -> {
-            background.color("-freja-sidebar");
+            background.color("derive(-fx-base, -3%)");
             padding.vertical(8, px);
             display.minWidth(48, px);
             display.maxWidth(48, px);
@@ -1386,25 +1381,25 @@ public final class MainView extends View {
         Style activityButton = () -> {
             background.color("transparent");
             padding.vertical(11, px).horizontal(14, px);
-            font.size(17, px).color("-freja-muted");
+            font.size(17, px).color("-fx-mid-text-color");
             cursor.pointer();
             $.hover(() -> {
-                background.color("-freja-hover");
-                font.color("-freja-text");
+                background.color("derive(-fx-base, 8%)");
+                font.color("-fx-light-text-color");
             });
         };
 
         Style activitySelected = () -> {
-            background.color("-freja-accent-soft");
-            font.color("-freja-accent-dark");
+            background.color("derive(-fx-accent, -40%)");
+            font.color("derive(-fx-accent, 10%)");
         };
 
-        Style splits = () -> background.color("-freja-background");
+        Style splits = () -> background.color("-fx-background");
 
         Style center = () -> display.minWidth(420, px);
 
         Style toolbar = () -> {
-            background.color("-freja-sidebar");
+            background.color("derive(-fx-base, -3%)");
             padding.vertical(7, px).horizontal(12, px);
         };
 
@@ -1414,30 +1409,30 @@ public final class MainView extends View {
 
         Style zoom = () -> display.maxWidth(130, px);
 
-        Style gridStack = () -> background.color("-freja-background");
+        Style gridStack = () -> background.color("-fx-background");
 
         Style statusbar = () -> {
-            background.color("-freja-surface");
+            background.color("-fx-control-inner-background");
             padding.vertical(6, px).horizontal(14, px);
         };
 
-        Style selection = () -> font.size(11, px).color("-freja-muted");
+        Style selection = () -> font.size(11, px).color("-fx-mid-text-color");
 
         Style themeToggle = () -> {
-            font.size(15, px).color("-freja-muted");
+            font.size(15, px).color("-fx-mid-text-color");
             padding.vertical(4, px).horizontal(8, px);
             cursor.pointer();
-            $.hover(() -> font.color("-freja-text"));
+            $.hover(() -> font.color("-fx-light-text-color"));
         };
 
         Style grow = () -> display.minWidth(10, px);
 
-        Style welcomeIcon = () -> font.size(72, px).color("-freja-accent");
+        Style welcomeIcon = () -> font.size(72, px).color("-fx-accent");
 
-        Style welcomeTitle = () -> font.size(19, px).weight(700).color("-freja-text");
+        Style welcomeTitle = () -> font.size(19, px).weight(700).color("-fx-light-text-color");
 
         Style welcomeAdd = () -> margin.vertical(6, px);
 
-        Style welcomePath = () -> font.size(10, px).color("-freja-muted");
+        Style welcomePath = () -> font.size(10, px).color("-fx-mid-text-color");
     }
 }

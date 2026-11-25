@@ -107,6 +107,14 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     /** Suppresses folder-change notifications while a resize rebuilds the virtual layout. */
     private boolean suppressStickyNotification;
 
+    /**
+     * The folder a sidebar selection is bringing into view. Until it reaches the top of the
+     * viewport - or the user scrolls by hand - the sticky header must not move the sidebar away
+     * from it. A folder close to the end of the library cannot always be scrolled to the top, and
+     * following the sticky header there would silently select its neighbour.
+     */
+    private long pinnedFolder = -1;
+
     private JScrollPane scrollPane;
 
     private int thumbSize = 170;
@@ -315,6 +323,13 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         // A sticky header cannot tolerate the viewport's blit optimization: old pixels, including
         // a previously drawn header, can be shifted into the wrong place for one frame.
         pane.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+        pane.getVerticalScrollBar().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                // Dragging the scroll bar is the user taking over; the sidebar follows again.
+                pinnedFolder = -1;
+            }
+        });
     }
 
     @Override
@@ -339,6 +354,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         JScrollBar bar = pane.getVerticalScrollBar();
         int units = event.getUnitsToScroll();
         if (units != 0) {
+            // The user is taking over the scrolling, so the sidebar follows the view again.
+            pinnedFolder = -1;
             int base = scrollAnimator != null && animatedScrollBar == bar ? scrollTarget : bar.getValue();
             int target = base + units * Math.max(1, bar.getUnitIncrement());
             target = Math.max(bar.getMinimum(), Math.min(bar.getMaximum() - bar.getVisibleAmount(), target));
@@ -430,7 +447,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         selectedIndex = selectedIndices.contains(restored) ? restored : first;
         anchorIndex = selectedIndex;
         hoverIndex = -1;
-        relayout();
+        relayoutKeepingFolder();
+        if (grouping != GroupMode.FOLDER || (pinnedFolder >= 0 && headerFor(Long.toString(pinnedFolder)) == null)) {
+            // Leaving the folder grouping, or the selected folder was filtered away.
+            pinnedFolder = -1;
+        }
         repaint();
     }
 
@@ -445,7 +466,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             return;
         }
         thumbSize = value;
-        relayout();
+        relayoutKeepingFolder();
         repaint();
     }
 
@@ -658,6 +679,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         getActionMap().put(key, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                // Keyboard navigation moves the view itself, so the sidebar follows again.
+                pinnedFolder = -1;
                 action.run();
             }
         });
@@ -696,6 +719,12 @@ public final class PhotoGrid extends JComponent implements Scrollable {
      * @return true when the folder has a section in the current layout
      */
     public boolean scrollToFolder(long folderId) {
+        JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        if (pane != null) {
+            // Laying out here can reflow the whole grid - the first show, or a divider move - so
+            // the target below is measured only after the rows have their final positions.
+            pane.validate();
+        }
         String key = Long.toString(folderId);
         int target = -1;
         int targetOrder = -1;
@@ -717,11 +746,10 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         if (target < 0) {
             return false;
         }
-        JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        pinnedFolder = folderId;
         if (pane == null) {
             return true;
         }
-        pane.validate();
         JScrollBar bar = pane.getVerticalScrollBar();
         int minimum = bar.getMinimum();
         int maximum = Math.max(minimum, bar.getMaximum() - bar.getVisibleAmount());
@@ -738,11 +766,66 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         return true;
     }
 
+    /** Pins the sidebar selection so sticky headers do not move it until the folder reaches the top. */
+    public void pinFolder(long folderId) {
+        pinnedFolder = folderId;
+    }
+
+    /** Drops the selection pin, e.g. when the whole-library view is chosen. */
+    public void clearPinnedFolder() {
+        pinnedFolder = -1;
+    }
+
+    /**
+     * The folder whose section will sit at the top once the running scroll animation settles, or -1
+     * when nothing is animating. A folder jump glides through the sections in between, and the
+     * sticky header reports each of them as it passes; persisting the current one while the window
+     * closes would reopen a folder the user was only travelling across.
+     *
+     * @return the destination folder identifier, or -1
+     */
+    public long scrollTargetFolder() {
+        if (pinnedFolder >= 0) {
+            return pinnedFolder;
+        }
+        if (scrollAnimator == null || grouping != GroupMode.FOLDER || rows.isEmpty()) {
+            return -1;
+        }
+        return folderAt(scrollTarget);
+    }
+
+    /**
+     * The folder whose section currently owns the top of the viewport, read from the layout rather
+     * than from the last painted sticky header. The header only catches up on the next paint, so a
+     * window closing in between could otherwise persist an older folder.
+     *
+     * @return the folder identifier, or -1
+     */
+    public long visibleFolderId() {
+        if (grouping != GroupMode.FOLDER || rows.isEmpty()) {
+            return -1;
+        }
+        return folderAt(getVisibleRect().y);
+    }
+
+    private long folderAt(int y) {
+        LayoutRow header = currentFolderHeader(y);
+        if (header == null || header.groupKey() == null) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(header.groupKey());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     /**
      * Brings the view back to the first photo. Selecting the entry the grid is already showing is a
      * deliberate request to return to its start, so it needs the same glide the folder jump gives.
      */
     public void scrollToTop() {
+        pinnedFolder = -1;
         JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
         if (pane == null) {
             return;
@@ -825,6 +908,50 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         if (animatedScrollBar != null) {
             scrollTarget = animatedScrollBar.getValue();
         }
+    }
+
+    /**
+     * Relays out the rows while keeping the same folder anchored at the top of the viewport. A
+     * refresh - a scan importing photos, a folder count changing - grows the sections above the
+     * current one, and keeping only the pixel position would silently move the view, and with it
+     * the sidebar selection, to a different folder.
+     */
+    private void relayoutKeepingFolder() {
+        LayoutRow before = visibleHeader();
+        String key = before == null ? null : before.groupKey();
+        int offset = before == null || scrollAnimator != null ? 0 : getVisibleRect().y - before.y();
+        if (scrollAnimator != null) {
+            // The animation measured its destination against the old rows; settle there instead of
+            // letting the new layout reinterpret the stale pixel target.
+            stopScrollAnimation();
+        }
+        relayout();
+        if (key != null) {
+            LayoutRow after = headerFor(key);
+            if (after != null) {
+                scrollBarToY(after.y() + offset);
+            }
+        }
+    }
+
+    /** The folder section owning the top of the viewport, or the animation's destination. */
+    private LayoutRow visibleHeader() {
+        if (grouping != GroupMode.FOLDER || rows.isEmpty()) {
+            return null;
+        }
+        return currentFolderHeader(scrollAnimator != null ? scrollTarget : getVisibleRect().y);
+    }
+
+    private void scrollBarToY(int y) {
+        JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+        if (pane == null) {
+            return;
+        }
+        pane.validate();
+        JScrollBar bar = pane.getVerticalScrollBar();
+        int minimum = bar.getMinimum();
+        int maximum = Math.max(minimum, bar.getMaximum() - bar.getVisibleAmount());
+        bar.setValue(Math.max(minimum, Math.min(maximum, y)));
     }
 
     private void relayout() {
@@ -1031,12 +1158,21 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         }
         if (grouping != GroupMode.FOLDER || rows.isEmpty()) {
             stickyKey = null;
+            pinnedFolder = -1;
             return;
         }
         LayoutRow current = currentFolderHeader(top);
         String key = current == null ? null : current.groupKey();
         boolean changed = key == null ? stickyKey != null : !key.equals(stickyKey);
         stickyKey = key;
+        if (pinnedFolder >= 0) {
+            if (key == null || !Long.toString(pinnedFolder).equals(key)) {
+                // Still travelling towards - or unable to reach the top because the section is too
+                // close to the end. Either way the sidebar keeps the folder the user picked.
+                return;
+            }
+            pinnedFolder = -1;
+        }
         if (changed && key != null) {
             try {
                 onStickyFolder.accept(Long.parseLong(key));

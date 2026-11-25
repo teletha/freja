@@ -301,7 +301,7 @@ public final class InspectorView extends View {
         for (int i = 0; i < stars.length; i++) {
             boolean filled = enabled && i < rating;
             stars[i].text(filled ? "★" : "☆");
-            stars[i].ui().setStyle("-fx-text-fill: " + (filled ? "-freja-gold" : enabled ? "-freja-muted" : "-freja-faint") + ";");
+            stars[i].ui().setStyle("-fx-text-fill: " + (filled ? "#F1B64A" : enabled ? "-fx-mid-text-color" : "-fx-mid-text-color") + ";");
             stars[i].enable(enabled);
         }
     }
@@ -346,7 +346,7 @@ public final class InspectorView extends View {
     /** Visual language of the inspector. */
     interface style extends StyleDSL {
 
-        Style panel = () -> background.color("-freja-surface");
+        Style panel = () -> background.color("-fx-control-inner-background");
 
         Style body = () -> padding.vertical(14, px).horizontal(16, px);
 
@@ -355,19 +355,19 @@ public final class InspectorView extends View {
             margin.bottom(6, px);
         };
 
-        Style fileName = () -> font.size(16, px).weight(700).color("-freja-text");
+        Style fileName = () -> font.size(16, px).weight(700).color("-fx-light-text-color");
 
-        Style placeholder = () -> font.color("-freja-muted");
+        Style placeholder = () -> font.color("-fx-mid-text-color");
 
         Style folder = () -> {
-            font.size(12, px).color("-freja-muted");
+            font.size(12, px).color("-fx-mid-text-color");
             margin.bottom(6, px);
         };
 
         Style actions = () -> display.width(360, px);
 
         Style primary = () -> {
-            background.color("-freja-accent");
+            background.color("-fx-accent");
             font.color("white");
         };
 
@@ -383,10 +383,10 @@ public final class InspectorView extends View {
 
         Style info = () -> padding.vertical(6, px);
 
-        Style infoLabel = () -> font.size(12, px).color("-freja-muted");
+        Style infoLabel = () -> font.size(12, px).color("-fx-mid-text-color");
 
         Style captionTitle = () -> {
-            font.size(11, px).weight(700).color("-freja-muted");
+            font.size(11, px).weight(700).color("-fx-mid-text-color");
             padding.vertical(6, px);
         };
 
@@ -394,14 +394,14 @@ public final class InspectorView extends View {
 
         Style footer = () -> display.width(360, px);
 
-        Style small = () -> font.size(11, px).color("-freja-muted");
+        Style small = () -> font.size(11, px).color("-fx-mid-text-color");
 
         Style link = () -> {
             background.color("transparent");
             border.none();
-            font.color("-freja-accent-dark");
+            font.color("derive(-fx-accent, 10%)");
             cursor.pointer();
-            $.hover(() -> font.color("-freja-accent"));
+            $.hover(() -> font.color("-fx-accent"));
         };
     }
 }

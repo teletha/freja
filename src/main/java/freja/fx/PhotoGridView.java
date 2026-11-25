@@ -456,7 +456,7 @@ public final class PhotoGridView extends View {
                 UILabel chip = new UILabel(this).text("+ タグ");
                 chip.style(style.chip);
                 chip.ui()
-                        .setStyle("-fx-background-color: -freja-surface; -fx-text-fill: -freja-accent; -fx-border-color: -freja-accent; -fx-border-width: 1; -fx-border-radius: 10;");
+                        .setStyle("-fx-background-color: -fx-control-inner-background; -fx-text-fill: -fx-accent; -fx-border-color: -fx-accent; -fx-border-width: 1; -fx-border-radius: 10;");
                 chip.when(User.LeftClick, event -> onTagFolder.accept(section.folderId(), chip.ui()));
                 chips.add(chip.ui());
             }
@@ -471,7 +471,7 @@ public final class PhotoGridView extends View {
                 }
             });
         }
-        row.setStyle("-fx-border-color: -freja-border; -fx-border-width: 0 0 1 0;");
+        row.setStyle("-fx-border-color: derive(-fx-base, 12%); -fx-border-width: 0 0 1 0;");
         return row;
     }
 
@@ -686,28 +686,28 @@ public final class PhotoGridView extends View {
     interface style extends StyleDSL {
 
         Style scroll = () -> {
-            background.color("-freja-background");
-            $.descendant(".viewport", () -> background.color("-freja-background"));
-            $.descendant(".corner", () -> background.color("-freja-background"));
+            background.color("-fx-background");
+            $.descendant(".viewport", () -> background.color("-fx-background"));
+            $.descendant(".corner", () -> background.color("-fx-background"));
         };
 
-        Style body = () -> background.color("-freja-background");
+        Style body = () -> background.color("-fx-background");
 
         Style card = () -> {
             background.color("transparent");
             border.width(2, px).color("transparent");
             border.radius(12, px);
             cursor.pointer();
-            $.hover(() -> background.color("-freja-hover"));
+            $.hover(() -> background.color("derive(-fx-base, 8%)"));
         };
 
         Style cardSelected = () -> {
-            background.color("-freja-selection");
-            border.color("-freja-accent");
+            background.color("derive(-fx-accent, -45%)");
+            border.color("-fx-accent");
         };
 
         Style favoriteBadge = () -> {
-            font.size(14, px).color("-freja-gold");
+            font.size(14, px).color("#F1B64A");
             background.color("rgba(255,255,255,0.88)");
             padding.size(4, px);
             border.radius(13, px);
@@ -724,21 +724,21 @@ public final class PhotoGridView extends View {
             font.size(11, px).weight(700).color("white");
             padding.vertical(3, px).horizontal(8, px);
             border.radius(10, px);
-            background.color("-freja-surface");
+            background.color("-fx-control-inner-background");
             cursor.pointer();
         };
 
-        Style headerTitle = () -> font.size(16, px).weight(700).color("-freja-text");
+        Style headerTitle = () -> font.size(16, px).weight(700).color("-fx-light-text-color");
 
         Style headerCount = () -> {
-            font.size(11, px).weight(700).color("-freja-accent-dark");
-            background.color("-freja-accent-soft");
+            font.size(11, px).weight(700).color("derive(-fx-accent, 10%)");
+            background.color("derive(-fx-accent, -40%)");
             padding.vertical(2, px).horizontal(7, px);
             border.radius(9, px);
         };
 
         Style empty = () -> {
-            font.size(13, px).color("-freja-muted");
+            font.size(13, px).color("-fx-mid-text-color");
             padding.size(24, px);
         };
     }
