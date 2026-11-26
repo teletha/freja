@@ -1154,20 +1154,21 @@ public final class MainWindow extends JFrame {
         List<Photo> targets = selected.size() > 1 && selected.contains(photo) ? selected : List.of(photo);
         String suffix = targets.size() > 1 ? " (" + targets.size() + "枚)" : "";
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem open = new JMenuItem("開く" + suffix);
+        JMenuItem open = new JMenuItem("開く" + suffix, Icons.image(14, Theme.MUTED));
         open.addActionListener(event -> openViewer(photo, targets));
         menu.add(open);
-        JMenuItem favorite = new JMenuItem((photo.favorite() ? "お気に入りから外す" : "お気に入りに追加") + suffix);
+        JMenuItem favorite = new JMenuItem((photo.favorite() ? "お気に入りから外す" : "お気に入りに追加") + suffix,
+                Icons.star(14, Theme.GOLD, photo.favorite()));
         favorite.addActionListener(event -> setFavorites(targets, !photo.favorite()));
         menu.add(favorite);
         menu.addSeparator();
-        JMenuItem reveal = new JMenuItem("エクスプローラーで表示");
+        JMenuItem reveal = new JMenuItem("エクスプローラーで表示", Icons.folder(14, Theme.MUTED));
         reveal.addActionListener(event -> reveal(photo.path()));
         menu.add(reveal);
-        JMenuItem copyPath = new JMenuItem("パスをコピー" + suffix);
+        JMenuItem copyPath = new JMenuItem("パスをコピー" + suffix, Icons.clipboard(14, Theme.MUTED));
         copyPath.addActionListener(event -> copyPaths(targets));
         menu.add(copyPath);
-        JMenuItem reimport = new JMenuItem("再読み込み" + suffix);
+        JMenuItem reimport = new JMenuItem("再読み込み" + suffix, Icons.refresh(14, Theme.MUTED));
         reimport.addActionListener(event -> {
             cache.clear();
             // scanner.reimport() writes to the catalog (invalidate/ensureFolder).
@@ -1179,10 +1180,10 @@ public final class MainWindow extends JFrame {
         });
         menu.add(reimport);
         menu.addSeparator();
-        JMenuItem remove = new JMenuItem("ライブラリから削除" + suffix);
+        JMenuItem remove = new JMenuItem("ライブラリから削除" + suffix, Icons.close(14, Theme.MUTED));
         remove.addActionListener(event -> removeFromLibrary(targets));
         menu.add(remove);
-        JMenuItem deleteFromDisk = new JMenuItem("ディスクから削除" + suffix);
+        JMenuItem deleteFromDisk = new JMenuItem("ディスクから削除" + suffix, Icons.close(14, Theme.DANGER));
         deleteFromDisk.addActionListener(event -> deleteFromDisk(targets));
         menu.add(deleteFromDisk);
         menu.show(grid, point.x, point.y);

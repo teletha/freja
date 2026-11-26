@@ -20,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -272,22 +273,25 @@ public final class Sidebar extends JPanel {
         JPopupMenu menu = new JPopupMenu();
         menu.add(sortMenu(folder));
         menu.addSeparator();
-        menu.add(item("Rename", () -> listener.onRenameFolder(folder.id())));
-        menu.add(item("Edit tags…", () -> listener.onEditFolderTags(folder.id())));
-        menu.add(item("Rescan", () -> listener.onRescanFolder(folder.id())));
-        menu.add(item("Open in Explorer", () -> listener.onRevealFolder(folder.id())));
+        menu.add(item("Rename", Icons.pencil(14, Theme.MUTED), () -> listener.onRenameFolder(folder.id())));
+        menu.add(item("Edit tags…", Icons.tag(14, Theme.MUTED), () -> listener.onEditFolderTags(folder.id())));
+        menu.add(item("Rescan", Icons.refresh(14, Theme.MUTED), () -> listener.onRescanFolder(folder.id())));
+        menu.add(item("Open in Explorer", Icons.folder(14, Theme.MUTED), () -> listener.onRevealFolder(folder.id())));
         if (folder.explicit()) {
             menu.addSeparator();
-            menu.add(item("Remove from library", () -> listener.onRemoveFolder(folder.id())));
+            menu.add(item("Remove from library", Icons.close(14, Theme.DANGER), () -> listener.onRemoveFolder(folder.id())));
         }
         return menu;
     }
 
     private JMenu sortMenu(Folder folder) {
         JMenu menu = new ARXMenu(I.translate("Sort order"));
+        menu.setIcon(Icons.sortOrder(14, Theme.MUTED));
         ButtonGroup group = new ButtonGroup();
         for (SortOrder sort : SortOrder.values()) {
-            ARXRadioButtonMenuItem item = new ARXRadioButtonMenuItem(label(sort), sort == folder.sort());
+            boolean selected = sort == folder.sort();
+            ARXRadioButtonMenuItem item = new ARXRadioButtonMenuItem(label(sort), sortIcon(sort), selected);
+            Icons.markSelected(item, selected);
             item.addActionListener(event -> listener.onSortFolder(folder.id(), sort));
             group.add(item);
             menu.add(item);
@@ -308,9 +312,27 @@ public final class Sidebar extends JPanel {
         });
     }
 
+    /** The icon that represents each sort order in menus. */
+    private static Icon sortIcon(SortOrder order) {
+        return switch (order) {
+        case NAME -> Icons.sortName(14, Theme.MUTED);
+        case DATE_NEWEST -> Icons.sortNewestFirst(14, Theme.MUTED);
+        case DATE_OLDEST -> Icons.sortOldestFirst(14, Theme.MUTED);
+        case SIZE -> Icons.sortBySize(14, Theme.MUTED);
+        };
+    }
+
     /** A menu item whose English caption is translated on the way in. */
     private javax.swing.JMenuItem item(String sentence, Runnable action) {
-        javax.swing.JMenuItem item = new ARXMenuItem(I.translate(sentence));
+        return item(new ARXMenuItem(I.translate(sentence)), action);
+    }
+
+    /** The same, with a leading icon; the caption is still a live translation. */
+    private javax.swing.JMenuItem item(String sentence, Icon icon, Runnable action) {
+        return item(new ARXMenuItem(I.translate(sentence), icon), action);
+    }
+
+    private static javax.swing.JMenuItem item(javax.swing.JMenuItem item, Runnable action) {
         item.addActionListener(event -> action.run());
         return item;
     }

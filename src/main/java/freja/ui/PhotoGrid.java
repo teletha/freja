@@ -40,6 +40,7 @@ import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -1399,7 +1400,9 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private void showSortMenu(SortHit hit, Point point) {
         JPopupMenu menu = new JPopupMenu();
         for (SortOrder option : SortOrder.values()) {
-            JCheckBoxMenuItem item = new JCheckBoxMenuItem(option.label(), option == hit.order());
+            boolean selected = option == hit.order();
+            JCheckBoxMenuItem item = new JCheckBoxMenuItem(option.label(), sortIcon(option), selected);
+            Icons.markSelected(item, selected);
             item.addActionListener(event -> {
                 if (option != hit.order()) {
                     onSortOrder.onSortOrder(hit.folderId(), option);
@@ -1408,6 +1411,16 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             menu.add(item);
         }
         menu.show(this, point.x, point.y);
+    }
+
+    /** The icon that represents each sort order in the grid header popup. */
+    private static Icon sortIcon(SortOrder order) {
+        return switch (order) {
+        case NAME -> Icons.sortName(14, Theme.MUTED);
+        case DATE_NEWEST -> Icons.sortNewestFirst(14, Theme.MUTED);
+        case DATE_OLDEST -> Icons.sortOldestFirst(14, Theme.MUTED);
+        case SIZE -> Icons.sortBySize(14, Theme.MUTED);
+        };
     }
 
     private static String sortLabel(SortOrder order) {

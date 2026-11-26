@@ -12,6 +12,7 @@ package freja.ui;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -58,9 +59,7 @@ public final class Theme {
     /** The size the individual font calls in this application were designed around. */
     private static final int BASE_FONT_SIZE = 13;
 
-    private record Palette(Color background, Color surface, Color sidebar, Color border, Color text, Color muted,
-            Color faint, Color accent, Color accentSoft, Color accentDark, Color gold, Color danger, Color hover,
-            Color viewer, Color viewerPanel) {
+    private record Palette(Color background, Color surface, Color sidebar, Color border, Color text, Color muted, Color faint, Color accent, Color accentSoft, Color accentDark, Color gold, Color danger, Color hover, Color viewer, Color viewerPanel) {
     }
 
     private static final Palette LIGHT = new Palette(new Color(0xF7F8FA), Color.WHITE, new Color(0xF1F3F6), new Color(0xE2E5EA), new Color(0x25282D), new Color(0x7B818B), new Color(0xA8ADB5), new Color(0x2E6BE6), new Color(0xE8F0FE), new Color(0x1F52B8), new Color(0xE9A800), new Color(0xC43D3D), new Color(0xE7EAEF), new Color(0x0D0E10), new Color(0x1A1C20));
@@ -163,8 +162,8 @@ public final class Theme {
     }
 
     private static String detectJapaneseFont() {
-        Set<String> available = new HashSet<>(Arrays.asList(
-                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+        Set<String> available = new HashSet<>(Arrays
+                .asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
         for (String candidate : new String[] {"Yu Gothic UI", "Meiryo UI", "Hiragino Sans", "Noto Sans JP", "Segoe UI"}) {
             if (available.contains(candidate)) {
                 return candidate;
@@ -249,9 +248,7 @@ public final class Theme {
         }
         List<ThemeInfo> found = new ArrayList<>();
         try {
-            Object[] infos = (Object[]) Class
-                    .forName("com.formdev.flatlaf.intellijthemes.FlatAllIJThemes")
-                    .getField("INFOS").get(null);
+            Object[] infos = (Object[]) Class.forName("com.formdev.flatlaf.intellijthemes.FlatAllIJThemes").getField("INFOS").get(null);
             for (Object info : infos) {
                 if (info instanceof UIManager.LookAndFeelInfo entry) {
                     boolean isDark = (Boolean) entry.getClass().getMethod("isDark").invoke(entry);
@@ -290,7 +287,8 @@ public final class Theme {
 
     /**
      * The shades a theme would paint with, resolved without installing it: a look and feel hands
-     * over its defaults as soon as it is constructed, so the picker can preview every theme at once.
+     * over its defaults as soon as it is constructed, so the picker can preview every theme at
+     * once.
      */
     public static Preview preview(ThemeInfo theme) {
         return PREVIEWS.computeIfAbsent(theme.id(), id -> readPreview(theme, id));
@@ -299,17 +297,15 @@ public final class Theme {
     private static Preview readPreview(ThemeInfo theme, String id) {
         Palette base = theme.dark() ? DARK : LIGHT;
         if (theme.builtin()) {
-            return new Preview(base.background(), base.surface(), base.sidebar(), base.text(),
-                    base.accent());
+            return new Preview(base.background(), base.surface(), base.sidebar(), base.text(), base.accent());
         }
         try {
             if (Class.forName(id).getDeclaredConstructor().newInstance() instanceof javax.swing.LookAndFeel laf) {
                 UIDefaults defaults = laf.getDefaults();
                 Color background = color(defaults, "Panel.background", base.background());
                 Color text = color(defaults, "Label.foreground", base.text());
-                return new Preview(background, color(defaults, "List.background", base.surface()),
-                        mix(background, text, theme.dark() ? 0.05 : 0.035), text,
-                        color(defaults, "Component.accentColor", base.accent()));
+                return new Preview(background, color(defaults, "List.background", base.surface()), mix(background, text, theme.dark() ? 0.05
+                        : 0.035), text, color(defaults, "Component.accentColor", base.accent()));
             }
         } catch (ReflectiveOperationException | LinkageError ignored) {
         }
@@ -318,7 +314,8 @@ public final class Theme {
 
     private static Color color(UIDefaults defaults, String key, Color fallback) {
         Color value = defaults == null ? null : defaults.getColor(key);
-        // Copy out of the UIResource: the instance belongs to a look and feel that is not installed.
+        // Copy out of the UIResource: the instance belongs to a look and feel that is not
+        // installed.
         return value == null ? fallback : new Color(value.getRGB(), true);
     }
 
@@ -341,7 +338,8 @@ public final class Theme {
 
     /**
      * Reads the application's shades from the freshly installed look and feel, so rails, cards and
-     * hairlines follow the chosen theme instead of the hand tuned palette. Colours are copied out of
+     * hairlines follow the chosen theme instead of the hand tuned palette. Colours are copied out
+     * of
      * the look and feel defaults: UIResource instances belong to the previous theme.
      */
     private static Palette readPalette(Palette base, boolean isDark) {
@@ -349,14 +347,12 @@ public final class Theme {
         Color text = uiColor("Label.foreground", base.text);
         Color muted = uiColor("Label.disabledForeground", base.muted);
         Color accent = uiColor("Component.accentColor", base.accent);
-        return new Palette(background, uiColor("List.background", base.surface),
-                mix(background, text, isDark ? 0.05 : 0.035),
-                uiColor("Component.borderColor", base.border), text, muted,
-                mix(muted, background, 0.45), accent,
-                mix(accent, background, isDark ? 0.78 : 0.86),
-                isDark ? mix(accent, Color.WHITE, 0.25) : mix(accent, Color.BLACK, 0.18),
-                base.gold, base.danger, mix(background, text, isDark ? 0.14 : 0.09),
-                base.viewer, base.viewerPanel);
+        return new Palette(background, uiColor("List.background", base.surface), mix(background, text, isDark ? 0.05
+                : 0.035), uiColor("Component.borderColor", base.border), text, muted, mix(muted, background, 0.45), accent, mix(accent, background, isDark
+                        ? 0.78
+                        : 0.86), isDark ? mix(accent, Color.WHITE, 0.25)
+                                : mix(accent, Color.BLACK, 0.18), base.gold, base.danger, mix(background, text, isDark ? 0.14
+                                        : 0.09), base.viewer, base.viewerPanel);
     }
 
     private static Color uiColor(String key, Color fallback) {
@@ -407,6 +403,14 @@ public final class Theme {
         UIManager.put("Component.selectionBackground", ACCENT_SOFT);
         UIManager.put("Component.selectionForeground", TEXT);
         UIManager.put("defaultFont", font(Font.PLAIN, 13));
+        // Give context-menu rows a little more breathing room. These must be real Insets
+        // instances: a plain String would make UIManager.getInsets() return null and drop the
+        // margin entirely. Vertical 3->4 adds 2px per row; horizontal spacing is untouched.
+        Insets menuMargin = new Insets(6, 6, 6, 6);
+        UIManager.put("MenuItem.margin", menuMargin);
+        UIManager.put("CheckBoxMenuItem.margin", menuMargin);
+        UIManager.put("RadioButtonMenuItem.margin", menuMargin);
+        UIManager.put("Menu.margin", menuMargin);
         // The ARX components read their palette and type scale from these keys instead of
         // importing this class, so laevatain stays reusable outside Freja while still following
         // every light/dark switch and font change.
@@ -503,7 +507,9 @@ public final class Theme {
      */
     public static Color mix(Color first, Color second, double ratio) {
         double value = Math.max(0, Math.min(1, ratio));
-        return new Color((int) Math.round(first.getRed() * (1 - value) + second.getRed() * value), (int) Math.round(first.getGreen() * (1 - value) + second.getGreen() * value), (int) Math.round(first.getBlue() * (1 - value) + second.getBlue() * value));
+        return new Color((int) Math.round(first.getRed() * (1 - value) + second.getRed() * value), (int) Math
+                .round(first.getGreen() * (1 - value) + second.getGreen() * value), (int) Math
+                        .round(first.getBlue() * (1 - value) + second.getBlue() * value));
     }
 
     /** Darkens a light base slightly and lightens a dark one, keeping its hue and saturation. */

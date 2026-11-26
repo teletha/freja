@@ -122,14 +122,14 @@ public final class ScanFoldersDialog extends JDialog {
         registeredList.setCellRenderer(new RegisteredRenderer());
         registeredList.setFixedCellHeight(30);
         JPopupMenu actions = new JPopupMenu();
-        JMenuItem scanNow = new JMenuItem("今すぐスキャン");
+        JMenuItem scanNow = new JMenuItem("今すぐスキャン", Icons.refresh(14, Theme.MUTED));
         scanNow.addActionListener(event -> {
             List<Long> ids = selectedFolderIds();
             if (!ids.isEmpty()) {
                 listener.onScanFolders(ids);
             }
         });
-        JMenuItem toggle = new JMenuItem("監視を切り替え");
+        JMenuItem toggle = new JMenuItem("監視を切り替え", Icons.check(14, Theme.MUTED));
         toggle.addActionListener(event -> {
             for (int index : registeredList.getSelectedIndices()) {
                 Folder folder = registeredModel.get(index);
@@ -138,7 +138,7 @@ public final class ScanFoldersDialog extends JDialog {
                 }
             }
         });
-        JMenuItem remove = new JMenuItem("ライブラリから削除");
+        JMenuItem remove = new JMenuItem("ライブラリから削除", Icons.close(14, Theme.DANGER));
         remove.addActionListener(event -> {
             List<Long> ids = selectedFolderIds();
             if (!ids.isEmpty()) {

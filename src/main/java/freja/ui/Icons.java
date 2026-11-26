@@ -26,6 +26,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 
+import javax.swing.AbstractButton;
 import javax.swing.Icon;
 
 /**
@@ -447,5 +448,179 @@ public final class Icons {
                 g.draw(path);
             }
         };
+    }
+
+    /** A clipboard page with a clip at the top, used for copying a file path. */
+    public static Icon clipboard(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float unit = size / 16f;
+                g.setStroke(new BasicStroke(1.4f * unit, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                float left = size * 0.22f;
+                float right = size * 0.78f;
+                float top = size * 0.26f;
+                float bottom = size * 0.84f;
+                g.draw(new RoundRectangle2D.Float(left, top, right - left, bottom - top, size * 0.12f, size * 0.12f));
+                g.fill(new RoundRectangle2D.Float(size * 0.36f, size * 0.16f, size * 0.28f, size * 0.16f, size * 0.06f, size * 0.06f));
+                g.draw(new java.awt.geom.Line2D.Float(size * 0.32f, size * 0.48f, size * 0.68f, size * 0.48f));
+                g.draw(new java.awt.geom.Line2D.Float(size * 0.32f, size * 0.64f, size * 0.58f, size * 0.64f));
+            }
+        };
+    }
+
+    /** A pencil with an eraser, used for renaming. */
+    public static Icon pencil(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float bodyX = size * 0.38f;
+                float bodyW = size * 0.24f;
+                float bodyY = size * 0.18f;
+                float bodyH = size * 0.54f;
+                g.fill(new RoundRectangle2D.Float(bodyX, bodyY, bodyW, bodyH, size * 0.06f, size * 0.06f));
+                Path2D.Float tip = new Path2D.Float();
+                tip.moveTo(bodyX, bodyY + bodyH);
+                tip.lineTo(bodyX + bodyW, bodyY + bodyH);
+                tip.lineTo(size * 0.5f, size * 0.92f);
+                tip.closePath();
+                g.fill(tip);
+                g.fill(new RoundRectangle2D.Float(bodyX, size * 0.08f, bodyW, size * 0.14f, size * 0.05f, size * 0.05f));
+            }
+        };
+    }
+
+    /** An "A -> Z" glyph for sorting by name. */
+    public static Icon sortName(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float unit = size / 16f;
+                g.setStroke(new BasicStroke(1.4f * unit, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                float ax = size * 0.24f;
+                float ay = size * 0.24f;
+                float aHeight = size * 0.48f;
+                g.draw(new java.awt.geom.Line2D.Float(ax, ay + aHeight, ax + size * 0.07f, ay));
+                g.draw(new java.awt.geom.Line2D.Float(ax + size * 0.07f, ay, ax + size * 0.14f, ay + aHeight));
+                g.draw(new java.awt.geom.Line2D.Float(ax + size * 0.03f, ay + aHeight * 0.55f, ax + size * 0.11f, ay + aHeight * 0.55f));
+                float zx = size * 0.58f;
+                float zWidth = size * 0.22f;
+                g.draw(new java.awt.geom.Line2D.Float(zx, ay, zx + zWidth, ay));
+                g.draw(new java.awt.geom.Line2D.Float(zx + zWidth, ay, zx, ay + aHeight));
+                g.draw(new java.awt.geom.Line2D.Float(zx, ay + aHeight, zx + zWidth, ay + aHeight));
+                float arrowY = size * 0.83f;
+                g.draw(new java.awt.geom.Line2D.Float(size * 0.22f, arrowY, size * 0.78f, arrowY));
+                Path2D.Float head = new Path2D.Float();
+                head.moveTo(size * 0.72f, arrowY - size * 0.06f);
+                head.lineTo(size * 0.78f, arrowY);
+                head.lineTo(size * 0.72f, arrowY + size * 0.06f);
+                g.draw(head);
+            }
+        };
+    }
+
+    /** A clock with an upward arrow: newest photos first. */
+    public static Icon sortNewestFirst(int size, Color color) {
+        return sortDate(size, color, true);
+    }
+
+    /** A clock with a downward arrow: oldest photos first. */
+    public static Icon sortOldestFirst(int size, Color color) {
+        return sortDate(size, color, false);
+    }
+
+    private static Icon sortDate(int size, Color color, boolean newestFirst) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float unit = size / 16f;
+                g.setStroke(new BasicStroke(1.4f * unit, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                float inset = size * 0.18f;
+                float clockSize = size * 0.58f;
+                g.draw(new Ellipse2D.Float(inset, size * 0.5f - clockSize * 0.5f, clockSize, clockSize));
+                float cx = inset + clockSize * 0.5f;
+                float cy = size * 0.5f;
+                g.draw(new java.awt.geom.Line2D.Float(cx, cy, cx, cy - clockSize * 0.28f));
+                g.draw(new java.awt.geom.Line2D.Float(cx, cy, cx + clockSize * 0.25f, cy + clockSize * 0.08f));
+                float arrowX = size * 0.78f;
+                float arrowTop = size * 0.28f;
+                float arrowBottom = size * 0.72f;
+                float headY = newestFirst ? arrowTop : arrowBottom;
+                float tailY = newestFirst ? arrowBottom : arrowTop;
+                g.draw(new java.awt.geom.Line2D.Float(arrowX, tailY, arrowX, headY));
+                Path2D.Float head = new Path2D.Float();
+                if (newestFirst) {
+                    head.moveTo(arrowX - size * 0.05f, headY + size * 0.06f);
+                    head.lineTo(arrowX, headY);
+                    head.lineTo(arrowX + size * 0.05f, headY + size * 0.06f);
+                } else {
+                    head.moveTo(arrowX - size * 0.05f, headY - size * 0.06f);
+                    head.lineTo(arrowX, headY);
+                    head.lineTo(arrowX + size * 0.05f, headY - size * 0.06f);
+                }
+                g.draw(head);
+            }
+        };
+    }
+
+    /** Three vertical bars of increasing height for sorting by size. */
+    public static Icon sortBySize(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float barW = size * 0.18f;
+                float gap = size * 0.07f;
+                float base = size * 0.78f;
+                float[] heights = { size * 0.28f, size * 0.44f, size * 0.62f };
+                for (int i = 0; i < heights.length; i++) {
+                    float x = size * 0.16f + i * (barW + gap);
+                    float h = heights[i];
+                    g.fill(new RoundRectangle2D.Float(x, base - h, barW, h, barW * 0.3f, barW * 0.3f));
+                }
+            }
+        };
+    }
+
+    /** Two opposed arrows, used as the heading icon for sort-order submenus. */
+    public static Icon sortOrder(int size, Color color) {
+        return new Vector(size, color) {
+            @Override
+            protected void paint(Graphics2D g) {
+                float unit = size / 16f;
+                g.setStroke(new BasicStroke(1.5f * unit, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                float cx = size * 0.5f;
+                float top = size * 0.16f;
+                float bottom = size * 0.84f;
+                g.draw(new java.awt.geom.Line2D.Float(cx, top + size * 0.12f, cx, bottom - size * 0.12f));
+                Path2D.Float up = new Path2D.Float();
+                up.moveTo(cx - size * 0.14f, top + size * 0.14f);
+                up.lineTo(cx, top);
+                up.lineTo(cx + size * 0.14f, top + size * 0.14f);
+                g.draw(up);
+                Path2D.Float down = new Path2D.Float();
+                down.moveTo(cx - size * 0.14f, bottom - size * 0.14f);
+                down.lineTo(cx, bottom);
+                down.lineTo(cx + size * 0.14f, bottom - size * 0.14f);
+                g.draw(down);
+            }
+        };
+    }
+
+    /**
+     * Styles a menu item so the current selection is readable without overlapping the leading icon.
+     * FlatLaf suppresses the native check/radio mark when a custom icon is set, so the selected row
+     * is shown with a bold, accent-coloured label instead.
+     */
+    public static void markSelected(AbstractButton item, boolean selected) {
+        Font font = item.getFont();
+        if (selected) {
+            item.setFont(font != null ? font.deriveFont(Font.BOLD) : Theme.font(Font.BOLD, 13));
+            item.setForeground(Theme.ACCENT);
+        } else {
+            if (font != null) {
+                item.setFont(font.deriveFont(Font.PLAIN));
+            }
+            item.setForeground(null);
+        }
     }
 }
