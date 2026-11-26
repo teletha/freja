@@ -32,9 +32,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -64,6 +68,10 @@ public final class PhotoViewer extends JDialog {
     public interface Listener {
 
         void onFavorite(Photo photo, boolean favorite);
+
+        /** Called when the viewer closes, with the photo that was on screen last. */
+        default void onClose(Photo photo) {
+        }
     }
 
     private final List<Photo> photos;
@@ -109,6 +117,21 @@ public final class PhotoViewer extends JDialog {
     private long loadedPhotoId = -1;
 
     private String error;
+
+    /**
+     * Supplies the stored placeholder thumbnail for a photo whose original cannot be decoded.
+     * The catalog keeps a generated image for those rows, so the viewer can still show something.
+     */
+    private Function<Photo, BufferedImage> placeholderProvider = photo -> null;
+
+    /** Photos whose original failed to decode, so navigation does not re-read the same file. */
+    private final Set<Long> unreadable = ConcurrentHashMap.newKeySet();
+
+    /** Decoded placeholders, keyed by photo id, so revisiting a broken photo costs nothing. */
+    private final Map<Long, BufferedImage> placeholders = new ConcurrentHashMap<>();
+
+    /** Photos for which the provider had no placeholder; avoids asking again. */
+    private final Set<Long> missingPlaceholders = ConcurrentHashMap.newKeySet();
 
     private boolean fit = true;
 
@@ -242,6 +265,35 @@ public final class PhotoViewer extends JDialog {
         return ImageTransforms.orient(Imagify.read(Files.readAllBytes(photo.path())).toBufferedImage(), photo.orientation());
     }
 
+    /**
+     * Returns the stored placeholder for a photo, decoding it once and remembering the result.
+     *
+     * @param photo an unreadable photo
+     * @return the placeholder image, or null when the catalog has none
+     */
+    private BufferedImage placeholder(Photo photo) {
+        long id = photo.id();
+        if (missingPlaceholders.contains(id)) {
+            return null;
+        }
+        BufferedImage cached = placeholders.get(id);
+        if (cached != null) {
+            return cached;
+        }
+        BufferedImage loaded;
+        try {
+            loaded = placeholderProvider.apply(photo);
+        } catch (RuntimeException e) {
+            loaded = null;
+        }
+        if (loaded == null) {
+            missingPlaceholders.add(id);
+            return null;
+        }
+        placeholders.put(id, loaded);
+        return loaded;
+    }
+
     public void setListener(Listener listener) {
         this.listener = listener == null ? (photo, favorite) -> {
         } : listener;
@@ -265,7 +317,23 @@ public final class PhotoViewer extends JDialog {
      * @return the visible viewer
      */
     public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener) {
+        return open(owner, photos, start, listener, photo -> null);
+    }
+
+    /**
+     * Opens a viewer at a photo, with a fallback image for unreadable originals.
+     *
+     * @param owner the owner window
+     * @param photos the navigation set
+     * @param start the initial photo
+     * @param listener receives favorite changes and the last viewed photo
+     * @param placeholderProvider supplies the stored placeholder image, or null when none exists
+     * @return the visible viewer
+     */
+    public static PhotoViewer open(Window owner, List<Photo> photos, Photo start, Listener listener,
+            Function<Photo, BufferedImage> placeholderProvider) {
         PhotoViewer viewer = new PhotoViewer(owner, photos, start);
+        viewer.placeholderProvider = placeholderProvider == null ? photo -> null : placeholderProvider;
         viewer.setListener(listener);
         viewer.startReveal();
         return viewer;
@@ -389,10 +457,25 @@ public final class PhotoViewer extends JDialog {
         loader.execute(() -> {
             BufferedImage loaded = null;
             String failure = null;
-            try {
-                loaded = loadImage(target);
-            } catch (IOException | RuntimeException | Error e) {
-                failure = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
+            if (!unreadable.contains(id)) {
+                try {
+                    loaded = loadImage(target);
+                } catch (IOException | RuntimeException | Error e) {
+                    // Remember the file so arrow keys and slideshow ticks do not decode it again.
+                    unreadable.add(id);
+                    failure = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
+                }
+            }
+            if (loaded == null && unreadable.contains(id)) {
+                // The catalog already holds a generated placeholder for this row; show it instead
+                // of an error, so the photo still looks like a photo while it is browsed.
+                BufferedImage fallback = placeholder(target);
+                if (fallback != null) {
+                    loaded = fallback;
+                    failure = null;
+                } else if (failure == null) {
+                    failure = "画像を読み込めません";
+                }
             }
             BufferedImage result = loaded;
             String message = failure;
@@ -490,6 +573,9 @@ public final class PhotoViewer extends JDialog {
 
     @Override
     public void dispose() {
+        if (closed) {
+            return;
+        }
         closed = true;
         revealTimer.stop();
         slideshowTimer.stop();
@@ -502,6 +588,9 @@ public final class PhotoViewer extends JDialog {
         setVisible(false);
         setAlwaysOnTop(false);
         super.dispose();
+        // The grid should keep its focus and scroll position on the photo actually being viewed
+        // when the viewer was closed, not on the one it was opened with.
+        listener.onClose(photo);
         if (owner instanceof Frame frame) {
             frame.toFront();
             frame.requestFocusInWindow();

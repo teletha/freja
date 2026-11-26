@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -291,6 +292,53 @@ class LibraryScannerTest {
 
             Folder childFolder = library.folders().stream().filter(folder -> folder.path().equals(child)).findFirst().orElseThrow();
             assertEquals(childFolder.id(), library.photo(id).orElseThrow().folderId());
+        }
+    }
+
+    @Test
+    void importsDamagedImagesWithPlaceholderThumbnails() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("damaged"));
+        // The broken files sort before the good one, so the scan has to survive them first.
+        Path broken = root.resolve("a-broken.jpg");
+        Files.write(broken, "this is not a picture".getBytes(StandardCharsets.UTF_8));
+        long brokenModified = 1_600_000_000_000L;
+        Files.setLastModifiedTime(broken, FileTime.fromMillis(brokenModified));
+        Path unsupported = root.resolve("b-unsupported.png");
+        Files.write(unsupported, new byte[] {0x00, 0x01, 0x02, 0x03});
+        image(root.resolve("z-good.png"), 64, 48, Color.RED);
+
+        try (Library library = new Library(temp.resolve("library.db")); LibraryScanner scanner = new LibraryScanner(library)) {
+            // Skip the start-time sweep: the folder is added right afterwards, and a concurrent
+            // second pass would reset the error counters this test checks.
+            scanner.start(false, false);
+            scanner.addFolder(root);
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(30)), "scan did not finish");
+
+            List<Photo> photos = library.photos(PhotoFilter.all());
+            assertEquals(3, photos.size(), () -> "an unreadable file still becomes a catalog row; rows="
+                    + photos.stream().map(Photo::fileName).toList() + " state=" + scanner.state());
+            Photo good = photos.stream().filter(photo -> photo.fileName().equals("z-good.png")).findFirst().orElseThrow();
+            Library.Thumbnail goodThumb = library.thumbnail(good.id()).orElseThrow();
+            BufferedImage goodPixels = Imagify.read(goodThumb.data()).toBufferedImage();
+            assertEquals(64, goodPixels.getWidth());
+            assertEquals(48, goodPixels.getHeight());
+
+            Photo brokenPhoto = photos.stream().filter(photo -> photo.fileName().equals("a-broken.jpg")).findFirst().orElseThrow();
+            Photo unsupportedPhoto = photos.stream().filter(photo -> photo.fileName().equals("b-unsupported.png")).findFirst().orElseThrow();
+            assertEquals(0, brokenPhoto.width());
+            assertEquals(0, brokenPhoto.height());
+            assertEquals(brokenModified, brokenPhoto.capturedAt(), "a placeholder takes the file's modification time");
+
+            Library.Thumbnail brokenThumb = library.thumbnail(brokenPhoto.id()).orElseThrow();
+            Library.Thumbnail unsupportedThumb = library.thumbnail(unsupportedPhoto.id()).orElseThrow();
+            assertEquals(PhotoImporter.PLACEHOLDER_WIDTH, brokenThumb.width());
+            assertEquals(PhotoImporter.PLACEHOLDER_HEIGHT, brokenThumb.height());
+            BufferedImage placeholder = Imagify.read(brokenThumb.data()).toBufferedImage();
+            assertEquals(PhotoImporter.PLACEHOLDER_WIDTH, placeholder.getWidth());
+            assertEquals(PhotoImporter.PLACEHOLDER_HEIGHT, placeholder.getHeight());
+            // Both unreadable files share the one lazily encoded placeholder.
+            assertArrayEquals(brokenThumb.data(), unsupportedThumb.data());
+            assertTrue(scanner.state().errors() >= 2, "the failures still have to be reported");
         }
     }
 

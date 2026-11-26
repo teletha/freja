@@ -72,6 +72,20 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
     }
 
     /**
+     * Whether the pixels of this photo could not be decoded when it was imported.
+     * <p>
+     * Such a file is still a catalog row: it has a generated placeholder thumbnail, and every
+     * operation except opening the original works on it. Unknown dimensions are the marker,
+     * because {@link freja.store.Library} records zero width and height for these rows.
+     * </p>
+     *
+     * @return true when the original cannot be decoded
+     */
+    public boolean isUnreadable() {
+        return width <= 0 || height <= 0;
+    }
+
+    /**
      * Returns the display name of the folder which directly contains this photo.
      *
      * @return the last element of the folder path
@@ -137,11 +151,15 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
     }
 
     /**
-     * Returns a dimensions label.
+     * Returns a dimensions label. Photos whose pixels could not be decoded have no known size, so
+     * they get a label instead of reporting "0 × 0".
      *
      * @return for example "4032 × 3024"
      */
     public String dimensionsLabel() {
+        if (isUnreadable()) {
+            return "サイズ不明";
+        }
         return displayWidth() + " × " + displayHeight();
     }
 

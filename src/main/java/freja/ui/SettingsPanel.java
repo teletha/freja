@@ -139,7 +139,7 @@ public final class SettingsPanel extends JPanel {
                 .of("Choose how the application is coloured."), Icons.contrast(17, Theme.MUTED));
 
         // Scope first, then brightness, then the tiles: each control narrows what appears below it.
-        moreButton = new ARXButton("More themes", Icons.chevron(14, Theme.MUTED, false), ARXButton.Variant.SECONDARY, () -> {
+        moreButton = new ARXButton("Show all themes", Icons.chevron(14, Theme.MUTED, false), ARXButton.Variant.SECONDARY, () -> {
             expanded = !expanded;
             showThemes();
         });
@@ -208,7 +208,7 @@ public final class SettingsPanel extends JPanel {
         for (ThemeTile tile : visible) {
             themeGrid.add(tile);
         }
-        moreButton.setText(I.translate(expanded ? "Fewer themes" : "More themes"));
+        moreButton.setText(I.translate(expanded ? "Show suggested themes" : "Show all themes"));
         moreButton.setIcon(Icons.chevron(14, Theme.MUTED, expanded));
         themeCount.setText(String.format(Language.locale(), "%1$d / %2$d", visible.size(), themeTiles.size()));
         themeGrid.revalidate();
@@ -337,10 +337,10 @@ public final class SettingsPanel extends JPanel {
         ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"), ARXSettingsPane.Text
                 .of("Pick the language of the interface."), Icons.letter("あ", 17, Theme.MUTED));
         section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Display language"), ARXSettingsPane.Text
-                .of("Interface text is written in English and translated " + "automatically; results are cached for offline use"), languages)
+                .of("Menus, buttons and messages are shown in the selected language."), languages)
                 .keywords("language", "locale", "translation", "translate"), ARXSettingsPane
                         .row(ARXSettingsPane.Text.of("Current locale"), ARXSettingsPane.Text
-                                .of("Used for dates, numbers and sorting"), localeValue)
+                                .of("Dates and numbers follow the selected region."), localeValue)
                         .keywords("locale", "region", "date", "numbers", "sorting"));
     }
 
@@ -361,7 +361,7 @@ public final class SettingsPanel extends JPanel {
 
         ARXButton check = new ARXButton(I.translate("Check now"), Icons
                 .search(14, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> JOptionPane
-                        .showMessageDialog(this, I.translate("The update check is not available yet.").get(), I.translate("Update")
+                        .showMessageDialog(this, I.translate("Update checking is currently unavailable.").get(), I.translate("Update")
                                 .get(), JOptionPane.INFORMATION_MESSAGE));
         check.setFont(Theme.font(Font.PLAIN, 12));
 
@@ -370,16 +370,16 @@ public final class SettingsPanel extends JPanel {
         restart.setFont(Theme.font(Font.PLAIN, 12));
 
         ARXSettingsPane.Section section = pane.addSection(SYSTEM, ARXSettingsPane.Text.of("System"), ARXSettingsPane.Text
-                .of("Update checks, application information and restart."), Icons.settings(17, Theme.MUTED));
+                .of("Check for updates, view application details or restart Freja."), Icons.settings(17, Theme.MUTED));
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Check for updates at startup"), ARXSettingsPane.Text
-                        .of("Look for a newer version when Freja starts"), togglePanel)
+                        .of("Check for a newer version each time Freja starts."), togglePanel)
                 .keywords("update", "updates", "startup", "boot"), ARXSettingsPane
                         .row(ARXSettingsPane.Text.of("Check for updates"), ARXSettingsPane.Text
                                 .of("Compare against the latest release"), check)
                         .keywords("update", "updates", "version", "release"), ARXSettingsPane
                                 .row(ARXSettingsPane.Text.of("Restart the application"), ARXSettingsPane.Text
-                                        .of("Apply the settings and start again"), restart)
+                                        .of("Save your changes and restart Freja."), restart)
                                 .keywords("restart", "reboot", "reload"));
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Application"), "", ARXSettingsPane.value("Freja " + freja.Freja.VERSION + " (2026-11-24)"))

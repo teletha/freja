@@ -62,6 +62,7 @@
         'Open in Explorer': 'エクスプローラーで表示',
         'Capture': '撮影日',
         'Dimensions': 'サイズ',
+        'Unknown size': 'サイズ不明',
         'Size': 'ファイルサイズ',
         'Camera': 'カメラ',
         'Lens': 'レンズ',
@@ -123,7 +124,7 @@
         'Grid': 'グリッド',
         'Thumbnail size for the photo wall.': '写真ウォールのサムネイルサイズです。',
         'Language': '言語',
-        'The interface follows the language here; date labels update immediately.': '表示言語を選ぶと、翻訳済みラベルがその場で更新されます。',
+        'Menus and messages are shown in the selected language.': 'メニューやメッセージが選択した言語で表示されます。',
         'Display language': '表示言語',
         'System': 'システム',
         'Application information and restart.': 'アプリケーション情報の確認と再起動です。',
@@ -306,6 +307,16 @@
     function displaySize(p) {
         var flip = p.orientation >= 5 && p.orientation <= 8;
         return [flip ? p.height : p.width, flip ? p.width : p.height];
+    }
+
+    /**
+     * A dimensions label for the inspector, viewer and status bar. Unreadable imports are real
+     * catalog rows with unknown size, so they must not read as "0 × 0".
+     */
+    function dimsLabel(p) {
+        if (!(p.width > 0) || !(p.height > 0)) { return t('Unknown size'); }
+        var dims = displaySize(p);
+        return dims[0] + ' × ' + dims[1];
     }
 
     function fmtDate(ms) {
@@ -1246,6 +1257,16 @@
         return '/photo/' + photo.id + '/thumb?v=' + photo.modifiedAt + (bust ? '&b=' + bust : '');
     }
 
+    // Shown when even the stored thumbnail cannot be fetched (a legacy row, or a deleted file).
+    // A data URI cannot fail, so it replaces the browser's broken-image icon with a quiet glyph.
+    var PLACEHOLDER_IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120">'
+        + '<rect width="160" height="120" rx="6" fill="#808080" fill-opacity="0.10"/>'
+        + '<g fill="none" stroke="#808080" stroke-opacity="0.6" stroke-width="3"'
+        + ' stroke-linecap="round" stroke-linejoin="round">'
+        + '<rect x="50" y="40" width="60" height="44" rx="4"/>'
+        + '<path d="M54 78l14-16 10 10 8-7 15 16"/></g></svg>');
+
     /* selection */
 
     function selectOnly(photo) {
@@ -1319,8 +1340,7 @@
         if (photos.length === 0) { node.textContent = ''; return; }
         if (photos.length === 1) {
             var p = photos[0];
-            var dims = displaySize(p);
-            node.textContent = p.fileName + '  ·  ' + dims[0] + '×' + dims[1] + '  ·  ' + fmtDateTime(p.capturedAt) + '  ·  ' + fmtSize(p.byteSize);
+            node.textContent = p.fileName + '  ·  ' + dimsLabel(p) + '  ·  ' + fmtDateTime(p.capturedAt) + '  ·  ' + fmtSize(p.byteSize);
             return;
         }
         var bytes = photos.reduce(function (sum, photo) { return sum + photo.byteSize; }, 0);
@@ -1440,11 +1460,19 @@
             $('insp-folder').textContent = shortenMiddle(detail.folderPath, 46);
             $('insp-folder').title = detail.folderPath;
             var preview = $('insp-preview');
+            // The stored thumbnail already carries the generated placeholder for unreadable
+            // files. If even that request fails, fall back to a local glyph rather than the
+            // browser's broken-image icon.
+            preview.onerror = function () {
+                if (preview.dataset.fallback) { return; }
+                preview.dataset.fallback = '1';
+                preview.src = PLACEHOLDER_IMAGE;
+            };
+            delete preview.dataset.fallback;
             preview.src = '/photo/' + detail.id + '/thumb?v=' + detail.modifiedAt;
             preview.hidden = false;
             $('val-capture').textContent = fmtDateTime(detail.capturedAt);
-            var dims = displaySize(detail);
-            $('val-dimensions').textContent = dims[0] + ' × ' + dims[1] + '  ·  ' + (detail.extension || '').toUpperCase();
+            $('val-dimensions').textContent = dimsLabel(detail) + '  ·  ' + (detail.extension || '').toUpperCase();
             $('val-size').textContent = fmtSize(detail.byteSize);
             $('val-camera').textContent = cameraLabel(detail);
             $('val-lens').textContent = detail.lens || '—';
@@ -1618,7 +1646,7 @@
 
     /* ======================================================== viewer ==== */
 
-    const V = { photos: [], index: 0, open: false, fit: true, zoom: 1, panX: 0, panY: 0, timer: 0, generation: 0, fullscreen: false, cache: new Map() };
+    const V = { photos: [], index: 0, open: false, fit: true, zoom: 1, panX: 0, panY: 0, timer: 0, generation: 0, fullscreen: false, cache: new Map(), failed: new Set() };
 
     var viewerImage = $('viewer-image');
     var viewerCanvas = $('viewer-canvas');
@@ -1666,11 +1694,8 @@
         setFullscreen(!V.fullscreen);
     }
 
-    /** Decoded originals kept warm so back-and-forth navigation never blanks the canvas. */
-    function loadOriginal(photo) {
-        var cached = V.cache.get(photo.id);
-        if (cached && cached.complete && cached.naturalWidth) { return Promise.resolve(cached); }
-        var url = '/photo/' + photo.id + '/original?v=' + photo.modifiedAt;
+    /** Loads one image URL, resolving only after a paintable frame is ready. */
+    function loadImageUrl(url) {
         return new Promise(function (resolve, reject) {
             var img = new Image();
             img.onload = function () {
@@ -1680,11 +1705,30 @@
             };
             img.onerror = function () { reject(new Error('Cannot load the image')); };
             img.src = url;
+        });
+    }
+
+    /** Decoded originals kept warm so back-and-forth navigation never blanks the canvas. */
+    function loadOriginal(photo) {
+        var cached = V.cache.get(photo.id);
+        if (cached && cached.complete && cached.naturalWidth) { return Promise.resolve(cached); }
+        // A photo whose original and thumbnail both failed is not retried. Prefetching neighbours
+        // would otherwise repeat a hopeless pair of requests on every navigation.
+        var failureKey = photo.id + ':' + photo.modifiedAt;
+        if (V.failed.has(failureKey)) { return Promise.reject(new Error('Cannot load the image')); }
+        var url = '/photo/' + photo.id + '/original?v=' + photo.modifiedAt;
+        // Unreadable files are imported with a generated placeholder thumbnail, so fall back to
+        // the thumbnail route and show the same image the grid shows.
+        return loadImageUrl(url).catch(function () {
+            return loadImageUrl(thumbUrl(photo));
         }).then(function (img) {
             V.cache.delete(photo.id);
             V.cache.set(photo.id, img);
             while (V.cache.size > 6) { V.cache.delete(V.cache.keys().next().value); }
             return img;
+        }, function (error) {
+            V.failed.add(failureKey);
+            throw error;
         });
     }
 
@@ -1729,8 +1773,7 @@
         var photo = V.photos[V.index];
         if (!photo) { return; }
         $('viewer-title').textContent = photo.fileName;
-        var dims = displaySize(photo);
-        $('viewer-counter').textContent = (V.index + 1) + ' / ' + V.photos.length + '   ·   ' + dims[0] + '×' + dims[1] + '   ·   ' + fmtSize(photo.byteSize);
+        $('viewer-counter').textContent = (V.index + 1) + ' / ' + V.photos.length + '   ·   ' + dimsLabel(photo) + '   ·   ' + fmtSize(photo.byteSize);
         var favorite = $('v-favorite');
         favorite.textContent = photo.favorite ? '★' : '☆';
         favorite.classList.toggle('on', photo.favorite);

@@ -9,6 +9,7 @@
  */
 package freja.scan;
 
+import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.DirectoryStream;
@@ -665,7 +666,7 @@ public final class LibraryScanner implements AutoCloseable {
                         } else {
                             submitImport(ownerId, file, token, attrs, walkFinished);
                         }
-                    } catch (RuntimeException e) {
+                    } catch (RuntimeException | IOError | LinkageError | OutOfMemoryError e) {
                         errors.incrementAndGet();
                         lastError = e.getMessage();
                     }
@@ -787,7 +788,8 @@ public final class LibraryScanner implements AutoCloseable {
             importers.submit(() -> {
                 try {
                     importFile(folderId, file, token, attrs);
-                } catch (RuntimeException e) {
+                } catch (RuntimeException | IOError | LinkageError | OutOfMemoryError e) {
+                    // One file must never take the worker down with it: the scan has to go on.
                     errors.incrementAndGet();
                     lastError = e.getMessage();
                 } finally {
@@ -931,12 +933,20 @@ public final class LibraryScanner implements AutoCloseable {
             PhotoImporter.AnalyzedPhoto analyzed;
             try {
                 analyzed = PhotoImporter.analyze(file, modified);
-            } catch (IOException e) {
-                recordSave(folderId, file, size, modified, null, effectiveToken, token);
+            } catch (OutOfMemoryError e) {
+                // The heap is already exhausted, so there is no room to build a placeholder. Keep
+                // this file a skip, as before, instead of risking the rest of the scan.
                 errors.incrementAndGet();
-                lastError = e.getMessage();
+                lastError = "読み込めません: " + file.getFileName();
                 notifyChanged(false);
                 return;
+            } catch (IOException | RuntimeException | IOError | LinkageError e) {
+                // A damaged or unsupported file still becomes a catalog row with a placeholder
+                // thumbnail, so the user can see it and delete it. The failure stays counted for
+                // diagnostics, and the normal save path (token, change check) still applies.
+                errors.incrementAndGet();
+                lastError = "読み込めません: " + file.getFileName();
+                analyzed = PhotoImporter.placeholder(file, modified);
             }
             BasicFileAttributes after = Files.readAttributes(file, BasicFileAttributes.class);
             if (after.size() != size || after.lastModifiedTime().toMillis() != modified) {
@@ -947,7 +957,7 @@ public final class LibraryScanner implements AutoCloseable {
             recordSave(folderId, file, size, modified, analyzed, effectiveToken, token);
             imported.incrementAndGet();
             notifyChanged(false);
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException | RuntimeException | IOError | LinkageError | OutOfMemoryError e) {
             errors.incrementAndGet();
             lastError = "読み込めません: " + file.getFileName();
         } finally {

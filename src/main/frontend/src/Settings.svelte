@@ -63,7 +63,7 @@
     </div>
 
     <h2>{t('Language')}</h2>
-    <p class="settings-note">{t('The interface follows the language here; date labels update immediately.')}</p>
+    <p class="settings-note">{t('Menus and messages are shown in the selected language.')}</p>
     <div class="setting-row">
         <label for="svelte-language">{t('Display language')}</label>
         <select id="svelte-language" value={state.language} onchange={event => actions.setLanguage(event.currentTarget.value)}>

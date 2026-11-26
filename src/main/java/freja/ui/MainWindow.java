@@ -24,6 +24,8 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOError;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,14 +41,11 @@ import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -58,7 +57,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.ListCellRenderer;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -73,6 +71,7 @@ import freja.scan.LibraryScanner;
 import freja.store.Library;
 import freja.store.LibraryTasks;
 import freja.util.PathUtil;
+import imagify.Imagify;
 import laevatain.ARXButton;
 import laevatain.ARXSearchField;
 
@@ -114,7 +113,11 @@ public final class MainWindow extends JFrame {
 
     private final ARXSearchField search;
 
-    private final JComboBox<SortOrder> sort = new JComboBox<>(SortOrder.values());
+    /**
+     * The order applied to the whole view. In the folder view each folder header shows - and
+     * changes - its own saved sort, and that order also becomes this value for the selected folder.
+     */
+    private SortOrder viewSort = preferredSort();
 
     private final JSlider zoom = new JSlider(120, 220, 170);
 
@@ -142,8 +145,6 @@ public final class MainWindow extends JFrame {
 
     private SettingsPanel settingsPanel;
 
-    private ARXButton themeButton;
-
     private javax.swing.JSplitPane split;
 
     private javax.swing.JSplitPane sidebarSplit;
@@ -169,7 +170,7 @@ public final class MainWindow extends JFrame {
     private long refreshGeneration;
 
     /** Everything a background refresh needs to hand back to the event dispatch thread. */
-    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, boolean fallback) {
+    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, SortOrder order, boolean fallback) {
     }
 
     private Sidebar.Mode mode = Sidebar.Mode.ALL;
@@ -187,8 +188,6 @@ public final class MainWindow extends JFrame {
     private volatile long uiHeartbeat = System.nanoTime();
 
     private volatile boolean uiWatchdogRunning = true;
-
-    private boolean updatingSort;
 
     private boolean scrollToSelectedFolder;
 
@@ -445,12 +444,6 @@ public final class MainWindow extends JFrame {
         tagFilterButton.setToolTipText("タグで絞り込む");
         bar.add(tagFilterButton);
         bar.add(Box.createHorizontalGlue());
-
-        sort.setRenderer(sortRenderer());
-        sort.setPreferredSize(new Dimension(168, 31));
-        sort.setMaximumSize(new Dimension(190, 31));
-        sort.setToolTipText("並び順");
-        bar.add(sort);
         bar.add(Box.createHorizontalStrut(14));
 
         zoom.setOpaque(false);
@@ -467,26 +460,7 @@ public final class MainWindow extends JFrame {
         ARXButton slideshow = new ARXButton("スライドショー", Icons.play(13, Theme.MUTED), ARXButton.Variant.SECONDARY, this::openSlideshow);
         slideshow.setFont(Theme.font(Font.PLAIN, 12));
         bar.add(slideshow);
-
-        themeButton = new ARXButton((String) null, Theme.isDark() ? Icons.sun(16, Theme.MUTED)
-                : Icons.moon(16, Theme.MUTED), ARXButton.Variant.SECONDARY, () -> setDarkMode(!Theme.isDark()));
-        themeButton.setToolTipText(Theme.isDark() ? "ライトモードに切り替え" : "ダークモードに切り替え");
-        bar.add(Box.createHorizontalStrut(8));
-        bar.add(themeButton);
         return bar;
-    }
-
-    private ListCellRenderer<? super SortOrder> sortRenderer() {
-        return new DefaultListCellRenderer() {
-            @Override
-            public java.awt.Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected, boolean focused) {
-                super.getListCellRendererComponent(list, value, index, selected, focused);
-                if (value instanceof SortOrder order) {
-                    setText(order.label());
-                }
-                return this;
-            }
-        };
     }
 
     private JComponent statusBar() {
@@ -640,11 +614,11 @@ public final class MainWindow extends JFrame {
             }
 
             @Override
-            public void onSortFolder(long folderId, SortOrder sort) {
+            public void onSortFolder(long folderId, SortOrder order) {
                 boolean applies = mode == Sidebar.Mode.FOLDER && MainWindow.this.folderId == folderId;
-                tasks.setFolderSort(folderId, sort, () -> {
+                tasks.setFolderSort(folderId, order, () -> {
                     if (applies) {
-                        setSortSelection(sort, true);
+                        setViewSort(order);
                         refreshAll();
                     }
                 });
@@ -700,6 +674,7 @@ public final class MainWindow extends JFrame {
                 TagPicker.show(grid, point.x, point.y + 8, tasks, folderId, this::tagsChanged);
             }
         }));
+        grid.setOnSortOrder(this::changeSortOrder);
         grid.setOnRemove(this::removeFromLibrary);
         grid.setOnDeleteFromDisk(this::deleteFromDisk);
         grid.setOnOpen(this::openViewer);
@@ -735,24 +710,31 @@ public final class MainWindow extends JFrame {
             }
         });
 
-        sort.addActionListener(event -> {
-            if (updatingSort) {
-                return;
-            }
-            SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
-            long selectedFolder = folderId;
-            if (mode == Sidebar.Mode.FOLDER && selectedFolder >= 0) {
-                tasks.setFolderSort(selectedFolder, order, () -> {
-                    refreshAll();
-                    savePreferences();
-                });
-            } else {
-                PREFERENCES.put(SORT_PREFERENCE, order.name());
+        zoom.addChangeListener(event -> savePreferences());
+    }
+
+    /**
+     * Applies a sort order to one folder when the folder view is active, and to the whole view
+     * otherwise. The folder header select is the only caller.
+     *
+     * @param targetFolder the folder to change, or -1 for the view-wide order
+     * @param order the order to apply
+     */
+    private void changeSortOrder(long targetFolder, SortOrder order) {
+        if (mode == Sidebar.Mode.FOLDER && targetFolder >= 0) {
+            tasks.setFolderSort(targetFolder, order, () -> {
+                if (mode == Sidebar.Mode.FOLDER && folderId == targetFolder) {
+                    setViewSort(order);
+                }
                 refreshAll();
                 savePreferences();
-            }
-        });
-        zoom.addChangeListener(event -> savePreferences());
+            });
+        } else {
+            PREFERENCES.put(SORT_PREFERENCE, order.name());
+            setViewSort(order);
+            refreshAll();
+            savePreferences();
+        }
     }
 
     /** Shows or hides the details panel and remembers the choice. */
@@ -1136,7 +1118,7 @@ public final class MainWindow extends JFrame {
         Sidebar.Mode requestedMode = mode;
         long requestedFolder = folderId;
         if (requestedMode != Sidebar.Mode.FOLDER) {
-            setSortSelection(preferredSort(), false);
+            setViewSort(preferredSort());
             if (onApplied != null) {
                 onApplied.run();
             }
@@ -1146,7 +1128,7 @@ public final class MainWindow extends JFrame {
             // A newer selection may have arrived while the catalog was being read.
             if (requestedMode == mode && requestedFolder == folderId) {
                 SortOrder order = found == null ? SortOrder.NAME : found.map(Folder::sort).orElse(SortOrder.NAME);
-                setSortSelection(order, true);
+                setViewSort(order);
             }
             if (onApplied != null) {
                 onApplied.run();
@@ -1154,14 +1136,9 @@ public final class MainWindow extends JFrame {
         });
     }
 
-    private void setSortSelection(SortOrder order, boolean folderView) {
-        updatingSort = true;
-        try {
-            sort.setSelectedItem(order);
-        } finally {
-            updatingSort = false;
-        }
-        sort.setToolTipText(folderView ? "このフォルダの表示順" : "表示順");
+    /** Records the order {@link #refreshAll()} should load the view with. */
+    private void setViewSort(SortOrder order) {
+        viewSort = order;
     }
 
     private SortOrder preferredSort() {
@@ -1279,8 +1256,36 @@ public final class MainWindow extends JFrame {
         if (photos.isEmpty()) {
             photos = List.of(photo);
         }
-        viewer = PhotoViewer.open(this, photos, photo, (updated, favorite) -> tasks.setFavorites(List
-                .of(updated.id()), favorite, this::refreshAll));
+        viewer = PhotoViewer.open(this, photos, photo, new PhotoViewer.Listener() {
+            @Override
+            public void onFavorite(Photo updated, boolean favorite) {
+                tasks.setFavorites(List.of(updated.id()), favorite, MainWindow.this::refreshAll);
+            }
+
+            @Override
+            public void onClose(Photo lastViewed) {
+                // Leave the grid focused on, and scrolled to, the photo that was on screen when the
+                // viewer closed rather than the one it was opened with.
+                grid.select(lastViewed);
+            }
+        }, this::viewerPlaceholder);
+    }
+
+    /**
+     * Loads the placeholder image stored for an unreadable photo, so the viewer can show the same
+     * picture as the grid instead of an error. Runs on the viewer's loader thread.
+     *
+     * @param photo a photo whose original could not be decoded
+     * @return the decoded placeholder, or null when the catalog has none
+     */
+    private BufferedImage viewerPlaceholder(Photo photo) {
+        try {
+            return tasks.library().thumbnail(photo.id())
+                    .map(thumbnail -> Imagify.read(thumbnail.data()).toBufferedImage())
+                    .orElse(null);
+        } catch (RuntimeException | IOError | LinkageError e) {
+            return null;
+        }
     }
 
     private void openSlideshow() {
@@ -1366,10 +1371,6 @@ public final class MainWindow extends JFrame {
         boolean dark = Theme.isDark();
         if (darkModeItem.isSelected() != dark) {
             darkModeItem.setSelected(dark);
-        }
-        if (themeButton != null) {
-            themeButton.setIcon(dark ? Icons.sun(16, Theme.MUTED) : Icons.moon(16, Theme.MUTED));
-            themeButton.setToolTipText(dark ? "ライトモードに切り替え" : "ダークモードに切り替え");
         }
         // The settings page keeps its own view of the active theme: badges, the visible picks and
         // the current theme row.
@@ -1514,7 +1515,7 @@ public final class MainWindow extends JFrame {
         long generation = ++refreshGeneration;
         Sidebar.Mode requestedMode = mode;
         long requestedFolder = folderId;
-        SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
+        SortOrder order = viewSort;
         String searchText = search.getText();
         List<Long> tagIds = List.copyOf(selectedTagIds);
         refresher.execute(() -> {
@@ -1571,7 +1572,7 @@ public final class MainWindow extends JFrame {
         } else {
             grouping = filter.groupsByDate() ? PhotoGrid.GroupMode.DATE : PhotoGrid.GroupMode.NONE;
         }
-        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, fallback);
+        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, order, fallback);
     }
 
     /** Installs a loaded view on the event dispatch thread. Never touches the catalog. */
@@ -1596,7 +1597,7 @@ public final class MainWindow extends JFrame {
         } else if (data.mode() != Sidebar.Mode.FOLDER) {
             grid.clearPinnedFolder();
         }
-        grid.setPhotos(data.photos(), data.grouping(), data.sections());
+        grid.setPhotos(data.photos(), data.grouping(), data.sections(), data.order(), data.mode() == Sidebar.Mode.FOLDER);
         // Only folders with a matching photo are shown while searching.
         sidebar.setData(data.stats(), data.visibleFolders(), data.mode(), data.folderId());
         statusCount.setText(data.stats().photos() + " 枚  ·  " + Photo.formatSize(data.stats().bytes()));
@@ -1658,7 +1659,7 @@ public final class MainWindow extends JFrame {
         }
         if (selected.size() == 1) {
             Photo photo = selected.get(0);
-            selectionInfo.setText(photo.fileName() + "  ·  " + photo.width() + "×" + photo.height() + "  ·  " + photo
+            selectionInfo.setText(photo.fileName() + "  ·  " + photo.dimensionsLabel() + "  ·  " + photo
                     .capturedLabel() + "  ·  " + Photo.formatSize(photo.byteSize()));
         } else {
             long bytes = 0;
@@ -1704,7 +1705,7 @@ public final class MainWindow extends JFrame {
             progress.setIndeterminate(false);
             progress.setVisible(false);
             if (state.errors() > 0) {
-                statusMessage.setText(state.message() == null || state.message().isBlank() ? state.errors() + " 件のファイルを読み込めませんでした"
+                statusMessage.setText(state.message() == null || state.message().isBlank() ? state.errors() + " 件のファイルはプレースホルダーとして取り込みました"
                         : shorten(state.message(), 110));
             } else if (state.imported() > 0) {
                 statusMessage.setText(state.imported() + " 枚の写真を更新しました  (" + formatDuration(state.elapsed()) + ")");
@@ -1764,12 +1765,7 @@ public final class MainWindow extends JFrame {
         }
         zoom.setValue(PREFERENCES.getInt("view.thumbSize", 170));
         grid.setThumbSize(zoom.getValue());
-        try {
-            sort.setSelectedItem(SortOrder.valueOf(PREFERENCES.get(SORT_PREFERENCE, SortOrder.NAME.name())));
-        } catch (IllegalArgumentException e) {
-            sort.setSelectedItem(SortOrder.NAME);
-        }
-        sort.setToolTipText("表示順");
+        viewSort = preferredSort();
     }
 
     private void savePreferences() {
@@ -1792,7 +1788,7 @@ public final class MainWindow extends JFrame {
         rememberSelection();
         PREFERENCES.putInt("view.thumbSize", zoom.getValue());
         if (mode != Sidebar.Mode.FOLDER) {
-            PREFERENCES.put(SORT_PREFERENCE, (sort.getSelectedItem() instanceof SortOrder order ? order : SortOrder.NAME).name());
+            PREFERENCES.put(SORT_PREFERENCE, viewSort.name());
         }
         if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && sidebarSplit.getDividerLocation() > 0) {
             PREFERENCES.putInt(SIDEBAR_DIVIDER_PREFERENCE, sidebarSplit.getDividerLocation());

@@ -40,7 +40,9 @@ import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -52,6 +54,7 @@ import javax.swing.Timer;
 
 import freja.model.Folder;
 import freja.model.Photo;
+import freja.model.PhotoFilter.SortOrder;
 
 /**
  * A virtualized, Picasa-like thumbnail grid.
@@ -76,6 +79,13 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private static final int HEADER_HEIGHT = 64;
 
+    /** Horizontal padding, gap and chevron width of the painted sort-order select control. */
+    private static final int SELECT_PADDING = 7;
+
+    private static final int SELECT_GAP = 5;
+
+    private static final int SELECT_CHEVRON = 6;
+
     private static final int TOP = 8;
 
     private static final DateTimeFormatter RANGE_DATE = DateTimeFormatter.ofPattern("yyyy/M/d");
@@ -89,6 +99,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private GroupMode grouping = GroupMode.DATE;
 
     private List<Folder> sections = List.of();
+
+    /** The order applied to the whole view, and whether folders override it with their own sort. */
+    private SortOrder viewOrder;
+
+    private boolean perFolderOrder;
 
     private Timer scrollAnimator;
 
@@ -151,10 +166,31 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private BiConsumer<Long, Point> onTagFolder = (folderId, point) -> {
     };
 
+    /**
+     * Receives a sort order chosen from a header's sort label. The folder identifier is -1 when the
+     * header does not belong to one folder (the "その他" header), meaning the whole view.
+     */
+    private SortOrderListener onSortOrder = (folderId, order) -> {
+    };
+
+    /** Receives the folder and order picked from a header's sort label. */
+    @FunctionalInterface
+    public interface SortOrderListener {
+
+        void onSortOrder(long folderId, SortOrder order);
+    }
+
     /** Clickable areas of the tag chips painted in the current frame. */
     private final List<TagHit> tagHits = new ArrayList<>();
 
     private record TagHit(String folderKey, Rectangle bounds) {
+    }
+
+    /** Clickable areas of the header sort labels painted in the current frame. */
+    private final List<SortHit> sortHits = new ArrayList<>();
+
+    /** A header's sort label: the folder it belongs to (-1 for the whole view) and its order. */
+    private record SortHit(long folderId, SortOrder order, Rectangle bounds) {
     }
 
     private Consumer<List<Photo>> onRemove = photos -> {
@@ -165,7 +201,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     /** One visual row, either a date header or a row of cells with per-photo heights. */
     private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey,
-            int[] cellHeights, List<String> tags) {
+            int[] cellHeights, List<String> tags, SortOrder order) {
 
         boolean header() {
             return indices.length == 0;
@@ -184,6 +220,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             @Override
             public void mousePressed(MouseEvent event) {
                 requestFocusInWindow();
+                SortHit sortHit = sortHitAt(event.getPoint());
+                if (sortHit != null && SwingUtilities.isLeftMouseButton(event)) {
+                    showSortMenu(sortHit, event.getPoint());
+                    return;
+                }
                 TagHit hit = tagHitAt(event.getPoint());
                 if (hit != null && SwingUtilities.isLeftMouseButton(event)) {
                     try {
@@ -238,6 +279,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent event) {
+                if (sortHitAt(event.getPoint()) != null) {
+                    setHover(-1);
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    return;
+                }
                 if (tagHitAt(event.getPoint()) != null) {
                     setHover(-1);
                     setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -402,13 +448,24 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     /**
+     * Receives the folder and order chosen from a header's sort label; the folder is -1 when the
+     * choice applies to the whole view.
+     *
+     * @param listener the listener, or null to ignore picker choices
+     */
+    public void setOnSortOrder(SortOrderListener listener) {
+        this.onSortOrder = listener == null ? (folderId, order) -> {
+        } : listener;
+    }
+
+    /**
      * Replaces the visible photos.
      *
      * @param photos the photos
      * @param grouping how to divide the photos with headers
      */
     public void setPhotos(List<Photo> photos, GroupMode grouping) {
-        setPhotos(photos, grouping, List.of());
+        setPhotos(photos, grouping, List.of(), null, false);
     }
 
     /**
@@ -419,6 +476,21 @@ public final class PhotoGrid extends JComponent implements Scrollable {
      * @param sections the folder sections in display order, including empty folders
      */
     public void setPhotos(List<Photo> photos, GroupMode grouping, List<Folder> sections) {
+        setPhotos(photos, grouping, sections, null, false);
+    }
+
+    /**
+     * Replaces the visible photos and records which sort order is actually applied, so each folder
+     * header can show its own order.
+     *
+     * @param photos the photos, ordered by folder when using {@link GroupMode#FOLDER}
+     * @param grouping how to divide the photos with headers
+     * @param sections the folder sections in display order, including empty folders
+     * @param viewOrder the order used for the whole view, shown when folders do not override it
+     * @param perFolderOrder whether each folder is ordered by its own saved sort
+     */
+    public void setPhotos(List<Photo> photos, GroupMode grouping, List<Folder> sections, SortOrder viewOrder,
+            boolean perFolderOrder) {
         Set<Long> selectedIds = new HashSet<>();
         for (int index : selectedIndices) {
             if (index >= 0 && index < photos.size()) {
@@ -429,6 +501,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         this.photos = List.copyOf(photos);
         this.grouping = grouping;
         this.sections = List.copyOf(sections);
+        this.viewOrder = viewOrder;
+        this.perFolderOrder = perFolderOrder;
         selectedIndices.clear();
         int restored = -1;
         int first = -1;
@@ -974,7 +1048,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                     while (index < photos.size() && photos.get(index).folderId() == section.id()) {
                         index++;
                     }
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id()), null, section.tags()));
+                    SortOrder applied = perFolderOrder ? (section.sort() == null ? SortOrder.NAME : section.sort()) : viewOrder;
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id()), null, section.tags(), applied));
                     y += HEADER_HEIGHT;
                     y = addPhotoRows(y, start, index);
                     y += 8;
@@ -982,7 +1057,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 if (index < photos.size()) {
                     int start = index;
                     index = photos.size();
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null, List.of()));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null, List.of(), viewOrder));
                     y += HEADER_HEIGHT;
                     y = addPhotoRows(y, start, index);
                     y += 8;
@@ -999,7 +1074,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 while (index < photos.size() && key.equals(photos.get(index).dateLabel())) {
                     index++;
                 }
-                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key, null, List.of()));
+                rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], key, index - start, null, key, null, List.of(), null));
                 y += HEADER_HEIGHT;
                 y = addPhotoRows(y, start, index);
                 y += 8;
@@ -1026,7 +1101,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 tallest = Math.max(tallest, heights[i]);
             }
             int height = tallest + CELL_PADDING * 2;
-            rows.add(new LayoutRow(y, height, indices, null, 0, null, null, heights, List.of()));
+            rows.add(new LayoutRow(y, height, indices, null, 0, null, null, heights, List.of(), null));
             y += height;
         }
         return y;
@@ -1117,6 +1192,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.setColor(Theme.BACKGROUND);
             g.fillRect(0, 0, getWidth(), getHeight());
             tagHits.clear();
+            sortHits.clear();
 
             if (rows.isEmpty()) {
                 paintEmpty(g);
@@ -1212,14 +1288,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         // CSS-like sticky headers are pushed by the next section header as it reaches the top.
         // Drawing the current header at a geometric offset avoids painting a second, time-based
         // copy of the previous header, which caused the flicker.
-        LayoutRow next = nextHeaderAfter(stickyKey);
-        int stickyY = top;
-        if (next != null && current.y() <= top) {
-            int distance = next.y() - top;
-            if (distance >= 0 && distance < HEADER_HEIGHT) {
-                stickyY = top - (HEADER_HEIGHT - distance);
-            }
-        }
+        int stickyY = stickyHeaderY(current, top);
 
         java.awt.Shape clip = g.getClip();
         try {
@@ -1250,6 +1319,19 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             }
         }
         return null;
+    }
+
+    /** The y where a folder header is drawn while it is sticky at the top of the viewport. */
+    private int stickyHeaderY(LayoutRow current, int top) {
+        LayoutRow next = current.groupKey() == null ? null : nextHeaderAfter(current.groupKey());
+        int stickyY = top;
+        if (next != null && current.y() <= top) {
+            int distance = next.y() - top;
+            if (distance >= 0 && distance < HEADER_HEIGHT) {
+                stickyY = top - (HEADER_HEIGHT - distance);
+            }
+        }
+        return stickyY;
     }
 
     private LayoutRow headerFor(String key) {
@@ -1313,6 +1395,111 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         tagHits.add(new TagHit(folderKey, new Rectangle(x, chipY, available, chipHeight)));
     }
 
+    /** Opens the sort-order chooser for a header's sort label, marking the order it shows. */
+    private void showSortMenu(SortHit hit, Point point) {
+        JPopupMenu menu = new JPopupMenu();
+        for (SortOrder option : SortOrder.values()) {
+            JCheckBoxMenuItem item = new JCheckBoxMenuItem(option.label(), option == hit.order());
+            item.addActionListener(event -> {
+                if (option != hit.order()) {
+                    onSortOrder.onSortOrder(hit.folderId(), option);
+                }
+            });
+            menu.add(item);
+        }
+        menu.show(this, point.x, point.y);
+    }
+
+    private static String sortLabel(SortOrder order) {
+        return order.label();
+    }
+
+    /** Width of the painted select control: the label with padding on both sides and a chevron. */
+    private static int sortControlWidth(FontMetrics metrics, SortOrder order) {
+        return metrics.stringWidth(sortLabel(order)) + SELECT_PADDING * 2 + SELECT_GAP + SELECT_CHEVRON;
+    }
+
+    /**
+     * How far the metadata after the sort control advances: the control's painted width, or the
+     * truncated text width when the control does not fit, plus the usual trailing gap.
+     */
+    private static int sortAdvance(FontMetrics metrics, SortOrder order, int room) {
+        int control = sortControlWidth(metrics, order);
+        int width = control <= room ? control : Math.min(metrics.stringWidth(sortLabel(order)), room);
+        return width + 10;
+    }
+
+    /** The folder a header belongs to, or -1 when its key is missing (the "その他" header). */
+    private static long folderIdOf(LayoutRow row) {
+        if (row.groupKey() == null) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(row.groupKey());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private SortHit sortHitAt(Point point) {
+        for (SortHit hit : sortHits) {
+            if (hit.bounds().contains(point)) {
+                return hit;
+            }
+        }
+        // Fallback for frames whose hit rectangles have not been painted yet: derive the label
+        // rectangle from the current layout, exactly as paintHeader places it. The sticky header's
+        // label is checked at its painted position so it keeps winning over the scroll-to-folder
+        // click.
+        FontMetrics countMetrics = getFontMetrics(Theme.font(Font.BOLD, 10));
+        FontMetrics orderMetrics = getFontMetrics(Theme.font(Font.PLAIN, 10));
+        if (grouping == GroupMode.FOLDER && stickyKey != null) {
+            LayoutRow sticky = headerFor(stickyKey);
+            if (sticky != null) {
+                SortHit hit = sortHitFor(sticky, stickyHeaderY(sticky, getVisibleRect().y), point, countMetrics,
+                        orderMetrics);
+                if (hit != null) {
+                    return hit;
+                }
+            }
+        }
+        for (LayoutRow row : rows) {
+            if (!row.header()) {
+                continue;
+            }
+            SortHit hit = sortHitFor(row, row.y(), point, countMetrics, orderMetrics);
+            if (hit != null) {
+                return hit;
+            }
+        }
+        return null;
+    }
+
+    /** The sort label rectangle of one header drawn at {@code rowY}, or null when it is not there. */
+    private SortHit sortHitFor(LayoutRow row, int rowY, Point point, FontMetrics countMetrics,
+            FontMetrics orderMetrics) {
+        if (row.order() == null) {
+            return null;
+        }
+        int chipY = rowY + 47 - 14;
+        if (point.y < chipY || point.y >= chipY + 20) {
+            return null;
+        }
+        int badgeWidth = countMetrics.stringWidth(row.count() + "枚") + 14;
+        int from = OUTER + badgeWidth + 10;
+        int room = getWidth() - OUTER - from;
+        if (room <= 40) {
+            return null;
+        }
+        int control = sortControlWidth(orderMetrics, row.order());
+        // Mirror paintHeader: the full control when it fits, otherwise only its truncated text.
+        int width = control <= room ? control : Math.min(orderMetrics.stringWidth(sortLabel(row.order())), room);
+        if (point.x < from || point.x > from + width) {
+            return null;
+        }
+        return new SortHit(folderIdOf(row), row.order(), new Rectangle(from, chipY, width, 20));
+    }
+
     private TagHit tagHitAt(Point point) {
         for (TagHit hit : tagHits) {
             if (hit.bounds().contains(point)) {
@@ -1322,6 +1509,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         // Fallback for frames whose hit rectangles have not been painted yet: derive the metadata
         // line from the current layout so a click is never silently lost.
         FontMetrics countMetrics = getFontMetrics(Theme.font(Font.BOLD, 10));
+        FontMetrics orderMetrics = getFontMetrics(Theme.font(Font.PLAIN, 10));
         for (LayoutRow row : rows) {
             if (!row.header() || row.groupKey() == null) {
                 continue;
@@ -1333,8 +1521,17 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             }
             int badgeWidth = countMetrics.stringWidth(row.count() + "枚") + 14;
             int from = OUTER + badgeWidth + 10;
-            if (point.x >= from && point.x <= getWidth() - OUTER) {
-                return new TagHit(row.groupKey(), new Rectangle(from, chipY, getWidth() - OUTER - from, 20));
+            int metaRight = getWidth() - OUTER;
+            if (row.order() != null) {
+                // The sort control sits between the badge and the chips; clicking it must not be
+                // mistaken for a click on the tag line.
+                int room = metaRight - from;
+                if (room > 40) {
+                    from += sortAdvance(orderMetrics, row.order(), room);
+                }
+            }
+            if (point.x >= from && point.x <= metaRight) {
+                return new TagHit(row.groupKey(), new Rectangle(from, chipY, metaRight - from, 20));
             }
         }
         return null;
@@ -1381,6 +1578,40 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
         int metaX = textX + badgeWidth + 10;
         int metaRight = getWidth() - OUTER;
+        if (row.order() != null && metaRight - metaX > 40) {
+            g.setFont(Theme.font(Font.PLAIN, 10));
+            FontMetrics orderMetrics = g.getFontMetrics();
+            int room = metaRight - metaX;
+            int control = sortControlWidth(orderMetrics, row.order());
+            if (control <= room) {
+                // A painted select control: a subtle rounded box with a chevron, sized to the label.
+                // It stays inside the metadata line, and metaX advances by exactly its width.
+                int boxY = metaBaseline - 14;
+                g.setColor(Theme.SURFACE);
+                g.fill(new RoundRectangle2D.Float(metaX, boxY, control, 20, 9, 9));
+                g.setColor(Theme.BORDER);
+                g.setStroke(new BasicStroke(1f));
+                g.draw(new RoundRectangle2D.Float(metaX + 0.5f, boxY + 0.5f, control - 1, 19, 9, 9));
+                g.setColor(Theme.TEXT);
+                g.drawString(sortLabel(row.order()), metaX + SELECT_PADDING, metaBaseline);
+                int arrowX = metaX + control - SELECT_PADDING - SELECT_CHEVRON;
+                int arrowY = metaBaseline - 6;
+                g.setColor(Theme.MUTED);
+                g.fillPolygon(new int[] { arrowX, arrowX + SELECT_CHEVRON, arrowX + SELECT_CHEVRON / 2 },
+                        new int[] { arrowY, arrowY, arrowY + 4 }, 3);
+                sortHits.add(new SortHit(folderIdOf(row), row.order(), new Rectangle(metaX, boxY, control, 20)));
+                metaX += control + 10;
+            } else {
+                // Too little room for the box: draw the bare truncated label, still clickable.
+                String shown = truncate(sortLabel(row.order()), orderMetrics, room);
+                int width = orderMetrics.stringWidth(shown);
+                g.setColor(Theme.TEXT);
+                g.drawString(shown, metaX, metaBaseline);
+                sortHits.add(new SortHit(folderIdOf(row), row.order(),
+                        new Rectangle(metaX - 2, metaBaseline - 13, width + 4, 20)));
+                metaX += Math.min(orderMetrics.stringWidth(sortLabel(row.order())), room) + 10;
+            }
+        }
         if (row.note() != null && metaRight - metaX > 30) {
             Font noteFont = Theme.font(Font.PLAIN, 11);
             g.setFont(noteFont);
@@ -1418,9 +1649,15 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         Rectangle inner = new Rectangle(cardX + 3, cardY + 3, cardWidth - 6, cardHeight - 6);
         BufferedImage image = cache.get(photo.id(), photo.modifiedAt());
         if (image == null) {
-            // Request the thumbnail but draw no placeholder: a grey icon flashing before the real
-            // image is more distracting than an empty cell.
+            // Request the thumbnail but draw no placeholder for a normal photo: a grey icon
+            // flashing before the real image is more distracting than an empty cell. An unreadable
+            // photo is the exception: until its generated placeholder thumbnail arrives - or
+            // forever, for rows imported before placeholders existed - draw a neutral graphic so
+            // the cell is still a clickable, selectable target. The cache deduplicates requests.
             cache.request(photo.id(), photo.modifiedAt(), this::repaint);
+            if (photo.isUnreadable()) {
+                paintUnreadablePlaceholder(g, inner);
+            }
         } else {
             double scale = Math.min((double) inner.width / image.getWidth(), (double) inner.height / image.getHeight());
             int width = Math.max(1, (int) Math.round(image.getWidth() * scale));
@@ -1443,6 +1680,22 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         }
 
         // The file name is shown in the status bar, so the cell contains only the thumbnail.
+    }
+
+    /**
+     * Draws the fallback for a photo whose pixels cannot be decoded and whose generated thumbnail
+     * is not in the cache (yet). It stays deliberately quiet so it reads as "no preview" instead
+     * of as an error badge.
+     *
+     * @param g the grid graphics
+     * @param inner the thumbnail area of the cell
+     */
+    private void paintUnreadablePlaceholder(Graphics2D g, Rectangle inner) {
+        g.setColor(withAlpha(Theme.BACKGROUND, 160));
+        g.fill(new RoundRectangle2D.Float(inner.x, inner.y, inner.width, inner.height, 10, 10));
+        int icon = Math.max(18, Math.min(40, Math.min(inner.width, inner.height) / 3));
+        Icons.image(icon, Theme.FAINT).paintIcon(this, g,
+                inner.x + (inner.width - icon) / 2, inner.y + (inner.height - icon) / 2);
     }
 
     private void paintEmpty(Graphics2D g) {

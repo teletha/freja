@@ -9,6 +9,9 @@
  */
 package freja.store;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOError;
 import java.io.IOException;
@@ -35,6 +38,18 @@ public final class PhotoImporter {
 
     /** WebP quality of the thumbnail. */
     public static final double THUMBNAIL_QUALITY = 0.6;
+
+    /** Width of the placeholder shown for a file whose pixels cannot be decoded. */
+    public static final int PLACEHOLDER_WIDTH = 160;
+
+    /** Height of the placeholder shown for a file whose pixels cannot be decoded. */
+    public static final int PLACEHOLDER_HEIGHT = 120;
+
+    /**
+     * The largest source file the importer reads into memory. A file above this limit is treated as
+     * unusable and skipped, so one absurd file cannot exhaust the heap and take the scan with it.
+     */
+    private static final long MAX_SOURCE_BYTES = 256L * 1024 * 1024;
 
     /**
      * WebP format for thumbnails, with a lower encoder effort than the default method 4. Thumbnails
@@ -111,12 +126,42 @@ public final class PhotoImporter {
     }
 
     /**
+     * Builds the analysis of a file whose pixels cannot be decoded.
+     * <p>
+     * The file still becomes a catalog row, so the user can find, select and delete it instead of
+     * it silently disappearing from the grid. Its dimensions are recorded as zero because they
+     * are unknown, and every row shares one small pre-encoded "broken image" thumbnail. The bytes
+     * are built once, when the first unreadable file needs them.
+     * </p>
+     *
+     * @param file the unreadable file
+     * @param modifiedAt the file's modification time, or -1 to read it
+     * @return the placeholder analysis
+     */
+    public static AnalyzedPhoto placeholder(Path file, long modifiedAt) {
+        long capturedAt = modifiedAt;
+        if (capturedAt < 0) {
+            try {
+                capturedAt = Files.getLastModifiedTime(file).toMillis();
+            } catch (IOException e) {
+                capturedAt = System.currentTimeMillis();
+            }
+        }
+        return new AnalyzedPhoto(0, 0, capturedAt, Exif.Data.EMPTY, Placeholder.THUMBNAIL,
+                PLACEHOLDER_WIDTH, PLACEHOLDER_HEIGHT);
+    }
+
+    /**
      * Decodes a file, asking JPEG's decoder to scale while decoding when the loaded native library
      * supports it. The catalog still records the original dimensions, which come from the header,
      * not from the reduced frame. A JPEG is read into memory once: the same bytes serve the header,
      * the EXIF block and the decoder.
      */
     private static Decoded decode(Path file) throws IOException {
+        long length = Files.size(file);
+        if (length > MAX_SOURCE_BYTES) {
+            throw new IOException("画像が大きすぎます: " + file.getFileName());
+        }
         if (isJpeg(file)) {
             byte[] encoded = Files.readAllBytes(file);
             Exif.Data exif = Exif.read(encoded);
@@ -246,5 +291,49 @@ public final class PhotoImporter {
             return 2;
         }
         return 1;
+    }
+
+    /**
+     * The shared placeholder thumbnail, encoded on first use. A nested holder keeps the work lazy
+     * (a library without unreadable files never pays for it) while class initialization makes the
+     * one-time encoding safe for the import threads.
+     */
+    private static final class Placeholder {
+
+        static final byte[] THUMBNAIL = encode();
+
+        private Placeholder() {
+        }
+
+        private static byte[] encode() {
+            BufferedImage image = new BufferedImage(PLACEHOLDER_WIDTH, PLACEHOLDER_HEIGHT, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                graphics.setColor(new Color(0x2B2F36));
+                graphics.fillRect(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_HEIGHT);
+                // A torn photo sheet: the missing corner carries the "cannot decode" message.
+                graphics.setColor(new Color(0x3A404A));
+                graphics.fillRoundRect(28, 22, 104, 76, 8, 8);
+                graphics.setColor(new Color(0x565E6B));
+                graphics.fillPolygon(new int[] {40, 64, 80, 98, 120}, new int[] {86, 52, 70, 48, 86}, 5);
+                graphics.setColor(new Color(0xC7CCD4));
+                graphics.fillOval(96, 34, 12, 12);
+                // A small warning triangle, drawn without fonts so it never depends on glyphs.
+                graphics.setColor(new Color(0xE0A030));
+                graphics.fillPolygon(new int[] {108, 128, 88}, new int[] {34, 68, 68}, 3);
+                graphics.setColor(new Color(0x2B2F36));
+                graphics.fillRect(106, 45, 4, 15);
+                graphics.fillRect(106, 63, 4, 3);
+            } finally {
+                graphics.dispose();
+            }
+            try {
+                return ImageWriter.toBytes(image, THUMBNAIL_FORMAT, THUMBNAIL_QUALITY);
+            } catch (IOException | RuntimeException | IOError | LinkageError e) {
+                throw new IllegalStateException("Failed to encode the placeholder thumbnail", e);
+            }
+        }
     }
 }

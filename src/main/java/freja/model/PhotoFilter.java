@@ -20,8 +20,8 @@ public record PhotoFilter(Long folderId, boolean includeSubfolders, boolean favo
     /** How a result set is ordered. */
     public enum SortOrder {
         NAME("名前順"),
-        DATE_NEWEST("日時順 (新しい順)"),
-        DATE_OLDEST("日時順 (古い順)"),
+        DATE_NEWEST("新しい順"),
+        DATE_OLDEST("古い順"),
         SIZE("サイズ順");
 
         private final String label;
