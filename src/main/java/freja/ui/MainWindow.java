@@ -635,6 +635,11 @@ public final class MainWindow extends JFrame {
             }
 
             @Override
+            public void onRemoveFolders(List<Long> folderIds) {
+                removeFolders(folderIds);
+            }
+
+            @Override
             public void onRevealFolder(long folderId) {
                 tasks.query(() -> library.folder(folderId), found -> {
                     if (found != null) {
@@ -856,34 +861,7 @@ public final class MainWindow extends JFrame {
 
                 @Override
                 public void onRemoveFolders(List<Long> folderIds) {
-                    if (folderIds.isEmpty()) {
-                        return;
-                    }
-                    tasks.query(() -> folderIds.stream().map(id -> library.folder(id).map(Folder::name).orElse("ID " + id)).toList(), names -> {
-                        if (names == null || names.isEmpty()) {
-                            return;
-                        }
-                        String message = folderIds.size() == 1 ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
-                                : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
-                        int answer = JOptionPane.showConfirmDialog(MainWindow.this, message, "フォルダを削除", JOptionPane
-                                .OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        if (answer != JOptionPane.OK_OPTION) {
-                            return;
-                        }
-                        // One transaction for roots and their descendants; never deleteFolders(),
-                        // which is only for pruning auto-folders. The scanner batch also drops
-                        // the watch registrations for the removed trees.
-                        tasks.execute(() -> scanner.removeFolders(folderIds), () -> {
-                            if (folderIds.contains(MainWindow.this.folderId)) {
-                                mode = Sidebar.Mode.ALL;
-                                MainWindow.this.folderId = -1;
-                                scrollToSelectedFolder = false;
-                                applySortForCurrentView();
-                            }
-                            refreshScanFolders();
-                            refreshAll();
-                        });
-                    });
+                    removeFolders(folderIds);
                 }
 
                 @Override
@@ -981,6 +959,37 @@ public final class MainWindow extends JFrame {
                     refreshAll();
                 });
             }
+        });
+    }
+
+    /** Removes one or more folders (and their subfolders) from the catalog, keeping files on disk. */
+    private void removeFolders(List<Long> folderIds) {
+        if (folderIds.isEmpty()) {
+            return;
+        }
+        tasks.query(() -> folderIds.stream().map(id -> library.folder(id).map(Folder::name).orElse("ID " + id)).toList(), names -> {
+            if (names == null || names.isEmpty()) {
+                return;
+            }
+            String message = folderIds.size() == 1 ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
+                    : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
+            int answer = JOptionPane.showConfirmDialog(this, message, "フォルダを削除", JOptionPane
+                    .OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (answer != JOptionPane.OK_OPTION) {
+                return;
+            }
+            // One transaction for roots and their descendants; never deleteFolders(), which is only
+            // for pruning auto-folders. The scanner batch also drops the watch registrations.
+            tasks.execute(() -> scanner.removeFolders(folderIds), () -> {
+                if (folderIds.contains(this.folderId)) {
+                    mode = Sidebar.Mode.ALL;
+                    this.folderId = -1;
+                    scrollToSelectedFolder = false;
+                    applySortForCurrentView();
+                }
+                refreshScanFolders();
+                refreshAll();
+            });
         });
     }
 

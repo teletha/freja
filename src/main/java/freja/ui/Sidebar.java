@@ -69,6 +69,8 @@ public final class Sidebar extends JPanel {
 
         void onRemoveFolder(long folderId);
 
+        void onRemoveFolders(List<Long> folderIds);
+
         void onRevealFolder(long folderId);
 
         void onEditFolderTags(long folderId);
@@ -107,6 +109,10 @@ public final class Sidebar extends JPanel {
 
         @Override
         public void onRemoveFolder(long folderId) {
+        }
+
+        @Override
+        public void onRemoveFolders(List<Long> folderIds) {
         }
 
         @Override
@@ -156,6 +162,7 @@ public final class Sidebar extends JPanel {
 
         folders.setMenu(this::folderMenu);
         folders.setOnSelect(folder -> select(Mode.FOLDER, folder.id()));
+        folders.setOnRemove(this::removeSelectedFolders);
         JScrollPane folderScroll = folders.scrolled();
 
         ARXLabel empty = new ARXLabel(I.translate("No folders are registered"));
@@ -267,19 +274,35 @@ public final class Sidebar extends JPanel {
         ((CardLayout) folderCard.getLayout()).show(folderCard, visible ? "list" : "empty");
     }
 
+    /** Removes every folder selected in the rail; a plain click still navigates to one folder. */
+    private void removeSelectedFolders(List<Folder> folders) {
+        if (folders.isEmpty()) {
+            return;
+        }
+        listener.onRemoveFolders(folders.stream().map(Folder::id).toList());
+    }
+
     /** isPopupTrigger is platform specific: only one of press and release reports it. */
     private JPopupMenu folderMenu(Folder folder) {
+        // A right-click on a row which is part of a multi-selection applies to the whole selection.
+        List<Folder> selected = folders.selectedFolders();
+        List<Folder> targets = selected.size() > 1 && selected.contains(folder) ? selected : List.of(folder);
         // The menu is rebuilt on every popup, so a snapshot of the translation is enough here.
         JPopupMenu menu = new JPopupMenu();
         menu.add(sortMenu(folder));
         menu.addSeparator();
         menu.add(item("Rename", Icons.pencil(14, Theme.MUTED), () -> listener.onRenameFolder(folder.id())));
         menu.add(item("Edit tags…", Icons.tag(14, Theme.MUTED), () -> listener.onEditFolderTags(folder.id())));
-        menu.add(item("Rescan", Icons.refresh(14, Theme.MUTED), () -> listener.onRescanFolder(folder.id())));
+        menu.add(item("Rescan", Icons.refresh(14, Theme.MUTED), () -> {
+            for (Folder target : targets) {
+                listener.onRescanFolder(target.id());
+            }
+        }));
         menu.add(item("Open in Explorer", Icons.folder(14, Theme.MUTED), () -> listener.onRevealFolder(folder.id())));
-        if (folder.explicit()) {
+        if (targets.stream().allMatch(Folder::explicit)) {
             menu.addSeparator();
-            menu.add(item("Remove from library", Icons.close(14, Theme.DANGER), () -> listener.onRemoveFolder(folder.id())));
+            menu.add(item("Remove from library", Icons.close(14, Theme.DANGER),
+                    () -> listener.onRemoveFolders(targets.stream().map(Folder::id).toList())));
         }
         return menu;
     }

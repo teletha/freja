@@ -83,9 +83,15 @@ public final class FolderList extends JList<Folder> {
     private Consumer<Folder> onSelect = folder -> {
     };
 
+    private Consumer<List<Folder>> onRemove = folders -> {
+    };
+
     private Function<Folder, JPopupMenu> menu;
 
     private int hovered = -1;
+
+    /** The row a Shift-click or drag extends from. */
+    private int selectionAnchor = -1;
 
     /** True while the selection is changed by code, so no navigation event is reported back. */
     private boolean syncing;
@@ -97,7 +103,7 @@ public final class FolderList extends JList<Folder> {
         super();
         setModel(model);
         setCellRenderer(cell);
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setFixedCellHeight(ROW_HEIGHT);
         setFixedCellWidth(ROW_WIDTH);
         setBackground(Theme.SIDEBAR);
@@ -134,6 +140,16 @@ public final class FolderList extends JList<Folder> {
                 }
             }
         });
+        getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "removeFolders");
+        getActionMap().put("removeFolders", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                List<Folder> targets = selectedFolders();
+                if (!targets.isEmpty()) {
+                    onRemove.accept(targets);
+                }
+            }
+        });
     }
 
     /**
@@ -150,7 +166,7 @@ public final class FolderList extends JList<Folder> {
         setCellRenderer(cell);
         setFixedCellHeight(ROW_HEIGHT);
         setFixedCellWidth(ROW_WIDTH);
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setBackground(Theme.SIDEBAR);
         setForeground(Theme.TEXT);
         installInteraction();
@@ -170,7 +186,9 @@ public final class FolderList extends JList<Folder> {
                 removeMouseMotionListener(listener);
             }
         }
-        addMouseListener(new MouseAdapter() {
+        // One adapter handles both listener roles: mouseDragged belongs to MouseMotionListener,
+        // so registering this object twice is what actually makes drag selection work.
+        MouseAdapter interaction = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent event) {
                 if (maybeShowMenu(event) || event.getButton() != MouseEvent.BUTTON1) {
@@ -179,18 +197,32 @@ public final class FolderList extends JList<Folder> {
                 int index = indexAt(event.getPoint());
                 if (index >= 0) {
                     requestFocusInWindow();
-                    selectQuietly(index);
-                    // Report on the press, like ARXNavList: a synthesised click is dropped when
-                    // the pointer drifts, which made rows feel dead.
-                    onSelect.accept(model.get(index));
+                    if (event.isShiftDown()) {
+                        // Keep the previous anchor: Shift extends from the last plain click.
+                        selectIntervalQuietly(selectionAnchor >= 0 ? selectionAnchor : index, index);
+                    } else {
+                        selectionAnchor = index;
+                        if (event.isControlDown() || event.isMetaDown()) {
+                            toggleQuietly(index);
+                        } else {
+                            selectQuietly(index);
+                        }
+                    }
+                    // A modifier click builds the selection; only a plain click navigates. Calling
+                    // onSelect here would refresh the view and collapse the multi-selection again.
+                    if (!event.isShiftDown() && !event.isControlDown() && !event.isMetaDown()) {
+                        // Report on the press, like ARXNavList: a synthesised click is dropped when
+                        // the pointer drifts, which made rows feel dead.
+                        onSelect.accept(model.get(index));
+                    }
                 }
             }
 
             @Override
             public void mouseDragged(MouseEvent event) {
                 int index = indexAt(event.getPoint());
-                if (index >= 0) {
-                    selectQuietly(index);
+                if (index >= 0 && selectionAnchor >= 0 && !event.isControlDown() && !event.isMetaDown()) {
+                    selectIntervalQuietly(selectionAnchor, index);
                 }
             }
 
@@ -203,17 +235,25 @@ public final class FolderList extends JList<Folder> {
             public void mouseExited(MouseEvent event) {
                 hover(-1);
             }
-        });
-        addMouseMotionListener(new MouseAdapter() {
+
             @Override
             public void mouseMoved(MouseEvent event) {
                 hover(indexAt(event.getPoint()));
             }
-        });
+        };
+        addMouseListener(interaction);
+        addMouseMotionListener(interaction);
     }
 
-    /** Replaces the folder rows. Rows which did not change are left alone. */
+    /**
+     * Replaces the folder rows. Rows which did not change are left alone. Selection follows folder
+     * identities: a removed folder cannot fall through to the row which took its place.
+     */
     public void setFolders(List<Folder> folders) {
+        List<Long> selectedIds = new ArrayList<>();
+        for (int index : getSelectedIndices()) {
+            selectedIds.add(model.get(index).id());
+        }
         boolean previous = syncing;
         syncing = true;
         try {
@@ -221,15 +261,56 @@ public final class FolderList extends JList<Folder> {
                 hover(-1);
             }
             model.setFolders(folders);
+            restoreSelection(selectedIds);
         } finally {
             syncing = previous;
         }
+    }
+
+    /** Keeps only the selected folders which still exist, without inheriting a neighbour's row. */
+    private void restoreSelection(List<Long> ids) {
+        int[] current = getSelectedIndices();
+        boolean unchanged = current.length == ids.size();
+        if (unchanged) {
+            for (int i = 0; i < ids.size(); i++) {
+                if (model.get(current[i]).id() != ids.get(i)) {
+                    unchanged = false;
+                    break;
+                }
+            }
+        }
+        if (unchanged) {
+            return;
+        }
+        clearSelection();
+        for (long id : ids) {
+            int index = model.indexOf(id);
+            if (index >= 0) {
+                addSelectionInterval(index, index);
+            }
+        }
+        selectionAnchor = getSelectedIndex();
     }
 
     /** Receives every folder the user selected with the pointer or the keyboard. */
     public void setOnSelect(Consumer<Folder> handler) {
         onSelect = handler == null ? folder -> {
         } : handler;
+    }
+
+    /** Receives all folders selected when Delete is pressed. */
+    public void setOnRemove(Consumer<List<Folder>> handler) {
+        onRemove = handler == null ? folders -> {
+        } : handler;
+    }
+
+    /** The selected folders, in list order. */
+    public List<Folder> selectedFolders() {
+        List<Folder> selected = new ArrayList<>();
+        for (int index : getSelectedIndices()) {
+            selected.add(model.get(index));
+        }
+        return List.copyOf(selected);
     }
 
     /**
@@ -240,8 +321,19 @@ public final class FolderList extends JList<Folder> {
         menu = provider;
     }
 
-    /** Marks a folder as selected without notifying the host. A negative id clears the selection. */
+    /**
+     * Marks a folder as selected without notifying the host. A negative id clears the selection.
+     * A multi-selection is kept when the requested folder is one of its rows: refreshing the view
+     * while several folders are selected must not silently reduce them to one.
+     */
     public void setSelectedId(long id) {
+        if (id >= 0 && getSelectedIndices().length > 1) {
+            for (int index : getSelectedIndices()) {
+                if (model.get(index).id() == id) {
+                    return;
+                }
+            }
+        }
         selectQuietly(model.indexOf(id));
     }
 
@@ -327,14 +419,34 @@ public final class FolderList extends JList<Folder> {
     }
 
     private void selectQuietly(int index) {
-        boolean previous = syncing;
-        syncing = true;
-        try {
+        quietly(() -> {
             if (index < 0) {
                 clearSelection();
             } else {
                 setSelectedIndex(index);
             }
+        });
+    }
+
+    private void selectIntervalQuietly(int from, int to) {
+        quietly(() -> setSelectionInterval(Math.min(from, to), Math.max(from, to)));
+    }
+
+    private void toggleQuietly(int index) {
+        quietly(() -> {
+            if (isSelectedIndex(index)) {
+                removeSelectionInterval(index, index);
+            } else {
+                addSelectionInterval(index, index);
+            }
+        });
+    }
+
+    private void quietly(Runnable change) {
+        boolean previous = syncing;
+        syncing = true;
+        try {
+            change.run();
         } finally {
             syncing = previous;
         }

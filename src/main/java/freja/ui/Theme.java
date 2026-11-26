@@ -411,6 +411,17 @@ public final class Theme {
         UIManager.put("CheckBoxMenuItem.margin", menuMargin);
         UIManager.put("RadioButtonMenuItem.margin", menuMargin);
         UIManager.put("Menu.margin", menuMargin);
+        // FlatLaf rolls menu items over with the strong accent selection colour, which swallows the
+        // small tinted icons. Use the neutral hover wash from the palette instead and keep the
+        // normal foreground so labels and icons stay equally readable in light and dark themes.
+        UIManager.put("MenuItem.selectionBackground", HOVER);
+        UIManager.put("MenuItem.selectionForeground", TEXT);
+        UIManager.put("Menu.selectionBackground", HOVER);
+        UIManager.put("Menu.selectionForeground", TEXT);
+        UIManager.put("CheckBoxMenuItem.selectionBackground", HOVER);
+        UIManager.put("CheckBoxMenuItem.selectionForeground", TEXT);
+        UIManager.put("RadioButtonMenuItem.selectionBackground", HOVER);
+        UIManager.put("RadioButtonMenuItem.selectionForeground", TEXT);
         // The ARX components read their palette and type scale from these keys instead of
         // importing this class, so laevatain stays reusable outside Freja while still following
         // every light/dark switch and font change.

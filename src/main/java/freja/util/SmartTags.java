@@ -16,13 +16,16 @@ import java.util.List;
 /**
  * Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
  * tagged with them, e.g. {@code 【旅行】(２０２４) 写真} yields {@code 旅行} and {@code 2024}.
+ *
+ * <p>Nested brackets are split into separate tags, so a doujin-style name such as
+ * {@code (C71) [サークル (作者)] 作品} yields {@code C71}, {@code サークル} and {@code 作者}.
  */
 public final class SmartTags {
 
-    /** Half/full-width parentheses and the two Japanese bracket styles. */
-    private static final String OPEN = "(（「【";
+    /** Half/full-width parentheses, square brackets and the two Japanese bracket styles. */
+    private static final String OPEN = "(（[［「【";
 
-    private static final String CLOSE = ")）」】";
+    private static final String CLOSE = ")）]］」】";
 
     private SmartTags() {
     }
@@ -37,29 +40,79 @@ public final class SmartTags {
         if (name == null) {
             return List.of();
         }
-        int index = 0;
-        while (index < name.length() && Character.isWhitespace(name.charAt(index))) {
-            index++;
-        }
+        int index = skipWhitespace(name, 0);
         List<String> tags = new ArrayList<>();
-        while (index < name.length() && OPEN.indexOf(name.charAt(index)) >= 0) {
-            int start = ++index;
-            while (index < name.length() && CLOSE.indexOf(name.charAt(index)) < 0) {
-                index++;
-            }
-            if (index >= name.length()) {
+        while (index < name.length() && isOpen(name.charAt(index))) {
+            int close = findMatchingClose(name, index);
+            if (close < 0) {
                 break;
             }
-            String tag = normalize(name.substring(start, index));
-            index++;
-            if (!tag.isEmpty() && !tags.contains(tag)) {
-                tags.add(tag);
-            }
-            while (index < name.length() && Character.isWhitespace(name.charAt(index))) {
-                index++;
-            }
+            collectTags(name.substring(index + 1, close), tags);
+            index = skipWhitespace(name, close + 1);
         }
         return List.copyOf(tags);
+    }
+
+    /**
+     * Splits the content of a bracket group into tags. Plain text before a nested bracket becomes a
+     * tag of its own, and the content of each nested bracket is collected recursively.
+     */
+    private static void collectTags(String content, List<String> tags) {
+        int segmentStart = 0;
+        int index = 0;
+        while (index < content.length()) {
+            if (isOpen(content.charAt(index))) {
+                int close = findMatchingClose(content, index);
+                if (close >= 0) {
+                    addTag(content.substring(segmentStart, index), tags);
+                    collectTags(content.substring(index + 1, close), tags);
+                    index = close + 1;
+                    segmentStart = index;
+                    continue;
+                }
+            }
+            index++;
+        }
+        addTag(content.substring(segmentStart), tags);
+    }
+
+    private static void addTag(String raw, List<String> tags) {
+        String tag = normalize(raw);
+        if (!tag.isEmpty() && !tags.contains(tag)) {
+            tags.add(tag);
+        }
+    }
+
+    /** Finds the close matching the bracket at {@code openIndex}, accounting for nested brackets. */
+    private static int findMatchingClose(String value, int openIndex) {
+        int depth = 0;
+        for (int i = openIndex; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (isOpen(c)) {
+                depth++;
+            } else if (isClose(c)) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isOpen(char c) {
+        return OPEN.indexOf(c) >= 0;
+    }
+
+    private static boolean isClose(char c) {
+        return CLOSE.indexOf(c) >= 0;
+    }
+
+    private static int skipWhitespace(String value, int index) {
+        while (index < value.length() && Character.isWhitespace(value.charAt(index))) {
+            index++;
+        }
+        return index;
     }
 
     /**

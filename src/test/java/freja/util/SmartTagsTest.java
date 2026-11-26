@@ -46,4 +46,14 @@ class SmartTagsTest {
         assertTrue(SmartTags.fromFolderName("(旅行 2024").isEmpty());
         assertTrue(SmartTags.fromFolderName("（）写真").isEmpty());
     }
+
+    @Test
+    void readsSquareBracketsAndNestedGroups() {
+        assertEquals(List.of("旅行"), SmartTags.fromFolderName("[旅行] album"));
+        assertEquals(List.of("旅行"), SmartTags.fromFolderName("［旅行］ album"));
+        assertEquals(
+                List.of("C71", "偽MIDI泥の会", "石恵"),
+                SmartTags.fromFolderName(
+                        "(C71) [偽MIDI泥の会 (石恵)] HNKまとめました。 カラー本総集編② (色々)"));
+    }
 }
