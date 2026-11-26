@@ -54,6 +54,7 @@ import freja.store.Library;
 import freja.store.Library.FileStamp;
 import freja.store.PhotoImporter;
 import freja.util.PathUtil;
+import freja.util.PicasaTags;
 
 /**
  * Keeps the catalog in sync with the folders on disk.
@@ -604,6 +605,28 @@ public final class LibraryScanner implements AutoCloseable {
         visitor.postVisitDirectory(dir, failure);
     }
 
+    /**
+     * Adds the words of a Picasa {@code .picasa.ini} description to a folder's tags. Tags assigned
+     * by hand are kept, and a repeated scan never writes the catalog when nothing changed.
+     */
+    private void applyPicasaTags(Folder folder, Path dir) {
+        List<String> found = PicasaTags.fromFolder(dir);
+        if (found.isEmpty()) {
+            return;
+        }
+        List<String> tags = new ArrayList<>(library.folderTags(folder.id()));
+        boolean changed = false;
+        for (String tag : found) {
+            if (tags.stream().noneMatch(existing -> existing.equalsIgnoreCase(tag))) {
+                tags.add(tag);
+                changed = true;
+            }
+        }
+        if (changed) {
+            library.setFolderTags(folder.id(), tags);
+        }
+    }
+
     private void scanFolderInternal(Folder folder) {
         Path root = folder.path();
         String token = library.beginScan(folder.id());
@@ -642,6 +665,7 @@ public final class LibraryScanner implements AutoCloseable {
                     remember(managed);
                     visited.add(managed.id());
                     owners.put(dir, managed.id());
+                    applyPicasaTags(managed, dir);
                     if (watching) {
                         register(dir);
                     }

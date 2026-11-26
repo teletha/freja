@@ -628,6 +628,18 @@ public final class ARXSettingsPane extends JPanel {
         });
     }
 
+    /**
+     * Places a component at the right edge of the search row. Freja uses this for the actions which
+     * apply to the whole settings page, keeping them on the same line as the search field.
+     *
+     * @param component the accessory, e.g. a small toolbar of icon buttons
+     */
+    public final void searchAccessory(Component component) {
+        searchPane.add(component, BorderLayout.EAST);
+        searchPane.revalidate();
+        searchPane.repaint();
+    }
+
     /** Applies a query to the document; an empty query shows everything again. */
     public void filter(String needle) {
         String query = needle == null ? "" : needle.trim();

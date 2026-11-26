@@ -22,20 +22,26 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import kiss.I;
 import laevatain.ARXButton;
@@ -44,6 +50,7 @@ import laevatain.ARXLabel;
 import laevatain.ARXSettingsPane;
 import laevatain.ARXTextBinding;
 import laevatain.ARXToggle;
+import laevatain.ChooserLocations;
 import laevatain.util.Language;
 
 /**
@@ -119,12 +126,92 @@ public final class SettingsPanel extends JPanel {
 
         // The search box narrows the page to the rows which answer to it, in any language.
         pane.search(ARXSettingsPane.Text.of("Search settings"), ARXSettingsPane.Text.of("No settings match your search"));
+        backupActions();
 
         appearanceSection();
         fontSection();
         languageSection();
         systemSection();
         pane.show(APPEARANCE);
+    }
+
+    /** Two compact buttons beside the search field: write the whole profile out, or restore one. */
+    private void backupActions() {
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        actions.setOpaque(false);
+        actions.add(iconButton(Icons.exportSettings(15, Theme.MUTED), "Export settings", this::exportSettings));
+        actions.add(iconButton(Icons.importSettings(15, Theme.MUTED), "Import settings", this::importSettings));
+        pane.searchAccessory(actions);
+    }
+
+    private ARXButton iconButton(Icon icon, String sentence, Runnable action) {
+        ARXButton button = new ARXButton((String) null, icon, ARXButton.Variant.SECONDARY, action);
+        // Translations arrive asynchronously (and may change with the language), so bind the live
+        // variable instead of freezing the English text with a single get().
+        button.setToolTipText(I.translate(sentence));
+        button.setPreferredSize(new Dimension(30, 30));
+        return button;
+    }
+
+    /** Saves every application preference to a file chosen by the user. */
+    private void exportSettings() {
+        JFileChooser chooser = new JFileChooser(ChooserLocations.getOrNull("settingsBackup"));
+        chooser.setDialogTitle(I.translate("Export settings").get());
+        chooser.setSelectedFile(new File("freja-settings.properties"));
+        chooser.setFileFilter(new FileNameExtensionFilter(I.translate("Settings backup").get(), "properties"));
+        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        File chosen = chooser.getSelectedFile();
+        ChooserLocations.remember("settingsBackup", chosen.getParentFile());
+        Path file = chosen.toPath();
+        if (!file.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".properties")) {
+            file = Path.of(file + ".properties");
+        }
+        try {
+            SettingsBackup.exportTo(file);
+            JOptionPane.showMessageDialog(this, I.translate("Settings exported to %1$s", file).get(), I
+                    .translate("Export settings").get(), JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            I.error("freja", e);
+            JOptionPane.showMessageDialog(this, I.translate("Could not export the settings.").get(), I
+                    .translate("Export settings").get(), JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Replaces the current preferences with a previously exported file. */
+    private void importSettings() {
+        JFileChooser chooser = new JFileChooser(ChooserLocations.getOrNull("settingsBackup"));
+        chooser.setDialogTitle(I.translate("Import settings").get());
+        chooser.setFileFilter(new FileNameExtensionFilter(I.translate("Settings backup").get(), "properties"));
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        File chosen = chooser.getSelectedFile();
+        ChooserLocations.remember("settingsBackup", chosen.getParentFile());
+        int confirm = JOptionPane.showConfirmDialog(this, I
+                .translate("Replace all current settings with this backup?").get(), I.translate("Import settings").get(), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+        try {
+            SettingsBackup.importFrom(chosen.toPath());
+            // Theme and language are read from Preferences here, so they change immediately; the
+            // window layout is read at startup and needs the restart offered below.
+            Theme.install();
+            Language.install();
+            refreshTheme();
+            listener.onThemeChanged();
+            int restart = JOptionPane.showConfirmDialog(this, I
+                    .translate("Settings imported. Restart Freja to apply every setting?").get(), I.translate("Import settings").get(), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (restart == JOptionPane.YES_OPTION) {
+                freja.Freja.restart();
+            }
+        } catch (IOException e) {
+            I.error("freja", e);
+            JOptionPane.showMessageDialog(this, I.translate("Could not import the settings.").get(), I
+                    .translate("Import settings").get(), JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /** The appearance section: a dozen preview tiles, opening up to every theme on request. */

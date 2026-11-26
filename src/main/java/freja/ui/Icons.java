@@ -483,6 +483,16 @@ public final class Icons {
         return of("mdi:cog", size, color);
     }
 
+    /** An arrow leaving a box: write the whole user profile to a file. */
+    public static Icon exportSettings(int size, Color color) {
+        return of("mdi:export", size, color);
+    }
+
+    /** An arrow entering a box: restore the whole user profile from a file. */
+    public static Icon importSettings(int size, Color color) {
+        return of("mdi:import", size, color);
+    }
+
     public static Icon grid(int size, Color color) {
         return of("mdi:view-grid", size, color);
     }
