@@ -33,9 +33,8 @@ import kiss.I;
 import laevatain.util.Language;
 
 /**
- * The browser edition entry point. Freja ships three user interfaces:
- * {@code freja.Freja} is the Swing edition, {@code freja.fx.FrejaFX} the JavaFX edition, and this
- * one is the Apocrypha counterpart of both.
+ * The browser edition entry point. Freja ships two user interfaces:
+ * {@code freja.Freja} is the Swing edition and this one is the Apocrypha counterpart.
  * <p>
  * The UI is built with the browser: HTML/CSS/JS live in the classpath directory {@code web}, and
  * every cross-boundary call crosses the {@code freja:*} IPC channels. Thumbnails and photo
@@ -178,6 +177,11 @@ public class FrejaWeb extends Application {
         ipc().register(registered);
         serve("/photo/", new PhotoRoutes(this));
 
+        Path frontend = SvelteUI.bundle(dataDirectory());
+        if (frontend != null) {
+            serve(SvelteUI.PREFIX, SvelteUI.route(frontend));
+        }
+
         Window frame = createWindow();
         window.set(frame);
         frame.id("main").size(1180, 780).show();
@@ -202,8 +206,8 @@ public class FrejaWeb extends Application {
             attach(started);
         } catch (java.sql.SQLException | RuntimeException e) {
             I.error("freja", new IOException("Cannot open the library", e));
-            SwingUtilities.invokeLater(() -> ipc().emit("freja:fatal",
-                    new WebModels.ScannerReport(false, false, 0, 0, 1, 0, "ライブラリを読み込めません: " + e.getMessage(), 0)));
+            SwingUtilities.invokeLater(() -> ipc()
+                    .emit("freja:fatal", new WebModels.ScannerReport(false, false, 0, 0, 1, 0, "ライブラリを読み込めません: " + e.getMessage(), 0)));
         }
     }
 
@@ -254,8 +258,8 @@ public class FrejaWeb extends Application {
         if (state == null) {
             return null;
         }
-        return new WebModels.ScannerReport(state.scanning(), state.watching(), state.processed(), state.total(),
-                state.errors(), state.imported(), state.message(), state.elapsed().toMillis());
+        return new WebModels.ScannerReport(state.scanning(), state.watching(), state.processed(), state.total(), state.errors(), state
+                .imported(), state.message(), state.elapsed().toMillis());
     }
 
     /**
@@ -282,10 +286,9 @@ public class FrejaWeb extends Application {
         if (opened == null) {
             return null;
         }
-        return new WebModels.Bootstrap(settings.get().map(), opened.location().toString(),
-                dataDirectory().toString(), settings.get().string("language", "ja"),
-                startupFolders.stream().map(Path::toString).toList(), opened.folders(), opened.tags(), opened.stats(),
-                report(scanner.get() == null ? null : scanner.get().state()));
+        return new WebModels.Bootstrap(settings.get().map(), opened.location().toString(), dataDirectory().toString(), settings.get()
+                .string("language", "ja"), startupFolders.stream().map(Path::toString).toList(), opened
+                        .folders(), opened.tags(), opened.stats(), report(scanner.get() == null ? null : scanner.get().state()));
     }
 
     /** @return the open catalog, for the handlers which need it */
@@ -341,8 +344,7 @@ public class FrejaWeb extends Application {
 
     /**
      * Returns the default catalog path from the {@code freja.library} system property or the
-     * per-user database in the local application data directory, shared with the Swing and JavaFX
-     * editions.
+     * per-user database in the local application data directory, shared with the Swing edition.
      *
      * @return the database path
      */

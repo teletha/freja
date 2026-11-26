@@ -9,6 +9,7 @@
  */
 package freja;
 
+import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -182,18 +183,45 @@ public final class Freja {
         Language.install();
         Theme.install();
 
-        SwingUtilities.invokeLater(() -> {
+        // Opening SQLite and creating the scanner must never happen on the event dispatch thread:
+        // the library now fails fast when SQL is attempted there. Build them on a daemon bootstrap
+        // thread and hand only the (SQL-free) UI construction to Swing.
+        Thread bootstrap = new Thread(() -> {
             Library library = null;
             LibraryScanner scanner = null;
             try {
                 library = new Library(location);
-                scanner = new LibraryScanner(library);
-                window = new MainWindow(library, scanner);
-                window.setVisible(true);
-                window.start();
-                if (!folders.isEmpty()) {
-                    window.addFolders(folders);
-                }
+                Library opened = library;
+                opened.setUiThreadCheck(EventQueue::isDispatchThread);
+                scanner = new LibraryScanner(opened);
+                LibraryScanner started = scanner;
+                Library toClose = opened;
+                LibraryScanner scannerToClose = started;
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        window = new MainWindow(opened, started);
+                        window.setVisible(true);
+                        window.start();
+                        if (!folders.isEmpty()) {
+                            window.addFolders(folders);
+                        }
+                    } catch (Exception e) {
+                        // library.close() itself runs SQL, so the cleanup must stay off the EDT.
+                        Thread cleanup = new Thread(() -> {
+                            if (scannerToClose != null) {
+                                scannerToClose.close();
+                            }
+                            if (toClose != null) {
+                                toClose.close();
+                            }
+                        }, "freja-startup-cleanup");
+                        cleanup.setDaemon(true);
+                        cleanup.start();
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Freja を起動できません。\n\n" + e
+                                .getMessage() + "\n\nライブラリ: " + location, "Freja", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
             } catch (Exception e) {
                 if (scanner != null) {
                     scanner.close();
@@ -202,10 +230,12 @@ public final class Freja {
                     library.close();
                 }
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Freja を起動できません。\n\n" + e
-                        .getMessage() + "\n\nライブラリ: " + location, "Freja", JOptionPane.ERROR_MESSAGE);
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Freja を起動できません。\n\n" + e
+                        .getMessage() + "\n\nライブラリ: " + location, "Freja", JOptionPane.ERROR_MESSAGE));
             }
-        });
+        }, "freja-startup");
+        bootstrap.setDaemon(true);
+        bootstrap.start();
     }
 
     /**

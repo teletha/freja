@@ -1,9 +1,9 @@
-# freja 三UI「Swing / JavaFX / Browser (Apocrypha)」実装計画
+# freja 二UI「Swing / Browser (Apocrypha)」実装計画
 
 ## 背景
-- freja はローカル写真ライブラリ管理(Swing 版 `freja.Freja` / FX 版 `freja.fx.FrejaFX` に加え、Browser 版 `freja.web.FrejaWeb` を追加実装)
+- freja はローカル写真ライブラリ管理(Swing 版 `freja.Freja` に加え、Browser 版 `freja.web.FrejaWeb` を追加実装。JavaFX 版は廃止済み)
 - apocrypha は Electron 系UIフレームワーク(Java バックエンド + avaje-webview)。HTML/CSS/JS をクラスパスの `web` から配信し、`freja:*` IPC チャネルでやり取りする
-- 目標: apocrypha を使った三番目のUIを実装し、既存ライブラリ/スキャナ/モデルをそのまま共有する
+- 目標: apocrypha を使った二番目のUIを実装し、既存ライブラリ/スキャナ/モデルをそのまま共有する
 
 ## 実装内容
 ### freja (Browser 版)
@@ -27,6 +27,12 @@
 - [x] 起動確認: `freja.web.FrejaWeb` → サーバ 127.0.0.1:65172、"Browser edition started"、致命的エラーなし
 - README に Browser 版の起動方法・依存(apocrypha/avaje-webview)を記載
 
+## Svelte の段階導入
+- `src/main/frontend/` — Svelte 5 のソース（`Settings.svelte` / `main.js` / `package.json`）。bun4j の `Bun.bundle()` + `Framework.SVELTE` でビルド
+- `freja.web.SvelteUI` — 起動時にソースをバンドルして `/svelte/` から配信。ソースツリーが無い環境では同梱済みの `web/svelte/` にフォールバック
+- `app.js` は `window.frejaSvelteBridge` で状態とアクションを公開。設定ページの静的 DOM とイベントバインディングを削除し、Svelte コンポーネントへ移管
+- 検証: `bee.bat test` 全34テスト成功 / happy-dom 上でマウント・テーマ切替・日本語ラベルを確認
+
 ## 依存と生成物
-- freja → sinobu, psychopath, imagify, viewtify, apocrypha, flatlaf, flatlaf-intellij-themes, ikonli, javafx, jna, miglayout, sqlite-jdbc, swing-tree, controlsfx, lycoris, conjure, altfx, BorderlessSceneFX, jsvg, sprouts, bee-api, antibug
+- freja → sinobu, psychopath, imagify, apocrypha, flatlaf, flatlaf-intellij-themes, ikonli, javafx (Browser 版の WebView), jna, miglayout, sqlite-jdbc, swing-tree, controlsfx, lycoris, conjure, altfx, BorderlessSceneFX, jsvg, sprouts, bee-api, antibug
 - 実行: `java --enable-native-access=ALL-UNNAMED -cp <libs>;target\classes freja.web.FrejaWeb --library=<path> [folders...]`

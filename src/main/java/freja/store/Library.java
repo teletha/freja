@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 
 import freja.model.Folder;
 import freja.model.LibraryStats;
@@ -89,18 +90,36 @@ public final class Library implements AutoCloseable {
 
     private final Path database;
 
+    /**
+     * Installed by each UI entry point. Every SQL-bearing method fails fast when called on a UI
+     * thread, so a stray call cannot silently block the event dispatch thread or the JavaFX thread.
+     */
+    private BooleanSupplier uiThreadCheck = () -> false;
+
     /** The single writer connection, guarded by this object's intrinsic lock. */
     private final Connection connection;
 
     /**
-     * A second connection for reads from the UI. SQLite's WAL mode lets it read while the scanner
-     * commits a batch, so a full catalog refresh on the event dispatch thread never waits for the
-     * writer lock. An in-memory database cannot be shared, so it uses the writer connection.
+     * A second connection for catalog reads. SQLite's WAL mode lets it read while the scanner
+     * commits a batch, so a background refresh never waits for the writer lock. An in-memory
+     * database cannot be shared, so it uses the writer connection.
      */
     private final Connection reader;
 
     /** Guards the reader connection; the same lock as the writer when the connection is shared. */
     private final Object readerLock;
+
+    /** Installs the predicate which identifies the calling UI thread. */
+    public void setUiThreadCheck(BooleanSupplier check) {
+        uiThreadCheck = check == null ? () -> false : check;
+    }
+
+    /** Fails fast when a database operation is attempted on a UI thread. */
+    private void assertOffUiThread() {
+        if (uiThreadCheck.getAsBoolean()) {
+            throw new IllegalStateException("Library SQL must not run on a UI thread");
+        }
+    }
 
     /**
      * Opens a library database, creating it when necessary.
@@ -373,6 +392,7 @@ public final class Library implements AutoCloseable {
      * @return the registered folder
      */
     public synchronized Folder addFolder(Path path) {
+        assertOffUiThread();
         Path normalized = PathUtil.normalize(path);
         if (!Files.isDirectory(normalized)) {
             throw new IllegalArgumentException("Not a directory: " + normalized);
@@ -415,6 +435,7 @@ public final class Library implements AutoCloseable {
      * @return the existing or newly created managed folder
      */
     public synchronized Folder ensureFolder(Path path) {
+        assertOffUiThread();
         Path normalized = PathUtil.normalize(path);
         String key = PathUtil.key(normalized);
         Folder existing = findFolderByKey(key);
@@ -476,6 +497,7 @@ public final class Library implements AutoCloseable {
      * @return the folders ordered by name, with the path as a tie-breaker
      */
     public List<Folder> folders() {
+        assertOffUiThread();
         synchronized (readerLock) {
             return foldersInternal();
         }
@@ -537,6 +559,7 @@ public final class Library implements AutoCloseable {
      * @return how many folders gained at least one tag
      */
     public synchronized int applySmartTagsToAllFolders() {
+        assertOffUiThread();
         int updated = 0;
         for (Folder folder : folders()) {
             List<String> smart = SmartTags.fromFolderName(folder.name());
@@ -590,6 +613,7 @@ public final class Library implements AutoCloseable {
 
     /** Lists every tag with the number of folders carrying it. */
     public List<Tag> tags() {
+        assertOffUiThread();
         synchronized (readerLock) {
             return tagsInternal();
         }
@@ -614,6 +638,7 @@ public final class Library implements AutoCloseable {
 
     /** Tags that a tag points to; searching one of those also finds folders carrying this tag. */
     public List<Tag> linkedTargets(long sourceId) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return linkedTags("l.target_id = t.id AND l.source_id = ?", sourceId);
         }
@@ -621,6 +646,7 @@ public final class Library implements AutoCloseable {
 
     /** Tags that point to a tag; these are the ones whose folders match a search for it. */
     public List<Tag> linkedSources(long targetId) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return linkedTags("l.source_id = t.id AND l.target_id = ?", targetId);
         }
@@ -645,6 +671,7 @@ public final class Library implements AutoCloseable {
 
     /** Replaces the outgoing links of a tag. Links are one-way: source implies target. */
     public synchronized void setTagLinks(long sourceId, Collection<Long> targetIds) {
+        assertOffUiThread();
         try {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement("DELETE FROM tag_links WHERE source_id=?")) {
@@ -676,6 +703,7 @@ public final class Library implements AutoCloseable {
 
     /** Returns the names of the tags attached to one folder. */
     public synchronized List<String> folderTags(long folderId) {
+        assertOffUiThread();
         synchronized (readerLock) {
             try {
                 return folderTags(folderId, connection);
@@ -687,6 +715,7 @@ public final class Library implements AutoCloseable {
 
     /** Creates a tag. */
     public synchronized long addTag(String name) {
+        assertOffUiThread();
         String value = tagName(name);
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO tags(name) VALUES(?)",
                 Statement.RETURN_GENERATED_KEYS)) {
@@ -702,6 +731,7 @@ public final class Library implements AutoCloseable {
 
     /** Renames a tag; the name must remain unique. */
     public synchronized void renameTag(long id, String name) {
+        assertOffUiThread();
         String value = tagName(name);
         try (PreparedStatement statement = connection.prepareStatement("UPDATE tags SET name=? WHERE id=?")) {
             statement.setString(1, value);
@@ -714,6 +744,7 @@ public final class Library implements AutoCloseable {
 
     /** Deletes tags everywhere; their folder assignments go with them. */
     public synchronized void deleteTags(Collection<Long> ids) {
+        assertOffUiThread();
         if (ids == null || ids.isEmpty()) {
             return;
         }
@@ -743,6 +774,7 @@ public final class Library implements AutoCloseable {
      * @return how many tags were renamed
      */
     public synchronized int bulkRenameTags(Collection<Long> ids, String from, String to) {
+        assertOffUiThread();
         if (from == null || from.isEmpty()) {
             throw new IllegalArgumentException("置換する文字列を入力してください");
         }
@@ -795,6 +827,7 @@ public final class Library implements AutoCloseable {
 
     /** Replaces the complete set of tags on a folder, creating tags that do not exist yet. */
     public synchronized void setFolderTags(long folderId, Collection<String> names) {
+        assertOffUiThread();
         List<String> values = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         if (names != null) {
@@ -876,6 +909,7 @@ public final class Library implements AutoCloseable {
      * @param sort the display order
      */
     public synchronized void setFolderSort(long folderId, PhotoFilter.SortOrder sort) {
+        assertOffUiThread();
         PhotoFilter.SortOrder value = sort == null ? PhotoFilter.SortOrder.NAME : sort;
         try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET sort_order=? WHERE id=?")) {
             statement.setString(1, value.name());
@@ -888,6 +922,7 @@ public final class Library implements AutoCloseable {
 
     /** Removes every folder and, through foreign keys, everything catalogued below them. */
     public synchronized void clearFolders() {
+        assertOffUiThread();
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("DELETE FROM folders");
         } catch (SQLException e) {
@@ -897,6 +932,7 @@ public final class Library implements AutoCloseable {
 
     /** Enables or disables a folder as a scan target. Its photos stay in the catalog. */
     public synchronized void setFolderScanEnabled(long folderId, boolean enabled) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET scan_enabled=? WHERE id=?")) {
             statement.setInt(1, enabled ? 1 : 0);
             statement.setLong(2, folderId);
@@ -904,6 +940,28 @@ public final class Library implements AutoCloseable {
         } catch (SQLException e) {
             throw new LibraryException("Failed to update the folder scan flag", e);
         }
+    }
+
+    /** Sets the scan flag on several folders in one transaction. */
+    public synchronized void setFolderScanEnabled(Collection<Long> folderIds, boolean enabled) {
+        assertOffUiThread();
+        List<Long> ids = normalizedIds(folderIds);
+        if (ids.isEmpty()) {
+            return;
+        }
+        inTransaction(() -> {
+            for (List<Long> chunk : chunks(ids, 500)) {
+                String sql = "UPDATE folders SET scan_enabled=? WHERE id IN (" + placeholders(chunk.size()) + ")";
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setInt(1, enabled ? 1 : 0);
+                    for (int i = 0; i < chunk.size(); i++) {
+                        statement.setLong(i + 2, chunk.get(i));
+                    }
+                    statement.executeUpdate();
+                }
+            }
+            return null;
+        });
     }
 
     /**
@@ -914,6 +972,7 @@ public final class Library implements AutoCloseable {
      * @param name the new display name
      */
     public synchronized void renameFolder(long folderId, String name) {
+        assertOffUiThread();
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("A folder name cannot be blank");
         }
@@ -934,6 +993,7 @@ public final class Library implements AutoCloseable {
      * @return the folder, if it exists
      */
     public Optional<Folder> folder(long id) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return folders().stream().filter(folder -> folder.id() == id).findFirst();
         }
@@ -945,6 +1005,7 @@ public final class Library implements AutoCloseable {
      * @param folderId the folder identifier
      */
     public synchronized void removeFolder(long folderId) {
+        assertOffUiThread();
         Optional<Folder> found = folder(folderId);
         if (found.isEmpty()) {
             return;
@@ -962,6 +1023,37 @@ public final class Library implements AutoCloseable {
     }
 
     /**
+     * Removes several folder trees in one transaction. Like {@link #removeFolder(long)}, this
+     * deletes the registered folders and all descendants, including explicit scan roots.
+     *
+     * @param folderIds folder identifiers
+     */
+    public synchronized void removeFolders(Collection<Long> folderIds) {
+        assertOffUiThread();
+        List<Long> ids = normalizedIds(folderIds);
+        if (ids.isEmpty()) {
+            return;
+        }
+        inTransaction(() -> {
+            for (Long id : ids) {
+                Optional<Folder> found = folder(id);
+                if (found.isEmpty()) {
+                    continue;
+                }
+                String key = PathUtil.key(found.get().path());
+                String prefix = PathUtil.prefix(key);
+                try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE path_key=? OR (path_key>=? AND path_key<?)")) {
+                    statement.setString(1, key);
+                    statement.setString(2, prefix);
+                    statement.setString(3, upperBound(prefix));
+                    statement.executeUpdate();
+                }
+            }
+            return null;
+        });
+    }
+
+    /**
      * Removes managed folders below a directory which disappeared from disk. The explicit scan
      * root is kept so a temporarily unavailable drive can be reconnected.
      *
@@ -969,6 +1061,7 @@ public final class Library implements AutoCloseable {
      * @return the number of removed folders
      */
     public synchronized int removeAutoFoldersUnder(Path path) {
+        assertOffUiThread();
         String key = PathUtil.key(path);
         String prefix = PathUtil.prefix(key);
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE explicit=0 AND (path_key=? OR (path_key>=? AND path_key<?))")) {
@@ -988,21 +1081,24 @@ public final class Library implements AutoCloseable {
      * @return the number of removed folders
      */
     public synchronized int deleteFolders(java.util.Collection<Long> folderIds) {
-        if (folderIds.isEmpty()) {
+        assertOffUiThread();
+        List<Long> ids = normalizedIds(folderIds);
+        if (ids.isEmpty()) {
             return 0;
         }
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM folders WHERE id=? AND explicit=0")) {
+        return inTransaction(() -> {
             int count = 0;
-            for (long id : folderIds) {
-                statement.setLong(1, id);
-                if (statement.executeUpdate() > 0) {
-                    count++;
+            for (List<Long> chunk : chunks(ids, 500)) {
+                String sql = "DELETE FROM folders WHERE explicit=0 AND id IN (" + placeholders(chunk.size()) + ")";
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    for (int i = 0; i < chunk.size(); i++) {
+                        statement.setLong(i + 1, chunk.get(i));
+                    }
+                    count += statement.executeUpdate();
                 }
             }
             return count;
-        } catch (SQLException e) {
-            throw new LibraryException("Failed to prune folders", e);
-        }
+        });
     }
 
     /**
@@ -1012,6 +1108,7 @@ public final class Library implements AutoCloseable {
      * @return matching photos in the requested order
      */
     public List<Photo> photos(PhotoFilter filter) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return photosInternal(filter);
         }
@@ -1120,6 +1217,7 @@ public final class Library implements AutoCloseable {
      * @return the photo, if it exists
      */
     public Optional<Photo> photo(long id) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return photoInternal(id);
         }
@@ -1149,6 +1247,7 @@ public final class Library implements AutoCloseable {
      * @return the thumbnail, if one has been generated
      */
     public Optional<Thumbnail> thumbnail(long photoId) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return thumbnailInternal(photoId);
         }
@@ -1174,6 +1273,7 @@ public final class Library implements AutoCloseable {
      * @return library statistics
      */
     public LibraryStats stats() {
+        assertOffUiThread();
         synchronized (readerLock) {
             return statsInternal();
         }
@@ -1208,6 +1308,7 @@ public final class Library implements AutoCloseable {
      * @return true when the catalog row is current
      */
     public synchronized boolean isCurrent(String key, long size, long modifiedAt) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM photos WHERE path_key=? AND byte_size=? AND modified_at=? AND thumbnail_revision>=?")) {
             statement.setString(1, key);
             statement.setLong(2, size);
@@ -1229,6 +1330,7 @@ public final class Library implements AutoCloseable {
      * @return the catalog stamp for each current photo, keyed by normalized path key
      */
     public synchronized Map<String, FileStamp> currentFiles(Path root) {
+        assertOffUiThread();
         String prefix = PathUtil.prefix(PathUtil.key(root));
         String sql = """
                 SELECT path_key, byte_size, modified_at FROM photos
@@ -1259,6 +1361,7 @@ public final class Library implements AutoCloseable {
      * @param folderId the folder containing the files
      */
     public synchronized void touchBatch(Collection<String> keys, String token, long folderId) {
+        assertOffUiThread();
         if (keys.isEmpty() || token == null) {
             return;
         }
@@ -1284,6 +1387,7 @@ public final class Library implements AutoCloseable {
      * @param token the scan token
      */
     public synchronized void touch(String key, String token) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET scan_token=? WHERE path_key=?")) {
             statement.setString(1, token);
             statement.setString(2, key);
@@ -1301,6 +1405,7 @@ public final class Library implements AutoCloseable {
      * @param folderId the folder containing the file
      */
     public synchronized void touch(String key, String token, long folderId) {
+        assertOffUiThread();
         String sql = token == null ? "UPDATE photos SET folder_id=? WHERE path_key=?" : "UPDATE photos SET folder_id=?, scan_token=? WHERE path_key=?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, folderId);
@@ -1323,6 +1428,7 @@ public final class Library implements AutoCloseable {
      * @return a token which must be passed back to {@link #finishScan(long, String)}
      */
     public synchronized String beginScan(long folderId) {
+        assertOffUiThread();
         return UUID.randomUUID().toString();
     }
 
@@ -1334,6 +1440,7 @@ public final class Library implements AutoCloseable {
      * @return the number of removed rows
      */
     public synchronized int finishScan(long folderId, String token) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE folder_id=? AND (scan_token IS NULL OR scan_token <> ?)")) {
             statement.setLong(1, folderId);
             statement.setString(2, token);
@@ -1351,6 +1458,7 @@ public final class Library implements AutoCloseable {
      * @return the number of removed rows
      */
     public synchronized int finishScanTree(Path root, String token) {
+        assertOffUiThread();
         String prefix = PathUtil.prefix(PathUtil.key(root));
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE (scan_token IS NULL OR scan_token <> ?) AND path_key >= ? AND path_key < ?")) {
             statement.setString(1, token);
@@ -1368,6 +1476,7 @@ public final class Library implements AutoCloseable {
      * @param folderId the folder identifier
      */
     public synchronized void markFolderScanned(long folderId) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE folders SET last_scan_at=? WHERE id=?")) {
             statement.setLong(1, System.currentTimeMillis());
             statement.setLong(2, folderId);
@@ -1394,6 +1503,7 @@ public final class Library implements AutoCloseable {
      * @return the photo identifier
      */
     public synchronized long savePhoto(long folderId, Path file, long size, long modifiedAt, PhotoImporter.AnalyzedPhoto analyzed, String token) {
+        assertOffUiThread();
         return savePhoto(new PhotoSave(folderId, file, size, modifiedAt, analyzed, token));
     }
 
@@ -1405,6 +1515,7 @@ public final class Library implements AutoCloseable {
      * @return the photo identifier
      */
     public synchronized long savePhoto(PhotoSave save) {
+        assertOffUiThread();
         try {
             connection.setAutoCommit(false);
             long id = savePhotoInternal(save);
@@ -1428,6 +1539,7 @@ public final class Library implements AutoCloseable {
      * @param saves the writes to perform
      */
     public synchronized void savePhotoBatch(List<PhotoSave> saves) {
+        assertOffUiThread();
         if (saves.isEmpty()) {
             return;
         }
@@ -1566,6 +1678,7 @@ public final class Library implements AutoCloseable {
      * @param photoId a photo identifier
      */
     public synchronized void invalidate(long photoId) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET byte_size=-1 WHERE id=?")) {
             statement.setLong(1, photoId);
             statement.executeUpdate();
@@ -1580,6 +1693,7 @@ public final class Library implements AutoCloseable {
      * @param photoId a photo identifier
      */
     public synchronized void deletePhoto(long photoId) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE id=?")) {
             statement.setLong(1, photoId);
             statement.executeUpdate();
@@ -1595,12 +1709,108 @@ public final class Library implements AutoCloseable {
      * @return true when a row was removed
      */
     public synchronized boolean deletePhoto(String key) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM photos WHERE path_key=?")) {
             statement.setString(1, key);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new LibraryException("Failed to remove the photo", e);
         }
+    }
+
+    /**
+     * Removes several catalog rows in one transaction. Thumbnail rows disappear through the foreign
+     * key cascade; files on disk are not touched.
+     *
+     * @param photoIds photo identifiers
+     * @return the number of removed rows
+     */
+    public synchronized int deletePhotos(Collection<Long> photoIds) {
+        assertOffUiThread();
+        List<Long> ids = normalizedIds(photoIds);
+        if (ids.isEmpty()) {
+            return 0;
+        }
+        return inTransaction(() -> {
+            int deleted = 0;
+            for (List<Long> chunk : chunks(ids, 500)) {
+                String sql = "DELETE FROM photos WHERE id IN (" + placeholders(chunk.size()) + ")";
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    for (int i = 0; i < chunk.size(); i++) {
+                        statement.setLong(i + 1, chunk.get(i));
+                    }
+                    deleted += statement.executeUpdate();
+                }
+            }
+            return deleted;
+        });
+    }
+
+    /** Sets the same favorite flag on several photos in one transaction. */
+    public synchronized void setFavorites(Collection<Long> photoIds, boolean favorite) {
+        assertOffUiThread();
+        List<Long> ids = normalizedIds(photoIds);
+        if (ids.isEmpty()) {
+            return;
+        }
+        inTransaction(() -> {
+            for (List<Long> chunk : chunks(ids, 500)) {
+                String sql = "UPDATE photos SET favorite=? WHERE id IN (" + placeholders(chunk.size()) + ")";
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setBoolean(1, favorite);
+                    for (int i = 0; i < chunk.size(); i++) {
+                        statement.setLong(i + 2, chunk.get(i));
+                    }
+                    statement.executeUpdate();
+                }
+            }
+            return null;
+        });
+    }
+
+    /** Sets several ratings in one transaction. Values outside 0..5 are clamped. */
+    public synchronized void setRatings(Map<Long, Integer> ratings) {
+        assertOffUiThread();
+        if (ratings == null || ratings.isEmpty()) {
+            return;
+        }
+        inTransaction(() -> {
+            try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET rating=? WHERE id=?")) {
+                for (Map.Entry<Long, Integer> entry : ratings.entrySet()) {
+                    if (entry.getKey() == null || entry.getValue() == null) {
+                        continue;
+                    }
+                    statement.setInt(1, Math.max(0, Math.min(5, entry.getValue())));
+                    statement.setLong(2, entry.getKey());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+            return null;
+        });
+    }
+
+    /** Sets several captions in one transaction. Blank captions are stored as null. */
+    public synchronized void setCaptions(Map<Long, String> captions) {
+        assertOffUiThread();
+        if (captions == null || captions.isEmpty()) {
+            return;
+        }
+        inTransaction(() -> {
+            try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET caption=? WHERE id=?")) {
+                for (Map.Entry<Long, String> entry : captions.entrySet()) {
+                    if (entry.getKey() == null) {
+                        continue;
+                    }
+                    String value = entry.getValue();
+                    statement.setString(1, value == null || value.isBlank() ? null : value.trim());
+                    statement.setLong(2, entry.getKey());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+            return null;
+        });
     }
 
     /**
@@ -1611,6 +1821,7 @@ public final class Library implements AutoCloseable {
      * @return the number of removed rows
      */
     public synchronized int deleteUnder(long folderId, Path directory) {
+        assertOffUiThread();
         String prefix = PathUtil.key(directory);
         List<Long> ids = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("SELECT id, path_key FROM photos WHERE folder_id=?")) {
@@ -1645,6 +1856,7 @@ public final class Library implements AutoCloseable {
      * @param favorite the new value
      */
     public synchronized void setFavorite(long photoId, boolean favorite) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET favorite=? WHERE id=?")) {
             statement.setInt(1, favorite ? 1 : 0);
             statement.setLong(2, photoId);
@@ -1661,6 +1873,7 @@ public final class Library implements AutoCloseable {
      * @param rating a value from 0 to 5
      */
     public synchronized void setRating(long photoId, int rating) {
+        assertOffUiThread();
         int value = Math.max(0, Math.min(5, rating));
         try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET rating=? WHERE id=?")) {
             statement.setInt(1, value);
@@ -1678,6 +1891,7 @@ public final class Library implements AutoCloseable {
      * @param caption the caption, or null to clear it
      */
     public synchronized void setCaption(long photoId, String caption) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET caption=? WHERE id=?")) {
             statement.setString(1, caption == null || caption.isBlank() ? null : caption.trim());
             statement.setLong(2, photoId);
@@ -1694,6 +1908,7 @@ public final class Library implements AutoCloseable {
      * @return the stored value, if any
      */
     public Optional<String> setting(String key) {
+        assertOffUiThread();
         synchronized (readerLock) {
             return settingInternal(key);
         }
@@ -1717,6 +1932,7 @@ public final class Library implements AutoCloseable {
      * @param value the value
      */
     public synchronized void setting(String key, String value) {
+        assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("""
                 INSERT INTO settings(key, value) VALUES(?,?)
                 ON CONFLICT(key) DO UPDATE SET value=excluded.value
@@ -1762,6 +1978,60 @@ public final class Library implements AutoCloseable {
         }
     }
 
+    @FunctionalInterface
+    private interface SqlWork<T> {
+
+        T run() throws SQLException;
+    }
+
+    /** Runs several statements as one commit, rolling back and restoring auto-commit on failure. */
+    private <T> T inTransaction(SqlWork<T> work) {
+        try {
+            connection.setAutoCommit(false);
+            T result = work.run();
+            connection.commit();
+            return result;
+        } catch (SQLException e) {
+            rollback();
+            throw new LibraryException("Failed to commit catalog changes", e);
+        } finally {
+            autoCommit(true);
+        }
+    }
+
+    /** Returns the non-null, unique identifiers in a stable order. */
+    private static List<Long> normalizedIds(Collection<Long> ids) {
+        if (ids == null) {
+            return List.of();
+        }
+        LinkedHashSet<Long> unique = new LinkedHashSet<>();
+        for (Long id : ids) {
+            if (id != null) {
+                unique.add(id);
+            }
+        }
+        return new ArrayList<>(unique);
+    }
+
+    private static List<List<Long>> chunks(List<Long> ids, int size) {
+        List<List<Long>> result = new ArrayList<>();
+        for (int start = 0; start < ids.size(); start += size) {
+            result.add(ids.subList(start, Math.min(start + size, ids.size())));
+        }
+        return result;
+    }
+
+    private static String placeholders(int count) {
+        StringBuilder text = new StringBuilder(Math.max(1, count * 2 - 1));
+        for (int i = 0; i < count; i++) {
+            if (i > 0) {
+                text.append(',');
+            }
+            text.append('?');
+        }
+        return text.toString();
+    }
+
     private void rollback() {
         try {
             connection.rollback();
@@ -1771,6 +2041,7 @@ public final class Library implements AutoCloseable {
 
     @Override
     public synchronized void close() {
+        assertOffUiThread();
         try (Statement statement = connection.createStatement()) {
             statement.execute("PRAGMA optimize");
             statement.execute("PRAGMA wal_checkpoint(TRUNCATE)");

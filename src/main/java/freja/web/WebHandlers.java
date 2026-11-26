@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import apocrypha.IpcChannel;
@@ -41,7 +40,7 @@ import kiss.I;
 /**
  * The IPC handlers of the Web edition.
  * <p>
- * These methods are the Apocrypha counterpart of the JavaFX edition's MainView: every call the
+ * These methods are the Apocrypha counterpart of the Swing edition's MainWindow: every call the
  * browser makes crosses the {@code freja:*} channel, reads or mutates the shared catalog, and
  * returns a typed model which Sinobu maps back to JSON. The handlers fetch the catalog lazily
  * through {@link FrejaWeb#library()} so registration can happen before the database finishes
@@ -383,9 +382,7 @@ public final class WebHandlers {
         if (library == null || request == null) {
             return;
         }
-        for (long photoId : request.ids()) {
-            library.deletePhoto(photoId);
-        }
+        library.deletePhotos(request.ids());
         refreshBootstrap();
     }
 
@@ -400,6 +397,7 @@ public final class WebHandlers {
         Library library = library();
         int deleted = 0;
         int failed = 0;
+        List<Long> deletedIds = new ArrayList<>();
         if (library != null && request != null) {
             for (long photoId : request.ids()) {
                 Optional<Photo> photo = library.photo(photoId);
@@ -409,7 +407,7 @@ public final class WebHandlers {
                 }
                 try {
                     if (Files.deleteIfExists(photo.get().path())) {
-                        library.deletePhoto(photoId);
+                        deletedIds.add(photoId);
                         deleted++;
                     } else {
                         failed++;
@@ -418,6 +416,8 @@ public final class WebHandlers {
                     failed++;
                 }
             }
+            // File I/O above stays per photo, but the catalog rows go in one transaction.
+            library.deletePhotos(deletedIds);
         }
         refreshBootstrap();
         Map<String, Object> summary = new HashMap<>();
@@ -508,9 +508,7 @@ public final class WebHandlers {
         if (library == null || request == null) {
             return;
         }
-        for (long photoId : request.ids()) {
-            library.setFavorite(photoId, request.value());
-        }
+        library.setFavorites(request.ids(), request.value());
         refreshBootstrap();
     }
 
@@ -551,23 +549,16 @@ public final class WebHandlers {
     // ----------------------------------------------------------------------------
 
     /**
-     * Opens the directory picker and returns the chosen directory. The chooser is shown directly
-     * from the handler thread and blocks until the user approves or cancels, exactly like the
-     * JavaFX edition's dialogs, because apocrypha runs IPC handlers on virtual threads.
+     * Opens the operating system's native folder picker in front of the application window and
+     * returns the chosen directory. The call blocks until the user approves or cancels; apocrypha
+     * runs IPC handlers on virtual threads, so the webview event loop keeps running.
      *
      * @return the path, or null when canceled
      */
     @IpcChannel("freja:pickFolder")
     public String pickFolder() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setDialogTitle("フォルダを選択");
-        int result = chooser.showOpenDialog(null);
-        if (result != JFileChooser.APPROVE_OPTION) {
-            return null;
-        }
-        java.io.File selected = chooser.getSelectedFile();
-        return selected == null ? null : selected.getPath();
+        Window window = app == null ? null : app.window();
+        return window == null ? null : window.chooseFolder("フォルダを選択");
     }
 
     /**
@@ -614,8 +605,12 @@ public final class WebHandlers {
         if (library == null || request == null) {
             return;
         }
-        for (long folderId : request.ids()) {
-            library.removeFolder(folderId);
+        LibraryScanner scanner = scanner();
+        if (scanner != null) {
+            // Also drops the watch registrations for the removed trees.
+            scanner.removeFolders(request.ids());
+        } else {
+            library.removeFolders(request.ids());
         }
         refreshBootstrap();
     }

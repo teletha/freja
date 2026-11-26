@@ -8,6 +8,7 @@
          harmless 404 to the console on every page load. -->
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/svelte/main.css">
 </head>
 <body>
     <div id="menubar">
@@ -122,44 +123,9 @@
                 </div>
             </section>
 
-            <!-- ============ settings page ============ -->
+            <!-- ============ settings page (Svelte) ============ -->
             <section class="page" id="page-settings">
-                <div class="settings-body scroll-y">
-                    <h1 id="settings-title">設定</h1>
-
-                    <h2 id="settings-appearance">外観</h2>
-                    <p class="settings-note" id="settings-appearance-note">テーマと色使いを調整します。</p>
-                    <div class="setting-row"><label id="lbl-theme">テーマ</label>
-                        <select id="set-theme">
-                            <option value="dark">ダーク</option>
-                            <option value="light">ライト</option>
-                        </select>
-                    </div>
-
-                    <h2 id="settings-library">ライブラリ</h2>
-                    <p class="settings-note" id="settings-library-note">スキャンと監視フォルダの設定です。</p>
-                    <div class="setting-row"><label id="lbl-scan-start">起動時にスキャン</label><input type="checkbox" id="set-scan-start"></div>
-                    <div class="setting-row"><label id="lbl-sweep">定期見回りスキャン</label><input type="checkbox" id="set-sweep"></div>
-                    <div class="setting-row"><label id="lbl-watch">監視フォルダ</label><button id="set-manage-folders">監視フォルダを管理…</button></div>
-
-                    <h2 id="settings-grid">グリッド</h2>
-                    <p class="settings-note" id="settings-grid-note">写真ウォールのサムネイルサイズです。</p>
-                    <div class="setting-row"><label id="lbl-thumb">サムネイルサイズ</label>
-                        <input type="range" id="set-thumb" min="120" max="220" step="10"><span id="set-thumb-value">170 px</span>
-                    </div>
-
-                    <h2 id="settings-language">言語</h2>
-                    <p class="settings-note" id="settings-language-note">表示言語を選ぶと、翻訳済みラベルがその場で更新されます。</p>
-                    <div class="setting-row"><label id="lbl-language">表示言語</label><select id="set-language"></select></div>
-
-                    <h2 id="settings-system">システム</h2>
-                    <p class="settings-note" id="settings-system-note">アプリケーション情報の確認と再起動です。</p>
-                    <div class="setting-row"><label></label>
-                        <button id="set-about">Freja について</button>
-                        <button id="set-restart">再起動</button>
-                    </div>
-                    <div class="settings-note" id="settings-library-path"></div>
-                </div>
+                <div id="svelte-settings" class="settings-body scroll-y"></div>
             </section>
         </div>
     </div>
@@ -190,5 +156,6 @@
     <div id="floating"></div>
 
     <script src="app.js"></script>
+    <script type="module" src="/svelte/main.js"></script>
 </body>
 </html>

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -50,7 +51,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.formdev.flatlaf.FlatClientProperties;
 
 import freja.model.Tag;
-import freja.store.Library;
+import freja.store.LibraryTasks;
 
 /**
  * A dialog for creating, renaming and removing tags. Tags are colour-coded and searchable, names
@@ -58,7 +59,7 @@ import freja.store.Library;
  */
 final class TagManager extends JDialog {
 
-    private final Library library;
+    private final LibraryTasks tasks;
 
     private final Runnable onChange;
 
@@ -72,9 +73,9 @@ final class TagManager extends JDialog {
 
     private final JLabel status = new JLabel();
 
-    TagManager(Frame owner, Library library, Runnable onChange) {
+    TagManager(Frame owner, LibraryTasks tasks, Runnable onChange) {
         super(owner, "タグを管理", true);
-        this.library = library;
+        this.tasks = tasks;
         this.onChange = onChange;
         setBackground(Theme.SURFACE);
         ((JPanel) getContentPane()).setBackground(Theme.SURFACE);
@@ -173,7 +174,7 @@ final class TagManager extends JDialog {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         buttons.setOpaque(false);
         JButton links = secondary("タグの結びつけ", Icons.tag(14, Theme.MUTED),
-                () -> new TagLinkEditor(this, library, this::changed).setVisible(true));
+                () -> new TagLinkEditor(this, tasks, this::changed).setVisible(true));
         JButton smart = secondary("スマートタグを適用", Icons.refresh(14, Theme.MUTED), this::applySmartTags);
         JButton replace = secondary("一括改名", Icons.tag(14, Theme.MUTED), this::bulkRename);
         JButton delete = secondary("削除", Icons.close(13, Theme.DANGER), this::deleteSelected);
@@ -207,13 +208,18 @@ final class TagManager extends JDialog {
         for (int row : table.getSelectedRows()) {
             keep.add(model.tagAt(row).id());
         }
-        model.setTags(library.tags());
-        for (int row = 0; row < model.getRowCount(); row++) {
-            if (keep.contains(model.tagAt(row).id())) {
-                table.setRowSelectionInterval(row, row);
+        tasks.query(() -> tasks.library().tags(), tags -> {
+            if (tags == null) {
+                return;
             }
-        }
-        updateStatus();
+            model.setTags(tags);
+            for (int row = 0; row < model.getRowCount(); row++) {
+                if (keep.contains(model.tagAt(row).id())) {
+                    table.setRowSelectionInterval(row, row);
+                }
+            }
+            updateStatus();
+        });
     }
 
     private void changed() {
@@ -228,14 +234,12 @@ final class TagManager extends JDialog {
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
-        try {
-            int count = library.applySmartTagsToAllFolders();
+        AtomicInteger count = new AtomicInteger();
+        tasks.execute(() -> count.set(tasks.library().applySmartTagsToAllFolders()), () -> {
             changed();
-            JOptionPane.showMessageDialog(this, count + " 件のフォルダにタグを付与しました",
+            JOptionPane.showMessageDialog(this, count.get() + " 件のフォルダにタグを付与しました",
                     "スマートタグ", JOptionPane.INFORMATION_MESSAGE);
-        } catch (RuntimeException e) {
-            error(e);
-        }
+        });
     }
 
     private void createTag() {
@@ -243,13 +247,10 @@ final class TagManager extends JDialog {
         if (name == null || name.isBlank()) {
             return;
         }
-        try {
-            library.addTag(name);
+        tasks.execute(() -> tasks.library().addTag(name), () -> {
             newTag.setText("");
             changed();
-        } catch (RuntimeException e) {
-            error(e);
-        }
+        });
     }
 
     private void bulkRename() {
@@ -301,13 +302,14 @@ final class TagManager extends JDialog {
             return;
         }
         List<Long> ids = selected.stream().map(Tag::id).toList();
-        try {
-            int count = library.bulkRenameTags(ids, from.getText(), to.getText());
+        String fromText = from.getText();
+        String toText = to.getText();
+        AtomicInteger count = new AtomicInteger();
+        tasks.execute(() -> count.set(tasks.library().bulkRenameTags(ids, fromText, toText)), () -> {
             changed();
-            JOptionPane.showMessageDialog(this, count + " 件のタグ名を変更しました", "一括改名", JOptionPane.INFORMATION_MESSAGE);
-        } catch (RuntimeException e) {
-            error(e);
-        }
+            JOptionPane.showMessageDialog(this, count.get() + " 件のタグ名を変更しました", "一括改名",
+                    JOptionPane.INFORMATION_MESSAGE);
+        });
     }
 
     private String buildPreview(List<Tag> selected, String from, String to) {
@@ -335,12 +337,8 @@ final class TagManager extends JDialog {
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
-        try {
-            library.deleteTags(selected.stream().map(Tag::id).toList());
-            changed();
-        } catch (RuntimeException e) {
-            error(e);
-        }
+        List<Long> ids = selected.stream().map(Tag::id).toList();
+        tasks.execute(() -> tasks.library().deleteTags(ids), this::changed);
     }
 
     private List<Tag> selectedTags() {
@@ -356,11 +354,6 @@ final class TagManager extends JDialog {
         label.setFont(Theme.font(Font.PLAIN, 12));
         label.setForeground(Theme.MUTED);
         return label;
-    }
-
-    private void error(RuntimeException e) {
-        JOptionPane.showMessageDialog(this, e.getMessage(), "タグを編集できません", JOptionPane.WARNING_MESSAGE);
-        reload();
     }
 
     private JButton primary(String text, javax.swing.Icon icon, Runnable action) {
@@ -486,12 +479,8 @@ final class TagManager extends JDialog {
             if (name.equals(tag.name())) {
                 return;
             }
-            try {
-                library.renameTag(tag.id(), name);
-                changed();
-            } catch (RuntimeException e) {
-                error(e);
-            }
+            long id = tag.id();
+            tasks.execute(() -> tasks.library().renameTag(id, name), TagManager.this::changed);
         }
     }
 }

@@ -27,13 +27,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 import freja.model.Tag;
-import freja.store.Library;
+import freja.store.LibraryTasks;
 
 /**
  * Edits one-way links between tags. Linking {@code 井上和彦 → 漫画} makes folders tagged with the
@@ -41,7 +40,7 @@ import freja.store.Library;
  */
 final class TagLinkEditor extends JDialog {
 
-    private final Library library;
+    private final LibraryTasks tasks;
 
     private final Runnable onChange;
 
@@ -55,9 +54,9 @@ final class TagLinkEditor extends JDialog {
 
     private final JLabel reverse = new JLabel();
 
-    TagLinkEditor(Window owner, Library library, Runnable onChange) {
+    TagLinkEditor(Window owner, LibraryTasks tasks, Runnable onChange) {
         super(owner, "タグの結びつけ", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
-        this.library = library;
+        this.tasks = tasks;
         this.onChange = onChange;
         ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(18, 18, 14, 18));
 
@@ -156,22 +155,27 @@ final class TagLinkEditor extends JDialog {
 
     private void loadSources() {
         Tag selected = sources.getSelectedValue();
-        sourceModel.clear();
-        for (Tag tag : library.tags()) {
-            sourceModel.addElement(tag);
-        }
-        if (!sourceModel.isEmpty()) {
-            sources.setSelectedIndex(0);
-        }
-        if (selected != null) {
-            for (int i = 0; i < sourceModel.size(); i++) {
-                if (sourceModel.get(i).id() == selected.id()) {
-                    sources.setSelectedIndex(i);
-                    break;
+        tasks.query(() -> tasks.library().tags(), tags -> {
+            if (tags == null) {
+                return;
+            }
+            sourceModel.clear();
+            for (Tag tag : tags) {
+                sourceModel.addElement(tag);
+            }
+            if (!sourceModel.isEmpty()) {
+                sources.setSelectedIndex(0);
+            }
+            if (selected != null) {
+                for (int i = 0; i < sourceModel.size(); i++) {
+                    if (sourceModel.get(i).id() == selected.id()) {
+                        sources.setSelectedIndex(i);
+                        break;
+                    }
                 }
             }
-        }
-        loadTargets();
+            loadTargets();
+        });
     }
 
     private void loadTargets() {
@@ -182,26 +186,40 @@ final class TagLinkEditor extends JDialog {
         if (source == null) {
             return;
         }
-        List<Tag> linked = library.linkedTargets(source.id());
-        for (Tag tag : library.tags()) {
-            if (tag.id() == source.id()) {
-                continue;
+        long sourceId = source.id();
+        tasks.query(() -> {
+            List<Tag> linked = tasks.library().linkedTargets(sourceId);
+            List<Tag> all = tasks.library().tags();
+            List<Tag> incoming = tasks.library().linkedSources(sourceId);
+            return new TargetData(linked, all, incoming);
+        }, data -> {
+            if (data == null) {
+                return;
             }
-            JCheckBox box = new JCheckBox(tag.name(), linked.stream().anyMatch(item -> item.id() == tag.id()));
-            box.setOpaque(false);
-            box.setFont(Theme.font(Font.PLAIN, 12));
-            box.setForeground(Theme.TEXT);
-            box.setAlignmentX(LEFT_ALIGNMENT);
-            targets.add(new Entry(tag, box));
-            targetList.add(box);
-        }
-        List<Tag> incoming = library.linkedSources(source.id());
-        if (!incoming.isEmpty()) {
-            List<String> names = incoming.stream().map(Tag::name).toList();
-            reverse.setText("このタグを指すタグ: " + String.join(", ", names));
-        }
-        targetList.revalidate();
-        targetList.repaint();
+            Tag current = sources.getSelectedValue();
+            if (current == null || current.id() != sourceId) {
+                return;
+            }
+            for (Tag tag : data.all()) {
+                if (tag.id() == sourceId) {
+                    continue;
+                }
+                JCheckBox box = new JCheckBox(tag.name(),
+                        data.linked().stream().anyMatch(item -> item.id() == tag.id()));
+                box.setOpaque(false);
+                box.setFont(Theme.font(Font.PLAIN, 12));
+                box.setForeground(Theme.TEXT);
+                box.setAlignmentX(LEFT_ALIGNMENT);
+                targets.add(new Entry(tag, box));
+                targetList.add(box);
+            }
+            if (!data.incoming().isEmpty()) {
+                List<String> names = data.incoming().stream().map(Tag::name).toList();
+                reverse.setText("このタグを指すタグ: " + String.join(", ", names));
+            }
+            targetList.revalidate();
+            targetList.repaint();
+        });
     }
 
     private void save() {
@@ -215,13 +233,14 @@ final class TagLinkEditor extends JDialog {
                 ids.add(entry.tag().id());
             }
         }
-        try {
-            library.setTagLinks(source.id(), ids);
+        long sourceId = source.id();
+        tasks.execute(() -> tasks.library().setTagLinks(sourceId, ids), () -> {
             onChange.run();
             dispose();
-        } catch (RuntimeException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "結びつけを保存できません", JOptionPane.WARNING_MESSAGE);
-        }
+        });
+    }
+
+    private record TargetData(List<Tag> linked, List<Tag> all, List<Tag> incoming) {
     }
 
     private record Entry(Tag tag, JCheckBox box) {

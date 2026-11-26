@@ -11,12 +11,16 @@ package freja.store;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.EventQueue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -358,6 +362,66 @@ class LibraryTest {
 
             library.renameFolder(folder.id(), "【家族】アルバム");
             assertEquals(List.of("Trip", "家族"), library.folder(folder.id()).orElseThrow().tags());
+        }
+    }
+
+    @Test
+    void rejectsDatabaseAccessOnTheUiThread() throws Exception {
+        try (Library library = new Library(temp.resolve("guard.db"))) {
+            library.setUiThreadCheck(EventQueue::isDispatchThread);
+            // A background caller is unaffected.
+            assertDoesNotThrow(() -> library.tags());
+
+            AtomicReference<Throwable> failure = new AtomicReference<>();
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    library.tags();
+                } catch (Throwable e) {
+                    failure.set(e);
+                }
+            });
+            assertTrue(failure.get() instanceof IllegalStateException, "EDT access must fail fast");
+        }
+    }
+
+    @Test
+    void removesFolderTreesInOneBatch() throws Exception {
+        Path root = Files.createDirectories(temp.resolve("tree"));
+        Path child = Files.createDirectories(root.resolve("child"));
+        try (Library library = new Library(temp.resolve("tree.db"))) {
+            Folder parent = library.addFolder(root);
+            library.ensureFolder(child);
+            assertEquals(2, library.folders().size());
+
+            library.removeFolders(List.of(parent.id()));
+            assertTrue(library.folders().isEmpty());
+        }
+    }
+
+    @Test
+    void batchesDeletesAndUpdates() throws Exception {
+        Path folder = Files.createDirectories(temp.resolve("batch"));
+        Exif.Data exif = Exif.Data.EMPTY;
+        PhotoImporter.AnalyzedPhoto analyzed = new PhotoImporter.AnalyzedPhoto(100, 80, 0, exif, new byte[] {1, 2, 3}, 40, 30);
+        try (Library library = new Library(temp.resolve("batch.db"))) {
+            Folder added = library.addFolder(folder);
+            long first = library.savePhoto(added.id(), Files.write(folder.resolve("a.jpg"), new byte[] {1}), 1, 1, analyzed, "scan");
+            long second = library.savePhoto(added.id(), Files.write(folder.resolve("b.jpg"), new byte[] {2}), 1, 1, analyzed, "scan");
+            long third = library.savePhoto(added.id(), Files.write(folder.resolve("c.jpg"), new byte[] {3}), 1, 1, analyzed, "scan");
+            assertEquals(3, library.photos(PhotoFilter.all()).size());
+
+            library.setFavorites(List.of(first, second), true);
+            assertEquals(2, library.photos(PhotoFilter.favorites()).size());
+            library.setFolderScanEnabled(List.of(added.id()), false);
+            assertFalse(library.folder(added.id()).orElseThrow().scanEnabled());
+
+            assertEquals(2, library.deletePhotos(List.of(first, third)));
+            assertTrue(library.photo(first).isEmpty());
+            assertTrue(library.thumbnail(first).isEmpty());
+            assertTrue(library.photo(second).isPresent());
+            assertTrue(library.thumbnail(second).isPresent());
+            assertEquals(0, library.deletePhotos(List.of()));
+            assertEquals(0, library.deletePhotos(null));
         }
     }
 }

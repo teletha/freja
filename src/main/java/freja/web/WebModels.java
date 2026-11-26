@@ -19,8 +19,8 @@ import freja.model.Photo;
  * The model records which cross the IPC boundary in the Web edition.
  * <p>
  * Apocrypha encodes records with Sinobu, so each type here is a plain data holder which the
- * browser decodes back into typed fields. The browser edition mirrors the JavaFX edition: the
- * renderer owns the DOM, these records carry catalog state, browse requests and results, and the
+ * browser decodes back into typed fields. In the browser edition the renderer owns the DOM: these
+ * records carry catalog state, browse requests and results, and the
  * scanner report snapshot published to the status bar.
  * </p>
  */

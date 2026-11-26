@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +71,7 @@ import freja.model.PhotoFilter;
 import freja.model.PhotoFilter.SortOrder;
 import freja.scan.LibraryScanner;
 import freja.store.Library;
+import freja.store.LibraryTasks;
 import freja.util.PathUtil;
 import laevatain.ARXButton;
 import laevatain.ARXSearchField;
@@ -98,6 +98,9 @@ public final class MainWindow extends JFrame {
     private static final String SCAN_SWEEP_PREFERENCE = "scan.sweep";
 
     private final Library library;
+
+    /** Serialises UI-originated catalog work off the EDT and delivers results back to it. */
+    private final LibraryTasks tasks;
 
     private final LibraryScanner scanner;
 
@@ -198,6 +201,9 @@ public final class MainWindow extends JFrame {
         super("Freja");
         setIconImage(Icons.applicationImage());
         this.library = library;
+        this.tasks = new LibraryTasks(library, SwingUtilities::invokeLater);
+        tasks.setErrorHandler(error -> JOptionPane.showMessageDialog(this,
+                "ライブラリ操作に失敗しました: " + error.getMessage(), "Freja", JOptionPane.ERROR_MESSAGE));
         this.scanner = scanner;
         this.cache = new ThumbnailCache(library);
         this.inspector = new PhotoInspector();
@@ -590,7 +596,7 @@ public final class MainWindow extends JFrame {
             search.requestFocusInWindow();
             search.selectAll();
         }));
-        view.add(menuItem("タグを管理…", "control T", () -> new TagManager(this, library, this::tagsChanged).setVisible(true)));
+        view.add(menuItem("タグを管理…", "control T", () -> new TagManager(this, tasks, this::tagsChanged).setVisible(true)));
         view.addSeparator();
         inspectorItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
         inspectorItem.addActionListener(event -> setInspectorVisible(inspectorItem.isSelected()));
@@ -635,11 +641,13 @@ public final class MainWindow extends JFrame {
 
             @Override
             public void onSortFolder(long folderId, SortOrder sort) {
-                library.setFolderSort(folderId, sort);
-                if (mode == Sidebar.Mode.FOLDER && MainWindow.this.folderId == folderId) {
-                    applySortForCurrentView();
-                    refreshAll();
-                }
+                boolean applies = mode == Sidebar.Mode.FOLDER && MainWindow.this.folderId == folderId;
+                tasks.setFolderSort(folderId, sort, () -> {
+                    if (applies) {
+                        setSortSelection(sort, true);
+                        refreshAll();
+                    }
+                });
             }
 
             @Override
@@ -654,7 +662,11 @@ public final class MainWindow extends JFrame {
 
             @Override
             public void onRevealFolder(long folderId) {
-                library.folder(folderId).ifPresent(folder -> reveal(folder.path()));
+                tasks.query(() -> library.folder(folderId), found -> {
+                    if (found != null) {
+                        found.ifPresent(folder -> reveal(folder.path()));
+                    }
+                });
             }
 
             @Override
@@ -662,12 +674,12 @@ public final class MainWindow extends JFrame {
                 java.awt.Point point = sidebar.getMousePosition();
                 int x = point == null ? 24 : point.x;
                 int y = point == null ? 24 : point.y;
-                TagPicker.show(sidebar, x, y, library, folderId, MainWindow.this::tagsChanged);
+                TagPicker.show(sidebar, x, y, tasks, folderId, MainWindow.this::tagsChanged);
             }
 
             @Override
             public void onManageTags() {
-                new TagManager(MainWindow.this, library, MainWindow.this::tagsChanged).setVisible(true);
+                new TagManager(MainWindow.this, tasks, MainWindow.this::tagsChanged).setVisible(true);
             }
         });
 
@@ -683,8 +695,11 @@ public final class MainWindow extends JFrame {
             mode = Sidebar.Mode.FOLDER;
             this.folderId = folderId;
         });
-        grid.setOnTagFolder((folderId, point) -> library.folder(folderId)
-                .ifPresent(folder -> TagPicker.show(grid, point.x, point.y + 8, library, folderId, this::tagsChanged)));
+        grid.setOnTagFolder((folderId, point) -> tasks.query(() -> library.folder(folderId), found -> {
+            if (found != null && found.isPresent()) {
+                TagPicker.show(grid, point.x, point.y + 8, tasks, folderId, this::tagsChanged);
+            }
+        }));
         grid.setOnRemove(this::removeFromLibrary);
         grid.setOnDeleteFromDisk(this::deleteFromDisk);
         grid.setOnOpen(this::openViewer);
@@ -708,15 +723,15 @@ public final class MainWindow extends JFrame {
 
             @Override
             public void onRating(Photo photo, int rating) {
-                library.setRating(photo.id(), rating);
-                refreshAll();
+                tasks.setRating(photo.id(), rating, MainWindow.this::refreshAll);
             }
 
             @Override
             public void onCaption(Photo photo, String caption) {
-                library.setCaption(photo.id(), caption);
-                inspectorPhoto = photo;
-                refreshAll();
+                tasks.setCaption(photo.id(), caption, () -> {
+                    inspectorPhoto = photo;
+                    refreshAll();
+                });
             }
         });
 
@@ -725,13 +740,17 @@ public final class MainWindow extends JFrame {
                 return;
             }
             SortOrder order = sort.getSelectedItem() instanceof SortOrder value ? value : SortOrder.NAME;
-            if (mode == Sidebar.Mode.FOLDER && folderId >= 0) {
-                library.setFolderSort(folderId, order);
+            long selectedFolder = folderId;
+            if (mode == Sidebar.Mode.FOLDER && selectedFolder >= 0) {
+                tasks.setFolderSort(selectedFolder, order, () -> {
+                    refreshAll();
+                    savePreferences();
+                });
             } else {
                 PREFERENCES.put(SORT_PREFERENCE, order.name());
+                refreshAll();
+                savePreferences();
             }
-            refreshAll();
-            savePreferences();
         });
         zoom.addChangeListener(event -> savePreferences());
     }
@@ -763,9 +782,11 @@ public final class MainWindow extends JFrame {
      * Starts the background scanner.
      */
     public void start() {
-        scanner.start(true, PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false), PREFERENCES
-                .getBoolean(SCAN_SWEEP_PREFERENCE, false));
-        SwingUtilities.invokeLater(() -> {
+        // scanner.start() reads the folder catalog, so it has to run on the task thread; the
+        // onDone callback is already delivered on the EDT by LibraryTasks.
+        boolean scanOnStartup = PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false);
+        boolean sweep = PREFERENCES.getBoolean(SCAN_SWEEP_PREFERENCE, false);
+        tasks.execute(() -> scanner.start(true, scanOnStartup, sweep), () -> {
             if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && savedSidebarDivider > 0) {
                 sidebarSplit.setDividerLocation(Math.max(180, savedSidebarDivider));
             }
@@ -783,35 +804,48 @@ public final class MainWindow extends JFrame {
      */
     public void addFolders(List<Path> folders) {
         for (Path folder : folders) {
-            try {
-                Folder added = scanner.addFolder(folder);
-                selectMode(Sidebar.Mode.FOLDER, added.id());
-            } catch (IllegalArgumentException e) {
-                statusMessage.setText(e.getMessage());
-            }
+            // scanner.addFolder() writes to the catalog, so keep it on the task thread and carry
+            // the result (or the validation error) back to the EDT.
+            Folder[] added = new Folder[1];
+            String[] error = new String[1];
+            tasks.execute(() -> {
+                try {
+                    added[0] = scanner.addFolder(folder);
+                } catch (IllegalArgumentException e) {
+                    error[0] = e.getMessage();
+                }
+            }, () -> {
+                if (added[0] != null) {
+                    selectMode(Sidebar.Mode.FOLDER, added[0].id());
+                } else if (error[0] != null) {
+                    statusMessage.setText(error[0]);
+                }
+            });
         }
         refreshAll();
     }
 
     /** Renames the sidebar label only; the directory on disk is never touched. */
     private void renameFolder(long id) {
-        Folder folder = library.folder(id).orElse(null);
-        if (folder == null) {
-            return;
-        }
-        String name = (String) JOptionPane
-                .showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane.QUESTION_MESSAGE, null, null, folder.name());
-        if (name == null) {
-            return;
-        }
-        String trimmed = name.trim();
-        if (trimmed.isEmpty()) {
-            statusMessage.setText("フォルダ名を入力してください");
-            return;
-        }
-        library.renameFolder(id, trimmed);
-        refreshAll();
-        statusMessage.setText("フォルダ名を変更しました: " + trimmed);
+        tasks.query(() -> library.folder(id), found -> {
+            if (found == null || found.isEmpty()) {
+                return;
+            }
+            String name = (String) JOptionPane.showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane
+                    .QUESTION_MESSAGE, null, null, found.get().name());
+            if (name == null) {
+                return;
+            }
+            String trimmed = name.trim();
+            if (trimmed.isEmpty()) {
+                statusMessage.setText("フォルダ名を入力してください");
+                return;
+            }
+            tasks.renameFolder(id, trimmed, () -> {
+                refreshAll();
+                statusMessage.setText("フォルダ名を変更しました: " + trimmed);
+            });
+        });
     }
 
     private void openScanFolders() {
@@ -830,10 +864,12 @@ public final class MainWindow extends JFrame {
                     if (answer != JOptionPane.OK_OPTION) {
                         return;
                     }
-                    scanner.clearFolders();
-                    refreshScanFolders();
-                    refreshAll();
-                    statusMessage.setText("監視フォルダをクリアしました");
+                    // scanner.clearFolders() calls library.clearFolders() internally.
+                    tasks.execute(scanner::clearFolders, () -> {
+                        refreshScanFolders();
+                        refreshAll();
+                        statusMessage.setText("監視フォルダをクリアしました");
+                    });
                 }
 
                 @Override
@@ -841,25 +877,31 @@ public final class MainWindow extends JFrame {
                     if (folderIds.isEmpty()) {
                         return;
                     }
-                    List<String> names = folderIds.stream().map(id -> library.folder(id).map(Folder::name).orElse("ID " + id)).toList();
-                    String message = folderIds.size() == 1 ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
-                            : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
-                    int answer = JOptionPane
-                            .showConfirmDialog(MainWindow.this, message, "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-                    if (answer != JOptionPane.OK_OPTION) {
-                        return;
-                    }
-                    for (Long folderId : folderIds) {
-                        scanner.removeFolder(folderId);
-                    }
-                    if (folderIds.contains(MainWindow.this.folderId)) {
-                        mode = Sidebar.Mode.ALL;
-                        MainWindow.this.folderId = -1;
-                        scrollToSelectedFolder = false;
-                        applySortForCurrentView();
-                    }
-                    refreshScanFolders();
-                    refreshAll();
+                    tasks.query(() -> folderIds.stream().map(id -> library.folder(id).map(Folder::name).orElse("ID " + id)).toList(), names -> {
+                        if (names == null || names.isEmpty()) {
+                            return;
+                        }
+                        String message = folderIds.size() == 1 ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
+                                : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
+                        int answer = JOptionPane.showConfirmDialog(MainWindow.this, message, "フォルダを削除", JOptionPane
+                                .OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                        if (answer != JOptionPane.OK_OPTION) {
+                            return;
+                        }
+                        // One transaction for roots and their descendants; never deleteFolders(),
+                        // which is only for pruning auto-folders. The scanner batch also drops
+                        // the watch registrations for the removed trees.
+                        tasks.execute(() -> scanner.removeFolders(folderIds), () -> {
+                            if (folderIds.contains(MainWindow.this.folderId)) {
+                                mode = Sidebar.Mode.ALL;
+                                MainWindow.this.folderId = -1;
+                                scrollToSelectedFolder = false;
+                                applySortForCurrentView();
+                            }
+                            refreshScanFolders();
+                            refreshAll();
+                        });
+                    });
                 }
 
                 @Override
@@ -872,9 +914,10 @@ public final class MainWindow extends JFrame {
 
                 @Override
                 public void onScanEnabled(long folderId, boolean enabled) {
-                    library.setFolderScanEnabled(folderId, enabled);
-                    refreshScanFolders();
-                    refreshAll();
+                    tasks.setFolderScanEnabled(folderId, enabled, () -> {
+                        refreshScanFolders();
+                        refreshAll();
+                    });
                 }
 
                 @Override
@@ -901,40 +944,62 @@ public final class MainWindow extends JFrame {
     }
 
     private void refreshScanFolders() {
-        if (scanFoldersDialog != null) {
-            scanFoldersDialog.setFolders(library.folders(), PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false), PREFERENCES
-                    .getBoolean(SCAN_SWEEP_PREFERENCE, false));
+        if (scanFoldersDialog == null) {
+            return;
         }
+        boolean scanOnStartup = PREFERENCES.getBoolean(SCAN_ON_STARTUP_PREFERENCE, false);
+        boolean sweep = PREFERENCES.getBoolean(SCAN_SWEEP_PREFERENCE, false);
+        tasks.query(library::folders, folders -> {
+            if (scanFoldersDialog != null && folders != null) {
+                scanFoldersDialog.setFolders(folders, scanOnStartup, sweep);
+            }
+        });
     }
 
     private void registerFolder(Path path) {
-        try {
-            scanner.addFolder(path);
+        // scanner.addFolder() writes to the catalog; carry the result back to the EDT.
+        Folder[] added = new Folder[1];
+        String[] error = new String[1];
+        tasks.execute(() -> {
+            try {
+                added[0] = scanner.addFolder(path);
+            } catch (IllegalArgumentException e) {
+                error[0] = e.getMessage();
+            }
+        }, () -> {
+            if (added[0] == null) {
+                if (error[0] != null) {
+                    statusMessage.setText(error[0]);
+                }
+                return;
+            }
             statusMessage.setText(path + " をスキャンしています…");
             refreshScanFolders();
             refreshAll();
-        } catch (IllegalArgumentException e) {
-            statusMessage.setText(e.getMessage());
-        }
+        });
     }
 
     private void removeFolder(long folderId) {
-        Optional<Folder> folder = library.folder(folderId);
-        if (folder.isEmpty()) {
-            return;
-        }
-        int answer = JOptionPane.showConfirmDialog(this, "「" + folder.get()
-                .name() + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。", "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-        if (answer == JOptionPane.OK_OPTION) {
-            scanner.removeFolder(folderId);
-            if (mode == Sidebar.Mode.FOLDER && this.folderId == folderId) {
-                mode = Sidebar.Mode.ALL;
-                this.folderId = -1;
-                scrollToSelectedFolder = false;
-                applySortForCurrentView();
+        tasks.query(() -> library.folder(folderId), found -> {
+            if (found == null || found.isEmpty()) {
+                return;
             }
-            refreshAll();
-        }
+            int answer = JOptionPane.showConfirmDialog(this, "「" + found.get()
+                    .name() + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。", "フォルダを削除", JOptionPane
+                    .OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (answer == JOptionPane.OK_OPTION) {
+                // User-initiated removal deletes the whole tree in one transaction and unregisters its watches.
+                tasks.execute(() -> scanner.removeFolders(List.of(folderId)), () -> {
+                    if (mode == Sidebar.Mode.FOLDER && this.folderId == folderId) {
+                        mode = Sidebar.Mode.ALL;
+                        this.folderId = -1;
+                        scrollToSelectedFolder = false;
+                        applySortForCurrentView();
+                    }
+                    refreshAll();
+                });
+            }
+        });
     }
 
     private void selectMode(Sidebar.Mode mode, long folderId) {
@@ -953,15 +1018,17 @@ public final class MainWindow extends JFrame {
             grid.clearPinnedFolder();
         }
         rememberSelection();
-        applySortForCurrentView();
-        if (folderToFolder && grid.scrollToFolder(folderId)) {
-            // The grid already contains every folder section. Moving between them only needs a
-            // scroll; reloading and re-sorting the whole library would land one step behind the
-            // click.
-            scrollToSelectedFolder = false;
-            return;
-        }
-        refreshAll();
+        long targetFolder = folderId;
+        applySortForCurrentView(() -> {
+            if (folderToFolder && grid.scrollToFolder(targetFolder)) {
+                // The grid already contains every folder section. Moving between them only needs a
+                // scroll; reloading and re-sorting the whole library would land one step behind the
+                // click.
+                scrollToSelectedFolder = false;
+            } else {
+                refreshAll();
+            }
+        });
     }
 
     /**
@@ -987,17 +1054,24 @@ public final class MainWindow extends JFrame {
      * launch opens the same place even when the catalog is rebuilt with fresh identifiers.
      */
     private void rememberSelection() {
-        PREFERENCES.put(VIEW_MODE_PREFERENCE, mode.name());
-        if (mode == Sidebar.Mode.FOLDER && folderId >= 0) {
-            java.util.Optional<Folder> folder = library.folder(folderId);
-            if (folder.isPresent()) {
-                PREFERENCES.put(SELECTED_FOLDER_PREFERENCE, folder.get().path().toString());
-                return;
-            }
+        Sidebar.Mode requestedMode = mode;
+        long requestedFolder = folderId;
+        PREFERENCES.put(VIEW_MODE_PREFERENCE, requestedMode.name());
+        if (requestedMode != Sidebar.Mode.FOLDER || requestedFolder < 0) {
+            // The whole-library views win over an older folder: opening the previous folder after
+            // quitting from "All photos" would not be what the window was showing.
+            PREFERENCES.remove(SELECTED_FOLDER_PREFERENCE);
+            return;
         }
-        // The whole-library views win over an older folder: opening the previous folder after
-        // quitting from "All photos" would not be what the window was showing.
-        PREFERENCES.remove(SELECTED_FOLDER_PREFERENCE);
+        // The folder lookup is SQL, so it runs on the task thread and only the preference write
+        // comes back to the EDT.
+        tasks.query(() -> library.folder(requestedFolder), found -> {
+            if (found != null && found.isPresent()) {
+                PREFERENCES.put(SELECTED_FOLDER_PREFERENCE, found.get().path().toString());
+            } else {
+                PREFERENCES.remove(SELECTED_FOLDER_PREFERENCE);
+            }
+        });
     }
 
     /** Restores the selection saved by the previous launch, when it still exists. */
@@ -1027,34 +1101,67 @@ public final class MainWindow extends JFrame {
             folderId = -1;
             return;
         }
-        try {
-            String key = PathUtil.key(Path.of(path));
-            for (Folder folder : library.folders()) {
-                if (PathUtil.key(folder.path()).equals(key)) {
-                    mode = Sidebar.Mode.FOLDER;
-                    folderId = folder.id();
-                    scrollToSelectedFolder = true;
-                    applySortForCurrentView();
-                    return;
+        // Catalog lookup happens on the task thread; the sidebar state changes back on the EDT.
+        tasks.query(library::folders, folders -> {
+            if (folders != null) {
+                try {
+                    String key = PathUtil.key(Path.of(path));
+                    for (Folder folder : folders) {
+                        if (PathUtil.key(folder.path()).equals(key)) {
+                            mode = Sidebar.Mode.FOLDER;
+                            folderId = folder.id();
+                            scrollToSelectedFolder = true;
+                            // The constructor's initial refresh captured the ALL view; reload now
+                            // that the restored folder selection and its sort are in place.
+                            applySortForCurrentView(this::refreshAll);
+                            return;
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    // A stale or malformed preference is simply ignored.
                 }
             }
-        } catch (RuntimeException e) {
-            // A stale or malformed preference is simply ignored.
-        }
-        // The folder was removed from the library in the meantime: show the whole library.
-        mode = Sidebar.Mode.ALL;
-        folderId = -1;
+            // The folder was removed from the library in the meantime: show the whole library.
+            mode = Sidebar.Mode.ALL;
+            folderId = -1;
+        });
     }
 
     private void applySortForCurrentView() {
-        SortOrder order = mode == Sidebar.Mode.FOLDER ? library.folder(folderId).map(Folder::sort).orElse(SortOrder.NAME) : preferredSort();
+        applySortForCurrentView(null);
+    }
+
+    /** Reads the folder's sort off the EDT, then optionally continues on the EDT once it is set. */
+    private void applySortForCurrentView(Runnable onApplied) {
+        Sidebar.Mode requestedMode = mode;
+        long requestedFolder = folderId;
+        if (requestedMode != Sidebar.Mode.FOLDER) {
+            setSortSelection(preferredSort(), false);
+            if (onApplied != null) {
+                onApplied.run();
+            }
+            return;
+        }
+        tasks.query(() -> library.folder(requestedFolder), found -> {
+            // A newer selection may have arrived while the catalog was being read.
+            if (requestedMode == mode && requestedFolder == folderId) {
+                SortOrder order = found == null ? SortOrder.NAME : found.map(Folder::sort).orElse(SortOrder.NAME);
+                setSortSelection(order, true);
+            }
+            if (onApplied != null) {
+                onApplied.run();
+            }
+        });
+    }
+
+    private void setSortSelection(SortOrder order, boolean folderView) {
         updatingSort = true;
         try {
             sort.setSelectedItem(order);
         } finally {
             updatingSort = false;
         }
-        sort.setToolTipText(mode == Sidebar.Mode.FOLDER ? "このフォルダの表示順" : "表示順");
+        sort.setToolTipText(folderView ? "このフォルダの表示順" : "表示順");
     }
 
     private SortOrder preferredSort() {
@@ -1086,10 +1193,12 @@ public final class MainWindow extends JFrame {
         JMenuItem reimport = new JMenuItem("再読み込み" + suffix);
         reimport.addActionListener(event -> {
             cache.clear();
-            for (Photo target : targets) {
-                scanner.reimport(target);
-            }
-            statusMessage.setText(targets.size() + " 枚を再読み込みしています…");
+            // scanner.reimport() writes to the catalog (invalidate/ensureFolder).
+            tasks.execute(() -> {
+                for (Photo target : targets) {
+                    scanner.reimport(target);
+                }
+            }, () -> statusMessage.setText(targets.size() + " 枚を再読み込みしています…"));
         });
         menu.add(reimport);
         menu.addSeparator();
@@ -1113,12 +1222,12 @@ public final class MainWindow extends JFrame {
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
-        for (Photo photo : photos) {
-            library.deletePhoto(photo.id());
-        }
-        inspectorPhoto = null;
-        inspector.show(null);
-        refreshAll();
+        List<Long> ids = photos.stream().map(Photo::id).toList();
+        tasks.deletePhotos(ids, () -> {
+            inspectorPhoto = null;
+            inspector.show(null);
+            refreshAll();
+        });
     }
 
     /** Removes the original files as well as their catalog entries. Cannot be undone. */
@@ -1133,34 +1242,25 @@ public final class MainWindow extends JFrame {
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
-        int deleted = 0;
-        int failed = 0;
-        for (Photo photo : photos) {
-            try {
-                if (Files.deleteIfExists(photo.path())) {
-                    library.deletePhoto(photo.id());
-                    deleted++;
-                } else {
-                    failed++;
-                }
-            } catch (Exception e) {
-                failed++;
-            }
-        }
-        inspectorPhoto = null;
-        inspector.show(null);
-        refreshAll();
-        statusMessage.setText(failed == 0 ? deleted + " 枚をディスクから削除しました" : deleted + " 枚を削除し、" + failed + " 枚は削除できませんでした");
+        // File deletion and the batch catalog delete both run on the task thread.
+        tasks.deleteFromDisk(photos, result -> {
+            int deleted = result == null ? 0 : result.deleted();
+            int failed = result == null ? photos.size() : result.failed();
+            inspectorPhoto = null;
+            inspector.show(null);
+            refreshAll();
+            statusMessage.setText(failed == 0 ? deleted + " 枚をディスクから削除しました" : deleted + " 枚を削除し、" + failed + " 枚は削除できませんでした");
+        });
     }
 
     private void setFavorites(List<Photo> photos, boolean favorite) {
-        for (Photo photo : photos) {
-            library.setFavorite(photo.id(), favorite);
-        }
-        Photo lead = photos.isEmpty() ? null : photos.get(0).withFavorite(favorite);
-        inspectorPhoto = lead;
-        inspector.show(lead);
-        refreshAll();
+        List<Long> ids = photos.stream().map(Photo::id).toList();
+        tasks.setFavorites(ids, favorite, () -> {
+            Photo lead = photos.isEmpty() ? null : photos.get(0).withFavorite(favorite);
+            inspectorPhoto = lead;
+            inspector.show(lead);
+            refreshAll();
+        });
     }
 
     private void openViewer(Photo photo) {
@@ -1179,10 +1279,8 @@ public final class MainWindow extends JFrame {
         if (photos.isEmpty()) {
             photos = List.of(photo);
         }
-        viewer = PhotoViewer.open(this, photos, photo, (updated, favorite) -> {
-            library.setFavorite(updated.id(), favorite);
-            refreshAll();
-        });
+        viewer = PhotoViewer.open(this, photos, photo, (updated, favorite) -> tasks.setFavorites(List
+                .of(updated.id()), favorite, this::refreshAll));
     }
 
     private void openSlideshow() {
@@ -1199,11 +1297,12 @@ public final class MainWindow extends JFrame {
     }
 
     private void setFavorite(Photo photo, boolean favorite) {
-        library.setFavorite(photo.id(), favorite);
-        Photo updated = photo.withFavorite(favorite);
-        inspectorPhoto = updated;
-        inspector.show(updated);
-        refreshAll();
+        tasks.setFavorites(List.of(photo.id()), favorite, () -> {
+            Photo updated = photo.withFavorite(favorite);
+            inspectorPhoto = updated;
+            inspector.show(updated);
+            refreshAll();
+        });
     }
 
     private void copyPaths(List<Photo> photos) {
@@ -1237,20 +1336,24 @@ public final class MainWindow extends JFrame {
     }
 
     private void about() {
-        LibraryStats stats = library.stats();
-        JOptionPane.showMessageDialog(this, """
-                Freja 1.0
-                Picasa ライクなローカル写真ライブラリ
+        tasks.query(library::stats, stats -> {
+            if (stats == null) {
+                return;
+            }
+            JOptionPane.showMessageDialog(this, """
+                    Freja 1.0
+                    Picasa ライクなローカル写真ライブラリ
 
-                写真: %d 枚
-                お気に入り: %d 枚
-                最近の写真: %d 枚
-                フォルダ: %d
-                ライブラリ: %s
+                    写真: %d 枚
+                    お気に入り: %d 枚
+                    最近の写真: %d 枚
+                    フォルダ: %d
+                    ライブラリ: %s
 
-                Java %s
-                """.formatted(stats.photos(), stats.favorites(), stats.recent(), stats.folders(), library.location(), System
-                .getProperty("java.version")), "Freja について", JOptionPane.INFORMATION_MESSAGE);
+                    Java %s
+                    """.formatted(stats.photos(), stats.favorites(), stats.recent(), stats.folders(), library.location(), System
+                    .getProperty("java.version")), "Freja について", JOptionPane.INFORMATION_MESSAGE);
+        });
     }
 
     private void setDarkMode(boolean dark) {
@@ -1290,7 +1393,14 @@ public final class MainWindow extends JFrame {
 
     /** Opens the toolbar popup for choosing which tags a photo's folder must carry. */
     private void showTagFilter() {
-        List<freja.model.Tag> tags = library.tags();
+        tasks.query(library::tags, tags -> {
+            if (tags != null) {
+                showTagFilterPopup(tags);
+            }
+        });
+    }
+
+    private void showTagFilterPopup(List<freja.model.Tag> tags) {
         JPopupMenu popup = new JPopupMenu();
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(Theme.SURFACE);
@@ -1378,11 +1488,13 @@ public final class MainWindow extends JFrame {
 
     /** Called after tags or folder assignments changed in one of the tag dialogs. */
     private void tagsChanged() {
-        List<Long> existing = library.tags().stream().map(freja.model.Tag::id).toList();
-        selectedTagIds.removeIf(id -> !existing.contains(id));
-        updateTagFilterButton();
-        cache.retryMissing();
-        refreshAll();
+        tasks.query(library::tags, tags -> {
+            List<Long> existing = tags == null ? List.of() : tags.stream().map(freja.model.Tag::id).toList();
+            selectedTagIds.removeIf(id -> !existing.contains(id));
+            updateTagFilterButton();
+            cache.retryMissing();
+            refreshAll();
+        });
     }
 
     private void scheduleRefresh() {
@@ -1760,6 +1872,10 @@ public final class MainWindow extends JFrame {
         watchdog.start();
 
         Thread cleanup = new Thread(() -> {
+            try {
+                tasks.close();
+            } catch (RuntimeException ignored) {
+            }
             try {
                 scanner.close();
             } catch (RuntimeException ignored) {

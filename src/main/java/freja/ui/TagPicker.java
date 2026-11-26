@@ -44,7 +44,7 @@ import javax.swing.event.DocumentListener;
 import com.formdev.flatlaf.FlatClientProperties;
 
 import freja.model.Tag;
-import freja.store.Library;
+import freja.store.LibraryTasks;
 
 /**
  * A GitHub-issue-style label picker shown as a popover instead of a modal dialog: a new-label field,
@@ -59,7 +59,7 @@ final class TagPicker extends JPanel {
 
     private final Window owner;
 
-    private final Library library;
+    private final LibraryTasks tasks;
 
     private final long folderId;
 
@@ -80,9 +80,9 @@ final class TagPicker extends JPanel {
 
     private final Runnable onClose;
 
-    private TagPicker(Window owner, Library library, long folderId, Runnable onChange, Runnable onClose) {
+    private TagPicker(Window owner, LibraryTasks tasks, long folderId, Runnable onChange, Runnable onClose) {
         this.owner = owner;
-        this.library = library;
+        this.tasks = tasks;
         this.folderId = folderId;
         this.onChange = onChange;
         this.onClose = onClose;
@@ -189,9 +189,9 @@ final class TagPicker extends JPanel {
     }
 
     /** Shows the picker anchored at the given point in the invoker's coordinate space. */
-    static void show(java.awt.Component invoker, int x, int y, Library library, long folderId, Runnable onChange) {
+    static void show(java.awt.Component invoker, int x, int y, LibraryTasks tasks, long folderId, Runnable onChange) {
         JPopupMenu popup = new JPopupMenu();
-        TagPicker picker = new TagPicker(SwingUtilities.getWindowAncestor(invoker), library, folderId,
+        TagPicker picker = new TagPicker(SwingUtilities.getWindowAncestor(invoker), tasks, folderId,
                 onChange, () -> popup.setVisible(false));
         popup.add(picker);
         popup.show(invoker, x, y);
@@ -199,80 +199,94 @@ final class TagPicker extends JPanel {
     }
 
     private void reload() {
-        selected.clear();
-        selected.addAll(library.folderTags(folderId));
-        entries.clear();
-        list.removeAll();
-        for (Tag tag : library.tags()) {
-            JPanel row = new JPanel(new BorderLayout(6, 0));
-            row.setOpaque(true);
-            row.setBackground(Theme.SURFACE);
-            row.setMaximumSize(new Dimension(Integer.MAX_VALUE, ROW_HEIGHT));
-            row.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
-            row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            JPanel main = new JPanel(new BorderLayout(6, 0));
-            main.setOpaque(false);
-            JLabel label = new JLabel(tag.name());
-            label.setIcon(Icons.tag(12, TagColors.of(tag.name())));
-            label.setFont(Theme.font(Font.PLAIN, 12));
-            label.setForeground(Theme.TEXT);
-            main.add(label, BorderLayout.WEST);
-            List<String> linked = library.linkedTargets(tag.id()).stream().map(Tag::name).toList();
-            if (!linked.isEmpty()) {
-                JLabel linkHint = new JLabel("→ " + String.join(", ", linked));
-                linkHint.setFont(Theme.font(Font.PLAIN, 10));
-                linkHint.setForeground(Theme.MUTED);
-                main.add(linkHint, BorderLayout.CENTER);
+        tasks.query(() -> {
+            Set<String> folderTags = new LinkedHashSet<>(tasks.library().folderTags(folderId));
+            List<TagView> views = new ArrayList<>();
+            for (Tag tag : tasks.library().tags()) {
+                List<String> linked = tasks.library().linkedTargets(tag.id()).stream().map(Tag::name).toList();
+                views.add(new TagView(tag, linked));
             }
-            JLabel check = new JLabel();
-            check.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 2));
-            main.add(check, BorderLayout.EAST);
-            main.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent event) {
-                    if (selected.contains(tag.name())) {
-                        selected.remove(tag.name());
-                    } else {
-                        selected.add(tag.name());
+            return new PickerData(folderTags, views);
+        }, data -> {
+            if (data == null) {
+                return;
+            }
+            selected.clear();
+            selected.addAll(data.selected());
+            entries.clear();
+            list.removeAll();
+            for (TagView view : data.views()) {
+                Tag tag = view.tag();
+                JPanel row = new JPanel(new BorderLayout(6, 0));
+                row.setOpaque(true);
+                row.setBackground(Theme.SURFACE);
+                row.setMaximumSize(new Dimension(Integer.MAX_VALUE, ROW_HEIGHT));
+                row.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+                row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                JPanel main = new JPanel(new BorderLayout(6, 0));
+                main.setOpaque(false);
+                JLabel label = new JLabel(tag.name());
+                label.setIcon(Icons.tag(12, TagColors.of(tag.name())));
+                label.setFont(Theme.font(Font.PLAIN, 12));
+                label.setForeground(Theme.TEXT);
+                main.add(label, BorderLayout.WEST);
+                List<String> linked = view.linked();
+                if (!linked.isEmpty()) {
+                    JLabel linkHint = new JLabel("→ " + String.join(", ", linked));
+                    linkHint.setFont(Theme.font(Font.PLAIN, 10));
+                    linkHint.setForeground(Theme.MUTED);
+                    main.add(linkHint, BorderLayout.CENTER);
+                }
+                JLabel check = new JLabel();
+                check.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 2));
+                main.add(check, BorderLayout.EAST);
+                main.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent event) {
+                        if (selected.contains(tag.name())) {
+                            selected.remove(tag.name());
+                        } else {
+                            selected.add(tag.name());
+                        }
+                        updateChecks();
+                        applyNow();
                     }
-                    updateChecks();
-                    applyNow();
-                }
-            });
-            row.add(main, BorderLayout.CENTER);
+                });
+                row.add(main, BorderLayout.CENTER);
 
-            JButton delete = new JButton("×");
-            delete.setFont(Theme.font(Font.BOLD, 13));
-            delete.setForeground(Theme.MUTED);
-            delete.setOpaque(false);
-            delete.setContentAreaFilled(false);
-            delete.setBorderPainted(false);
-            delete.setFocusPainted(false);
-            delete.setToolTipText("このタグを削除");
-            delete.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 2));
-            delete.addActionListener(event -> deleteTag(tag));
-            row.add(delete, BorderLayout.EAST);
+                JButton delete = new JButton("×");
+                delete.setFont(Theme.font(Font.BOLD, 13));
+                delete.setForeground(Theme.MUTED);
+                delete.setOpaque(false);
+                delete.setContentAreaFilled(false);
+                delete.setBorderPainted(false);
+                delete.setFocusPainted(false);
+                delete.setToolTipText("このタグを削除");
+                delete.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 2));
+                delete.addActionListener(event -> deleteTag(tag));
+                row.add(delete, BorderLayout.EAST);
 
-            Entry entry = new Entry(tag, row, check);
-            row.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent event) {
-                    row.setBackground(Theme.HOVER);
-                }
+                Entry entry = new Entry(tag, row, check);
+                row.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent event) {
+                        row.setBackground(Theme.HOVER);
+                    }
 
-                @Override
-                public void mouseExited(MouseEvent event) {
-                    row.setBackground(Theme.SURFACE);
-                }
-            });
-            entries.add(entry);
-            list.add(row);
-        }
-        list.add(createRow);
-        filter();
-        updateChecks();
-        list.revalidate();
-        list.repaint();
+                    @Override
+                    public void mouseExited(MouseEvent event) {
+                        row.setBackground(Theme.SURFACE);
+                    }
+                });
+                entries.add(entry);
+                list.add(row);
+            }
+            list.add(createRow);
+            filter();
+            updateChecks();
+            list.revalidate();
+            list.repaint();
+        });
     }
 
     private void filter() {
@@ -314,16 +328,12 @@ final class TagPicker extends JPanel {
         if (name.isEmpty()) {
             return;
         }
-        try {
-            library.addTag(name);
+        tasks.execute(() -> tasks.library().addTag(name), () -> {
             search.setText("");
-            reload();
             selected.add(name);
             updateChecks();
-            applyNow();
-        } catch (RuntimeException e) {
-            error("ラベルを作成できません", e);
-        }
+            applyNow(this::reload);
+        });
     }
 
     /** Removes a tag itself, everywhere it was used, with a confirmation. */
@@ -333,24 +343,27 @@ final class TagPicker extends JPanel {
         if (answer != JOptionPane.OK_OPTION) {
             return;
         }
-        try {
-            library.deleteTags(List.of(tag.id()));
+        List<Long> ids = List.of(tag.id());
+        tasks.execute(() -> tasks.library().deleteTags(ids), () -> {
             selected.remove(tag.name());
             reload();
             onChange.run();
-        } catch (RuntimeException e) {
-            error("タグを削除できません", e);
-        }
+        });
     }
 
     /** Persists every change immediately, so the picker has no Apply step. */
     private void applyNow() {
-        try {
-            library.setFolderTags(folderId, new ArrayList<>(selected));
+        applyNow(null);
+    }
+
+    private void applyNow(Runnable onDone) {
+        List<String> names = new ArrayList<>(selected);
+        tasks.execute(() -> tasks.library().setFolderTags(folderId, names), () -> {
             onChange.run();
-        } catch (RuntimeException e) {
-            error("ラベルを更新できません", e);
-        }
+            if (onDone != null) {
+                onDone.run();
+            }
+        });
     }
 
     private int confirm(String title, String message) {
@@ -361,11 +374,10 @@ final class TagPicker extends JPanel {
         return pane.getValue() instanceof Integer value ? value : JOptionPane.CLOSED_OPTION;
     }
 
-    private void error(String title, Exception e) {
-        JOptionPane pane = new JOptionPane(e.getMessage(), JOptionPane.WARNING_MESSAGE, JOptionPane.OK_OPTION);
-        JDialog dialog = pane.createDialog(owner, title);
-        dialog.setAlwaysOnTop(true);
-        dialog.setVisible(true);
+    private record TagView(Tag tag, List<String> linked) {
+    }
+
+    private record PickerData(Set<String> selected, List<TagView> views) {
     }
 
     private record Entry(Tag tag, JPanel row, JLabel check) {

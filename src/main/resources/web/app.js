@@ -10,7 +10,7 @@
 /*
  * Freja — browser edition (Apocrypha).
  *
- * The renderer mirrors the Swing and JavaFX editions: the backend owns the catalog and the
+ * The renderer mirrors the Swing edition: the backend owns the catalog and the
  * scanner, this file owns the DOM. All data crosses the boundary through the `freja:*` IPC
  * channels; thumbnails and originals are plain <img> loads served by the /photo/ route, which
  * gives the browser native lazy loading and caching.
@@ -331,7 +331,7 @@
         return Math.floor(minutes / 60) + (LANG === 'ja' ? '時間' + (minutes % 60) + '分' : 'h ' + (minutes % 60) + 'm');
     }
 
-    // Tag colors mirror the Swing / JavaFX palette, which is picked by java.lang.String.hashCode.
+    // Tag colors mirror the Swing palette, which is picked by java.lang.String.hashCode.
     var TAG_PALETTE = [0x5473B5, 0x528A67, 0xB88947, 0xB85F52, 0x7A66A3, 0x438391];
 
     function javaHash(text) {
@@ -368,6 +368,62 @@
     }
 
     var saveSettingsSoon = debounce(saveSettings, 250);
+
+    /* ====================================================== svelte bridge ==== */
+
+    // The settings page is a Svelte component. app.js stays the owner of the state and the actions;
+    // the component renders a snapshot and calls back into these functions.
+    var svelteListeners = [];
+
+    window.frejaSvelteBridge = {
+        state: function () {
+            return {
+                theme: S.theme,
+                scanOnStartup: S.settings.scanOnStartup === 'true',
+                sweep: S.settings.sweep === 'true',
+                thumb: S.thumb,
+                language: S.settings.language || LANG,
+                languages: LANG_NAMES,
+                library: S.library || ''
+            };
+        },
+        subscribe: function (listener) {
+            svelteListeners.push(listener);
+            listener(window.frejaSvelteBridge.state());
+            return function () {
+                var index = svelteListeners.indexOf(listener);
+                if (index >= 0) { svelteListeners.splice(index, 1); }
+            };
+        },
+        actions: {
+            translate: function (key, args) { return t(key, args); },
+            setTheme: function (value) {
+                S.theme = value === 'light' ? 'light' : 'dark';
+                document.documentElement.dataset.theme = S.theme;
+                $('tb-theme').textContent = S.theme === 'dark' ? '☀' : '☾';
+                setSetting('theme', S.theme);
+                publishSvelteState();
+            },
+            setScanOnStartup: function (value) { setSetting('scanOnStartup', String(!!value)); },
+            setSweep: function (value) { setSetting('sweep', String(!!value)); },
+            setThumb: function (value) { applyThumb(value); setSetting('thumbSize', String(S.thumb)); },
+            setLanguage: function (code) {
+                LANG = code;
+                setSetting('language', LANG);
+                saveSettings();
+                applyChrome();
+                browse().then(function () { setStatus(t('Language changed')); });
+            },
+            manageFolders: function () { openFolderManager(); },
+            about: function () { openAbout(); },
+            restart: function () { apocrypha.app.restart(); }
+        }
+    };
+
+    function publishSvelteState() {
+        var snapshot = window.frejaSvelteBridge.state();
+        svelteListeners.slice().forEach(function (listener) { listener(snapshot); });
+    }
 
     /* ========================================================= bootstrap ==== */
 
@@ -468,14 +524,7 @@
         'insp-rating-label': 'Rating', 'lbl-capture': 'Capture', 'lbl-dimensions': 'Dimensions', 'lbl-size': 'Size',
         'lbl-camera': 'Camera', 'lbl-lens': 'Lens', 'lbl-exposure': 'Exposure', 'lbl-caption': 'Caption',
         'insp-save-caption': 'Save', 'insp-reveal': 'Open in Explorer', 'insp-open': 'Open', 'insp-favorite': 'Favorite',
-        'settings-title': 'Settings', 'settings-appearance': 'Appearance', 'settings-appearance-note': 'Theme, colors and text live here.',
-        'lbl-theme': 'Theme', 'settings-library': 'Library', 'settings-library-note': 'Scanning and watched folders.',
-        'lbl-scan-start': 'Scan on startup', 'lbl-sweep': 'Periodic sweep', 'lbl-watch': 'Watched folders',
-        'set-manage-folders': 'Manage watched folders…', 'settings-grid': 'Grid', 'settings-grid-note': 'Thumbnail size for the photo wall.',
-        'lbl-thumb': 'Thumbnail size', 'settings-language': 'Language',
-        'settings-language-note': 'The interface follows the language here; date labels update immediately.',
-        'lbl-language': 'Display language', 'settings-system': 'System', 'settings-system-note': 'Application information and restart.',
-        'set-about': 'About Freja', 'set-restart': 'Restart', 'welcome-title': 'Put photos together, find them fast.',
+        'welcome-title': 'Put photos together, find them fast.',
         'welcome-line1': 'Register folders and Freja builds thumbnails and metadata automatically,',
         'welcome-line2': 'then follows additions, changes and deletions in the background.',
         'welcome-add': 'Add folder', 'welcome-note': 'Photos are never moved or changed. Metadata lives in a local SQLite file.',
@@ -2480,10 +2529,9 @@
         S.thumb = px;
         $('grid').style.setProperty('--thumb', px + 'px');
         $('zoom').value = px;
-        $('set-thumb').value = px;
-        $('set-thumb-value').textContent = px + ' px';
         $('zoom').title = t('Thumbnail size') + ': ' + px + ' px';
         scheduleVirtualUpdate(true);
+        publishSvelteState();
     }
 
     $('zoom').addEventListener('input', function () {
@@ -2491,19 +2539,10 @@
         setSetting('thumbSize', String(S.thumb));
     });
 
-    $('set-thumb').addEventListener('input', function () {
-        applyThumb(parseInt($('set-thumb').value, 10));
-        setSetting('thumbSize', String(S.thumb));
-    });
-
     $('tb-theme').addEventListener('click', toggleTheme);
 
     function toggleTheme() {
-        S.theme = S.theme === 'dark' ? 'light' : 'dark';
-        document.documentElement.dataset.theme = S.theme;
-        $('tb-theme').textContent = S.theme === 'dark' ? '☀' : '☾';
-        setSetting('theme', S.theme);
-        syncSettingsPage();
+        window.frejaSvelteBridge.actions.setTheme(S.theme === 'dark' ? 'light' : 'dark');
     }
 
     function applyInspector() {
@@ -2571,51 +2610,10 @@
         restoreSplitter($('inspector'), 'inspectorWidth', 240, 520);
     }
 
-    /* settings page bindings */
-
-    $('set-theme').addEventListener('change', function () {
-        S.theme = $('set-theme').value;
-        document.documentElement.dataset.theme = S.theme;
-        $('tb-theme').textContent = S.theme === 'dark' ? '☀' : '☾';
-        setSetting('theme', S.theme);
-    });
-
-    $('set-scan-start').addEventListener('change', function () {
-        setSetting('scanOnStartup', String($('set-scan-start').checked));
-    });
-
-    $('set-sweep').addEventListener('change', function () {
-        setSetting('sweep', String($('set-sweep').checked));
-    });
-
-    $('set-manage-folders').addEventListener('click', openFolderManager);
-    $('set-about').addEventListener('click', openAbout);
-    $('set-restart').addEventListener('click', function () { apocrypha.app.restart(); });
-
-    (function buildLanguageSelect() {
-        var select = $('set-language');
-        Object.keys(LANG_NAMES).forEach(function (code) {
-            var option = el('option', null, LANG_NAMES[code]);
-            option.value = code;
-            select.appendChild(option);
-        });
-        select.addEventListener('change', function () {
-            LANG = select.value;
-            setSetting('language', LANG);
-            saveSettings();
-            applyChrome();
-            browse().then(function () { setStatus(t('Language changed')); });
-        });
-    })();
+    /* The settings controls live in the Svelte component and call the bridge actions above. */
 
     function syncSettingsPage() {
-        $('set-theme').value = S.theme;
-        $('set-scan-start').checked = S.settings.scanOnStartup === 'true';
-        $('set-sweep').checked = S.settings.sweep === 'true';
-        $('set-thumb').value = S.thumb;
-        $('set-thumb-value').textContent = S.thumb + ' px';
-        $('set-language').value = LANG;
-        $('settings-library-path').textContent = t('Library: {0}', [S.library || '—']);
+        publishSvelteState();
     }
 
     /* ====================================================== keyboard ==== */

@@ -16,23 +16,16 @@ A fast, local-first photo library for the desktop.
 
 
 ## Editions
-Freja ships three interchangeable user interfaces on top of the same SQLite catalog and scanner:
+Freja ships two interchangeable user interfaces on top of the same SQLite catalog and scanner:
 
 | Edition | Entry point | Toolkit |
 |---|---|---|
 | Swing (default) | `freja.Freja` | Swing + FlatLaf |
-| JavaFX (Viewtify) | `freja.fx.FrejaFX` | JavaFX via [Viewtify](https://github.com/teletha/viewtify) |
 | Browser (Apocrypha) | `freja.web.FrejaWeb` | HTML/CSS/JS via [Apocrypha](https://github.com/teletha/apocrypha) |
 
 All editions read and write the same library (`%LOCALAPPDATA%\Freja\library.db` by default), so
 you can switch between them freely. They share the single-instance port, meaning starting one
 asks the other to close (disable with `-Dfreja.singleInstance=false` for testing).
-
-To start the JavaFX edition:
-
-```
-java --enable-native-access=ALL-UNNAMED -cp <dependencies> freja.fx.FrejaFX [options] [photo folders...]
-```
 
 To start the browser edition:
 
@@ -40,21 +33,22 @@ To start the browser edition:
 java --enable-native-access=ALL-UNNAMED -cp <dependencies> freja.web.FrejaWeb --library=<path> [photo folders...]
 ```
 
-The JavaFX edition is built with Viewtify's declarative `View`/`ViewDSL` UIs, Stylist CSS,
-sinobu reactive variables, `Viewtify.dialog` and toasts. The UI code lives in the `freja.fx`
-package (`MainView`, `SidebarView`, `PhotoGridView`, `InspectorView`, `PhotoViewerView`,
-`ScanFoldersView`, `TagManagerView`, `TagPickerView`, `TagFilterView`, `SettingsView`).
-
 The browser edition (`freja.web.FrejaWeb`, `src/main/resources/web`) uses the same catalog over
 IPC. Its grid is virtualized in two layers: only near-viewport rows own DOM card nodes, and photo
 metadata is fetched through `freja:browse` in 300-row pages as the user scrolls (section headers
 and scroll height are computed from the section counts returned with every reply).
 
-The browser edition is built with Apocrypha: the frontend is plain HTML/CSS/JS served from the
+The browser edition is built with Apocrypha: the frontend is HTML/CSS/JS served from the
 classpath resource root `web`, and every request and response crosses the `freja:*` IPC channels.
 The UI code lives in the `freja.web` package (`FrejaWeb`, `WebHandlers`, `WebModels`,
-`PhotoRoutes`, `WebSettings`), and the browser itself is a native webview window with its own
-developer tools (`F12`).
+`PhotoRoutes`, `WebSettings`, `SvelteUI`), and the browser itself is a native webview window with
+its own developer tools (`F12`).
+
+The settings page is a Svelte component. Its sources live in `src/main/frontend` and are compiled
+through [bun4j](https://github.com/teletha/bun4j) at startup whenever that source tree is present;
+the generated JavaScript and CSS are served from `/svelte/`. A packaged application has no source
+tree and falls back to the prebuilt assets in `src/main/resources/web/svelte`. Use
+`-Dfreja.frontend=<path>` to point the builder at a different frontend directory.
 
 
 ## Prerequisites
@@ -145,6 +139,7 @@ Freja depends on the following products on runtime.
 * [BorderlessSceneFX-1.0.0](https://mvnrepository.com/artifact/com.catwithawand/BorderlessSceneFX/1.0.0)
 * [altfx-1.6.2](https://mvnrepository.com/artifact/io.github.teletha/altfx/1.6.2)
 * [apocrypha-0.1](https://mvnrepository.com/artifact/io.github.teletha/apocrypha/0.1)
+* [bun4j-1.0.1](https://mvnrepository.com/artifact/io.github.teletha/bun4j/1.0.1)
 * [avaje-webview-0.19](https://mvnrepository.com/artifact/io.avaje.webview/avaje-webview/0.19)
 * [avaje-webview-windows-x86_64-0.19](https://mvnrepository.com/artifact/io.avaje.webview/avaje-webview-windows-x86_64/0.19)
 * [conjure-1.2.2](https://mvnrepository.com/artifact/io.github.teletha/conjure/1.2.2)
@@ -181,7 +176,6 @@ Freja depends on the following products on runtime.
 * [sqlite-jdbc-3.54.1.0](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc/3.54.1.0)
 * [stylist-1.16.1](https://mvnrepository.com/artifact/io.github.teletha/stylist/1.16.1)
 * [swing-tree-1.1.2](https://mvnrepository.com/artifact/io.github.globaltcad/swing-tree/1.1.2)
-* [viewtify-2.35.1](https://mvnrepository.com/artifact/io.github.teletha/viewtify/2.35.1)
 <p align="right"><a href="#top">back to top</a></p>
 
 

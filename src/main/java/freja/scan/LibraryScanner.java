@@ -23,6 +23,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -351,15 +352,27 @@ public final class LibraryScanner implements AutoCloseable {
      * @param folderId the folder identifier
      */
     public void removeFolder(long folderId) {
-        Folder folder = folders.get(folderId);
-        if (folder != null) {
-            if (watching) {
-                unregisterTree(folder.path());
+        removeFolders(java.util.List.of(folderId));
+    }
+
+    /**
+     * Removes several folder trees from the catalog in one transaction and drops their watch
+     * registrations. Files on disk are not touched.
+     *
+     * @param folderIds folder identifiers
+     */
+    public void removeFolders(Collection<Long> folderIds) {
+        for (Long folderId : folderIds) {
+            Folder folder = folders.get(folderId);
+            if (folder != null) {
+                if (watching) {
+                    unregisterTree(folder.path());
+                }
+                folders.entrySet().removeIf(entry -> PathUtil.contains(folder.path(), entry.getValue().path()));
+                foldersByKey.entrySet().removeIf(entry -> PathUtil.contains(folder.path(), Path.of(entry.getKey())));
             }
-            folders.entrySet().removeIf(entry -> PathUtil.contains(folder.path(), entry.getValue().path()));
-            foldersByKey.entrySet().removeIf(entry -> PathUtil.contains(folder.path(), Path.of(entry.getKey())));
         }
-        library.removeFolder(folderId);
+        library.removeFolders(folderIds);
         notifyChanged(true);
         publishState(true);
     }
