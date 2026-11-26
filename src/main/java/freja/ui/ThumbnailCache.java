@@ -12,6 +12,7 @@ package freja.ui;
 import java.awt.image.BufferedImage;
 import java.io.IOError;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executors;
 
 import javax.swing.SwingUtilities;
 
+import freja.model.Photo;
 import freja.store.Library;
 import imagify.Imagify;
 
@@ -114,6 +116,55 @@ final class ThumbnailCache implements AutoCloseable {
                 }
             }
         });
+    }
+
+    /**
+     * Decodes the first thumbnails of a view before the grid paints it. This runs on the refresh
+     * thread, so the first frame already has images instead of showing empty cells for a moment.
+     * Only a bounded prefix is warmed: scrolling still loads the rest lazily.
+     *
+     * @param photos the photos in display order
+     * @param limit the maximum number to warm
+     */
+    void warm(List<Photo> photos, int limit) {
+        warm(photos, 0, limit);
+    }
+
+    /**
+     * Same as {@link #warm(List, int)} but starts at an arbitrary row, e.g. the folder restored at
+     * startup which may be far down the list.
+     *
+     * @param photos the photos in display order
+     * @param from the first index to warm
+     * @param limit the maximum number to warm
+     */
+    void warm(List<Photo> photos, int from, int limit) {
+        int start = Math.max(0, Math.min(from, photos.size()));
+        int end = Math.min(photos.size(), start + Math.max(0, limit));
+        for (int i = start; i < end; i++) {
+            Photo photo = photos.get(i);
+            Key key = new Key(photo.id(), photo.modifiedAt());
+            if (images.containsKey(key) || missing.contains(key) || !loading.add(key)) {
+                continue;
+            }
+            try {
+                library.thumbnail(photo.id()).ifPresent(thumbnail -> {
+                    BufferedImage image = Imagify.read(thumbnail.data()).toBufferedImage();
+                    if (image != null) {
+                        put(key, image);
+                    } else {
+                        missing.add(key);
+                    }
+                });
+                if (!images.containsKey(key)) {
+                    missing.add(key);
+                }
+            } catch (RuntimeException | IOError | LinkageError e) {
+                missing.add(key);
+            } finally {
+                loading.remove(key);
+            }
+        }
     }
 
     private void put(Key key, BufferedImage image) {

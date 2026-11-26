@@ -90,7 +90,7 @@ public final class LibraryScanner implements AutoCloseable {
     private static final long WATCH_DELAY_MS = 700;
 
     /** How often a full sweep runs when watching is enabled. */
-    private static final long SWEEP_MINUTES = 5;
+    private static final long SWEEP_MINUTES = 30;
 
     /** How many path keys are sent to SQLite in one touch statement. */
     private static final int TOUCH_BATCH = 400;

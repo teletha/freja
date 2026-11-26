@@ -53,7 +53,7 @@ import freja.util.SmartTags;
 public final class Library implements AutoCloseable {
 
     /** How far back the "recent" view reaches. */
-    private static final long RECENT_WINDOW = 30L * 24 * 60 * 60 * 1000;
+    private static final long RECENT_WINDOW = 3L * 24 * 60 * 60 * 1000;
 
     /**
      * Bumped whenever thumbnail generation changes. Rows below this revision are decoded again by

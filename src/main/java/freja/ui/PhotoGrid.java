@@ -151,6 +151,15 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private int hoverIndex = -1;
 
+    /**
+     * A refresh is still loading the view; the empty hint would only flash before it arrives.
+     * Starts true because the first view is loaded asynchronously after the window is built.
+     */
+    private boolean loading = true;
+
+    /** Whether any folder is registered, even if it has no photos yet. */
+    private boolean hasFolders;
+
     private Consumer<Photo> onSelection = photo -> {
     };
 
@@ -460,6 +469,32 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
 
     /**
+     * Marks the view as loading. While it is, an empty grid stays blank instead of briefly showing
+     * the "no photos" hint before the catalog answer arrives.
+     *
+     * @param value true while a refresh is in flight
+     */
+    void setLoading(boolean value) {
+        if (loading != value) {
+            loading = value;
+            repaint();
+        }
+    }
+
+    /**
+     * Records whether folders are registered at all. The empty hint is only meaningful before the
+     * first folder has been added; a registered but still empty folder should not show it.
+     *
+     * @param value true when the library has at least one folder
+     */
+    void setHasFolders(boolean value) {
+        if (hasFolders != value) {
+            hasFolders = value;
+            repaint();
+        }
+    }
+
+    /**
      * Replaces the visible photos.
      *
      * @param photos the photos
@@ -504,6 +539,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         this.sections = List.copyOf(sections);
         this.viewOrder = viewOrder;
         this.perFolderOrder = perFolderOrder;
+        // Installing a view completes the load even when the host never called setLoading(false).
+        loading = false;
         selectedIndices.clear();
         int restored = -1;
         int first = -1;
@@ -1196,7 +1233,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             sortHits.clear();
 
             if (rows.isEmpty()) {
-                paintEmpty(g);
+                // A refresh has not answered yet, or folders are registered but still empty: both
+                // are quiet states, not "there is nothing in this library".
+                if (!loading && !hasFolders) {
+                    paintEmpty(g);
+                }
                 return;
             }
 
@@ -1687,9 +1728,17 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         }
 
         if (photo.favorite()) {
+            Icon star = Icons.star(17, Theme.GOLD, true);
+            // FlatSVGIcon reports a display-scaled size, so fixed offsets used to push the star
+            // down and right of the badge on HiDPI screens. Centre it from the icon's own bounds.
+            int diameter = Math.max(26, Math.max(star.getIconWidth(), star.getIconHeight()) + 9);
+            double circleX = cardX + cardWidth - 8 - diameter;
+            double circleY = cardY + 8;
             g.setColor(new Color(255, 255, 255, 225));
-            g.fill(new Ellipse2D.Float(cardX + cardWidth - 34, cardY + 8, 26, 26));
-            Icons.star(17, Theme.GOLD, true).paintIcon(this, g, cardX + cardWidth - 29, cardY + 13);
+            g.fill(new Ellipse2D.Double(circleX, circleY, diameter, diameter));
+            star.paintIcon(this, g,
+                    (int) Math.round(circleX + (diameter - star.getIconWidth()) / 2.0),
+                    (int) Math.round(circleY + (diameter - star.getIconHeight()) / 2.0));
         }
 
         // The file name is shown in the status bar, so the cell contains only the thumbnail.

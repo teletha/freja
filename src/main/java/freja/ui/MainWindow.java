@@ -100,6 +100,9 @@ public final class MainWindow extends JFrame {
 
     private static final String SCAN_SWEEP_PREFERENCE = "scan.sweep";
 
+    /** How many thumbnails of the visible page are decoded before its first paint. */
+    private static final int THUMBNAIL_WARMUP = 36;
+
     private final Library library;
 
     /** Serialises UI-originated catalog work off the EDT and delivers results back to it. */
@@ -174,7 +177,7 @@ public final class MainWindow extends JFrame {
     private long refreshGeneration;
 
     /** Everything a background refresh needs to hand back to the event dispatch thread. */
-    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, SortOrder order, boolean fallback) {
+    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, SortOrder order, boolean fallback, boolean hasFolders) {
     }
 
     private Sidebar.Mode mode = Sidebar.Mode.ALL;
@@ -259,8 +262,9 @@ public final class MainWindow extends JFrame {
         });
 
         applyState(scanner.state());
+        // The first refresh is started by restoreViewSelection() once the saved mode and folder
+        // are known, so the grid never shows the first folder before jumping to the last one.
         restoreViewSelection();
-        refreshAll();
     }
 
     private void buildUi() {
@@ -324,6 +328,11 @@ public final class MainWindow extends JFrame {
             public void onThemeChanged() {
                 applyThemeUi();
             }
+
+            @Override
+            public void onManageFolders() {
+                openScanFolders();
+            }
         });
         holder[0] = settingsPanel;
         panes.add(settingsPanel, "settings");
@@ -332,6 +341,9 @@ public final class MainWindow extends JFrame {
         switchPane("viewer");
 
         setJMenuBar(menuBar());
+        // Apply the saved visibility before the window is shown. Doing it in start() let a hidden
+        // inspector appear for one frame and then disappear once the scanner had started.
+        setInspectorVisible(PREFERENCES.getBoolean(INSPECTOR_VISIBLE_PREFERENCE, true));
     }
 
     private final List<ActivityButton> activityButtons = new ArrayList<>();
@@ -787,8 +799,13 @@ public final class MainWindow extends JFrame {
                 sidebarSplit.setDividerLocation(Math.max(180, savedSidebarDivider));
             }
             if (split != null && split.getWidth() > 0) {
-                inspectorItem.setSelected(PREFERENCES.getBoolean(INSPECTOR_VISIBLE_PREFERENCE, true));
-                setInspectorVisible(inspectorItem.isSelected());
+                boolean visible = PREFERENCES.getBoolean(INSPECTOR_VISIBLE_PREFERENCE, true);
+                if (visible != inspector.isVisible()) {
+                    setInspectorVisible(visible);
+                } else if (visible) {
+                    // The divider can only be placed once the window has a width.
+                    split.setDividerLocation(Math.max(0, split.getWidth() - 308));
+                }
             }
         });
     }
@@ -1169,12 +1186,14 @@ public final class MainWindow extends JFrame {
         if (saved != Sidebar.Mode.FOLDER) {
             mode = saved;
             folderId = -1;
+            refreshAll();
             return;
         }
         String path = PREFERENCES.get(SELECTED_FOLDER_PREFERENCE, "");
         if (path.isBlank()) {
             mode = Sidebar.Mode.ALL;
             folderId = -1;
+            refreshAll();
             return;
         }
         // Catalog lookup happens on the task thread; the sidebar state changes back on the EDT.
@@ -1187,9 +1206,10 @@ public final class MainWindow extends JFrame {
                             mode = Sidebar.Mode.FOLDER;
                             folderId = folder.id();
                             scrollToSelectedFolder = true;
-                            // The constructor's initial refresh captured the ALL view; reload now
-                            // that the restored folder selection and its sort are in place.
-                            applySortForCurrentView(this::refreshAll);
+                            // The folder list already carries its sort, so there is no need for a
+                            // second catalog round-trip before starting the first refresh.
+                            setViewSort(folder.sort() == null ? SortOrder.NAME : folder.sort());
+                            refreshAll();
                             return;
                         }
                     }
@@ -1200,6 +1220,7 @@ public final class MainWindow extends JFrame {
             // The folder was removed from the library in the meantime: show the whole library.
             mode = Sidebar.Mode.ALL;
             folderId = -1;
+            refreshAll();
         });
     }
 
@@ -1609,6 +1630,7 @@ public final class MainWindow extends JFrame {
      */
     private void refreshAll() {
         long generation = ++refreshGeneration;
+        grid.setLoading(true);
         Sidebar.Mode requestedMode = mode;
         long requestedFolder = folderId;
         SortOrder order = viewSort;
@@ -1619,12 +1641,14 @@ public final class MainWindow extends JFrame {
                 RefreshData data = loadView(requestedMode, requestedFolder, order, searchText, tagIds);
                 SwingUtilities.invokeLater(() -> {
                     if (generation == refreshGeneration) {
+                        grid.setLoading(false);
                         applyRefresh(data);
                     }
                 });
             } catch (RuntimeException e) {
                 SwingUtilities.invokeLater(() -> {
                     if (generation == refreshGeneration) {
+                        grid.setLoading(false);
                         statusMessage.setText("ライブラリを読み込めません: " + e.getMessage());
                     }
                 });
@@ -1668,7 +1692,20 @@ public final class MainWindow extends JFrame {
         } else {
             grouping = filter.groupsByDate() ? PhotoGrid.GroupMode.DATE : PhotoGrid.GroupMode.NONE;
         }
-        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, order, fallback);
+        // Decode the screen which will actually be visible before the grid is installed on the EDT.
+        // At startup that is the restored folder, which may be far below the first row.
+        int warmFrom = 0;
+        if (effectiveMode == Sidebar.Mode.FOLDER && effectiveFolder >= 0) {
+            for (int i = 0; i < photos.size(); i++) {
+                if (photos.get(i).folderId() == effectiveFolder) {
+                    warmFrom = i;
+                    break;
+                }
+            }
+        }
+        cache.warm(photos, warmFrom, THUMBNAIL_WARMUP);
+        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, order, fallback,
+                !folders.isEmpty());
     }
 
     /** Installs a loaded view on the event dispatch thread. Never touches the catalog. */
@@ -1693,6 +1730,7 @@ public final class MainWindow extends JFrame {
         } else if (data.mode() != Sidebar.Mode.FOLDER) {
             grid.clearPinnedFolder();
         }
+        grid.setHasFolders(data.hasFolders());
         grid.setPhotos(data.photos(), data.grouping(), data.sections(), data.order(), data.mode() == Sidebar.Mode.FOLDER);
         // Only folders with a matching photo are shown while searching.
         sidebar.setData(data.stats(), data.visibleFolders(), data.mode(), data.folderId());
@@ -1707,8 +1745,9 @@ public final class MainWindow extends JFrame {
         }
         if (scrollToSelectedFolder && data.mode() == Sidebar.Mode.FOLDER) {
             scrollToSelectedFolder = false;
-            long target = data.folderId();
-            SwingUtilities.invokeLater(() -> grid.scrollToFolder(target));
+            // Scroll before the first paint of this view: deferring it made the user see the top of
+            // the library for one frame before the jump to the restored folder.
+            grid.scrollToFolder(data.folderId());
         }
     }
 

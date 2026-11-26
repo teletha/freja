@@ -68,7 +68,7 @@ public final class ScanFoldersDialog extends JDialog {
 
     private final JCheckBox startupScan = new JCheckBox("起動時にスキャンする");
 
-    private final JCheckBox sweepScan = new JCheckBox("定期スキャンする（5分ごと）");
+    private final JCheckBox sweepScan = new JCheckBox("定期スキャンする（30分ごと）");
 
     private final DefaultListModel<Folder> registeredModel = new DefaultListModel<>();
 

@@ -69,6 +69,8 @@ public final class SettingsPanel extends JPanel {
         void onFontChanged(float ratio);
 
         void onThemeChanged();
+
+        void onManageFolders();
     }
 
     private static final String APPEARANCE = "appearance";
@@ -350,12 +352,19 @@ public final class SettingsPanel extends JPanel {
         ARXToggle archives = new ARXToggle(ArchiveSettings.scanArchives());
         archives.addActionListener(event -> ArchiveSettings.scanArchives(archives.isSelected()));
 
+        ARXButton manage = new ARXButton(I.translate("Manage watched folders"), Icons
+                .folder(15, Theme.MUTED), ARXButton.Variant.SECONDARY, listener::onManageFolders);
+        manage.setFont(Theme.font(Font.PLAIN, 12));
+
         ARXSettingsPane.Section section = pane.addSection(DATA_SCAN, ARXSettingsPane.Text.of("Data scan"), ARXSettingsPane.Text
                 .of("Choose how the library scans and indexes images."), Icons.nav("refresh", Theme.MUTED));
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Scan images inside compressed files"), ARXSettingsPane.Text
                         .of("Index photos stored in ZIP and 7z archives."), archives)
-                .keywords("zip", "7z", "archive", "compressed", "scan", "photo", "image"));
+                .keywords("zip", "7z", "archive", "compressed", "scan", "photo", "image"), ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Watched folders"), ARXSettingsPane.Text
+                        .of("Add or remove folders and rescan them."), manage)
+                .keywords("folder", "folders", "watch", "watched", "manage", "rescan"));
     }
 
     /** The font section: family and size controls plus a live preview card. */

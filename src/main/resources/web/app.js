@@ -139,7 +139,7 @@
         'Clear all': 'すべて削除',
         'Close': '閉じる',
         'Scan folders when Freja starts': 'Freja 起動時にフォルダをスキャンする',
-        'Sweep for missed changes every 5 minutes': '5 分ごとに变更を見回してスキャンします',
+        'Sweep for missed changes every 30 minutes': '30 分ごとに変更を見回してスキャンします',
         'Photo files are never moved, renamed or deleted here; only the catalog changes.': '写真ファイルは移動・名前変更・削除されません。カタログのみが更新されます。',
         'Remove {0} folders and their catalog data? The photo files stay on disk.': 'フォルダ {0} 件とカタログデータを削除します。写真ファイルはディスクに残ります。',
         'Remove every folder and its catalog data? The photo files stay on disk.': 'すべてのフォルダとカタログデータを削除します。写真ファイルはディスクに残ります。',
@@ -2042,7 +2042,7 @@
         sweepBox.type = 'checkbox';
         sweepBox.checked = S.settings.sweep === 'true';
         sweep.appendChild(sweepBox);
-        sweep.appendChild(el('span', null, t('Sweep for missed changes every 5 minutes')));
+        sweep.appendChild(el('span', null, t('Sweep for missed changes every 30 minutes')));
         var checks = el('div');
         checks.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:14px';
         checks.appendChild(scanStart);

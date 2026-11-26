@@ -26,6 +26,10 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.Element;
+import javax.swing.text.StyleConstants;
 
 import com.formdev.flatlaf.FlatClientProperties;
 
@@ -85,11 +89,10 @@ public final class ARXSearchField extends JTextField {
         debounce = new Timer(Math.max(0, debounceMillis), null);
         debounce.setRepeats(false);
         debounce.addActionListener(event -> {
-            // While an input method owns the text - Japanese keystrokes before they are committed -
-            // touching the page rebuilds the layout around this field and the IME drops the
-            // composition, which is what made the edit vanish after a single character. Poll again
-            // instead of firing in the middle of it.
-            if (isComposing()) {
+            // Search on kana as soon as it appears, and on plain latin words such as "MID". Only
+            // a mixed kana + romaji run (e.g. "ばｒ") is held back, because the trailing romaji is
+            // still keystrokes rather than part of the term.
+            if (hasMixedComposition()) {
                 debounce.restart();
                 return;
             }
@@ -219,21 +222,61 @@ public final class ARXSearchField extends JTextField {
     }
 
     /**
-     * Whether an input method is composing text in this field right now: Swing marks the in-flight
-     * run with {@code ComposedTextAttribute}, which is the same signal the underline is drawn
-     * from. Read from the document rather than tracked in a flag, so it cannot go stale when the
-     * user deletes text, clicks away or cancels a conversion.
+     * Whether a composing run is still just keystrokes: kana mixed with romaji ("ば$r") or a single
+     * romaji character. Kana alone is a usable term and a latin word such as "MID" is a term in its
+     * own right, so those search immediately. Reading the document rather than a flag keeps this
+     * correct when the user cancels a conversion or clicks away.
+     *
+     * @return true while the in-flight text is not yet a usable search term
      */
-    private boolean isComposing() {
-        if (!(getDocument() instanceof javax.swing.text.StyledDocument document)) {
+    private boolean hasMixedComposition() {
+        // A JTextField uses a PlainDocument, not a StyledDocument. PlainDocument still carries
+        // per-character attributes, so checking the document type made the old test always false.
+        if (!(getDocument() instanceof AbstractDocument document)) {
             return false;
         }
-        for (int offset = 0, length = document.getLength(); offset < length; offset++) {
-            if (document.getCharacterElement(offset).getAttributes()
-                    .getAttribute(javax.swing.text.StyleConstants.ComposedTextAttribute) != null) {
-                return true;
+        return hasMixedComposition(document, document.getDefaultRootElement());
+    }
+
+    /** Walks every leaf, because a PlainDocument's runs are not always nested below paragraphs. */
+    private static boolean hasMixedComposition(AbstractDocument document, Element element) {
+        if (!element.isLeaf()) {
+            for (int index = 0; index < element.getElementCount(); index++) {
+                if (hasMixedComposition(document, element.getElement(index))) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
+        AttributeSet attributes = element.getAttributes();
+        if (attributes == null || attributes.getAttribute(StyleConstants.ComposedTextAttribute) == null) {
+            return false;
+        }
+        try {
+            String composing = document.getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
+            boolean kana = false;
+            boolean latin = false;
+            for (int index = 0; index < composing.length(); index++) {
+                kana |= isKana(composing.charAt(index));
+                latin |= isLatin(composing.charAt(index));
+            }
+            // A lone romaji key is not a search term either, but a whole latin word such as "MID"
+            // is. The mixed kana + romaji case is the usual half-converted input.
+            return latin && (kana || composing.length() == 1);
+        } catch (javax.swing.text.BadLocationException e) {
+            // A concurrent edit removed the run; nothing to hold back.
+            return false;
+        }
+    }
+
+    private static boolean isLatin(char character) {
+        // An IME shows unfinished romaji as fullwidth latin letters (ba-r, ba-k), so the ASCII
+        // range alone misses exactly the keystrokes which must hold the search back.
+        return character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z'
+                || character >= 0xFF41 && character <= 0xFF5A || character >= 0xFF21 && character <= 0xFF3A;
+    }
+
+    private static boolean isKana(char character) {
+        return character >= 0x3040 && character <= 0x30FF || character >= 0xFF66 && character <= 0xFF9D;
     }
 }
