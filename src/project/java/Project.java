@@ -26,6 +26,8 @@ public class Project extends bee.api.Project {
         require("com.formdev", "flatlaf-extras");
         require("com.formdev", "flatlaf-intellij-themes");
         require("org.xerial", "sqlite-jdbc");
+        require("org.apache.commons", "commons-compress");
+        require("org.tukaani", "xz");
         require("io.github.teletha", "antibug").atTest();
     }
 }

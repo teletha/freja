@@ -406,6 +406,10 @@ public final class WebHandlers {
                     continue;
                 }
                 try {
+                    if (photo.get().archived()) {
+                        // An archive entry has no file of its own; it can only be removed from the catalog.
+                        continue;
+                    }
                     if (Files.deleteIfExists(photo.get().path())) {
                         deletedIds.add(photoId);
                         deleted++;
@@ -437,7 +441,7 @@ public final class WebHandlers {
         if (library == null) {
             return;
         }
-        library.photo(photoId).ifPresent(photo -> revealPath(photo.path()));
+        library.photo(photoId).ifPresent(photo -> revealPath(photo.origin()));
     }
 
     /**

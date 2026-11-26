@@ -50,8 +50,10 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.util.UIScale;
 
 /**
  * Bundled SVG icons loaded from the classpath. The application stays offline-capable because the
@@ -221,6 +223,29 @@ public final class Icons {
             }
         });
         return placeholder;
+    }
+
+    /**
+     * An icon for a navigation row, sized from the shared {@code ARX.navIconSize} UI default. All
+     * navigation lists use the same value, so their icons and text columns stay in step.
+     *
+     * @param iconifyName the icon name, with or without an {@code mdi:} prefix
+     * @param color the tint colour
+     * @return the icon at the shared navigation size
+     */
+    public static Icon nav(String iconifyName, Color color) {
+        String name = iconifyName == null ? "" : iconifyName;
+        return of(name.startsWith("mdi:") ? name : "mdi:" + name, navSize(), color);
+    }
+
+    /** A glyph icon at the shared navigation size, for captions which read better as a letter. */
+    public static Icon navLetter(String text, Color color) {
+        return letter(text, navSize(), color);
+    }
+
+    private static int navSize() {
+        Object value = UIManager.get("ARX.navIconSize");
+        return value instanceof Integer size ? size : UIScale.scale(15);
     }
 
     /** Returns the first cached SVG for the asset, or null when none exists yet. */
@@ -425,6 +450,11 @@ public final class Icons {
         return of("mdi:close", size, color);
     }
 
+    /** A trash can, used for operations which remove files from disk. */
+    public static Icon trash(int size, Color color) {
+        return of("mdi:trash-can", size, color);
+    }
+
     public static Icon star(int size, Color color, boolean filled) {
         return of(filled ? "mdi:star" : "mdi:star-outline", size, color);
     }
@@ -442,15 +472,18 @@ public final class Icons {
      * better than an outline: the font row shows an "A" in the very typeface it configures.
      */
     public static Icon letter(String text, int size, Color color) {
+        // FlatSVGIcon scales its reported size with the display scale. Do the same here, otherwise a
+        // glyph beside an SVG ends up smaller and shifts the text of a navigation row to the left.
+        int scaled = UIScale.scale(size);
         return new Icon() {
             @Override
             public int getIconWidth() {
-                return size;
+                return scaled;
             }
 
             @Override
             public int getIconHeight() {
-                return size;
+                return scaled;
             }
 
             @Override
@@ -460,12 +493,12 @@ public final class Icons {
                     gg.translate(x, y);
                     gg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-                    Font font = new Font(freja.ui.Theme.fontFamily(), Font.BOLD, Math.round(size * 1.1f));
+                    Font font = new Font(freja.ui.Theme.fontFamily(), Font.BOLD, Math.round(scaled * 1.1f));
                     gg.setFont(font);
                     gg.setColor(color);
                     FontMetrics metrics = gg.getFontMetrics();
-                    int tx = (size - metrics.stringWidth(text)) / 2;
-                    int ty = (size - metrics.getHeight()) / 2 + metrics.getAscent();
+                    int tx = (scaled - metrics.stringWidth(text)) / 2;
+                    int ty = (scaled - metrics.getHeight()) / 2 + metrics.getAscent();
                     gg.drawString(text, tx, ty);
                 } finally {
                     gg.dispose();

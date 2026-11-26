@@ -30,7 +30,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +53,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import freja.model.Photo;
+import freja.store.Archives;
 import freja.util.ImageTransforms;
 import imagify.Imagify;
 
@@ -262,7 +262,7 @@ public final class PhotoViewer extends JDialog {
     }
 
     private static BufferedImage loadImage(Photo photo) throws IOException {
-        return ImageTransforms.orient(Imagify.read(Files.readAllBytes(photo.path())).toBufferedImage(), photo.orientation());
+        return ImageTransforms.orient(Imagify.read(Archives.read(photo)).toBufferedImage(), photo.orientation());
     }
 
     /**

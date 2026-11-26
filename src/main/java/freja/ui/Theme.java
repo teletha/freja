@@ -441,6 +441,9 @@ public final class Theme {
         UIManager.put("ARX.font.value", font(Font.PLAIN, 12));
         UIManager.put("ARX.font.row", font(Font.PLAIN, 13));
         UIManager.put("ARX.font.annotation", font(Font.PLAIN, 11));
+        // One logical size for every navigation row icon, shared by ARXNavList and the folder list.
+        // Icons apply the display scale themselves, so the value here stays unscaled.
+        UIManager.put("ARX.navIconSize", 15);
         UIManager.put("ARX.font.section", font(Font.BOLD, 11));
         FlatLaf.updateUI();
     }

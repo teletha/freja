@@ -26,8 +26,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOError;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -640,6 +644,11 @@ public final class MainWindow extends JFrame {
             }
 
             @Override
+            public void onDeleteFolderFromDisk(List<Long> folderIds) {
+                deleteFolderFromDisk(folderIds);
+            }
+
+            @Override
             public void onRevealFolder(long folderId) {
                 tasks.query(() -> library.folder(folderId), found -> {
                     if (found != null) {
@@ -693,7 +702,7 @@ public final class MainWindow extends JFrame {
 
             @Override
             public void onReveal(Photo photo) {
-                reveal(photo.path());
+                reveal(photo.origin());
             }
 
             @Override
@@ -993,6 +1002,82 @@ public final class MainWindow extends JFrame {
         });
     }
 
+    /** Deletes the file or directory behind each selected folder, including everything below it. */
+    private void deleteFolderFromDisk(List<Long> folderIds) {
+        if (folderIds.isEmpty()) {
+            return;
+        }
+        tasks.query(() -> {
+            List<Folder> found = new ArrayList<>();
+            for (long id : folderIds) {
+                library.folder(id).ifPresent(found::add);
+            }
+            return found;
+        }, folders -> {
+            if (folders == null || folders.isEmpty()) {
+                return;
+            }
+            String message;
+            if (folders.size() == 1) {
+                Folder folder = folders.getFirst();
+                message = Files.isDirectory(folder.path())
+                        ? "「" + folder.name() + "」とその中身をディスクから完全に削除します。元に戻せません。"
+                        : "「" + folder.name() + "」をディスクから完全に削除します。元に戻せません。";
+            } else {
+                message = "選択した " + folders.size() + " 件のフォルダとその中身をディスクから完全に削除します。元に戻せません。";
+            }
+            int answer = JOptionPane.showConfirmDialog(this, message, "ディスクから削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (answer != JOptionPane.OK_OPTION) {
+                return;
+            }
+            tasks.execute(() -> {
+                List<Long> removed = new ArrayList<>();
+                for (Folder folder : folders) {
+                    try {
+                        if (Files.isDirectory(folder.path())) {
+                            deleteTree(folder.path());
+                        } else {
+                            Files.deleteIfExists(folder.path());
+                        }
+                        removed.add(folder.id());
+                    } catch (Exception ignored) {
+                        // A locked or already missing path stays in the catalog for now.
+                    }
+                }
+                scanner.removeFolders(removed);
+            }, () -> {
+                if (folderIds.contains(this.folderId)) {
+                    mode = Sidebar.Mode.ALL;
+                    this.folderId = -1;
+                    scrollToSelectedFolder = false;
+                    applySortForCurrentView();
+                }
+                refreshScanFolders();
+                refreshAll();
+            });
+        });
+    }
+
+    /** Removes a directory and everything inside it, files first so every directory ends up empty. */
+    private void deleteTree(Path root) throws IOException {
+        Files.walkFileTree(root, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path directory, IOException error) throws IOException {
+                if (error != null) {
+                    throw error;
+                }
+                Files.delete(directory);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
     private void selectMode(Sidebar.Mode mode, long folderId) {
         if (this.mode == mode && this.folderId == folderId) {
             // Clicking the entry which is already selected is not a no-op: the grid has been
@@ -1172,7 +1257,7 @@ public final class MainWindow extends JFrame {
         menu.add(favorite);
         menu.addSeparator();
         JMenuItem reveal = new JMenuItem("エクスプローラーで表示", Icons.folder(14, Theme.MUTED));
-        reveal.addActionListener(event -> reveal(photo.path()));
+        reveal.addActionListener(event -> reveal(photo.origin()));
         menu.add(reveal);
         JMenuItem copyPath = new JMenuItem("パスをコピー" + suffix, Icons.clipboard(14, Theme.MUTED));
         copyPath.addActionListener(event -> copyPaths(targets));
@@ -1192,7 +1277,8 @@ public final class MainWindow extends JFrame {
         JMenuItem remove = new JMenuItem("ライブラリから削除" + suffix, Icons.close(14, Theme.MUTED));
         remove.addActionListener(event -> removeFromLibrary(targets));
         menu.add(remove);
-        JMenuItem deleteFromDisk = new JMenuItem("ディスクから削除" + suffix, Icons.close(14, Theme.DANGER));
+        JMenuItem deleteFromDisk = new JMenuItem("ディスクから削除" + suffix, Icons.trash(14, Theme.DANGER));
+        deleteFromDisk.setEnabled(targets.stream().noneMatch(Photo::archived));
         deleteFromDisk.addActionListener(event -> deleteFromDisk(targets));
         menu.add(deleteFromDisk);
         menu.show(grid, point.x, point.y);

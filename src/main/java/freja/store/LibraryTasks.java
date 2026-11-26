@@ -124,6 +124,10 @@ public final class LibraryTasks implements AutoCloseable {
             int failed = 0;
             for (Photo photo : photos) {
                 try {
+                    if (photo.archived()) {
+                        // Archive entries are virtual; deleting the container would remove other photos.
+                        continue;
+                    }
                     if (Files.deleteIfExists(photo.path())) {
                         ids.add(photo.id());
                     } else {

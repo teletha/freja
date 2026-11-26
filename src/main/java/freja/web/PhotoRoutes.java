@@ -18,6 +18,7 @@ import java.util.Optional;
 import apocrypha.Response;
 import apocrypha.Route;
 import freja.model.Photo;
+import freja.store.Archives;
 import freja.store.Library;
 import freja.util.ImageTransforms;
 import imagify.ImageFormat;
@@ -99,13 +100,14 @@ public final class PhotoRoutes implements Route {
         if (photo.isEmpty()) {
             return Response.notFound();
         }
-        Path file = photo.get().path();
-        if (file == null || !Files.isRegularFile(file)) {
+        Photo item = photo.get();
+        Path file = item.path();
+        if (!item.archived() && (file == null || !Files.isRegularFile(file))) {
             return Response.notFound();
         }
         try {
-            BufferedImage decoded = Imagify.read(Files.readAllBytes(file)).toBufferedImage();
-            BufferedImage oriented = ImageTransforms.orient(decoded, photo.get().orientation());
+            BufferedImage decoded = Imagify.read(Archives.read(item)).toBufferedImage();
+            BufferedImage oriented = ImageTransforms.orient(decoded, item.orientation());
             BufferedImage scaled = ImageTransforms.scale(oriented, 320);
             byte[] jpeg = ImageWriter.toBytes(scaled, ImageFormat.JPEG, 0.85);
             return Response.ok("image/jpeg", jpeg).cache("public, max-age=3600");
@@ -127,20 +129,21 @@ public final class PhotoRoutes implements Route {
         if (photo.isEmpty()) {
             return Response.notFound();
         }
-        Path file = photo.get().path();
-        if (file == null || !Files.isRegularFile(file)) {
+        Photo item = photo.get();
+        Path file = item.path();
+        if (!item.archived() && (file == null || !Files.isRegularFile(file))) {
             return Response.notFound();
         }
         try {
-            byte[] encoded = Files.readAllBytes(file);
-            String extension = photo.get().extension() == null ? "" : photo.get().extension().toLowerCase();
+            byte[] encoded = Archives.read(item);
+            String extension = item.extension() == null ? "" : item.extension().toLowerCase();
             String mime = mime(extension);
             if (mime != null) {
                 return Response.ok(mime, encoded).cache("public, max-age=86400");
             }
             // Formats without a browser codec: decode, rotate and hand back a JPEG.
             BufferedImage decoded = Imagify.read(encoded).toBufferedImage();
-            BufferedImage oriented = ImageTransforms.orient(decoded, photo.get().orientation());
+            BufferedImage oriented = ImageTransforms.orient(decoded, item.orientation());
             byte[] jpeg = ImageWriter.toBytes(oriented, ImageFormat.JPEG, 0.92);
             return Response.ok("image/jpeg", jpeg).cache("public, max-age=86400");
         } catch (IOException | RuntimeException | Error e) {

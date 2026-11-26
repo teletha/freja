@@ -76,7 +76,7 @@ public final class FolderList extends JList<Folder> {
 
     private final Model model = new Model();
 
-    private final Icon folderIcon = Icons.folder(17, Theme.MUTED);
+    private final Icon folderIcon = Icons.nav("folder", Theme.MUTED);
 
     private final Cell cell = new Cell();
 

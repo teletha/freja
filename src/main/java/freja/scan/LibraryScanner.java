@@ -50,9 +50,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import freja.model.Folder;
 import freja.model.Photo;
+import freja.store.Archives;
 import freja.store.Library;
 import freja.store.Library.FileStamp;
 import freja.store.PhotoImporter;
+import freja.util.ArchiveSettings;
 import freja.util.PathUtil;
 import freja.util.PicasaTags;
 
@@ -392,6 +394,14 @@ public final class LibraryScanner implements AutoCloseable {
      * @param folderId the folder identifier
      */
     public void scanFolder(long folderId) {
+        Folder folder = folders.get(folderId);
+        if (folder != null && Archives.isArchive(folder.path())) {
+            // An archive folder has no directory to walk; rescan the folder which owns the file.
+            Path parent = folder.path().getParent();
+            Folder owner = parent == null ? null : folderFor(parent).orElse(null);
+            requestFolderScan(owner == null ? folderId : owner.id());
+            return;
+        }
         requestFolderScan(folderId);
     }
 
@@ -402,6 +412,14 @@ public final class LibraryScanner implements AutoCloseable {
      */
     public void reimport(Photo photo) {
         library.invalidate(photo.id());
+        if (photo.archived()) {
+            // A virtual entry has no file of its own: rescan the real folder holding its archive.
+            Path archive = Path.of(photo.archivePath());
+            Path parent = archive.getParent();
+            Folder owner = parent == null ? null : folderFor(parent).orElse(null);
+            requestFolderScan(owner == null ? photo.folderId() : owner.id());
+            return;
+        }
         Folder owner = folderFor(photo.path()).orElse(null);
         Path parent = photo.path().getParent();
         if (parent != null && Files.isDirectory(parent)) {
@@ -674,6 +692,18 @@ public final class LibraryScanner implements AutoCloseable {
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    if (Archives.isArchive(file)) {
+                        if (ArchiveSettings.scanArchives()) {
+                            total.incrementAndGet();
+                            // Each archive gets its own catalog folder, so its entries are browsable
+                            // as a group instead of being lumped into the containing directory.
+                            Folder archiveFolder = library.ensureFolder(file);
+                            remember(archiveFolder);
+                            visited.add(archiveFolder.id());
+                            scanArchive(archiveFolder.id(), file, token, attrs, walkFinished, stamps, unchanged);
+                        }
+                        return FileVisitResult.CONTINUE;
+                    }
                     if (!PathUtil.isImage(file)) {
                         return FileVisitResult.CONTINUE;
                     }
@@ -777,6 +807,92 @@ public final class LibraryScanner implements AutoCloseable {
      * prunes rows that were not seen.
      */
     private void submitImport(long folderId, Path file, String token, BasicFileAttributes attrs, AtomicBoolean complete) {
+        submitWork(file, complete, () -> importFile(folderId, file, token, attrs));
+    }
+
+    /**
+     * Indexes the image entries of one archive. The archive file itself is never treated as a photo.
+     * Entries whose stamp still matches are touched, changed ones are queued for decoding, and
+     * entries which disappeared are left untouched so the scan token prunes them.
+     */
+    private void scanArchive(long folderId, Path archive, String token, BasicFileAttributes attrs,
+            AtomicBoolean complete, Map<String, FileStamp> stamps, Map<Long, List<String>> unchanged) {
+        String archiveKey = PathUtil.key(archive);
+        long modified = attrs.lastModifiedTime().toMillis();
+        FileStamp previous = stamps.remove(archiveKey);
+        if (previous != null && previous.size() == attrs.size() && previous.modifiedAt() == modified) {
+            List<String> keys = library.archiveKeys(archiveKey);
+            for (int from = 0; from < keys.size(); from += TOUCH_BATCH) {
+                library.touchBatch(keys.subList(from, Math.min(from + TOUCH_BATCH, keys.size())), token, folderId);
+            }
+            return;
+        }
+        String type = Archives.type(archive);
+        List<Archives.Entry> entries;
+        try {
+            entries = Archives.entries(archive);
+        } catch (IOException | RuntimeException e) {
+            errors.incrementAndGet();
+            lastError = "読み込めません: " + archive.getFileName();
+            complete.set(false);
+            // A transient read error must not erase the rows from a previous, successful scan.
+            for (String key : library.archiveKeys(archiveKey)) {
+                library.touch(key, token, folderId);
+            }
+            return;
+        }
+        for (Archives.Entry entry : entries) {
+            Path virtual = Archives.entryPath(archive, entry.name());
+            String key = PathUtil.key(virtual);
+            FileStamp stamp = stamps.remove(key);
+            if (stamp != null && stamp.size() == entry.size() && stamp.modifiedAt() == modified) {
+                unchanged.computeIfAbsent(folderId, ignored -> new ArrayList<>()).add(key);
+            } else {
+                submitArchiveImport(folderId, archive, virtual, type, entry.name(), entry.size(), modified, token, complete);
+            }
+        }
+    }
+
+    private void submitArchiveImport(long folderId, Path archive, Path virtual, String type, String entryName,
+            long size, long modified, String token, AtomicBoolean complete) {
+        submitWork(virtual, complete, () -> importArchiveEntry(folderId, archive, virtual, type, entryName, size, modified, token));
+    }
+
+    /** Decodes one archive entry into the same catalog row shape as a normal photo. */
+    private void importArchiveEntry(long folderId, Path archive, Path virtual, String type, String entryName,
+            long size, long modified, String token) {
+        String key = PathUtil.key(virtual);
+        if (!importing.add(key)) {
+            return;
+        }
+        busy.incrementAndGet();
+        try {
+            String effectiveToken = token != null ? token : activeTokenFor(archive);
+            PhotoImporter.AnalyzedPhoto analyzed;
+            try {
+                analyzed = PhotoImporter.analyze(Archives.read(archive, type, entryName), entryName, modified);
+            } catch (IOException | RuntimeException | Error e) {
+                errors.incrementAndGet();
+                lastError = "読み込めません: " + entryName;
+                analyzed = PhotoImporter.placeholder(virtual, modified);
+            }
+            recordSave(new Library.PhotoSave(folderId, virtual, size, modified, analyzed, effectiveToken,
+                    PathUtil.key(archive), type, entryName), token);
+            imported.incrementAndGet();
+            notifyChanged(false);
+        } catch (RuntimeException | IOError | LinkageError | OutOfMemoryError e) {
+            errors.incrementAndGet();
+            lastError = "読み込めません: " + entryName;
+        } finally {
+            importing.remove(key);
+            processed.incrementAndGet();
+            busy.decrementAndGet();
+            publishState(false);
+        }
+    }
+
+    /** Queues one bounded decode, shared by files and archive entries. */
+    private void submitWork(Path file, AtomicBoolean complete, Runnable work) {
         if (closed.get() || importsBlocked) {
             return;
         }
@@ -804,16 +920,15 @@ public final class LibraryScanner implements AutoCloseable {
             lastError = "画像の読み込みが応答しないためスキップしました: " + file.getFileName();
             return;
         }
-        String key = PathUtil.key(file);
         synchronized (importMonitor) {
             activeImports++;
         }
         try {
             importers.submit(() -> {
                 try {
-                    importFile(folderId, file, token, attrs);
+                    work.run();
                 } catch (RuntimeException | IOError | LinkageError | OutOfMemoryError e) {
-                    // One file must never take the worker down with it: the scan has to go on.
+                    // One entry must never take the worker down with it: the scan has to go on.
                     errors.incrementAndGet();
                     lastError = e.getMessage();
                 } finally {
@@ -863,7 +978,10 @@ public final class LibraryScanner implements AutoCloseable {
 
     private void recordSave(long folderId, Path file, long size, long modified,
             PhotoImporter.AnalyzedPhoto analyzed, String effectiveToken, String scanToken) {
-        Library.PhotoSave save = new Library.PhotoSave(folderId, file, size, modified, analyzed, effectiveToken);
+        recordSave(new Library.PhotoSave(folderId, file, size, modified, analyzed, effectiveToken), scanToken);
+    }
+
+    private void recordSave(Library.PhotoSave save, String scanToken) {
         if (scanToken == null) {
             // A watch event is a single write; a transaction of its own is cheaper than a batch.
             library.savePhoto(save);
@@ -1132,7 +1250,14 @@ public final class LibraryScanner implements AutoCloseable {
                 requestFolderScan(managed.id());
             }
         } else if (Files.isRegularFile(path)) {
-            if (PathUtil.isImage(path)) {
+            if (Archives.isArchive(path)) {
+                // The archive is a container: reindex it so added and removed entries follow the file.
+                if (ArchiveSettings.scanArchives()) {
+                    Path parent = path.getParent();
+                    Folder parentFolder = parent == null ? folder : folderFor(parent).orElse(folder);
+                    requestFolderScan(parentFolder.id());
+                }
+            } else if (PathUtil.isImage(path)) {
                 Path parent = path.getParent();
                 if (parent != null && Files.isDirectory(parent)) {
                     folder = library.ensureFolder(parent);

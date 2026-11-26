@@ -267,6 +267,10 @@ public final class Library implements AutoCloseable {
         ensureColumn("folders", "name", "TEXT NOT NULL DEFAULT ''");
         ensureColumn("folders", "scan_enabled", "INTEGER NOT NULL DEFAULT 1");
         ensureColumn("photos", "thumbnail_revision", "INTEGER NOT NULL DEFAULT 1");
+        // Entries indexed from ZIP/7z containers. A null archive_type marks a regular file.
+        ensureColumn("photos", "archive_path", "TEXT");
+        ensureColumn("photos", "archive_type", "TEXT");
+        ensureColumn("photos", "entry_name", "TEXT");
         normalizeExistingTags();
         backfillFolderNames();
         migrateThumbnailRevision();
@@ -472,7 +476,7 @@ public final class Library implements AutoCloseable {
 
     private Folder insertFolder(Path normalized, String key, boolean explicit) throws LibraryException {
         long now = System.currentTimeMillis();
-        String name = PathUtil.folderName(normalized);
+        String name = Archives.displayName(normalized);
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO folders(path, path_key, name, added_at, sort_order, explicit) VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, normalized.toString());
             statement.setString(2, key);
@@ -1488,7 +1492,36 @@ public final class Library implements AutoCloseable {
 
     /** One catalog write waiting to be committed. */
     public record PhotoSave(long folderId, Path file, long size, long modifiedAt,
-            PhotoImporter.AnalyzedPhoto analyzed, String token) {
+            PhotoImporter.AnalyzedPhoto analyzed, String token, String archivePath, String archiveType, String entryName) {
+
+        /** A regular file on disk. */
+        public PhotoSave(long folderId, Path file, long size, long modifiedAt,
+                PhotoImporter.AnalyzedPhoto analyzed, String token) {
+            this(folderId, file, size, modifiedAt, analyzed, token, null, null, null);
+        }
+    }
+
+    /**
+     * Returns the keys of every virtual photo indexed from one archive. The scanner touches them
+     * when the archive itself has not changed, so a plain rescan cannot prune them.
+     *
+     * @param archivePath the normalized key of the archive file
+     * @return the synthetic keys of its entries
+     */
+    public synchronized List<String> archiveKeys(String archivePath) {
+        assertOffUiThread();
+        List<String> keys = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT path_key FROM photos WHERE archive_path=?")) {
+            statement.setString(1, archivePath);
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    keys.add(results.getString(1));
+                }
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the archive entries of " + archivePath, e);
+        }
+        return keys;
     }
 
     /**
@@ -1586,13 +1619,17 @@ public final class Library implements AutoCloseable {
                 try (PreparedStatement insert = connection.prepareStatement("""
                         INSERT INTO photos(folder_id, path, path_key, file_name, extension, byte_size, modified_at,
                             width, height, captured_at, camera_make, camera_model, lens, exposure, aperture, iso,
-                            focal_length, orientation, thumbnail_revision, imported_at, scan_token)
-                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                            focal_length, orientation, thumbnail_revision, imported_at, scan_token,
+                            archive_path, archive_type, entry_name)
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                         """, Statement.RETURN_GENERATED_KEYS)) {
                     bindCommon(insert, folderId, normalized, key, size, modifiedAt, exif, capturedAt, width, height);
                     insert.setInt(19, THUMBNAIL_REVISION);
                     insert.setLong(20, now);
                     insert.setString(21, token);
+                    insert.setString(22, save.archivePath());
+                    insert.setString(23, save.archiveType());
+                    insert.setString(24, save.entryName());
                     insert.executeUpdate();
                     try (ResultSet keys = insert.getGeneratedKeys()) {
                         keys.next();
@@ -1604,7 +1641,8 @@ public final class Library implements AutoCloseable {
                 try (PreparedStatement update = connection.prepareStatement("""
                         UPDATE photos SET folder_id=?, path=?, file_name=?, extension=?, byte_size=?, modified_at=?,
                             width=?, height=?, captured_at=?, camera_make=?, camera_model=?, lens=?, exposure=?,
-                            aperture=?, iso=?, focal_length=?, orientation=?, thumbnail_revision=?, scan_token=?
+                            aperture=?, iso=?, focal_length=?, orientation=?, thumbnail_revision=?, scan_token=?,
+                            archive_path=?, archive_type=?, entry_name=?
                         WHERE id=?
                         """)) {
                     update.setLong(1, folderId);
@@ -1626,7 +1664,10 @@ public final class Library implements AutoCloseable {
                     update.setInt(17, exif.orientation());
                     update.setInt(18, THUMBNAIL_REVISION);
                     update.setString(19, token);
-                    update.setLong(20, photoId);
+                    update.setString(20, save.archivePath());
+                    update.setString(21, save.archiveType());
+                    update.setString(22, save.entryName());
+                    update.setLong(23, photoId);
                     update.executeUpdate();
                 }
             }
@@ -1949,7 +1990,8 @@ public final class Library implements AutoCloseable {
         Double aperture = nullableDouble(results, "aperture");
         Double focalLength = nullableDouble(results, "focal_length");
         Integer iso = nullableInteger(results, "iso");
-        return new Photo(results.getLong("id"), results.getLong("folder_id"), results.getString("folder_path"), Path.of(results.getString("path")), results.getString("file_name"), results.getString("extension"), results.getLong("byte_size"), results.getLong("modified_at"), results.getInt("width"), results.getInt("height"), results.getLong("captured_at"), results.getString("camera_make"), results.getString("camera_model"), results.getString("lens"), results.getString("exposure"), aperture, iso, focalLength, results.getInt("orientation"), results.getInt("favorite") != 0, results.getInt("rating"), results.getString("caption"), results.getLong("imported_at"));
+        return new Photo(results.getLong("id"), results.getLong("folder_id"), results.getString("folder_path"), Path.of(results.getString("path")), results.getString("file_name"), results.getString("extension"), results.getLong("byte_size"), results.getLong("modified_at"), results.getInt("width"), results.getInt("height"), results.getLong("captured_at"), results.getString("camera_make"), results.getString("camera_model"), results.getString("lens"), results.getString("exposure"), aperture, iso, focalLength, results.getInt("orientation"), results.getInt("favorite") != 0, results.getInt("rating"), results.getString("caption"), results.getLong("imported_at"), results.getString("archive_path"), results
+                .getString("archive_type"), results.getString("entry_name"));
     }
 
     private static Double nullableDouble(ResultSet results, String column) throws SQLException {

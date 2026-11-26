@@ -71,6 +71,8 @@ public final class Sidebar extends JPanel {
 
         void onRemoveFolders(List<Long> folderIds);
 
+        void onDeleteFolderFromDisk(List<Long> folderIds);
+
         void onRevealFolder(long folderId);
 
         void onEditFolderTags(long folderId);
@@ -116,6 +118,10 @@ public final class Sidebar extends JPanel {
         }
 
         @Override
+        public void onDeleteFolderFromDisk(List<Long> folderIds) {
+        }
+
+        @Override
         public void onRevealFolder(long folderId) {
         }
 
@@ -145,9 +151,9 @@ public final class Sidebar extends JPanel {
         // The captions are written in English; each row binds its own live translation, so a
         // language change reaches them without a restart and without ARXLang callbacks here.
         library.setSection(I.translate("Library"));
-        library.add("ALL", I.translate("All photos"), Icons.grid(17, Theme.MUTED));
-        library.add("FAVORITES", I.translate("Favorites"), Icons.star(17, Theme.MUTED, true));
-        library.add("RECENT", I.translate("Recent photos"), Icons.clock(17, Theme.MUTED));
+        library.add("ALL", I.translate("All photos"), Icons.nav("view-grid", Theme.MUTED));
+        library.add("FAVORITES", I.translate("Favorites"), Icons.nav("star", Theme.MUTED));
+        library.add("RECENT", I.translate("Recent photos"), Icons.nav("clock", Theme.MUTED));
         library.setOnSelect(key -> select(Mode.valueOf(key), -1));
         // A BoxLayout column hands a child only what it asked for and centres the sliver, so the
         // list goes into a stretching holder: the rows then span the sidebar instead of parking on
@@ -299,11 +305,11 @@ public final class Sidebar extends JPanel {
             }
         }));
         menu.add(item("Open in Explorer", Icons.folder(14, Theme.MUTED), () -> listener.onRevealFolder(folder.id())));
-        if (targets.stream().allMatch(Folder::explicit)) {
-            menu.addSeparator();
-            menu.add(item("Remove from library", Icons.close(14, Theme.DANGER),
-                    () -> listener.onRemoveFolders(targets.stream().map(Folder::id).toList())));
-        }
+        menu.addSeparator();
+        menu.add(item("Remove from library", Icons.close(14, Theme.MUTED),
+                () -> listener.onRemoveFolders(targets.stream().map(Folder::id).toList())));
+        menu.add(item("Delete from disk", Icons.trash(14, Theme.DANGER),
+                () -> listener.onDeleteFolderFromDisk(targets.stream().map(Folder::id).toList())));
         return menu;
     }
 

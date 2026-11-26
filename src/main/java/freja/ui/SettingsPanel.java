@@ -43,6 +43,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import freja.util.ArchiveSettings;
 import kiss.I;
 import laevatain.ARXButton;
 import laevatain.ARXComboBox;
@@ -75,6 +76,8 @@ public final class SettingsPanel extends JPanel {
     private static final String FONTS = "fonts";
 
     private static final String LANGUAGE = "language";
+
+    private static final String DATA_SCAN = "dataScan";
 
     private static final String SYSTEM = "system";
 
@@ -131,6 +134,7 @@ public final class SettingsPanel extends JPanel {
         appearanceSection();
         fontSection();
         languageSection();
+        dataScanSection();
         systemSection();
         pane.show(APPEARANCE);
     }
@@ -223,7 +227,7 @@ public final class SettingsPanel extends JPanel {
         }
 
         ARXSettingsPane.Section section = pane.addSection(APPEARANCE, ARXSettingsPane.Text.of("Appearance"), ARXSettingsPane.Text
-                .of("Choose how the application is coloured."), Icons.contrast(17, Theme.MUTED));
+                .of("Choose how the application is coloured."), Icons.nav("contrast-circle", Theme.MUTED));
 
         // Scope first, then brightness, then the tiles: each control narrows what appears below it.
         moreButton = new ARXButton("Show all themes", Icons.chevron(14, Theme.MUTED, false), ARXButton.Variant.SECONDARY, () -> {
@@ -339,6 +343,21 @@ public final class SettingsPanel extends JPanel {
         }
     }
 
+    /** The data scan section: how the library finds and indexes images. */
+    private void dataScanSection() {
+        // A newly registered archive is indexed on the next scan; the choice is shared with the
+        // scanner through Preferences so it takes effect without restarting the application.
+        ARXToggle archives = new ARXToggle(ArchiveSettings.scanArchives());
+        archives.addActionListener(event -> ArchiveSettings.scanArchives(archives.isSelected()));
+
+        ARXSettingsPane.Section section = pane.addSection(DATA_SCAN, ARXSettingsPane.Text.of("Data scan"), ARXSettingsPane.Text
+                .of("Choose how the library scans and indexes images."), Icons.nav("refresh", Theme.MUTED));
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Scan images inside compressed files"), ARXSettingsPane.Text
+                        .of("Index photos stored in ZIP and 7z archives."), archives)
+                .keywords("zip", "7z", "archive", "compressed", "scan", "photo", "image"));
+    }
+
     /** The font section: family and size controls plus a live preview card. */
     private void fontSection() {
         JComboBox<String> family = new JComboBox<>(Theme.availableFontFamilies());
@@ -379,7 +398,7 @@ public final class SettingsPanel extends JPanel {
                 .keywords("preview", "sample", "specimen");
 
         ARXSettingsPane.Section section = pane.addSection(FONTS, ARXSettingsPane.Text.of("Fonts"), ARXSettingsPane.Text
-                .of("Adjust the typeface and its base size."), Icons.letter("A", 17, Theme.MUTED));
+                .of("Adjust the typeface and its base size."), Icons.navLetter("A", Theme.MUTED));
         section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Font family"), ARXSettingsPane.Text.of("Typeface to use"), family)
                 .keywords("font", "typeface", "family"), ARXSettingsPane
                         .row(ARXSettingsPane.Text.of("Font size"), ARXSettingsPane.Text.of("Base size in points"), size)
@@ -422,7 +441,7 @@ public final class SettingsPanel extends JPanel {
         localeValue = ARXSettingsPane.value(Language.displayName());
 
         ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"), ARXSettingsPane.Text
-                .of("Pick the language of the interface."), Icons.letter("あ", 17, Theme.MUTED));
+                .of("Pick the language of the interface."), Icons.navLetter("あ", Theme.MUTED));
         section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Display language"), ARXSettingsPane.Text
                 .of("Menus, buttons and messages are shown in the selected language."), languages)
                 .keywords("language", "locale", "translation", "translate"), ARXSettingsPane
@@ -457,7 +476,7 @@ public final class SettingsPanel extends JPanel {
         restart.setFont(Theme.font(Font.PLAIN, 12));
 
         ARXSettingsPane.Section section = pane.addSection(SYSTEM, ARXSettingsPane.Text.of("System"), ARXSettingsPane.Text
-                .of("Check for updates, view application details or restart Freja."), Icons.settings(17, Theme.MUTED));
+                .of("Check for updates, view application details or restart Freja."), Icons.nav("cog", Theme.MUTED));
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Check for updates at startup"), ARXSettingsPane.Text
                         .of("Check for a newer version each time Freja starts."), togglePanel)

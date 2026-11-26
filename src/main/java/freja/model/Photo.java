@@ -26,7 +26,8 @@ import java.util.Locale;
 public record Photo(long id, long folderId, String folderPath, Path path, String fileName, String extension,
         long byteSize, long modifiedAt, int width, int height, long capturedAt, String cameraMake, String cameraModel,
         String lens, String exposure, Double aperture, Integer iso, Double focalLength, int orientation,
-        boolean favorite, int rating, String caption, long importedAt) {
+        boolean favorite, int rating, String caption, long importedAt, String archivePath, String archiveType,
+        String entryName) {
 
     private static volatile DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.JAPANESE);
     private static volatile DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", Locale.JAPANESE);
@@ -206,15 +207,35 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
         return String.format(Locale.ROOT, "%.2f GB", bytes / (1024.0 * 1024 * 1024));
     }
 
+    /**
+     * Whether this row is an image inside a ZIP or 7z archive rather than a file on disk.
+     * Such a row has a synthetic {@link #path()} and cannot be revealed or deleted on its own.
+     *
+     * @return true for an archive entry
+     */
+    public boolean archived() {
+        return archiveType != null && archivePath != null;
+    }
+
+    /**
+     * The real file behind this row: an archive for indexed entries, the photo file otherwise.
+     * Use this for "reveal in Explorer" and similar operations which need an existing path.
+     *
+     * @return an existing file, or the synthetic path for regular photos
+     */
+    public Path origin() {
+        return archived() ? Path.of(archivePath) : path;
+    }
+
     public Photo withFavorite(boolean value) {
-        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, value, rating, caption, importedAt);
+        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, value, rating, caption, importedAt, archivePath, archiveType, entryName);
     }
 
     public Photo withRating(int value) {
-        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, value, caption, importedAt);
+        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, value, caption, importedAt, archivePath, archiveType, entryName);
     }
 
     public Photo withCaption(String value) {
-        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, rating, value, importedAt);
+        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, rating, value, importedAt, archivePath, archiveType, entryName);
     }
 }

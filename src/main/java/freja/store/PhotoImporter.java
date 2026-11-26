@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import freja.util.ImageTransforms;
-import freja.util.PathUtil;
 import imagify.ImageFormat;
 import imagify.ImageReader;
 import imagify.ImageWriter;
@@ -94,7 +93,26 @@ public final class PhotoImporter {
      * @throws IOException when the file cannot be decoded
      */
     public static AnalyzedPhoto analyze(Path file, long modifiedAt) throws IOException {
-        Decoded decoded = decode(file);
+        long length = Files.size(file);
+        if (length > MAX_SOURCE_BYTES) {
+            throw new IOException("画像が大きすぎます: " + file.getFileName());
+        }
+        String name = file.getFileName() == null ? file.toString() : file.getFileName().toString();
+        return analyze(Files.readAllBytes(file), name, modifiedAt);
+    }
+
+    /**
+     * Decodes image bytes which did not come from a plain file, e.g. an entry of a ZIP or 7z
+     * archive. The pipeline is identical to {@link #analyze(Path, long)}; only the source differs.
+     *
+     * @param encoded the complete encoded image
+     * @param name a display name for diagnostics and the modification-time fallback
+     * @param modifiedAt the source's modification time, or -1 to use the current time
+     * @return the analysis
+     * @throws IOException when the bytes cannot be decoded
+     */
+    public static AnalyzedPhoto analyze(byte[] encoded, String name, long modifiedAt) throws IOException {
+        Decoded decoded = decode(encoded, name);
         BufferedImage image = decoded.image();
         Exif.Data exif = decoded.exif();
 
@@ -112,16 +130,16 @@ public final class PhotoImporter {
         BufferedImage thumbnail = decoded.opaque() || !ImageTransforms.hasTransparency(scaled)
                 ? ImageTransforms.toOpaque(scaled) : scaled;
 
-        byte[] encoded;
+        byte[] thumbnailBytes;
         try {
-            encoded = ImageWriter.toBytes(thumbnail, THUMBNAIL_FORMAT, THUMBNAIL_QUALITY);
+            thumbnailBytes = ImageWriter.toBytes(thumbnail, THUMBNAIL_FORMAT, THUMBNAIL_QUALITY);
         } catch (RuntimeException | IOError | LinkageError e) {
-            throw new IOException("Failed to encode the thumbnail: " + file.getFileName(), e);
+            throw new IOException("Failed to encode the thumbnail: " + name, e);
         }
 
         long capturedAt = exif.capturedAt() != null ? exif.capturedAt()
-                : modifiedAt >= 0 ? modifiedAt : Files.getLastModifiedTime(file).toMillis();
-        return new AnalyzedPhoto(decoded.width(), decoded.height(), capturedAt, exif, encoded,
+                : modifiedAt >= 0 ? modifiedAt : System.currentTimeMillis();
+        return new AnalyzedPhoto(decoded.width(), decoded.height(), capturedAt, exif, thumbnailBytes,
                 thumbnail.getWidth(), thumbnail.getHeight());
     }
 
@@ -157,19 +175,14 @@ public final class PhotoImporter {
      * not from the reduced frame. A JPEG is read into memory once: the same bytes serve the header,
      * the EXIF block and the decoder.
      */
-    private static Decoded decode(Path file) throws IOException {
-        long length = Files.size(file);
-        if (length > MAX_SOURCE_BYTES) {
-            throw new IOException("画像が大きすぎます: " + file.getFileName());
-        }
-        if (isJpeg(file)) {
-            byte[] encoded = Files.readAllBytes(file);
+    private static Decoded decode(byte[] encoded, String name) throws IOException {
+        if (isJpeg(encoded)) {
             Exif.Data exif = Exif.read(encoded);
             if (JpegliCodec.isAvailable() && JpegliCodec.supportsScaledDecode()) {
                 try {
                     int[] size = jpegSize(encoded);
                     int denominator = scaleDenominator(Math.max(size[0], size[1]));
-                    BufferedImage image = denominator == 1 ? decodeBytes(encoded, file)
+                    BufferedImage image = denominator == 1 ? decodeBytes(encoded, name)
                             : ImageReader.read(encoded, ImageFormat.JPEG, 1, denominator).toBufferedImage();
                     if (image != null && image.getWidth() > 0 && image.getHeight() > 0) {
                         // A JPEG decoded here cannot carry transparency, so the alpha scan in
@@ -177,35 +190,35 @@ public final class PhotoImporter {
                         return new Decoded(image, size[0], size[1], exif, true);
                     }
                 } catch (JpegException | IOException | RuntimeException e) {
-                    // A header the decoder cannot read is no reason to give up on the file: the
+                    // A header the decoder cannot read is no reason to give up on the image: the
                     // ordinary reader below knows how to report a damaged image as an IOException.
                 }
             }
-            BufferedImage image = decodeBytes(encoded, file);
+            BufferedImage image = decodeBytes(encoded, name);
             return new Decoded(image, image.getWidth(), image.getHeight(), exif, false);
         }
-        // EXIF lives in JPEG segments only, so other formats need no metadata pass. Reading the
-        // bytes lets imagify detect the real format from the header even if the extension lies.
-        BufferedImage image = decodeBytes(Files.readAllBytes(file), file);
+        // EXIF lives in JPEG segments only, so other formats need no metadata pass. Detecting the
+        // real format from the header also covers archive entries whose name carries no extension.
+        BufferedImage image = decodeBytes(encoded, name);
         return new Decoded(image, image.getWidth(), image.getHeight(), Exif.Data.EMPTY, false);
     }
 
-    private static BufferedImage decodeBytes(byte[] encoded, Path file) throws IOException {
+    private static BufferedImage decodeBytes(byte[] encoded, String name) throws IOException {
         BufferedImage image;
         try {
             image = Imagify.read(encoded).toBufferedImage();
         } catch (RuntimeException | IOError | LinkageError e) {
-            throw new IOException("Unsupported or damaged image: " + file.getFileName(), e);
+            throw new IOException("Unsupported or damaged image: " + name, e);
         }
         if (image == null || image.getWidth() <= 0 || image.getHeight() <= 0) {
-            throw new IOException("Image has no pixels: " + file.getFileName());
+            throw new IOException("Image has no pixels: " + name);
         }
         return image;
     }
 
-    private static boolean isJpeg(Path file) {
-        String extension = PathUtil.extension(file);
-        return extension.equals("jpg") || extension.equals("jpeg");
+    /** JPEG detection by magic bytes, so entries without a trustworthy name still decode fully. */
+    private static boolean isJpeg(byte[] encoded) {
+        return encoded.length >= 2 && u8(encoded, 0) == 0xFF && u8(encoded, 1) == 0xD8;
     }
 
     /**

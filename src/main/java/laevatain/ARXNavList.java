@@ -45,6 +45,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+import com.formdev.flatlaf.util.UIScale;
+
 import kiss.Variable;
 
 /**
@@ -122,6 +124,17 @@ public final class ARXNavList extends JPanel {
         }
     }
 
+    /**
+     * A fixed width for the leading icon. Without it BorderLayout gives the icon whatever width it
+     * reports, so a scaled SVG and a plain glyph start the text at different x positions.
+     */
+    private static int iconSlot() {
+        Object configured = UIManager.get("ARX.navIconSize");
+        int size = configured instanceof Integer value ? value : 15;
+        // The stored value is logical; the icons apply UIScale themselves.
+        return UIScale.scale(size + 5);
+    }
+
     /** One row of the list. Kept public so callers can annotate or extend it. */
     public static final class Row extends JPanel {
 
@@ -151,7 +164,13 @@ public final class ARXNavList extends JPanel {
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setFocusable(true);
             if (icon != null) {
-                add(new PassthroughLabel(icon), BorderLayout.WEST);
+                PassthroughLabel iconLabel = new PassthroughLabel(icon);
+                iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                iconLabel.setVerticalAlignment(SwingConstants.CENTER);
+                Dimension slot = new Dimension(iconSlot(), iconSlot());
+                iconLabel.setPreferredSize(slot);
+                iconLabel.setMinimumSize(new Dimension(slot.width, 0));
+                add(iconLabel, BorderLayout.WEST);
             }
             label = new TruncatedLabel(text);
             label.setFont(rowFont());
