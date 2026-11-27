@@ -364,7 +364,7 @@ public final class PhotoViewer extends JDialog {
         // transport buttons in the middle and the file name at the bottom right.
         videoControls.setOpaque(false);
         videoControls.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        videoControls.setPreferredSize(new Dimension(0, 62));
+        videoControls.setPreferredSize(new Dimension(0, 80));
 
         videoTitle.setForeground(Color.WHITE);
         videoTitle.setFont(Theme.font(Font.PLAIN, 12));
@@ -374,7 +374,8 @@ public final class PhotoViewer extends JDialog {
         time.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
         seek.setRange(0, 1000);
-        seek.setPreferredSize(new Dimension(600, 18));
+        // Taller than the painted bar so the pointer does not have to land on a 4px line.
+        seek.setPreferredSize(new Dimension(600, 36));
         volume.setRange(0, 100);
         volume.value(100);
         volume.setPreferredSize(new Dimension(110, 18));
@@ -520,7 +521,11 @@ public final class PhotoViewer extends JDialog {
 
             @Override
             public void mouseClicked(MouseEvent event) {
-                relay(event);
+                // Playback belongs to the picture: a click on the chrome must not toggle it.
+                // Double clicks still close the viewer as they do on the picture.
+                if (event.getClickCount() >= 2) {
+                    relay(event);
+                }
             }
         });
         controlsRoot.addMouseMotionListener(new MouseAdapter() {
@@ -1659,14 +1664,16 @@ public final class PhotoViewer extends JDialog {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 int width = getWidth();
                 int height = getHeight();
+                // Keep the painted bar at its old position while the hit target grows upward.
+                int trackY = height - 9;
                 double fraction = maximum > minimum ? (value - minimum) / (maximum - minimum) : 0;
                 double centre = fraction * width;
                 g.setColor(new Color(255, 255, 255, 90));
-                g.fillRoundRect(0, height / 2 - 2, width, 4, 3, 3);
+                g.fillRoundRect(0, trackY - 2, width, 4, 3, 3);
                 g.setColor(new Color(0x3EA6FF));
-                g.fillRoundRect(0, height / 2 - 2, (int) Math.round(centre), 4, 3, 3);
+                g.fillRoundRect(0, trackY - 2, (int) Math.round(centre), 4, 3, 3);
                 g.setColor(new Color(0x3EA6FF));
-                g.fillOval((int) Math.round(centre) - 6, height / 2 - 6, 12, 12);
+                g.fillOval((int) Math.round(centre) - 6, trackY - 6, 12, 12);
             } finally {
                 g.dispose();
             }

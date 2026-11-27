@@ -57,8 +57,18 @@ public final class Theme {
 
     private static final String FONT_SIZE_KEY = "font.size";
 
+    private static final String FILE_LIST_FONT_SIZE_KEY = "font.fileList.size";
+
+    private static final String FILE_LIST_ROW_HEIGHT_KEY = "fileList.rowHeight";
+
     /** The size the individual font calls in this application were designed around. */
     private static final int BASE_FONT_SIZE = 13;
+
+    /** Default size of the file manager's list, independent of the general font size. */
+    public static final int BASE_FILE_LIST_FONT_SIZE = 12;
+
+    /** Default height of one file manager list row, in points at the base font size. */
+    public static final int BASE_FILE_LIST_ROW_HEIGHT = 30;
 
     private record Palette(Color background, Color surface, Color sidebar, Color border, Color text, Color muted, Color faint, Color accent, Color accentSoft, Color accentDark, Color gold, Color danger, Color hover, Color viewer, Color viewerPanel) {
     }
@@ -146,6 +156,10 @@ public final class Theme {
 
     private static int fontSize = BASE_FONT_SIZE;
 
+    private static int fileListFontSize = BASE_FILE_LIST_FONT_SIZE;
+
+    private static int fileListRowHeight = BASE_FILE_LIST_ROW_HEIGHT;
+
     private Theme() {
     }
 
@@ -159,6 +173,8 @@ public final class Theme {
         palette = dark ? DARK : LIGHT;
         fontFamily = PREFERENCES.get(FONT_FAMILY_KEY, detectJapaneseFont());
         fontSize = Math.max(8, Math.min(28, PREFERENCES.getInt(FONT_SIZE_KEY, BASE_FONT_SIZE)));
+        fileListFontSize = Math.max(8, Math.min(28, PREFERENCES.getInt(FILE_LIST_FONT_SIZE_KEY, BASE_FILE_LIST_FONT_SIZE)));
+        fileListRowHeight = Math.max(20, Math.min(80, PREFERENCES.getInt(FILE_LIST_ROW_HEIGHT_KEY, BASE_FILE_LIST_ROW_HEIGHT)));
         applyLookAndFeel();
     }
 
@@ -479,6 +495,46 @@ public final class Theme {
     /** Returns the configured base font size. */
     public static int fontSize() {
         return fontSize;
+    }
+
+    /** Returns the configured file list font size. */
+    public static int fileListFontSize() {
+        return fileListFontSize;
+    }
+
+    /** Returns the file list font, scaled with the application's base size. */
+    public static Font fileListFont() {
+        return font(Font.PLAIN, fileListFontSize);
+    }
+
+    /** Changes the file list font size and persists the choice. */
+    public static void setFileListFontSize(int size) {
+        fileListFontSize = Math.max(8, Math.min(28, size));
+        PREFERENCES.putInt(FILE_LIST_FONT_SIZE_KEY, fileListFontSize);
+        try {
+            PREFERENCES.flush();
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** Returns the configured file list row height. */
+    public static int fileListRowHeight() {
+        return fileListRowHeight;
+    }
+
+    /** Returns the row height scaled with the application's base font size. */
+    public static int scaledFileListRowHeight() {
+        return Math.max(16, Math.round(fileListRowHeight * (float) fontSize / BASE_FONT_SIZE));
+    }
+
+    /** Changes the file list row height and persists the choice. */
+    public static void setFileListRowHeight(int height) {
+        fileListRowHeight = Math.max(20, Math.min(80, height));
+        PREFERENCES.putInt(FILE_LIST_ROW_HEIGHT_KEY, fileListRowHeight);
+        try {
+            PREFERENCES.flush();
+        } catch (Exception ignored) {
+        }
     }
 
     /** Lists font families available on this system. */

@@ -330,7 +330,24 @@ public final class MainWindow extends JFrame {
                 if (holder[0] != null) {
                     Theme.scaleFonts(holder[0], ratio);
                 }
+                if (fileManager != null) {
+                    fileManager.applyListSettings();
+                }
                 repaint();
+            }
+
+            @Override
+            public void onFileListFontChanged() {
+                if (fileManager != null) {
+                    fileManager.applyListSettings();
+                }
+            }
+
+            @Override
+            public void onFileListRowHeightChanged() {
+                if (fileManager != null) {
+                    fileManager.applyListSettings();
+                }
             }
 
             @Override
@@ -1551,6 +1568,9 @@ public final class MainWindow extends JFrame {
         grid.repaint();
         sidebar.repaint();
         inspector.repaint();
+        if (fileManager != null) {
+            fileManager.applyListSettings();
+        }
         repaint();
     }
 

@@ -71,6 +71,14 @@ public final class SettingsPanel extends JPanel {
 
         void onFontChanged(float ratio);
 
+        /** Called when the file manager's list font size changes on its own. */
+        default void onFileListFontChanged() {
+        }
+
+        /** Called when the file manager's row height changes on its own. */
+        default void onFileListRowHeightChanged() {
+        }
+
         void onThemeChanged();
 
         /** Called when the selected window icon changes; windows can refresh their icon here. */
@@ -418,6 +426,12 @@ public final class SettingsPanel extends JPanel {
         JSpinner size = new JSpinner(new SpinnerNumberModel(Theme.fontSize(), 8, 28, 1));
         size.setFont(Theme.font(Font.PLAIN, 13));
         size.setPreferredSize(new Dimension(110, 30));
+        JSpinner fileListSize = new JSpinner(new SpinnerNumberModel(Theme.fileListFontSize(), 8, 28, 1));
+        fileListSize.setFont(Theme.font(Font.PLAIN, 13));
+        fileListSize.setPreferredSize(new Dimension(110, 30));
+        JSpinner rowHeight = new JSpinner(new SpinnerNumberModel(Theme.fileListRowHeight(), 20, 80, 2));
+        rowHeight.setFont(Theme.font(Font.PLAIN, 13));
+        rowHeight.setPreferredSize(new Dimension(110, 30));
 
         family.addActionListener(event -> {
             if (family.getSelectedItem() instanceof String chosen) {
@@ -433,6 +447,14 @@ public final class SettingsPanel extends JPanel {
             Theme.setFont(chosen instanceof String string ? string : null, value);
             refreshPreview();
             listener.onFontChanged(ratio);
+        });
+        fileListSize.addChangeListener(event -> {
+            Theme.setFileListFontSize((Integer) fileListSize.getValue());
+            listener.onFileListFontChanged();
+        });
+        rowHeight.addChangeListener(event -> {
+            Theme.setFileListRowHeight((Integer) rowHeight.getValue());
+            listener.onFileListRowHeightChanged();
         });
 
         preview = new JLabel("Aa Bb あいうえお カタカナ 0123456789 — Freja");
@@ -452,7 +474,11 @@ public final class SettingsPanel extends JPanel {
         section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Font family"), ARXSettingsPane.Text.of("Typeface to use"), family)
                 .keywords("font", "typeface", "family"), ARXSettingsPane
                         .row(ARXSettingsPane.Text.of("Font size"), ARXSettingsPane.Text.of("Base size in points"), size)
-                        .keywords("size", "points", "scale"));
+                        .keywords("size", "points", "scale"), ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("File list font size"), ARXSettingsPane.Text.of("Size of the file manager list"), fileListSize)
+                        .keywords("file", "list", "table", "size", "points"), ARXSettingsPane
+                        .row(ARXSettingsPane.Text.of("File list row height"), ARXSettingsPane.Text.of("Height of one file manager row"), rowHeight)
+                        .keywords("file", "list", "row", "height", "density"));
         section.addCard(previewRow);
         refreshPreview();
     }

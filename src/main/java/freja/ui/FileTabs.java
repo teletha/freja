@@ -55,6 +55,16 @@ final class FileTabs {
         changed();
     }
 
+    /** Inserts a copy of the tab right after it and selects the copy. */
+    void duplicate(int index) {
+        if (index < 0 || index >= tabs.size()) {
+            return;
+        }
+        tabs.add(index + 1, tabs.get(index).duplicate());
+        selected = index + 1;
+        changed();
+    }
+
     void remove(int index) {
         if (index < 0 || index >= tabs.size()) {
             return;
@@ -134,7 +144,15 @@ final class FileTabs {
                 continue;
             }
             try {
-                FileTab tab = new FileTab(Path.of(root), PREFERENCES.get("name." + i, null));
+                Path rootPath = Path.of(root);
+                String name = PREFERENCES.get("name." + i, null);
+                // Saves made before the custom-name flag have no marker: a name other than the
+                // pinned folder's was necessarily typed by the user.
+                String stored = PREFERENCES.get("custom." + i, null);
+                boolean custom = stored == null
+                        ? name != null && !name.equals(folderName(rootPath))
+                        : Boolean.parseBoolean(stored);
+                FileTab tab = new FileTab(rootPath, custom ? name : null);
                 String current = PREFERENCES.get("current." + i, null);
                 if (current != null && !current.isBlank()) {
                     tab.goTo(Path.of(current));
@@ -154,7 +172,13 @@ final class FileTabs {
             FileTab tab = tabs.get(i);
             PREFERENCES.put("root." + i, tab.root().toString());
             PREFERENCES.put("name." + i, tab.displayName());
+            PREFERENCES.put("custom." + i, Boolean.toString(tab.customName()));
             PREFERENCES.put("current." + i, tab.current().toString());
         }
+    }
+
+    private static String folderName(Path path) {
+        Path name = path.getFileName();
+        return name == null ? path.toString() : name.toString();
     }
 }

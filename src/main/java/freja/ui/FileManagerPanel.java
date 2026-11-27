@@ -16,6 +16,9 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -28,11 +31,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -45,6 +54,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -52,6 +62,8 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableRowSorter;
+import javax.swing.text.JTextComponent;
 
 import freja.util.PathUtil;
 import psychopath.Progress;
@@ -80,9 +92,37 @@ final class FileManagerPanel extends JPanel {
 
     private final DefaultListModel<FileTab> tabModel = new DefaultListModel<>();
 
-    private final JList<FileTab> tabList = new JList<>(tabModel);
+    private final JList<FileTab> tabList = new JList<>(tabModel) {
+        @Override
+        protected void processKeyEvent(KeyEvent event) {
+            // A/B/N belong to the pane. Consuming alone would still reach the UI's KeyListener, so
+            // the typed event must not be passed on to the list's first-letter tab search at all.
+            if (event.getID() == KeyEvent.KEY_TYPED && isShortcutChar(event.getKeyChar())) {
+                event.consume();
+                return;
+            }
+            super.processKeyEvent(event);
+        }
+    };
 
     private final FileTableModel tableModel = new FileTableModel();
+
+    /** Header clicks cycle ascending, descending and back to the list's original order. */
+    private final TableRowSorter<FileTableModel> sorter = new TableRowSorter<>(tableModel) {
+        @Override
+        public void toggleSortOrder(int column) {
+            List<? extends SortKey> keys = getSortKeys();
+            SortOrder current = keys.isEmpty() || keys.get(0).getColumn() != column
+                    ? null : keys.get(0).getSortOrder();
+            if (current == null) {
+                setSortKeys(List.of(new SortKey(column, SortOrder.ASCENDING)));
+            } else if (current == SortOrder.ASCENDING) {
+                setSortKeys(List.of(new SortKey(column, SortOrder.DESCENDING)));
+            } else {
+                setSortKeys(List.of());
+            }
+        }
+    };
 
     private final JTable table = new JTable(tableModel);
 
@@ -121,6 +161,53 @@ final class FileManagerPanel extends JPanel {
         add(split, BorderLayout.CENTER);
 
         tabsChanged();
+        installKeys();
+    }
+
+    /** Pane shortcuts: A goes to the parent, B and N walk the active tab's history. */
+    private void installKeys() {
+        bind(KeyEvent.VK_A, "fileUp", this::goUp);
+        bind(KeyEvent.VK_B, "fileBack", this::goBack);
+        bind(KeyEvent.VK_N, "fileForward", this::goForward);
+    }
+
+    /**
+     * Bound to the window so the keys work whichever child has focus, but guarded by visibility so
+     * the shortcuts stay confined to the file manager card of the main window.
+     */
+    private void bind(int keyCode, String name, Runnable action) {
+        AbstractAction bound = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                Component focus = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+                if (isShowing() && !(focus instanceof JTextComponent) && !table.isEditing()) {
+                    action.run();
+                }
+            }
+        };
+        getActionMap().put(name, bound);
+        InputMap keys = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        keys.put(KeyStroke.getKeyStroke(keyCode, 0), name);
+        keys.put(KeyStroke.getKeyStroke(keyCode, KeyEvent.SHIFT_DOWN_MASK), name);
+    }
+
+    private static boolean isShortcutChar(char key) {
+        return key == 'a' || key == 'A' || key == 'b' || key == 'B' || key == 'n' || key == 'N';
+    }
+
+    private void goUp() {
+        FileTab tab = tabs.active();
+        if (tab != null && tab.current().getParent() != null) {
+            tabs.navigate(tab.current().getParent());
+        }
+    }
+
+    private void goBack() {
+        tabs.back();
+    }
+
+    private void goForward() {
+        tabs.forward();
     }
 
     /** The vertical tab strip on the left: pinned folders, not a directory tree. */
@@ -193,6 +280,8 @@ final class FileManagerPanel extends JPanel {
                 tabs.rename(index, name);
             }
         });
+        JMenuItem duplicate = new JMenuItem("タブを複製");
+        duplicate.addActionListener(e -> tabs.duplicate(index));
         JMenuItem moveUp = new JMenuItem("上へ移動");
         moveUp.addActionListener(e -> tabs.move(index, index - 1));
         JMenuItem moveDown = new JMenuItem("下へ移動");
@@ -200,6 +289,7 @@ final class FileManagerPanel extends JPanel {
         JMenuItem remove = new JMenuItem("タブを削除");
         remove.addActionListener(e -> tabs.remove(index));
         menu.add(rename);
+        menu.add(duplicate);
         menu.add(moveUp);
         menu.add(moveDown);
         menu.addSeparator();
@@ -228,14 +318,12 @@ final class FileManagerPanel extends JPanel {
 
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
         bar.setBackground(Theme.SURFACE);
-        back.addActionListener(event -> tabs.back());
-        forward.addActionListener(event -> tabs.forward());
-        up.addActionListener(event -> {
-            FileTab tab = tabs.active();
-            if (tab != null && tab.current().getParent() != null) {
-                tabs.navigate(tab.current().getParent());
-            }
-        });
+        back.setToolTipText("戻る (B)");
+        forward.setToolTipText("進む (N)");
+        up.setToolTipText("上に移動 (A)");
+        back.addActionListener(event -> goBack());
+        forward.addActionListener(event -> goForward());
+        up.addActionListener(event -> goUp());
         reload.addActionListener(event -> refresh());
         pathLabel.setFont(Theme.font(Font.PLAIN, 12));
         pathLabel.setForeground(Theme.MUTED);
@@ -273,12 +361,12 @@ final class FileManagerPanel extends JPanel {
             bar.add(button);
         }
 
-        table.setRowHeight(30);
+        applyListSettings();
         table.setShowGrid(false);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setSelectionBackground(Theme.SELECTION);
         table.setSelectionForeground(Theme.TEXT);
-        table.setAutoCreateRowSorter(true);
+        table.setRowSorter(sorter);
         table.getColumnModel().getColumn(0).setMaxWidth(42);
         table.getColumnModel().getColumn(0).setCellRenderer(new IconRenderer());
         table.addMouseListener(new MouseAdapter() {
@@ -301,6 +389,16 @@ final class FileManagerPanel extends JPanel {
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         panel.add(status, BorderLayout.SOUTH);
         return panel;
+    }
+
+    /** Applies the separately configurable file list font and row height. */
+    void applyListSettings() {
+        table.setFont(Theme.fileListFont());
+        table.getTableHeader().setFont(Theme.fileListFont());
+        table.setRowHeight(Theme.scaledFileListRowHeight());
+        table.revalidate();
+        table.repaint();
+        table.getTableHeader().repaint();
     }
 
     private void open(int row) {
@@ -555,7 +653,7 @@ final class FileManagerPanel extends JPanel {
 
     private final class FileTableModel extends AbstractTableModel {
 
-        private final String[] columns = {"", "ファイル名", "サイズ", "最終更新日", "種別"};
+        private final String[] columns = {"", "ファイル名", "サイズ", "最終更新日"};
 
         @Override
         public int getRowCount() {
@@ -585,7 +683,7 @@ final class FileManagerPanel extends JPanel {
                 case 1 -> entry.name();
                 case 2 -> entry.directory() ? "" : humanSize(entry.size());
                 case 3 -> date(entry.modified());
-                default -> kind(entry);
+                default -> null;
             };
         }
 
@@ -605,21 +703,6 @@ final class FileManagerPanel extends JPanel {
             return Icons.of("mdi:file", 16, Theme.MUTED);
         }
 
-        private String kind(FileBrowser.Entry entry) {
-            if (entry.directory()) {
-                return "フォルダ";
-            }
-            if (entry.archive()) {
-                return "アーカイブ";
-            }
-            if (PathUtil.isImage(entry.path())) {
-                return "画像";
-            }
-            if (PathUtil.isVideo(entry.path())) {
-                return "動画";
-            }
-            return "ファイル";
-        }
     }
 
     private static final class IconRenderer extends DefaultTableCellRenderer {
