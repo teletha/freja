@@ -106,11 +106,15 @@ public final class FileTabs {
     }
 
     public void navigate(Path path) {
+        navigate(FileLocation.folder(path));
+    }
+
+    public void navigate(FileLocation location) {
         FileTab tab = active();
         if (tab == null) {
             return;
         }
-        tab.goTo(path);
+        tab.goTo(location);
         changed();
     }
 
@@ -156,7 +160,7 @@ public final class FileTabs {
                 FileTab tab = new FileTab(rootPath, custom ? name : null);
                 String current = PREFERENCES.get("current." + i, null);
                 if (current != null && !current.isBlank()) {
-                    tab.goTo(Path.of(current));
+                    tab.goTo(FileLocation.from(current));
                 }
                 tabs.add(tab);
             } catch (InvalidPathException ignored) {
@@ -174,7 +178,7 @@ public final class FileTabs {
             PREFERENCES.put("root." + i, tab.root().toString());
             PREFERENCES.put("name." + i, tab.displayName());
             PREFERENCES.put("custom." + i, Boolean.toString(tab.customName()));
-            PREFERENCES.put("current." + i, tab.current().toString());
+            PREFERENCES.put("current." + i, tab.current().key());
         }
     }
 

@@ -15,8 +15,10 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -1577,30 +1579,53 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.setColor(selected ? withAlpha(Theme.ACCENT, 80) : withAlpha(Theme.HOVER, 110));
             g.fill(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 12, 12));
         }
-        // Videos carry a play badge with their duration in the opposite corner from the favourite
-        // star, so a favourite clip shows both marks. It is painted after the selection tint to
-        // stay
-        // legible even over a bright thumbnail.
+        // Videos carry a play-and-duration badge in the top-left corner and their name on a soft
+        // scrim along the bottom edge. The favourite star keeps the opposite top corner, so a
+        // favourite clip shows all three marks. Painted after the selection tint to stay legible
+        // over a bright thumbnail.
         if (photo.isVideo()) {
-            Icon play = VIDEO_ICON;
+            String name = withoutExtension(photo.fileName());
             String duration = photo.durationLabel();
-            Font font = Theme.font(Font.BOLD, 10);
-            g.setFont(font);
-            FontMetrics metrics = g.getFontMetrics();
+            Icon play = VIDEO_ICON;
+            Font nameFont = Theme.font(Font.BOLD, 11);
+            Font durationFont = Theme.font(Font.BOLD, 10);
+            g.setFont(durationFont);
+            FontMetrics durationMetrics = g.getFontMetrics();
             int iconWidth = play.getIconWidth();
             int iconHeight = play.getIconHeight();
-            int textWidth = duration.isEmpty() ? 0 : metrics.stringWidth(duration);
-            int height = Math.max(20, Math.max(iconHeight, metrics.getHeight()) + 6);
-            int width = Math.min(cardWidth - 16, iconWidth + textWidth + 14);
-            double x = cardX + 8;
-            double y = cardY + cardHeight - 6 - height;
+            int textWidth = duration.isEmpty() ? 0 : durationMetrics.stringWidth(duration);
+            int badgeHeight = Math.max(20, Math.max(iconHeight, durationMetrics.getHeight()) + 6);
+            int badgeWidth = Math.min(cardWidth - 16, iconWidth + textWidth + 14);
+            double badgeX = cardX + 8;
+            double badgeY = cardY + 8;
             g.setColor(new Color(0, 0, 0, 200));
-            g.fill(new RoundRectangle2D.Double(x, y, width, height, height / 2.0, height / 2.0));
-            play.paintIcon(this, g, (int) Math.round(x + 4), (int) Math.round(y + (height - iconHeight) / 2.0));
+            g.fill(new RoundRectangle2D.Double(badgeX, badgeY, badgeWidth, badgeHeight,
+                    badgeHeight / 2.0, badgeHeight / 2.0));
+            play.paintIcon(this, g, (int) Math.round(badgeX + 4),
+                    (int) Math.round(badgeY + (badgeHeight - iconHeight) / 2.0));
             if (!duration.isEmpty()) {
                 g.setColor(Color.WHITE);
-                g.drawString(duration, (int) Math.round(x + 4 + iconWidth + 1), (int) Math
-                        .round(y + (height + metrics.getAscent() - metrics.getDescent()) / 2.0));
+                g.drawString(duration, (int) Math.round(badgeX + 4 + iconWidth + 1), (int) Math
+                        .round(badgeY + (badgeHeight + durationMetrics.getAscent() - durationMetrics.getDescent()) / 2.0));
+            }
+            g.setFont(nameFont);
+            FontMetrics nameMetrics = g.getFontMetrics();
+            int nameWidth = cardWidth - 16;
+            if (nameWidth > 24 && !name.isEmpty()) {
+                String[] lines = nameLines(name, nameMetrics, nameWidth);
+                int lineHeight = nameMetrics.getHeight();
+                int bandHeight = Math.min(cardHeight, lines.length * lineHeight + 10);
+                int bandTop = cardY + cardHeight - bandHeight;
+                Paint previousPaint = g.getPaint();
+                g.setPaint(new GradientPaint(0, bandTop - 12, new Color(0, 0, 0, 0),
+                        0, cardY + cardHeight, new Color(0, 0, 0, 205)));
+                g.fill(new Rectangle(cardX, bandTop - 12, cardWidth, bandHeight + 12));
+                g.setPaint(previousPaint);
+                int bottomBaseline = cardY + cardHeight - 9;
+                g.setColor(Color.WHITE);
+                for (int line = 0; line < lines.length; line++) {
+                    g.drawString(lines[line], cardX + 8, bottomBaseline - (lines.length - 1 - line) * lineHeight);
+                }
             }
         }
         if (photo.favorite()) {
@@ -1615,7 +1640,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             star.paintIcon(this, g, (int) Math.round(circleX + (diameter - star.getIconWidth()) / 2.0), (int) Math
                     .round(circleY + (diameter - star.getIconHeight()) / 2.0));
         }
-        // The file name is shown in the status bar, so the cell contains only the thumbnail.
+    }
+    /** Strips the extension from a file name so a video card can show just its title. */
+    private static String withoutExtension(String name) {
+        int dot = name.lastIndexOf('.');
+        return dot > 0 ? name.substring(0, dot) : name;
     }
     /**
      * Draws the fallback for a photo whose pixels cannot be decoded and whose generated thumbnail
@@ -1649,6 +1678,30 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private void drawCentered(Graphics2D g, String text, int centerX, int y) {
         FontMetrics metrics = g.getFontMetrics();
         g.drawString(text, centerX - metrics.stringWidth(text) / 2, y);
+    }
+    /**
+     * Wraps a video name into at most two lines, preferring a space as the break. A remainder which
+     * still does not fit is shortened with an ellipsis instead of being drawn over the card edge.
+     */
+    private static String[] nameLines(String name, FontMetrics metrics, int maxWidth) {
+        if (metrics.stringWidth(name) <= maxWidth) {
+            return new String[] {name};
+        }
+        int fit = 0;
+        while (fit < name.length() && metrics.stringWidth(name.substring(0, fit + 1)) <= maxWidth) {
+            fit++;
+        }
+        int split = name.lastIndexOf(' ', Math.max(0, fit - 1));
+        if (split <= 0) {
+            split = fit;
+        }
+        String first = name.substring(0, split).trim();
+        String second = name.substring(split).trim();
+        if (first.isEmpty()) {
+            return new String[] {truncate(name, metrics, maxWidth)};
+        }
+        return second.isEmpty() ? new String[] {first}
+                : new String[] {first, metrics.stringWidth(second) <= maxWidth ? second : truncate(second, metrics, maxWidth)};
     }
     private static String truncate(String text, FontMetrics metrics, int maxWidth) {
         if (metrics.stringWidth(text) <= maxWidth) {

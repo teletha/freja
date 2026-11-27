@@ -288,6 +288,12 @@ public final class MainWindow extends JFrame {
                 }
             }
             @Override
+            public void onHiddenFilesChanged() {
+                if (fileManager != null) {
+                    fileManager.refresh();
+                }
+            }
+            @Override
             public void onThemeChanged() {
                 applyThemeUi();
             }

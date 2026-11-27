@@ -9,6 +9,7 @@
  */
 package freja.setting.ui;
 
+import freja.setting.FileSettings;
 import freja.setting.SettingsBackup;
 import freja.AppIcon;
 import freja.Icons;
@@ -51,6 +52,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import freja.util.ArchiveSettings;
+import freja.util.VideoThumbnailSettings;
 import kiss.I;
 import laevatain.ARXButton;
 import laevatain.ARXComboBox;
@@ -82,8 +84,13 @@ public final class SettingsPanel extends JPanel {
         default void onAppIconChanged() {
         }
         void onManageFolders();
+
+        /** Called when the file manager's hidden-file filter changes. */
+        default void onHiddenFilesChanged() {
+        }
     }
     private static final String APPEARANCE = "appearance";
+    private static final String FILES = "files";
     private static final String FONTS = "fonts";
     private static final String LANGUAGE = "language";
     private static final String DATA_SCAN = "dataScan";
@@ -123,6 +130,7 @@ public final class SettingsPanel extends JPanel {
         backupActions();
         appearanceSection();
         fontSection();
+        filesSection();
         languageSection();
         dataScanSection();
         systemSection();
@@ -358,6 +366,14 @@ public final class SettingsPanel extends JPanel {
         ARXButton manage = new ARXButton(I.translate("Manage watched folders"), Icons
                 .folder(15, Theme.MUTED), ARXButton.Variant.SECONDARY, listener::onManageFolders);
         manage.setFont(Theme.font(Font.PLAIN, 12));
+        JSpinner thumbnailSeconds = new JSpinner(new SpinnerNumberModel(
+                VideoThumbnailSettings.thumbnailSeconds(), VideoThumbnailSettings.MIN_SECONDS,
+                VideoThumbnailSettings.MAX_SECONDS, 1));
+        thumbnailSeconds.setFont(Theme.font(Font.PLAIN, 13));
+        thumbnailSeconds.setPreferredSize(new Dimension(110, 30));
+        // Only future scans use the new position; thumbnails already in the catalog stay as they are.
+        thumbnailSeconds.addChangeListener(event -> VideoThumbnailSettings
+                .thumbnailSeconds((Integer) thumbnailSeconds.getValue()));
         ARXSettingsPane.Section section = pane.addSection(DATA_SCAN, ARXSettingsPane.Text.of("Data scan"), ARXSettingsPane.Text
                 .of("Choose how the library scans and indexes images."), Icons.nav("refresh", Theme.MUTED));
         section.addCard(ARXSettingsPane
@@ -366,7 +382,10 @@ public final class SettingsPanel extends JPanel {
                 .keywords("zip", "7z", "archive", "compressed", "scan", "photo", "image"), ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Watched folders"), ARXSettingsPane.Text
                         .of("Add or remove folders and rescan them."), manage)
-                .keywords("folder", "folders", "watch", "watched", "manage", "rescan"));
+                .keywords("folder", "folders", "watch", "watched", "manage", "rescan"), ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Video thumbnail position"), ARXSettingsPane.Text
+                        .of("Seconds into a video where its thumbnail is taken; 0 keeps the first frame."), thumbnailSeconds)
+                .keywords("video", "thumbnail", "seconds", "frame", "position"));
     }
     /** The font section: family and size controls plus a live preview card. */
     private void fontSection() {
@@ -438,6 +457,20 @@ public final class SettingsPanel extends JPanel {
             preview.repaint();
         }
     }
+    /** The file manager section: controls what the folder list shows. */
+    private void filesSection() {
+        ARXToggle hidden = new ARXToggle(FileSettings.hideHidden());
+        hidden.addActionListener(event -> {
+            FileSettings.hideHidden(hidden.isSelected());
+            listener.onHiddenFilesChanged();
+        });
+        ARXSettingsPane.Section section = pane.addSection(FILES, ARXSettingsPane.Text.of("Files"), ARXSettingsPane.Text
+                .of("Choose which items appear in the file manager list."), Icons.nav("folder", Theme.MUTED));
+        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Hide hidden files"), ARXSettingsPane.Text
+                .of("Exclude items with the hidden attribute from the file list."), hidden)
+                .keywords("hidden", "files", "folders", "filter", "file manager"));
+    }
+
     /**
      * The language section. Freja writes its interface text in English and {@link Language}
      * translates it into the language chosen here; the first request per sentence goes online, the

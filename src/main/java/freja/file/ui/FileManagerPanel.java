@@ -12,6 +12,7 @@ package freja.file.ui;
 import freja.Icons;
 import freja.Theme;
 import freja.file.FileBrowser;
+import freja.file.FileLocation;
 import freja.file.FileOperations;
 import freja.file.FileTab;
 import freja.file.FileTabs;
@@ -19,11 +20,17 @@ import freja.file.FileTabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.KeyboardFocusManager;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -39,23 +46,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.Function;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.ListCellRenderer;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
+import javax.swing.Scrollable;
 import javax.swing.SortOrder;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -70,10 +81,12 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import freja.setting.FavoriteFolders;
 import freja.util.PathUtil;
 import psychopath.Progress;
 /** A file manager with pinned folder tabs and a detailed file list, without a directory tree. */
@@ -92,6 +105,18 @@ public final class FileManagerPanel extends JPanel {
     private final FileOperations operations = new FileOperations();
     private final DefaultListModel<FileTab> tabModel = new DefaultListModel<>();
     private final JList<FileTab> tabList = new JList<>(tabModel) {
+        @Override
+        protected void processMouseEvent(MouseEvent event) {
+            // A popup click must not fall through to the list's selection handler, which would
+            // navigate to the tab before the context menu is shown.
+            if (event.isPopupTrigger()) {
+                event.consume();
+                showTabMenu(event);
+                return;
+            }
+            super.processMouseEvent(event);
+        }
+
         @Override
         protected void processKeyEvent(KeyEvent event) {
             // A/B/N belong to the pane. Consuming alone would still reach the UI's KeyListener, so
@@ -132,6 +157,12 @@ public final class FileManagerPanel extends JPanel {
 
     private final JScrollPane listScroll = new JScrollPane(table);
 
+    private JPanel homePanel;
+
+    private JPanel homeContent;
+
+    private List<JButton> fileActions = List.of();
+
     private final DefaultListModel<FileBrowser.Entry> entryListModel = new DefaultListModel<>();
 
     private final JList<FileBrowser.Entry> contentList = new JList<>(entryListModel);
@@ -153,6 +184,9 @@ public final class FileManagerPanel extends JPanel {
         this.tabs = new FileTabs(this::tabsChanged);
         setLayout(new BorderLayout());
         setBackground(Theme.BACKGROUND);
+        listScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+        listScroll.setBackground(Theme.BACKGROUND);
+        listScroll.getViewport().setBackground(Theme.BACKGROUND);
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabPane(), filePane());
         split.setDividerSize(5);
         split.setResizeWeight(0.0);
@@ -166,6 +200,10 @@ public final class FileManagerPanel extends JPanel {
         bind(KeyEvent.VK_A, "fileUp", this::goUp);
         bind(KeyEvent.VK_B, "fileBack", this::goBack);
         bind(KeyEvent.VK_N, "fileForward", this::goForward);
+        for (int key = 0; key <= 9; key++) {
+            int digit = key;
+            bind(KeyEvent.VK_0 + key, "favorite." + key, () -> goFavoriteByKey(digit));
+        }
     }
     /**
      * Bound to the window so the keys work whichever child has focus, but guarded by visibility so
@@ -186,14 +224,37 @@ public final class FileManagerPanel extends JPanel {
         keys.put(KeyStroke.getKeyStroke(keyCode, 0), name);
         keys.put(KeyStroke.getKeyStroke(keyCode, KeyEvent.SHIFT_DOWN_MASK), name);
     }
+    /** A plain digit opens the favourite that was assigned to it. */
+    private void goFavoriteByKey(int key) {
+        for (Path folder : FavoriteFolders.folders()) {
+            if (FavoriteFolders.shortcut(folder) == key) {
+                openPath(folder);
+                return;
+            }
+        }
+    }
+
     private static boolean isShortcutChar(char key) {
-        return key == 'a' || key == 'A' || key == 'b' || key == 'B' || key == 'n' || key == 'N';
+        return key == 'a' || key == 'A' || key == 'b' || key == 'B' || key == 'n' || key == 'N'
+                || (key >= '0' && key <= '9');
     }
     private void goUp() {
         FileTab tab = tabs.active();
-        if (tab != null && tab.current().getParent() != null) {
-            tabs.navigate(tab.current().getParent());
+        if (tab == null || !(tab.current() instanceof FileLocation.Folder folder)) {
+            return;
         }
+        Path path = folder.path();
+        if (path.getParent() != null) {
+            tabs.navigate(path.getParent());
+        } else if (isWindowsDriveRoot(path)) {
+            tabs.navigate(FileLocation.Home.INSTANCE);
+        }
+    }
+
+    private static boolean isWindowsDriveRoot(Path path) {
+        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows")
+                && path.getParent() == null
+                && path.toString().matches("(?i)^[A-Za-z]:\\\\?$");
     }
     private void goBack() {
         tabs.back();
@@ -227,38 +288,34 @@ public final class FileManagerPanel extends JPanel {
                 tabs.select(tabList.getSelectedIndex());
             }
         });
-        tabList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent event) {
-                if (event.isPopupTrigger()) {
-                    showTabMenu(event);
-                }
-            }
-            @Override
-            public void mouseReleased(MouseEvent event) {
-                if (event.isPopupTrigger()) {
-                    showTabMenu(event);
-                }
-            }
-        });
-        JButton add = new JButton(Icons.plus(15, Theme.MUTED));
-        add.setToolTipText("フォルダをタブに追加");
-        add.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 6, 6, 6));
-        add.addActionListener(event -> addTab());
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
-        footer.setOpaque(false);
-        footer.add(add);
-        panel.add(new JScrollPane(tabList), BorderLayout.CENTER);
-        panel.add(footer, BorderLayout.SOUTH);
+        JScrollPane tabsScroll = new JScrollPane(tabList);
+        tabsScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+        tabsScroll.getViewport().setBackground(Theme.SIDEBAR);
+        panel.add(tabsScroll, BorderLayout.CENTER);
         return panel;
     }
     private void showTabMenu(MouseEvent event) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem add = new JMenuItem("フォルダをタブに追加");
+        add.addActionListener(e -> addTab());
+        menu.add(add);
         int index = tabList.locationToIndex(event.getPoint());
         if (index < 0) {
+            menu.show(tabList, event.getX(), event.getY());
             return;
         }
-        tabList.setSelectedIndex(index);
-        JPopupMenu menu = new JPopupMenu();
+        menu.addSeparator();
+        Path folder = tabs.tabs().get(index).current().path();
+        if (folder != null) {
+            JMenuItem favorite = new JMenuItem(FavoriteFolders.contains(folder)
+                    ? "お気に入りから削除" : "お気に入りに追加");
+            favorite.addActionListener(e -> {
+                FavoriteFolders.toggle(folder);
+                buildHome();
+            });
+            menu.add(favorite);
+            menu.addSeparator();
+        }
         JMenuItem rename = new JMenuItem("タブ名を変更");
         rename.addActionListener(e -> {
             String name = JOptionPane.showInputDialog(this, "タブ名", tabs.tabs().get(index).displayName());
@@ -344,12 +401,14 @@ public final class FileManagerPanel extends JPanel {
         unpack.setToolTipText("ここに解凍");
         unpack.addActionListener(event -> extractSelected());
         bar.add(Box.createHorizontalStrut(12));
-        for (JButton button : List.of(copy, move, rename, delete, pack, unpack)) {
+        fileActions = List.of(copy, move, rename, delete, pack, unpack);
+        for (JButton button : fileActions) {
             button.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 6, 4, 6));
             button.setContentAreaFilled(false);
             button.setFocusable(false);
             bar.add(button);
         }
+        homePanel = homePane();
         applyListSettings();
         table.setShowGrid(false);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -380,6 +439,18 @@ public final class FileManagerPanel extends JPanel {
         tileList.setFixedCellHeight(104);
         installOpenOnDoubleClick(contentList);
         installOpenOnDoubleClick(tileList);
+        installFavoriteMenu(table, event -> {
+            int row = table.rowAtPoint(event.getPoint());
+            return row < 0 ? null : entries.get(table.convertRowIndexToModel(row));
+        });
+        installFavoriteMenu(contentList, event -> {
+            int index = contentList.locationToIndex(event.getPoint());
+            return index < 0 ? null : entryListModel.get(index);
+        });
+        installFavoriteMenu(tileList, event -> {
+            int index = tileList.locationToIndex(event.getPoint());
+            return index < 0 ? null : entryListModel.get(index);
+        });
         status.setFont(Theme.font(Font.PLAIN, 11));
         status.setForeground(Theme.MUTED);
         status.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 10, 4, 10));
@@ -391,6 +462,9 @@ public final class FileManagerPanel extends JPanel {
     /** Applies the separately configurable file list font and row height. */
     public void applyListSettings() {
         Font font = Theme.fileListFont();
+        table.setBackground(Theme.BACKGROUND);
+        contentList.setBackground(Theme.BACKGROUND);
+        tileList.setBackground(Theme.BACKGROUND);
         table.setFont(font);
         table.getTableHeader().setFont(font);
         table.setRowHeight(Theme.scaledFileListRowHeight());
@@ -411,13 +485,19 @@ public final class FileManagerPanel extends JPanel {
         }
         List<Path> selected = selectedPaths();
         view = next;
-        listScroll.setViewportView(switch (view) {
+        updateViewport();
+        updateViews();
+        restoreSelection(selected);
+    }
+
+    private void updateViewport() {
+        FileTab active = tabs.active();
+        boolean home = active != null && active.current() instanceof FileLocation.Home;
+        listScroll.setViewportView(home ? homePanel : switch (view) {
             case DETAILS -> table;
             case CONTENT -> contentList;
             case TILES -> tileList;
         });
-        updateViews();
-        restoreSelection(selected);
     }
 
     private JList<FileBrowser.Entry> activeList() {
@@ -470,6 +550,46 @@ public final class FileManagerPanel extends JPanel {
                 }
             }
         });
+    }
+
+    /** Right-click on any row in any view offers the same favourite toggle. */
+    private void installFavoriteMenu(JComponent component, Function<MouseEvent, FileBrowser.Entry> entryAt) {
+        component.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                if (event.isPopupTrigger()) {
+                    showFileMenu(event, entryAt.apply(event));
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent event) {
+                if (event.isPopupTrigger()) {
+                    showFileMenu(event, entryAt.apply(event));
+                }
+            }
+        });
+    }
+
+    private void showFileMenu(MouseEvent event, FileBrowser.Entry entry) {
+        if (entry == null) {
+            return;
+        }
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem favorite = new JMenuItem(FavoriteFolders.contains(entry.path())
+                ? "お気に入りから削除" : "お気に入りに追加");
+        favorite.addActionListener(e -> {
+            FavoriteFolders.toggle(entry.path());
+            buildHome();
+        });
+        menu.add(favorite);
+        menu.show(event.getComponent(), event.getX(), event.getY());
+    }
+
+    /** Opens a remembered path: folders navigate, files and archives open normally. */
+    private void openPath(Path path) {
+        String name = path.getFileName() == null ? path.toString() : path.getFileName().toString();
+        open(new FileBrowser.Entry(path, name, Files.isDirectory(path), PathUtil.isArchive(path), 0, 0, ""));
     }
 
     private void restoreSelection(List<Path> paths) {
@@ -527,13 +647,22 @@ public final class FileManagerPanel extends JPanel {
             tabList.setSelectedIndex(tabs.selectedIndex());
         }
         FileTab active = tabs.active();
+        boolean home = active != null && active.current() instanceof FileLocation.Home;
         back.setEnabled(active != null && active.canBack());
         forward.setEnabled(active != null && active.canForward());
-        up.setEnabled(active != null && active.current().getParent() != null);
+        up.setEnabled(active != null && active.current() instanceof FileLocation.Folder folder
+                && (folder.path().getParent() != null || isWindowsDriveRoot(folder.path())));
+        for (JButton button : fileActions) {
+            button.setEnabled(!home);
+        }
         refresh();
     }
     private List<Path> selectedPaths() {
         List<Path> paths = new ArrayList<>();
+        FileTab active = tabs.active();
+        if (active != null && active.current() instanceof FileLocation.Home) {
+            return paths;
+        }
         if (view == View.DETAILS) {
             for (int row : table.getSelectedRows()) {
                 paths.add(entries.get(table.convertRowIndexToModel(row)).path());
@@ -692,7 +821,7 @@ public final class FileManagerPanel extends JPanel {
             }
         };
     }
-    private void refresh() {
+    public void refresh() {
         FileTab active = tabs.active();
         if (active == null) {
             entries.clear();
@@ -700,11 +829,38 @@ public final class FileManagerPanel extends JPanel {
             updateViews();
             pathLabel.setText("フォルダを追加してください");
             status.setText("");
+            updateViewport();
             return;
         }
-        pathLabel.setText(active.current().toString());
+        FileLocation location = active.current();
+        updateViewport();
         long id = ++request;
-        browser.list(active.current(), (found, error) -> {
+        long started = System.nanoTime();
+        if (location instanceof FileLocation.Home) {
+            pathLabel.setText("HOME");
+            entries.clear();
+            tableModel.fireTableDataChanged();
+            updateViews();
+            buildHome();
+            browser.listHome((found, error) -> {
+                if (id != request) {
+                    return;
+                }
+                entries.clear();
+                if (found != null) {
+                    entries.addAll(found);
+                }
+                tableModel.fireTableDataChanged();
+                updateViews();
+                buildHome();
+                status.setText(entries.size() + " 箇所" + elapsed(started)
+                        + (error == null ? "" : "  ·  読み込みに失敗しました"));
+            });
+            return;
+        }
+        Path path = ((FileLocation.Folder) location).path();
+        pathLabel.setText(path.toString());
+        browser.list(path, (found, error) -> {
             if (id != request) {
                 return;
             }
@@ -719,9 +875,459 @@ public final class FileManagerPanel extends JPanel {
                 bytes += entry.size();
             }
             status.setText(String.format(Locale.ROOT, "%1$d 項目  ·  %2$s", entries.size(), humanSize(bytes))
-                    + (error == null ? "" : "  ·  読み込みに失敗しました"));
+                    + elapsed(started) + (error == null ? "" : "  ·  読み込みに失敗しました"));
         });
     }
+    /** The virtual home: collapsible drive and network sections, styled like Files. */
+    private JPanel homePane() {
+        homeContent = new HomeContent();
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Theme.BACKGROUND);
+        JScrollPane scroll = new JScrollPane(homeContent);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+        scroll.setBackground(Theme.BACKGROUND);
+        scroll.getViewport().setBackground(Theme.BACKGROUND);
+        panel.add(scroll, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void buildHome() {
+        if (homeContent == null) {
+            return;
+        }
+        homeContent.removeAll();
+        addHomeSection("ドライブ", "ドライブ", Icons.of("mdi:harddisk", 14, Theme.MUTED));
+        addHomeSection("ネットワーク", "ネットワーク", Icons.of("mdi:lan", 14, Theme.MUTED));
+        addFavoriteSection();
+        if (System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows")) {
+            addPinnedSection();
+            addSystemSection();
+        }
+        homeContent.add(Box.createVerticalGlue());
+        homeContent.revalidate();
+        homeContent.repaint();
+    }
+
+    /** Folders the user added from a tab's context menu. */
+    private void addFavoriteSection() {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        header.setOpaque(false);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel label = new JLabel("お気に入り");
+        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setForeground(Theme.TEXT);
+        header.add(new JLabel(Icons.of("mdi:star", 14, Theme.MUTED)));
+        header.add(label);
+        homeContent.add(header);
+
+        JPanel items = new WrapPanel();
+        items.setBackground(Theme.BACKGROUND);
+        items.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 18, 6, 0));
+        List<Path> favorites = FavoriteFolders.folders();
+        if (favorites.isEmpty()) {
+            JLabel empty = new JLabel("お気に入りフォルダはありません");
+            empty.setFont(Theme.fileListFont());
+            empty.setForeground(Theme.MUTED);
+            items.add(empty);
+        }
+        for (Path folder : favorites) {
+            String name = folder.getFileName() == null ? folder.toString() : folder.getFileName().toString();
+            int shortcut = FavoriteFolders.shortcut(folder);
+            FileBrowser.Entry probe = new FileBrowser.Entry(folder, name, Files.isDirectory(folder),
+                    PathUtil.isArchive(folder), 0, 0, "");
+            JPanel card = linkTile(name, iconFor(probe, 20), () -> openPath(folder),
+                    shortcut >= 0 ? String.valueOf(shortcut) : null);
+            Path target = folder;
+            card.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent event) {
+                    if (event.isPopupTrigger()) {
+                        showFavoriteMenu(event, target);
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent event) {
+                    if (event.isPopupTrigger()) {
+                        showFavoriteMenu(event, target);
+                    }
+                }
+            });
+            items.add(card);
+        }
+        homeContent.add(items);
+    }
+
+    private void showFavoriteMenu(MouseEvent event, Path folder) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenu keys = new JMenu("ショートカットキー");
+        int assigned = FavoriteFolders.shortcut(folder);
+        for (int key = 0; key <= 9; key++) {
+            int digit = key;
+            JMenuItem item = new JMenuItem(assigned == key ? key + "  ✓" : String.valueOf(key));
+            item.addActionListener(e -> {
+                FavoriteFolders.shortcut(folder, digit);
+                buildHome();
+            });
+            keys.add(item);
+        }
+        JMenuItem none = new JMenuItem("なし");
+        none.addActionListener(e -> {
+            FavoriteFolders.shortcut(folder, -1);
+            buildHome();
+        });
+        keys.add(none);
+        menu.add(keys);
+        menu.addSeparator();
+        JMenuItem remove = new JMenuItem("お気に入りから削除");
+        remove.addActionListener(e -> {
+            FavoriteFolders.remove(folder);
+            buildHome();
+        });
+        menu.add(remove);
+        menu.show(event.getComponent(), event.getX(), event.getY());
+    }
+
+    /** Standard shell folders, with the localized Japanese name as a fallback. */
+    private void addPinnedSection() {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        header.setOpaque(false);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel label = new JLabel("システムフォルダ");
+        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setForeground(Theme.TEXT);
+        header.add(new JLabel(Icons.folder(14, Theme.MUTED)));
+        header.add(label);
+        homeContent.add(header);
+
+        JPanel items = new WrapPanel();
+        items.setBackground(Theme.BACKGROUND);
+        items.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 18, 6, 0));
+        items.add(pinnedTile("デスクトップ", "Desktop", "デスクトップ", "mdi:monitor"));
+        items.add(pinnedTile("ダウンロード", "Downloads", "ダウンロード", "mdi:download"));
+        items.add(pinnedTile("ドキュメント", "Documents", "ドキュメント", "mdi:file-document"));
+        items.add(pinnedTile("ピクチャ", "Pictures", "ピクチャ", "mdi:image"));
+        items.add(pinnedTile("ミュージック", "Music", "ミュージック", "mdi:music"));
+        items.add(pinnedTile("ビデオ", "Videos", "ビデオ", "mdi:video"));
+        items.add(linkTile("ゴミ箱", Icons.trash(20, Theme.MUTED),
+                () -> launch(new String[] {"explorer.exe", "shell:RecycleBinFolder"})));
+        homeContent.add(items);
+    }
+
+    private JPanel pinnedTile(String name, String english, String japanese, String icon) {
+        Path home = Path.of(System.getProperty("user.home"));
+        Path folder = home.resolve(english);
+        if (!Files.isDirectory(folder)) {
+            Path localized = home.resolve(japanese);
+            if (Files.isDirectory(localized)) {
+                folder = localized;
+            }
+        }
+        Path target = folder;
+        return linkTile(name, Icons.of(icon, 20, Theme.MUTED), () -> tabs.navigate(target));
+    }
+
+    /** Well-known Windows entry points, launched through the shell rather than as file paths. */
+    private record SystemLink(String name, String[] command, Icon icon) {
+    }
+
+    private void addSystemSection() {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        header.setOpaque(false);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel label = new JLabel("システムツール");
+        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setForeground(Theme.TEXT);
+        header.add(new JLabel(Icons.settings(14, Theme.MUTED)));
+        header.add(label);
+        homeContent.add(header);
+
+        JPanel items = new WrapPanel();
+        items.setBackground(Theme.BACKGROUND);
+        items.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 18, 6, 0));
+        List<SystemLink> links = List.of(
+                new SystemLink("エクスプローラー", new String[] {"explorer.exe"}, Icons.folder(20, Theme.MUTED)),
+                new SystemLink("設定", new String[] {"ms-settings:"}, Icons.settings(20, Theme.MUTED)),
+                new SystemLink("Windows ツール", new String[] {"explorer.exe", "shell:Common Administrative Tools"}, Icons.settings(20, Theme.MUTED)),
+                new SystemLink("タスク スケジューラ", new String[] {"taskschd.msc"}, Icons.clock(20, Theme.MUTED)),
+                new SystemLink("Windows セキュリティ", new String[] {"windowsdefender:"}, Icons.check(20, Theme.MUTED)),
+                new SystemLink("リモート デスクトップ接続", new String[] {"mstsc.exe"}, Icons.of("mdi:export", 20, Theme.MUTED)),
+                new SystemLink("Windows Update", new String[] {"ms-settings:windowsupdate"}, Icons.refresh(20, Theme.MUTED)));
+        for (SystemLink link : links) {
+            items.add(linkTile(link.name(), link.icon(), () -> launch(link.command())));
+        }
+        homeContent.add(items);
+    }
+
+    private JPanel linkTile(String name, Icon icon, Runnable action) {
+        return linkTile(name, icon, action, null);
+    }
+
+    private JPanel linkTile(String name, Icon icon, Runnable action, String hint) {
+        JPanel tile = new CardPanel(new BorderLayout(6, 0));
+        Dimension size = new Dimension(220, 42);
+        tile.setPreferredSize(size);
+        tile.setMinimumSize(size);
+        tile.setMaximumSize(size);
+        tile.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 8, 5, 8));
+        JLabel label = new JLabel(truncate(name, 24));
+        label.setFont(Theme.font(Font.PLAIN, 12));
+        label.setForeground(Theme.TEXT);
+        tile.add(new JLabel(icon), BorderLayout.WEST);
+        tile.add(label, BorderLayout.CENTER);
+        if (hint != null) {
+            JLabel key = new JLabel(hint);
+            key.setFont(Theme.font(Font.BOLD, 11));
+            key.setForeground(Theme.MUTED);
+            tile.add(key, BorderLayout.EAST);
+        }
+        tile.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getButton() == MouseEvent.BUTTON1 && !event.isPopupTrigger()) {
+                    action.run();
+                }
+            }
+        });
+        return tile;
+    }
+
+    private void launch(String[] command) {
+        List<String> arguments = new ArrayList<>();
+        arguments.add("cmd");
+        arguments.add("/c");
+        arguments.add("start");
+        arguments.add("");
+        arguments.addAll(List.of(command));
+        try {
+            new ProcessBuilder(arguments).start();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "起動できませんでした: " + e.getMessage(), "システム", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void addHomeSection(String title, String section, Icon icon) {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        header.setOpaque(false);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel label = new JLabel(title);
+        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setForeground(Theme.TEXT);
+        header.add(new JLabel(icon));
+        header.add(label);
+        homeContent.add(header);
+
+        JPanel items = new WrapPanel();
+        items.setBackground(Theme.BACKGROUND);
+        items.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 18, 6, 0));
+        List<FileBrowser.Entry> found = entries.stream().filter(entry -> section.equals(entry.section())).toList();
+        if (found.isEmpty()) {
+            JLabel empty = new JLabel(section.equals("ネットワーク")
+                    ? "ネットワークの場所はありませんでした" : "ドライブはありませんでした");
+            empty.setFont(Theme.fileListFont());
+            empty.setForeground(Theme.MUTED);
+            items.add(empty);
+        }
+        for (FileBrowser.Entry entry : found) {
+            items.add(homeTile(entry));
+        }
+        homeContent.add(items);
+    }
+
+    private JPanel homeTile(FileBrowser.Entry entry) {
+        JPanel tile = new CardPanel(new BorderLayout(6, 3));
+        Dimension size = new Dimension(220, 42);
+        tile.setPreferredSize(size);
+        tile.setMinimumSize(size);
+        tile.setMaximumSize(size);
+        tile.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 8, 5, 8));
+        boolean network = "ネットワーク".equals(entry.section());
+        Icon nativeIcon = nativeIcon(entry);
+        JLabel icon = new JLabel(nativeIcon != null ? nativeIcon : glyphIcon(network, 20));
+        tile.add(icon, BorderLayout.WEST);
+        JPanel text = new JPanel();
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+        text.setOpaque(false);
+        JLabel name = new JLabel(truncate(entry.name(), 24));
+        name.setFont(Theme.font(Font.PLAIN, 12));
+        name.setForeground(Theme.TEXT);
+        text.add(name);
+        if (entry.total() > 0) {
+            text.add(Box.createVerticalStrut(2));
+            int percent = (int) Math.round(entry.free() * 100.0 / entry.total());
+            JLabel detail = new JLabel("空き " + humanSize(entry.free()) + " / " + humanSize(entry.total())
+                    + " (" + percent + "%)");
+            detail.setFont(Theme.fileListFont());
+            detail.setForeground(Theme.MUTED);
+            text.add(detail);
+        }
+        tile.add(text, BorderLayout.CENTER);
+        tile.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getButton() == MouseEvent.BUTTON1 && !event.isPopupTrigger() && entry.path() != null) {
+                    tabs.navigate(entry.path());
+                }
+            }
+        });
+        return tile;
+    }
+
+    /** Uses the shell's own drive/network icon when the platform provides one. */
+    private static Icon nativeIcon(FileBrowser.Entry entry) {
+        if (entry.path() == null) {
+            return null;
+        }
+        try {
+            return FileSystemView.getFileSystemView().getSystemIcon(entry.path().toFile(), 20, 20);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    /** Deterministic fallback which is deliberately not a folder glyph. */
+    private static Icon glyphIcon(boolean network, int size) {
+        return new Icon() {
+            @Override
+            public int getIconWidth() {
+                return size;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return size;
+            }
+
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g.setColor(Theme.MUTED);
+                    if (network) {
+                        g.fillOval(x + 1, y + 6, 7, 7);
+                        g.fillOval(x + size - 8, y + 6, 7, 7);
+                        g.drawLine(x + 6, y + 9, x + size - 8, y + 9);
+                    } else {
+                        g.fillRoundRect(x + 1, y + 5, size - 2, size - 9, 3, 3);
+                        g.fillRect(x + 3, y + 7, size - 8, 2);
+                        g.setColor(Theme.ACCENT);
+                        g.fillOval(x + size - 5, y + 9, 2, 2);
+                    }
+                } finally {
+                    g.dispose();
+                }
+            }
+        };
+    }
+
+    private static String truncate(String text, int limit) {
+        return text.length() <= limit ? text : text.substring(0, limit) + "…";
+    }
+
+    /** Rounded home card with a subtle highlight while the pointer is over it. */
+    private static final class CardPanel extends JPanel {
+
+        private boolean hover;
+
+        CardPanel(LayoutManager layout) {
+            super(layout);
+            setOpaque(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent event) {
+                    hover = true;
+                    repaint();
+                }
+
+                @Override
+                public void mouseExited(MouseEvent event) {
+                    hover = false;
+                    repaint();
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            try {
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(hover ? Theme.ACCENT_SOFT : Theme.SURFACE);
+                g.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+            } finally {
+                g.dispose();
+            }
+            super.paintComponent(graphics);
+        }
+    }
+
+    /** Follows the viewport width so the home page never needs a horizontal scrollbar. */
+    private static final class HomeContent extends JPanel implements Scrollable {
+
+        HomeContent() {
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setBackground(Theme.BACKGROUND);
+            setBorder(javax.swing.BorderFactory.createEmptyBorder(12, 18, 16, 18));
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            Dimension size = super.getPreferredSize();
+            return new Dimension(0, size.height);
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visible, int orientation, int direction) {
+            return 24;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visible, int orientation, int direction) {
+            return Math.max(24, visible.height - 24);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
+    }
+
+    /** Wraps fixed-size tiles into as many rows as the current width allows. */
+    private static final class WrapPanel extends JPanel {
+
+        WrapPanel() {
+            super(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            // Before the first layout the viewport width is still zero; assume four columns so the
+            // initial home page does not reserve one row per tile.
+            int width = getWidth() > 0 ? getWidth() : 4 * (220 + 6);
+            int columns = Math.max(1, width / (220 + 6));
+            int rows = (getComponentCount() + columns - 1) / columns;
+            int height = rows * (42 + 4) + getInsets().top + getInsets().bottom;
+            return new Dimension(0, Math.max(height, 24));
+        }
+    }
+
+    private static String elapsed(long started) {
+        return "  ·  " + (System.nanoTime() - started) / 1_000_000 + " ms";
+    }
+
     private static String humanSize(long bytes) {
         if (bytes < 1024) {
             return bytes + " B";

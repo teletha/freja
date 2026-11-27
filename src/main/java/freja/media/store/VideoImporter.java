@@ -12,11 +12,13 @@ package freja.media.store;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import freja.mpv.Mpv;
 import freja.mpv.MpvNative;
+import freja.util.VideoThumbnailSettings;
 
 /**
  * Produces the catalog entry of a video: a still frame for the thumbnail plus the dimensions and
@@ -24,8 +26,12 @@ import freja.mpv.MpvNative;
  */
 public final class VideoImporter {
 
-    /** Scanning with a dozen simultaneous mpv clients made frame extraction flaky. */
-    private static final Semaphore DECODERS = new Semaphore(2);
+    /**
+     * A dozen simultaneous mpv clients made frame extraction flaky, but two leave most cores idle
+     * on a large machine. Scale the limit with the machine, capped at six decoders.
+     */
+    private static final Semaphore DECODERS = new Semaphore(
+            Math.max(2, Math.min(6, Runtime.getRuntime().availableProcessors() / 4)));
 
     private VideoImporter() {
     }
@@ -55,6 +61,7 @@ public final class VideoImporter {
             // empty placeholder file and a slow write cannot be read half-finished.
             directory = Files.createTempDirectory("freja-video-");
             Path frame = directory.resolve("frame.png");
+            Path baseline = directory.resolve("baseline.png");
             int width;
             int height;
             long durationMillis;
@@ -81,22 +88,28 @@ public final class VideoImporter {
                 height = integer(heightValue, 0);
                 double duration = decimal(durationValue, 0);
                 durationMillis = Math.round(duration * 1000);
-                if (duration > 1) {
-                    // The very first frame is often a fade-in or a dark title card. Sample a little
-                    // into the clip so the grid shows something representative of the video.
-                    double target = Math.min(Math.max(0.5, duration * 0.1), duration - 0.1);
+                double target = seekTarget(duration, VideoThumbnailSettings.thumbnailSeconds());
+                if (target > 0) {
+                    // time-pos reaches the target before the decoder draws the new frame, so a
+                    // screenshot taken right after the seek still shows the first frame. Keep
+                    // sampling until the image differs from the pre-seek one, then keep that frame.
+                    byte[] before = screenshot(mpv, baseline);
                     mpv.command("seek", Double.toString(target), "absolute+exact");
-                    long deadline = System.nanoTime() + 2_000_000_000L;
-                    while (System.nanoTime() < deadline && decimal(mpv.property("time-pos"), -1) < target - 0.05) {
+                    long deadline = System.nanoTime() + 3_000_000_000L;
+                    while (System.nanoTime() < deadline) {
                         try {
-                            Thread.sleep(50);
+                            Thread.sleep(100);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             break;
                         }
+                        if (!Arrays.equals(screenshot(mpv, frame), before)) {
+                            break;
+                        }
                     }
+                } else {
+                    screenshot(mpv, frame);
                 }
-                mpv.screenshot(frame);
             } catch (RuntimeException e) {
                 throw new IOException("Cannot decode the video " + file.getFileName(), e);
             }
@@ -110,11 +123,63 @@ public final class VideoImporter {
             if (directory != null) {
                 try {
                     Files.deleteIfExists(directory.resolve("frame.png"));
+                    Files.deleteIfExists(directory.resolve("baseline.png"));
                     Files.deleteIfExists(directory);
                 } catch (IOException ignored) {
                 }
             }
             DECODERS.release();
+        }
+    }
+
+    /**
+     * Position of the thumbnail frame, in seconds from the start of the clip.
+     *
+     * @param duration the clip length in seconds, or 0 when unknown
+     * @param seconds the configured position, or 0 to keep the very first frame
+     * @return the seek target, or 0 when no seek is needed
+     */
+    static double seekTarget(double duration, int seconds) {
+        if (duration <= 1 || seconds <= 0) {
+            return 0;
+        }
+        // The configured position must not land in the closing credits of a short clip. Half the
+        // clip is as far as the thumbnail is ever taken, with a small floor for very short seeks.
+        return Math.min(Math.max(0.5, seconds), duration / 2);
+    }
+
+    /**
+     * Captures one frame, retrying until mpv has decoded one.
+     * <p>
+     * {@code screenshot-to-file} fails while the first frame is still being decoded, which is
+     * common right after loading a large video. Retrying turns that transient failure into a
+     * usable frame instead of a placeholder catalog row.
+     * </p>
+     *
+     * @param mpv the player holding the video
+     * @param file where to write the PNG
+     * @return the PNG bytes
+     * @throws IOException when no frame appears within the deadline
+     */
+    private static byte[] screenshot(Mpv mpv, Path file) throws IOException {
+        long deadline = System.nanoTime() + 3_000_000_000L;
+        while (true) {
+            try {
+                // Start from a missing file so mpv's stability check cannot accept an old image.
+                Files.deleteIfExists(file);
+                mpv.screenshot(file);
+                return Files.readAllBytes(file);
+            } catch (Mpv.MpvException e) {
+                if (System.nanoTime() >= deadline) {
+                    throw new IOException("mpv could not capture a frame", e);
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupted while waiting for a video frame", interrupted);
+                }
+            }
         }
     }
 

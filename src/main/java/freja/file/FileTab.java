@@ -26,20 +26,20 @@ public final class FileTab {
     /** A name chosen with "タブ名を変更" wins over the folder name. */
     private boolean customName;
 
-    private final List<Path> history = new ArrayList<>();
+    private final List<FileLocation> history = new ArrayList<>();
 
     private int index = -1;
 
     public FileTab(Path root, String displayName) {
         this.root = root.toAbsolutePath().normalize();
-        this.current = this.root;
+        this.current = FileLocation.folder(this.root);
         customName = displayName != null && !displayName.isBlank();
         this.displayName = customName ? displayName : nameOf(this.root);
-        history.add(this.root);
+        history.add(this.current);
         index = 0;
     }
 
-    private Path current;
+    private FileLocation current;
 
     public String id() {
         return id;
@@ -49,7 +49,7 @@ public final class FileTab {
         return root;
     }
 
-    public Path current() {
+    public FileLocation current() {
         return current;
     }
 
@@ -76,7 +76,8 @@ public final class FileTab {
     /** Keeps the tab label in step with the folder being browsed, unless the user renamed it. */
     private void followCurrentName() {
         if (!customName) {
-            displayName = nameOf(current);
+            displayName = current instanceof FileLocation.Folder folder
+                    ? nameOf(folder.path()) : "HOME";
         }
     }
 
@@ -103,16 +104,19 @@ public final class FileTab {
     }
 
     public void goTo(Path path) {
-        Path next = path.toAbsolutePath().normalize();
-        if (next.equals(current())) {
+        goTo(FileLocation.folder(path));
+    }
+
+    public void goTo(FileLocation location) {
+        if (location.equals(current())) {
             return;
         }
         while (history.size() - 1 > index) {
             history.remove(history.size() - 1);
         }
-        history.add(next);
+        history.add(location);
         index = history.size() - 1;
-        current = next;
+        current = location;
         followCurrentName();
     }
 

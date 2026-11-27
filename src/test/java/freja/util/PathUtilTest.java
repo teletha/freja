@@ -9,6 +9,7 @@
  */
 package freja.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,5 +33,13 @@ class PathUtilTest {
         assertTrue(PathUtil.isSupported(Path.of("photo.png")));
         assertTrue(PathUtil.isSupported(Path.of("clip.mp4")));
         assertFalse(PathUtil.isSupported(Path.of("notes.txt")));
+    }
+
+    @Test
+    void driveRootsHaveNoExtension() {
+        Path root = Path.of(".").toAbsolutePath().getRoot();
+        assertEquals("", PathUtil.extension(root));
+        assertFalse(PathUtil.isArchive(root));
+        assertFalse(PathUtil.isSupported(root));
     }
 }

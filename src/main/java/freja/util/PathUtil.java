@@ -83,7 +83,13 @@ public final class PathUtil {
      * @return the extension or an empty string
      */
     public static String extension(Path path) {
-        String name = path.getFileName().toString();
+        // A drive root has no file name, so it has no extension either. Deriving one from the
+        // whole path would mistake the dot in e.g. "C:\Photos.v2" for an extension separator.
+        Path fileName = path.getFileName();
+        if (fileName == null) {
+            return "";
+        }
+        String name = fileName.toString();
         int dot = name.lastIndexOf('.');
         return dot < 0 ? "" : name.substring(dot + 1).toLowerCase(Locale.ROOT);
     }
