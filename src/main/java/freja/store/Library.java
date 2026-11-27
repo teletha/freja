@@ -1242,6 +1242,30 @@ public final class Library implements AutoCloseable {
     }
 
     /**
+     * Finds a catalogued photo by its file path, or null when the path is not in the library.
+     *
+     * @param path the file to look up
+     * @return the matching photo, or null
+     */
+    public Photo photo(Path path) {
+        assertOffUiThread();
+        synchronized (readerLock) {
+            try (PreparedStatement statement = reader.prepareStatement("""
+                    SELECT p.*, f.path AS folder_path
+                    FROM photos p JOIN folders f ON f.id = p.folder_id
+                    WHERE p.path_key = ?
+                    """)) {
+                statement.setString(1, PathUtil.key(path));
+                try (ResultSet results = statement.executeQuery()) {
+                    return results.next() ? mapPhoto(results) : null;
+                }
+            } catch (SQLException e) {
+                throw new LibraryException("Failed to find the photo at " + path, e);
+            }
+        }
+    }
+
+    /**
      * Finds a photo by identifier.
      *
      * @param id a photo identifier

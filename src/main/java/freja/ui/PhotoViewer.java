@@ -442,25 +442,29 @@ public final class PhotoViewer extends JDialog {
         toastHost.setOpaque(false);
         toastHost.add(toast);
 
-        JLabel helpText = new JLabel("""
-                <html><div style='color:white;font-size:13px'>
-                <b>ショートカット</b><br>
-                Space / K / P　再生・一時停止<br>
-                ← / →　前後の項目<br>
-                J / L　10秒戻る・進む<br>
-                0〜9　0〜90% へシーク<br>
-                ↑ / ↓　音量 ±5<br>
-                M　ミュート<br>
-                C　字幕 On / Off<br>
-                Shift + &lt; / &gt;　再生速度 ±0.25<br>
-                F　フィット<br>
-                ?　この一覧<br>
-                Esc　閉じる
-                </div></html>""");
-        helpText.setForeground(Color.WHITE);
-        helpPanel.setOpaque(false);
-        helpPanel.setBorder(BorderFactory.createEmptyBorder(14, 20, 14, 20));
-        helpPanel.add(helpText, BorderLayout.CENTER);
+        helpPanel.setOpaque(true);
+        helpPanel.setBackground(new Color(32, 32, 32));
+        helpPanel.setBorder(BorderFactory.createEmptyBorder(24, 24, 12, 24));
+        JEditorPane helpText = new JEditorPane("text/html", helpHtml());
+        helpText.setEditable(false);
+        helpText.setOpaque(true);
+        helpText.setBackground(new Color(32, 32, 32));
+        helpText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+        JScrollPane helpScroll = new JScrollPane(helpText);
+        helpScroll.setBorder(BorderFactory.createEmptyBorder());
+        helpScroll.getViewport().setOpaque(false);
+        helpPanel.add(helpScroll, BorderLayout.CENTER);
+        JButton closeHelp = new JButton("閉じる");
+        closeHelp.setForeground(Color.WHITE);
+        closeHelp.setFocusPainted(false);
+        closeHelp.setContentAreaFilled(false);
+        closeHelp.setBorderPainted(false);
+        closeHelp.setFont(Theme.font(Font.PLAIN, 12));
+        closeHelp.addActionListener(event -> toggleHelp());
+        JPanel helpFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        helpFooter.setOpaque(false);
+        helpFooter.add(closeHelp);
+        helpPanel.add(helpFooter, BorderLayout.SOUTH);
         helpPanel.setVisible(false);
         JPanel centre = new JPanel();
         centre.setLayout(null);
@@ -889,7 +893,13 @@ public final class PhotoViewer extends JDialog {
     private void installKeys() {
         bind("LEFT", () -> move(-1));
         bind("RIGHT", () -> move(1));
-        bind("ESCAPE", this::dispose);
+        bind("ESCAPE", () -> {
+            if (helpVisible) {
+                toggleHelp();
+            } else {
+                dispose();
+            }
+        });
         bind("SPACE", this::togglePlayback);
         bind("K", this::togglePlayback);
         bind("P", this::togglePlayback);
@@ -1100,9 +1110,13 @@ public final class PhotoViewer extends JDialog {
         }
         Point origin = getLocationOnScreen();
         controlsWindow.setBounds(origin.x, origin.y, getWidth(), getHeight());
-        Dimension helpSize = helpPanel.getPreferredSize();
-        helpPanel.setBounds((getWidth() - helpSize.width) / 2, (getHeight() - helpSize.height) / 2,
-                helpSize.width, helpSize.height);
+        if (helpVisible) {
+            helpPanel.setBounds(0, 0, getWidth(), getHeight());
+        } else {
+            Dimension helpSize = helpPanel.getPreferredSize();
+            helpPanel.setBounds((getWidth() - helpSize.width) / 2, (getHeight() - helpSize.height) / 2,
+                    helpSize.width, helpSize.height);
+        }
         Dimension toastSize = toastHost.getPreferredSize();
         toastHost.setBounds((getWidth() - toastSize.width) / 2, (getHeight() - toastSize.height) / 2,
                 toastSize.width, toastSize.height);
@@ -1124,12 +1138,53 @@ public final class PhotoViewer extends JDialog {
                 event.getWheelRotation()));
     }
 
+    private static String helpHtml() {
+        StringBuilder html = new StringBuilder("""
+                <html><head><style>
+                body { background-color:#202020; color:#dddddd; font-family:sans-serif; }
+                h1 { color:white; font-size:22px; margin:0 0 18px 0; }
+                h2 { color:#aaaaaa; font-size:13px; font-weight:normal; margin:14px 0 6px 0; }
+                table { width:100%; border-collapse:collapse; }
+                td { padding:5px 0; font-size:13px; border-bottom:1px solid #3a3a3a; }
+                td.k { text-align:right; color:white; font-weight:bold; width:40%; }
+                table.outer td { vertical-align:top; border:0; padding:0 20px; }
+                </style></head><body>
+                <h1>キーボード ショートカット</h1>
+                <table class='outer'><tr><td>
+                """);
+        html.append("<h2>再生</h2><table>");
+        helpRow(html, "再生／一時停止", "Space / K / P");
+        helpRow(html, "10秒戻る", "J");
+        helpRow(html, "10秒進む", "L");
+        helpRow(html, "前後の項目", "← / →");
+        helpRow(html, "指定位置へ移動", "0 〜 9");
+        helpRow(html, "フィット表示", "F");
+        html.append("</table></td><td><h2>操作</h2><table>");
+        helpRow(html, "音量を上げる／下げる", "↑ / ↓");
+        helpRow(html, "ミュート切替", "M");
+        helpRow(html, "字幕 On／Off", "C");
+        helpRow(html, "再生速度 ±0.25", "Shift + &lt; / &gt;");
+        helpRow(html, "この一覧", "?");
+        helpRow(html, "閉じる", "Esc");
+        html.append("</table></td></tr></table></body></html>");
+        return html.toString();
+    }
+
+    private static void helpRow(StringBuilder html, String label, String key) {
+        html.append("<tr><td>").append(label).append("</td><td class='k'>").append(key).append("</td></tr>");
+    }
+
     private void toggleHelp() {
         helpVisible = !helpVisible;
         helpPanel.setVisible(helpVisible);
-        helpPanel.revalidate();
+        topPanel.setVisible(!helpVisible);
+        bottomPanel.setVisible(!helpVisible);
+        if (helpVisible) {
+            toast.setVisible(false);
+        }
         showOverlay();
         positionControls();
+        controlsRoot.revalidate();
     }
 
     private void showToast(String text) {

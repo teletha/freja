@@ -31,6 +31,9 @@ public final class PathUtil {
     private static final Set<String> VIDEO_EXTENSIONS = Set.of("mp4", "m4v", "mov", "mkv", "webm", "avi", "wmv",
             "flv", "mpg", "mpeg", "m2ts", "ts", "3gp", "ogv", "vob");
 
+    /** Archive containers the file manager can browse. */
+    private static final Set<String> ARCHIVE_EXTENSIONS = Set.of("zip", "7z", "jar", "war", "apk");
+
     /** The folder separator as it appears in normalized path keys. */
     public static final String SEPARATOR = File.separator;
 
@@ -113,6 +116,16 @@ public final class PathUtil {
      */
     public static boolean isSupported(Path path) {
         return isImage(path) || isVideo(path);
+    }
+
+    /**
+     * Tests whether the file is an archive the file manager can browse.
+     *
+     * @param path a file
+     * @return true when the extension belongs to a supported archive format
+     */
+    public static boolean isArchive(Path path) {
+        return ARCHIVE_EXTENSIONS.contains(extension(path));
     }
 
     /**

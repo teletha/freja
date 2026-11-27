@@ -154,6 +154,8 @@ public final class MainWindow extends JFrame {
 
     private SettingsPanel settingsPanel;
 
+    private FileManagerPanel fileManager;
+
     private javax.swing.JSplitPane split;
 
     private javax.swing.JSplitPane sidebarSplit;
@@ -351,6 +353,18 @@ public final class MainWindow extends JFrame {
         });
         holder[0] = settingsPanel;
         panes.add(settingsPanel, "settings");
+        fileManager = new FileManagerPanel(new FileManagerPanel.Listener() {
+            @Override
+            public void openMedia(Path path) {
+                openMediaFile(path);
+            }
+
+            @Override
+            public void filesChanged() {
+                scanner.scanAll();
+            }
+        });
+        panes.add(fileManager, "files");
         add(panes, BorderLayout.CENTER);
         add(activityBar(), BorderLayout.WEST);
         switchPane("viewer");
@@ -372,6 +386,7 @@ public final class MainWindow extends JFrame {
         bar.setPreferredSize(new Dimension(48, 0));
         bar.add(Box.createVerticalStrut(8));
         activityButtons.add(new ActivityButton("viewer", Icons.grid(20, Theme.MUTED), "写真ライブラリ", () -> switchPane("viewer")));
+        activityButtons.add(new ActivityButton("files", Icons.folder(20, Theme.MUTED), "ファイル", () -> switchPane("files")));
         activityButtons.add(new ActivityButton("settings", Icons.settings(20, Theme.MUTED), "設定", () -> switchPane("settings")));
         for (ActivityButton button : activityButtons) {
             bar.add(button);
@@ -1376,6 +1391,21 @@ public final class MainWindow extends JFrame {
             inspectorPhoto = lead;
             inspector.show(lead);
             refreshAll();
+        });
+    }
+
+    /** Opens a file chosen in the file manager in Freja's viewer when catalogued, otherwise in the OS. */
+    private void openMediaFile(Path path) {
+        tasks.query(() -> library.photo(path), photo -> {
+            if (photo != null) {
+                openViewer(photo);
+                return;
+            }
+            try {
+                Desktop.getDesktop().open(path.toFile());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "ファイルを開けませんでした: " + e.getMessage(), "ファイル", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 
