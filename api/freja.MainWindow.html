@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja</code>
+				<h2 class="Class AB"><code class="Z">MainWindow</code></h2>
+				<div class="w">
+					<ul class="E G">
+						<li><code><a aria-label="javax.swing.JFrame 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JFrame.html">JFrame</a></code></li>
+						<li><code><a aria-label="java.awt.Frame 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Frame.html">Frame</a></code></li>
+						<li><code><a aria-label="java.awt.Window 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Window.html">Window</a></code></li>
+						<li><code><a aria-label="java.awt.Container 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Container.html">Container</a></code></li>
+						<li><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code></li>
+					</ul>
+					<ul class="E H">
+						<li><code><a aria-label="javax.accessibility.Accessible 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/accessibility/Accessible.html">Accessible</a></code></li>
+						<li><code><a aria-label="javax.swing.TransferHandler.HasGetTransferHandler 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/TransferHandler.HasGetTransferHandler.html">HasGetTransferHandler</a></code></li>
+						<li><code><a aria-label="java.awt.image.ImageObserver 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/ImageObserver.html">ImageObserver</a></code></li>
+						<li><code><a aria-label="java.awt.MenuContainer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/MenuContainer.html">MenuContainer</a></code></li>
+						<li><code><a aria-label="javax.swing.RootPaneContainer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/RootPaneContainer.html">RootPaneContainer</a></code></li>
+						<li><code><a aria-label="java.io.Serializable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/Serializable.html">Serializable</a></code></li>
+						<li><code><a aria-label="javax.swing.WindowConstants 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/WindowConstants.html">WindowConstants</a></code></li>
+					</ul>
+				</div><span class="A"><p>The main application window.</p></span></section>
+			<section class="KB" id="MainWindow(freja.media.store.Library,freja.media.scan.LibraryScanner)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">MainWindow</code><code class="L">(<code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code>, <code><a aria-label="freja.media.scan.LibraryScanner" href="api/freja.media.scan.LibraryScanner.html">LibraryScanner</a></code><code class="parameterName">scanner</code>)</code></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="freja.media.scan.LibraryScanner" href="api/freja.media.scan.LibraryScanner.html">LibraryScanner</a></code><code class="parameterName">scanner</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="start()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">start</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Starts the background scanner.</p></span></section>
+			<section class="KB" id="addFolders(java.util.List)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">addFolders</code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></code></code><code class="parameterName">folders</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></code></code><code class="parameterName">folders</code></td>
+						<td><span><p>the folders</p></span></td>
+					</tr>
+				</table><span class="A"><p>Adds folders, typically from the command line.</p></span></section>
+			<section class="KB" id="toggleDarkMode()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">toggleDarkMode</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Switches between light and dark mode.</p></span></section>
+			<section class="KB" id="requestShutdown()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">requestShutdown</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Called when a newer instance takes over; shuts down on the event dispatch thread.</p></span></section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Constructors</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.MainWindow.html#MainWindow(freja.media.store.Library,freja.media.scan.LibraryScanner)">MainWindow</a></code><code class="L">(<code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code>, <code><a aria-label="freja.media.scan.LibraryScanner" href="api/freja.media.scan.LibraryScanner.html">LibraryScanner</a></code><code class="parameterName">scanner</code>)</code></li>
+				</ul>
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.MainWindow.html#start()">start</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.MainWindow.html#addFolders(java.util.List)">addFolders</a></code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></code></code><code class="parameterName">folders</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.MainWindow.html#toggleDarkMode()">toggleDarkMode</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.MainWindow.html#requestShutdown()">requestShutdown</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

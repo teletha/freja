@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.media.ui</code>
+				<h2 class="Interface AB"><code class="Z">ScanFoldersDialog.Listener</code></h2>
+				<div class="w"></div><span class="A"><p>Actions requested by this dialog.</p></span></section>
+			<section class="KB" id="onRegisterFolder(java.nio.file.Path)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onRegisterFolder</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="onClearFolders()">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onClearFolders</code><code class="L">()</code><i class="y"><code>void</code></i></h2>
+			</section>
+			<section class="KB" id="onRemoveFolders(java.util.List)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onRemoveFolders</code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="onScanFolders(java.util.List)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onScanFolders</code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="onScanEnabled(long,boolean)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onScanEnabled</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code>boolean</code><code class="parameterName">enabled</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="onStartupScanChanged(boolean)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onStartupScanChanged</code><code class="L">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="onSweepChanged(boolean)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onSweepChanged</code><code class="L">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onRegisterFolder(java.nio.file.Path)">onRegisterFolder</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onClearFolders()">onClearFolders</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onRemoveFolders(java.util.List)">onRemoveFolders</a></code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onScanFolders(java.util.List)">onScanFolders</a></code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onScanEnabled(long,boolean)">onScanEnabled</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code>boolean</code><code class="parameterName">enabled</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onStartupScanChanged(boolean)">onStartupScanChanged</a></code><code class="L">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.media.ui.ScanFoldersDialog.Listener.html#onSweepChanged(boolean)">onSweepChanged</a></code><code class="L">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="J"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

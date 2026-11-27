@@ -5,12 +5,16 @@ const root = {
 		"laevatain.util",
 		"laevatain",
 		"freja.util",
-		"freja.scan",
-		"freja.model",
-		"freja.ui",
+		"freja.mpv",
 		"freja",
+		"freja.file",
+		"freja.file.ui",
+		"freja.setting",
+		"freja.setting.ui",
+		"freja.media.scan",
 		"freja.media",
-		"freja.store"
+		"freja.media.ui",
+		"freja.media.store"
 	],
 	"types": [
 		{
@@ -164,159 +168,109 @@ const root = {
 			"type": "Class"
 		},
 		{
-			"name": "LibraryScanner",
-			"packageName": "freja.scan",
+			"name": "Mpv",
+			"packageName": "freja.mpv",
 			"type": "Class"
 		},
 		{
-			"name": "LibraryScanner.Listener",
-			"packageName": "freja.scan",
-			"type": "Interface"
+			"name": "Mpv.MpvException",
+			"packageName": "freja.mpv",
+			"type": "Exception"
 		},
 		{
-			"name": "LibraryScanner.State",
-			"packageName": "freja.scan",
-			"type": "Record"
+			"name": "MpvNative",
+			"packageName": "freja.mpv",
+			"type": "Class"
 		},
 		{
-			"name": "LibraryStats",
-			"packageName": "freja.model",
-			"type": "Record"
+			"name": "MpvNative.UnavailableException",
+			"packageName": "freja.mpv",
+			"type": "Exception"
 		},
 		{
-			"name": "PhotoFilter",
-			"packageName": "freja.model",
-			"type": "Record"
-		},
-		{
-			"name": "PhotoFilter.SortOrder",
-			"packageName": "freja.model",
-			"type": "Enum"
-		},
-		{
-			"name": "Folder",
-			"packageName": "freja.model",
-			"type": "Record"
-		},
-		{
-			"name": "Tag",
-			"packageName": "freja.model",
-			"type": "Record"
-		},
-		{
-			"name": "Photo",
-			"packageName": "freja.model",
-			"type": "Record"
+			"name": "Win32Window",
+			"packageName": "freja.mpv",
+			"type": "Class"
 		},
 		{
 			"name": "AppIcon",
-			"packageName": "freja.ui",
+			"packageName": "freja",
 			"type": "Enum"
 		},
 		{
-			"name": "PhotoInspector",
-			"packageName": "freja.ui",
+			"name": "FileBrowser",
+			"packageName": "freja.file",
 			"type": "Class"
 		},
 		{
-			"name": "PhotoInspector.Listener",
-			"packageName": "freja.ui",
+			"name": "FileBrowser.Callback",
+			"packageName": "freja.file",
+			"type": "Functional"
+		},
+		{
+			"name": "FileBrowser.Entry",
+			"packageName": "freja.file",
+			"type": "Record"
+		},
+		{
+			"name": "FileOperations",
+			"packageName": "freja.file",
+			"type": "Class"
+		},
+		{
+			"name": "FileOperations.Listener",
+			"packageName": "freja.file",
 			"type": "Interface"
 		},
 		{
+			"name": "FileTab",
+			"packageName": "freja.file",
+			"type": "Class"
+		},
+		{
+			"name": "FileManagerPanel",
+			"packageName": "freja.file.ui",
+			"type": "Class"
+		},
+		{
+			"name": "FileManagerPanel.Listener",
+			"packageName": "freja.file.ui",
+			"type": "Functional"
+		},
+		{
+			"name": "FileTabs",
+			"packageName": "freja.file",
+			"type": "Class"
+		},
+		{
+			"name": "FileTabs.Listener",
+			"packageName": "freja.file",
+			"type": "Functional"
+		},
+		{
 			"name": "Theme",
-			"packageName": "freja.ui",
+			"packageName": "freja",
 			"type": "Class"
 		},
 		{
 			"name": "Theme.Preview",
-			"packageName": "freja.ui",
+			"packageName": "freja",
 			"type": "Record"
 		},
 		{
 			"name": "Theme.ThemeInfo",
-			"packageName": "freja.ui",
+			"packageName": "freja",
 			"type": "Record"
 		},
 		{
 			"name": "MainWindow",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "SettingsBackup",
-			"packageName": "freja.ui",
+			"packageName": "freja",
 			"type": "Class"
 		},
 		{
 			"name": "Icons",
-			"packageName": "freja.ui",
+			"packageName": "freja",
 			"type": "Class"
-		},
-		{
-			"name": "SettingsPanel",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "SettingsPanel.Listener",
-			"packageName": "freja.ui",
-			"type": "Interface"
-		},
-		{
-			"name": "PhotoViewer",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "PhotoViewer.Listener",
-			"packageName": "freja.ui",
-			"type": "Functional"
-		},
-		{
-			"name": "PhotoGrid",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "PhotoGrid.SortOrderListener",
-			"packageName": "freja.ui",
-			"type": "Functional"
-		},
-		{
-			"name": "PhotoGrid.GroupMode",
-			"packageName": "freja.ui",
-			"type": "Enum"
-		},
-		{
-			"name": "FolderList",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "ScanFoldersDialog",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "ScanFoldersDialog.Listener",
-			"packageName": "freja.ui",
-			"type": "Interface"
-		},
-		{
-			"name": "Sidebar",
-			"packageName": "freja.ui",
-			"type": "Class"
-		},
-		{
-			"name": "Sidebar.Listener",
-			"packageName": "freja.ui",
-			"type": "Interface"
-		},
-		{
-			"name": "Sidebar.Mode",
-			"packageName": "freja.ui",
-			"type": "Enum"
 		},
 		{
 			"name": "Freja",
@@ -324,98 +278,213 @@ const root = {
 			"type": "Class"
 		},
 		{
-			"name": "Mpv",
-			"packageName": "freja.media",
+			"name": "SettingsBackup",
+			"packageName": "freja.setting",
 			"type": "Class"
 		},
 		{
-			"name": "Mpv.MpvException",
-			"packageName": "freja.media",
-			"type": "Exception"
-		},
-		{
-			"name": "MpvNative",
-			"packageName": "freja.media",
+			"name": "SettingsPanel",
+			"packageName": "freja.setting.ui",
 			"type": "Class"
 		},
 		{
-			"name": "MpvNative.UnavailableException",
-			"packageName": "freja.media",
-			"type": "Exception"
+			"name": "SettingsPanel.Listener",
+			"packageName": "freja.setting.ui",
+			"type": "Interface"
 		},
 		{
-			"name": "Win32Window",
-			"packageName": "freja.media",
+			"name": "LibraryScanner",
+			"packageName": "freja.media.scan",
 			"type": "Class"
+		},
+		{
+			"name": "LibraryScanner.Listener",
+			"packageName": "freja.media.scan",
+			"type": "Interface"
+		},
+		{
+			"name": "LibraryScanner.State",
+			"packageName": "freja.media.scan",
+			"type": "Record"
+		},
+		{
+			"name": "LibraryStats",
+			"packageName": "freja.media",
+			"type": "Record"
+		},
+		{
+			"name": "PhotoFilter",
+			"packageName": "freja.media",
+			"type": "Record"
+		},
+		{
+			"name": "PhotoFilter.SortOrder",
+			"packageName": "freja.media",
+			"type": "Enum"
+		},
+		{
+			"name": "Folder",
+			"packageName": "freja.media",
+			"type": "Record"
+		},
+		{
+			"name": "Tag",
+			"packageName": "freja.media",
+			"type": "Record"
+		},
+		{
+			"name": "PhotoInspector",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "PhotoInspector.Listener",
+			"packageName": "freja.media.ui",
+			"type": "Interface"
+		},
+		{
+			"name": "TagPicker",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "PhotoViewer",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "PhotoViewer.Listener",
+			"packageName": "freja.media.ui",
+			"type": "Functional"
+		},
+		{
+			"name": "PhotoGrid",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "PhotoGrid.SortOrderListener",
+			"packageName": "freja.media.ui",
+			"type": "Functional"
+		},
+		{
+			"name": "PhotoGrid.GroupMode",
+			"packageName": "freja.media.ui",
+			"type": "Enum"
+		},
+		{
+			"name": "FolderList",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "ScanFoldersDialog",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "ScanFoldersDialog.Listener",
+			"packageName": "freja.media.ui",
+			"type": "Interface"
+		},
+		{
+			"name": "TagManager",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "ThumbnailCache",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "Sidebar",
+			"packageName": "freja.media.ui",
+			"type": "Class"
+		},
+		{
+			"name": "Sidebar.Listener",
+			"packageName": "freja.media.ui",
+			"type": "Interface"
+		},
+		{
+			"name": "Sidebar.Mode",
+			"packageName": "freja.media.ui",
+			"type": "Enum"
+		},
+		{
+			"name": "Photo",
+			"packageName": "freja.media",
+			"type": "Record"
 		},
 		{
 			"name": "PhotoImporter",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Class"
 		},
 		{
 			"name": "PhotoImporter.AnalyzedPhoto",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		},
 		{
 			"name": "Exif",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Class"
 		},
 		{
 			"name": "Exif.Data",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		},
 		{
 			"name": "VideoImporter",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Class"
 		},
 		{
 			"name": "Archives",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Class"
 		},
 		{
 			"name": "Archives.Entry",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		},
 		{
 			"name": "LibraryTasks",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Class"
 		},
 		{
 			"name": "LibraryTasks.DeleteResult",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		},
 		{
 			"name": "Library",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Class"
 		},
 		{
 			"name": "Library.PhotoSave",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		},
 		{
 			"name": "Library.LibraryException",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Exception"
 		},
 		{
 			"name": "Library.FileStamp",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		},
 		{
 			"name": "Library.Thumbnail",
-			"packageName": "freja.store",
+			"packageName": "freja.media.store",
 			"type": "Record"
 		}
 	]

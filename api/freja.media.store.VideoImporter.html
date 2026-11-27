@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.media.store</code>
+				<h2 class="Class AB"><code class="Z">VideoImporter</code></h2>
+				<div class="w"></div><span class="A"><p>Produces the catalog entry of a video: a still frame for the thumbnail plus the dimensions and
+duration reported by libmpv.</p></span></section>
+			<section class="KB" id="analyze(java.nio.file.Path,long)">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">analyze</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="y"><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
+						<td><span><p>a video file</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">modifiedAt</code></td>
+						<td><span><p>the file&apos;s modification time, or -1 to read it</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code></td>
+						<td><span><p>the analysis with the video duration in milliseconds</p></span></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Analyzes a video file with libmpv.</p></span></section>
+			<section class="KB" id="failed(java.nio.file.Path,long)">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">failed</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="y"><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
+						<td><span><p>the unreadable video</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">modifiedAt</code></td>
+						<td><span><p>the file&apos;s modification time, or -1 to read it</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code></td>
+						<td><span><p>the retry analysis</p></span></td>
+					</tr>
+				</table><span class="A"><p>Builds the catalog entry of a video whose analysis failed. A negative duration marks the row
+for re-import on the next scan, so a transient libmpv failure does not become permanent.</p></span></section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Static Methods</h5>
+				<ul>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.VideoImporter.html#analyze(java.nio.file.Path,long)">analyze</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="J"><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code></i></li>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.VideoImporter.html#failed(java.nio.file.Path,long)">failed</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="J"><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

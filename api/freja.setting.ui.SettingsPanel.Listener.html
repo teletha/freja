@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.setting.ui</code>
+				<h2 class="Interface AB"><code class="Z">SettingsPanel.Listener</code></h2>
+				<div class="w"></div><span class="A"><p>Notifications sent back to the owner after a setting changed.</p></span></section>
+			<section class="KB" id="onFontChanged(float)">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onFontChanged</code><code class="L">(<code>float</code><code class="parameterName">ratio</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>float</code><code class="parameterName">ratio</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="onFileListFontChanged()">
+				<h2 class="l"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="Z">onFileListFontChanged</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Called when the file manager&apos;s list font size changes on its own.</p></span></section>
+			<section class="KB" id="onFileListRowHeightChanged()">
+				<h2 class="l"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="Z">onFileListRowHeightChanged</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Called when the file manager&apos;s row height changes on its own.</p></span></section>
+			<section class="KB" id="onThemeChanged()">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onThemeChanged</code><code class="L">()</code><i class="y"><code>void</code></i></h2>
+			</section>
+			<section class="KB" id="onAppIconChanged()">
+				<h2 class="l"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="Z">onAppIconChanged</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Called when the selected window icon changes; windows can refresh their icon here.</p></span></section>
+			<section class="KB" id="onManageFolders()">
+				<h2 class="l"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="Z">onManageFolders</code><code class="L">()</code><i class="y"><code>void</code></i></h2>
+			</section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.setting.ui.SettingsPanel.Listener.html#onFontChanged(float)">onFontChanged</a></code><code class="L">(<code>float</code><code class="parameterName">ratio</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/freja.setting.ui.SettingsPanel.Listener.html#onFileListFontChanged()">onFileListFontChanged</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/freja.setting.ui.SettingsPanel.Listener.html#onFileListRowHeightChanged()">onFileListRowHeightChanged</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.setting.ui.SettingsPanel.Listener.html#onThemeChanged()">onThemeChanged</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/freja.setting.ui.SettingsPanel.Listener.html#onAppIconChanged()">onAppIconChanged</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.setting.ui.SettingsPanel.Listener.html#onManageFolders()">onManageFolders</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

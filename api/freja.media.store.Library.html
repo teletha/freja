@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.media.store</code>
+				<h2 class="Class AB"><code class="Z">Library</code></h2>
+				<div class="w">
+					<ul class="E H">
+						<li><code><a aria-label="java.lang.AutoCloseable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/AutoCloseable.html">AutoCloseable</a></code></li>
+					</ul>
+				</div><span class="A"><p>The SQLite-backed photo catalog.</p><p>
+A single connection is guarded by the intrinsic lock of this object. SQLite is fast enough for
+the reads the UI makes, and keeping one writer avoids <code>SQLITE_BUSY</code> between the scanner
+and the rest of the application. All thumbnails are stored in a separate table so browsing the
+catalog never reads megabyte-sized blobs by accident.
+</p></span></section>
+			<section class="KB" id="Library(java.nio.file.Path)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">Library</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">database</code>)</code></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">database</code></td>
+						<td><span><p>the SQLite file, or <code>:memory:</code></p></span></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="java.sql.SQLException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.sql/java/sql/SQLException.html">SQLException</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Opens a library database, creating it when necessary.</p></span></section>
+			<section class="KB" id="setUiThreadCheck(java.util.function.BooleanSupplier)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setUiThreadCheck</code><code class="L">(<code><a aria-label="java.util.function.BooleanSupplier 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/BooleanSupplier.html">BooleanSupplier</a></code><code class="parameterName">check</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.function.BooleanSupplier 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/BooleanSupplier.html">BooleanSupplier</a></code><code class="parameterName">check</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Installs the predicate which identifies the calling UI thread.</p></span></section>
+			<section class="KB" id="location()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">location</code><code class="L">()</code><i class="y"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></td>
+						<td><span><p>the database location</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the database file.</p></span></section>
+			<section class="KB" id="addFolder(java.nio.file.Path)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">addFolder</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td><span><p>the directory</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></td>
+						<td><span><p>the registered folder</p></span></td>
+					</tr>
+				</table><span class="A"><p>Registers a directory.</p><p>
+Registering the same directory twice returns the existing entry. A directory below an
+already registered scan root is accepted as a managed folder; the root scan discovers those
+directories automatically, so selecting one in the dialog simply navigates to it. A new
+parent above an existing root is rejected because it would scan the same files twice.
+</p></span></section>
+			<section class="KB" id="ensureFolder(java.nio.file.Path)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">ensureFolder</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td><span><p>the directory</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></td>
+						<td><span><p>the existing or newly created managed folder</p></span></td>
+					</tr>
+				</table><span class="A"><p>Registers a directory discovered by the scanner.</p></span></section>
+			<section class="KB" id="folders()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">folders</code><code class="L">()</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></td>
+						<td><span><p>the folders ordered by name, with the path as a tie-breaker</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns all registered folders with their photo counts.</p></span></section>
+			<section class="KB" id="applySmartTagsToAllFolders()">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">applySmartTagsToAllFolders</code><code class="L">()</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>how many folders gained at least one tag</p></span></td>
+					</tr>
+				</table><span class="A"><p>Applies smart tags to every folder that has bracketed names. Tags assigned by hand are kept.</p></span></section>
+			<section class="KB" id="tags()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">tags</code><code class="L">()</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Lists every tag with the number of folders carrying it.</p></span></section>
+			<section class="KB" id="linkedTargets(long)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">linkedTargets</code><code class="L">(<code>long</code><code class="parameterName">sourceId</code>)</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">sourceId</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Tags that a tag points to; searching one of those also finds folders carrying this tag.</p></span></section>
+			<section class="KB" id="linkedSources(long)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">linkedSources</code><code class="L">(<code>long</code><code class="parameterName">targetId</code>)</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">targetId</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Tags that point to a tag; these are the ones whose folders match a search for it.</p></span></section>
+			<section class="KB" id="setTagLinks(long,java.util.Collection)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setTagLinks</code><code class="L">(<code>long</code><code class="parameterName">sourceId</code>, <code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">targetIds</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">sourceId</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">targetIds</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Replaces the outgoing links of a tag. Links are one-way: source implies target.</p></span></section>
+			<section class="KB" id="folderTags(long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">folderTags</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Returns the names of the tags attached to one folder.</p></span></section>
+			<section class="KB" id="addTag(java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">addTag</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="y"><code>long</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code>long</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Creates a tag.</p></span></section>
+			<section class="KB" id="renameTag(long,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">renameTag</code><code class="L">(<code>long</code><code class="parameterName">id</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">id</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Renames a tag; the name must remain unique.</p></span></section>
+			<section class="KB" id="deleteTags(java.util.Collection)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">deleteTags</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">ids</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">ids</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Deletes tags everywhere; their folder assignments go with them.</p></span></section>
+			<section class="KB" id="bulkRenameTags(java.util.Collection,java.lang.String,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">bulkRenameTags</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">ids</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">from</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">to</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">ids</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">from</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">to</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>how many tags were renamed</p></span></td>
+					</tr>
+				</table><span class="A"><p>Replaces a piece of the name in every selected tag. The whole operation is rejected when a
+result would be blank or collide with another tag, so a bulk edit never leaves a half-applied
+rename behind.</p></span></section>
+			<section class="KB" id="setFolderTags(long,java.util.Collection)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setFolderTags</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">names</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">names</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Replaces the complete set of tags on a folder, creating tags that do not exist yet.</p></span></section>
+			<section class="KB" id="setFolderSort(long,freja.media.PhotoFilter.SortOrder)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setFolderSort</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder identifier</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code></td>
+						<td><span><p>the display order</p></span></td>
+					</tr>
+				</table><span class="A"><p>Stores the display order for one folder.</p></span></section>
+			<section class="KB" id="clearFolders()">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">clearFolders</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Removes every folder and, through foreign keys, everything catalogued below them.</p></span></section>
+			<section class="KB" id="setFolderScanEnabled(long,boolean)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setFolderScanEnabled</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code>boolean</code><code class="parameterName">enabled</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Enables or disables a folder as a scan target. Its photos stay in the catalog.</p></span></section>
+			<section class="KB" id="setFolderScanEnabled(java.util.Collection,boolean)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setFolderScanEnabled</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>, <code>boolean</code><code class="parameterName">enabled</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Sets the scan flag on several folders in one transaction.</p></span></section>
+			<section class="KB" id="renameFolder(long,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">renameFolder</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder identifier</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code></td>
+						<td><span><p>the new display name</p></span></td>
+					</tr>
+				</table><span class="A"><p>Changes a folder&apos;s display name. The directory on disk is not touched; the name stored here
+is what the sidebar and the grid headers show.</p></span></section>
+			<section class="KB" id="folder(long)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">folder</code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="y"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">id</code></td>
+						<td><span><p>a folder identifier</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></td>
+						<td><span><p>the folder, if it exists</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finds a registered folder by its database identifier.</p></span></section>
+			<section class="KB" id="removeFolder(long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">removeFolder</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder identifier</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes a folder and every catalog entry below it. Files on disk are not touched.</p></span></section>
+			<section class="KB" id="removeFolders(java.util.Collection)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">removeFolders</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code></td>
+						<td><span><p>folder identifiers</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes several folder trees in one transaction. Like <code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html#removeFolder(long)">#removeFolder(long)</a></code>, this
+deletes the registered folders and all descendants, including explicit scan roots.</p></span></section>
+			<section class="KB" id="removeAutoFoldersUnder(java.nio.file.Path)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">removeAutoFoldersUnder</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td><span><p>the deleted directory</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>the number of removed folders</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes managed folders below a directory which disappeared from disk. The explicit scan
+root is kept so a temporarily unavailable drive can be reconnected.</p></span></section>
+			<section class="KB" id="deleteFolders(java.util.Collection)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">deleteFolders</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code></td>
+						<td><span><p>folder identifiers</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>the number of removed folders</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes managed folders which a scan no longer found.</p></span></section>
+			<section class="KB" id="photos(freja.media.PhotoFilter)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">photos</code><code class="L">(<code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code><code class="parameterName">filter</code>)</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code><code class="parameterName">filter</code></td>
+						<td><span><p>the query</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code></td>
+						<td><span><p>matching photos in the requested order</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns photos matching a filter.</p></span></section>
+			<section class="KB" id="photo(java.nio.file.Path)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">photo</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td><span><p>the file to look up</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></td>
+						<td><span><p>the matching photo, or null</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finds a catalogued photo by its file path, or null when the path is not in the library.</p></span></section>
+			<section class="KB" id="photo(long)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">photo</code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="y"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">id</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code></td>
+						<td><span><p>the photo, if it exists</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finds a photo by identifier.</p></span></section>
+			<section class="KB" id="thumbnail(long)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">thumbnail</code><code class="L">(<code>long</code><code class="parameterName">photoId</code>)</code><i class="y"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.store.Library.Thumbnail" href="api/freja.media.store.Library.Thumbnail.html">Thumbnail</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">photoId</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.store.Library.Thumbnail" href="api/freja.media.store.Library.Thumbnail.html">Thumbnail</a></code></code></code></td>
+						<td><span><p>the thumbnail, if one has been generated</p></span></td>
+					</tr>
+				</table><span class="A"><p>Loads the thumbnail of a photo.</p></span></section>
+			<section class="KB" id="stats()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">stats</code><code class="L">()</code><i class="y"><code><a aria-label="freja.media.LibraryStats" href="api/freja.media.LibraryStats.html">LibraryStats</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="freja.media.LibraryStats" href="api/freja.media.LibraryStats.html">LibraryStats</a></code></td>
+						<td><span><p>library statistics</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns aggregate counters.</p></span></section>
+			<section class="KB" id="isCurrent(java.lang.String,long,long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">isCurrent</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code>long</code><code class="parameterName">size</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>a normalized path key</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">size</code></td>
+						<td><span><p>the file size</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">modifiedAt</code></td>
+						<td><span><p>the modification time</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td><span><p>true when the catalog row is current</p></span></td>
+					</tr>
+				</table><span class="A"><p>Tests whether a file is already cataloged with the given size and modification time.</p></span></section>
+			<section class="KB" id="currentFiles(java.nio.file.Path)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">currentFiles</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>)</code><i class="y"><code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code>, <code><a aria-label="freja.media.store.Library.FileStamp" href="api/freja.media.store.Library.FileStamp.html">FileStamp</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code></td>
+						<td><span><p>the scanned directory tree</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code>, <code><a aria-label="freja.media.store.Library.FileStamp" href="api/freja.media.store.Library.FileStamp.html">FileStamp</a></code></code></code></td>
+						<td><span><p>the catalog stamp for each current photo, keyed by normalized path key</p></span></td>
+					</tr>
+				</table><span class="A"><p>Loads every up-to-date file under a scan root in one query so the scanner can compare stamps
+in memory instead of issuing one <code>SELECT</code> per file.</p></span></section>
+			<section class="KB" id="touchBatch(java.util.Collection,java.lang.String,long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">touchBatch</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">keys</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">keys</code></td>
+						<td><span><p>normalized path keys</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code></td>
+						<td><span><p>the scan token</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder containing the files</p></span></td>
+					</tr>
+				</table><span class="A"><p>Marks a group of catalog rows as seen by the current full scan. All keys must belong to the
+same folder, which lets one statement replace hundreds of individual updates.</p></span></section>
+			<section class="KB" id="touch(java.lang.String,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">touch</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>a normalized path key</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code></td>
+						<td><span><p>the scan token</p></span></td>
+					</tr>
+				</table><span class="A"><p>Marks a catalog row as seen by the current full scan.</p></span></section>
+			<section class="KB" id="touch(java.lang.String,java.lang.String,long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">touch</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>a normalized path key</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code></td>
+						<td><span><p>the scan token, or null to leave the current token untouched</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder containing the file</p></span></td>
+					</tr>
+				</table><span class="A"><p>Marks a row as seen and moves it to the folder which actually contains the file.</p></span></section>
+			<section class="KB" id="beginScan(long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">beginScan</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder being scanned</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td><span><p>a token which must be passed back to <code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html#finishScan(long,java.lang.String)">#finishScan(long, String)</a></code></p></span></td>
+					</tr>
+				</table><span class="A"><p>Starts a full scan and returns its token.</p></span></section>
+			<section class="KB" id="finishScan(long,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">finishScan</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder that was scanned</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code></td>
+						<td><span><p>the token returned by <code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html#beginScan(long)">#beginScan(long)</a></code></p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>the number of removed rows</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finishes a full scan and removes rows which were not seen.</p></span></section>
+			<section class="KB" id="finishScanTree(java.nio.file.Path,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">finishScanTree</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code></td>
+						<td><span><p>the scanned directory</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code></td>
+						<td><span><p>the token returned by <code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html#beginScan(long)">#beginScan(long)</a></code></p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>the number of removed rows</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finishes a recursive scan of a directory tree and removes rows which were not seen.</p></span></section>
+			<section class="KB" id="markFolderScanned(long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">markFolderScanned</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the folder identifier</p></span></td>
+					</tr>
+				</table><span class="A"><p>Records that a folder was scanned now.</p></span></section>
+			<section class="KB" id="archiveKeys(java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">archiveKeys</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">archivePath</code>)</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">archivePath</code></td>
+						<td><span><p>the normalized key of the archive file</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></td>
+						<td><span><p>the synthetic keys of its entries</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the keys of every virtual photo indexed from one archive. The scanner touches them
+when the archive itself has not changed, so a plain rescan cannot prune them.</p></span></section>
+			<section class="KB" id="savePhoto(long,java.nio.file.Path,long,long,freja.media.store.PhotoImporter.AnalyzedPhoto,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">savePhoto</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>, <code>long</code><code class="parameterName">size</code>, <code>long</code><code class="parameterName">modifiedAt</code>, <code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code><code class="parameterName">analyzed</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="y"><code>long</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the owning folder</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
+						<td><span><p>the image file</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">size</code></td>
+						<td><span><p>the file size at scan time</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">modifiedAt</code></td>
+						<td><span><p>the modification time at scan time</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code><code class="parameterName">analyzed</code></td>
+						<td><span><p>the decoded metadata, or null for a file that could not be decoded</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code></td>
+						<td><span><p>the current scan token, or null for a watch event</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>long</code></td>
+						<td><span><p>the photo identifier</p></span></td>
+					</tr>
+				</table><span class="A"><p>Inserts or updates a catalog row and its thumbnail in its own transaction.</p></span></section>
+			<section class="KB" id="savePhoto(freja.media.store.Library.PhotoSave)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">savePhoto</code><code class="L">(<code><a aria-label="freja.media.store.Library.PhotoSave" href="api/freja.media.store.Library.PhotoSave.html">PhotoSave</a></code><code class="parameterName">save</code>)</code><i class="y"><code>long</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="freja.media.store.Library.PhotoSave" href="api/freja.media.store.Library.PhotoSave.html">PhotoSave</a></code><code class="parameterName">save</code></td>
+						<td><span><p>the write to perform</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>long</code></td>
+						<td><span><p>the photo identifier</p></span></td>
+					</tr>
+				</table><span class="A"><p>Commits one write with its own transaction. Used by watch events, which are too sparse to
+justify a batch.</p></span></section>
+			<section class="KB" id="savePhotoBatch(java.util.List)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">savePhotoBatch</code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Library.PhotoSave" href="api/freja.media.store.Library.PhotoSave.html">PhotoSave</a></code></code></code><code class="parameterName">saves</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Library.PhotoSave" href="api/freja.media.store.Library.PhotoSave.html">PhotoSave</a></code></code></code><code class="parameterName">saves</code></td>
+						<td><span><p>the writes to perform</p></span></td>
+					</tr>
+				</table><span class="A"><p>Commits many writes in one transaction. An initial scan saves tens of thousands of photos,
+and one commit per photo is a substantial cost even in WAL mode.</p></span></section>
+			<section class="KB" id="invalidate(long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">invalidate</code><code class="L">(<code>long</code><code class="parameterName">photoId</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">photoId</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+				</table><span class="A"><p>Marks a catalog row stale so the next scan decodes it again.</p></span></section>
+			<section class="KB" id="deletePhoto(long)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">deletePhoto</code><code class="L">(<code>long</code><code class="parameterName">photoId</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">photoId</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes a photo from the catalog. The file on disk is not touched.</p></span></section>
+			<section class="KB" id="deletePhoto(java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">deletePhoto</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>a normalized path key</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td><span><p>true when a row was removed</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes a catalog row by path.</p></span></section>
+			<section class="KB" id="deletePhotos(java.util.Collection)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">deletePhotos</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">photoIds</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">photoIds</code></td>
+						<td><span><p>photo identifiers</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>the number of removed rows</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes several catalog rows in one transaction. Thumbnail rows disappear through the foreign
+key cascade; files on disk are not touched.</p></span></section>
+			<section class="KB" id="setFavorites(java.util.Collection,boolean)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setFavorites</code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">photoIds</code>, <code>boolean</code><code class="parameterName">favorite</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">photoIds</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">favorite</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Sets the same favorite flag on several photos in one transaction.</p></span></section>
+			<section class="KB" id="setRatings(java.util.Map)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setRatings</code><code class="L">(<code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code>, <code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code></code></code><code class="parameterName">ratings</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code>, <code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code></code></code><code class="parameterName">ratings</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Sets several ratings in one transaction. Values outside 0..5 are clamped.</p></span></section>
+			<section class="KB" id="setCaptions(java.util.Map)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setCaptions</code><code class="L">(<code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">captions</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">captions</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Sets several captions in one transaction. Blank captions are stored as null.</p></span></section>
+			<section class="KB" id="deleteUnder(long,java.nio.file.Path)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">deleteUnder</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code>)</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td><span><p>the owning folder</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code></td>
+						<td><span><p>the deleted directory</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code>int</code></td>
+						<td><span><p>the number of removed rows</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes every photo under a directory which is no longer present.</p></span></section>
+			<section class="KB" id="setFavorite(long,boolean)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setFavorite</code><code class="L">(<code>long</code><code class="parameterName">photoId</code>, <code>boolean</code><code class="parameterName">favorite</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">photoId</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">favorite</code></td>
+						<td><span><p>the new value</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the favorite flag.</p></span></section>
+			<section class="KB" id="setRating(long,int)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setRating</code><code class="L">(<code>long</code><code class="parameterName">photoId</code>, <code>int</code><code class="parameterName">rating</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">photoId</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">rating</code></td>
+						<td><span><p>a value from 0 to 5</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the star rating.</p></span></section>
+			<section class="KB" id="setCaption(long,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setCaption</code><code class="L">(<code>long</code><code class="parameterName">photoId</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">caption</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">photoId</code></td>
+						<td><span><p>a photo identifier</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">caption</code></td>
+						<td><span><p>the caption, or null to clear it</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the caption.</p></span></section>
+			<section class="KB" id="setting(java.lang.String)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setting</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="y"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>the setting name</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></td>
+						<td><span><p>the stored value, if any</p></span></td>
+					</tr>
+				</table><span class="A"><p>Reads an application setting.</p></span></section>
+			<section class="KB" id="setting(java.lang.String,java.lang.String)">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code class="Z">setting</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td><span><p>the setting name</p></span></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code></td>
+						<td><span><p>the value</p></span></td>
+					</tr>
+				</table><span class="A"><p>Stores an application setting.</p></span></section>
+			<section class="KB" id="close()">
+				<h2 class="l"><i class="SYNCHRONIZED"><i class="OVERRIDE PUBLIC"></i></i><code class="Z">close</code><code class="L">()</code><i class="y"><code>void</code></i></h2>
+			</section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Constructors</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#Library(java.nio.file.Path)">Library</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">database</code>)</code></li>
+				</ul>
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#setUiThreadCheck(java.util.function.BooleanSupplier)">setUiThreadCheck</a></code><code class="L">(<code><a aria-label="java.util.function.BooleanSupplier 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/BooleanSupplier.html">BooleanSupplier</a></code><code class="parameterName">check</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#location()">location</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#addFolder(java.nio.file.Path)">addFolder</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="J"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#ensureFolder(java.nio.file.Path)">ensureFolder</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="J"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#folders()">folders</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#applySmartTagsToAllFolders()">applySmartTagsToAllFolders</a></code><code class="L">()</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#tags()">tags</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#linkedTargets(long)">linkedTargets</a></code><code class="L">(<code>long</code><code class="parameterName">sourceId</code>)</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#linkedSources(long)">linkedSources</a></code><code class="L">(<code>long</code><code class="parameterName">targetId</code>)</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Tag" href="api/freja.media.Tag.html">Tag</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setTagLinks(long,java.util.Collection)">setTagLinks</a></code><code class="L">(<code>long</code><code class="parameterName">sourceId</code>, <code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">targetIds</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#folderTags(long)">folderTags</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#addTag(java.lang.String)">addTag</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="J"><code>long</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#renameTag(long,java.lang.String)">renameTag</a></code><code class="L">(<code>long</code><code class="parameterName">id</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#deleteTags(java.util.Collection)">deleteTags</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">ids</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#bulkRenameTags(java.util.Collection,java.lang.String,java.lang.String)">bulkRenameTags</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">ids</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">from</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">to</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setFolderTags(long,java.util.Collection)">setFolderTags</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">names</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setFolderSort(long,freja.media.PhotoFilter.SortOrder)">setFolderSort</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#clearFolders()">clearFolders</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setFolderScanEnabled(long,boolean)">setFolderScanEnabled</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code>boolean</code><code class="parameterName">enabled</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setFolderScanEnabled(java.util.Collection,boolean)">setFolderScanEnabled</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>, <code>boolean</code><code class="parameterName">enabled</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#renameFolder(long,java.lang.String)">renameFolder</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#folder(long)">folder</a></code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="J"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#removeFolder(long)">removeFolder</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#removeFolders(java.util.Collection)">removeFolders</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#removeAutoFoldersUnder(java.nio.file.Path)">removeAutoFoldersUnder</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#deleteFolders(java.util.Collection)">deleteFolders</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">folderIds</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#photos(freja.media.PhotoFilter)">photos</a></code><code class="L">(<code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code><code class="parameterName">filter</code>)</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#photo(java.nio.file.Path)">photo</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="J"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#photo(long)">photo</a></code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="J"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#thumbnail(long)">thumbnail</a></code><code class="L">(<code>long</code><code class="parameterName">photoId</code>)</code><i class="J"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="freja.media.store.Library.Thumbnail" href="api/freja.media.store.Library.Thumbnail.html">Thumbnail</a></code></code></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#stats()">stats</a></code><code class="L">()</code><i class="J"><code><a aria-label="freja.media.LibraryStats" href="api/freja.media.LibraryStats.html">LibraryStats</a></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#isCurrent(java.lang.String,long,long)">isCurrent</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code>long</code><code class="parameterName">size</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#currentFiles(java.nio.file.Path)">currentFiles</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>)</code><i class="J"><code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code>, <code><a aria-label="freja.media.store.Library.FileStamp" href="api/freja.media.store.Library.FileStamp.html">FileStamp</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#touchBatch(java.util.Collection,java.lang.String,long)">touchBatch</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">keys</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#touch(java.lang.String,java.lang.String)">touch</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#touch(java.lang.String,java.lang.String,long)">touch</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#beginScan(long)">beginScan</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#finishScan(long,java.lang.String)">finishScan</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#finishScanTree(java.nio.file.Path,java.lang.String)">finishScanTree</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#markFolderScanned(long)">markFolderScanned</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#archiveKeys(java.lang.String)">archiveKeys</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">archivePath</code>)</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#savePhoto(long,java.nio.file.Path,long,long,freja.media.store.PhotoImporter.AnalyzedPhoto,java.lang.String)">savePhoto</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>, <code>long</code><code class="parameterName">size</code>, <code>long</code><code class="parameterName">modifiedAt</code>, <code><a aria-label="freja.media.store.PhotoImporter.AnalyzedPhoto" href="api/freja.media.store.PhotoImporter.AnalyzedPhoto.html">AnalyzedPhoto</a></code><code class="parameterName">analyzed</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">token</code>)</code><i class="J"><code>long</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#savePhoto(freja.media.store.Library.PhotoSave)">savePhoto</a></code><code class="L">(<code><a aria-label="freja.media.store.Library.PhotoSave" href="api/freja.media.store.Library.PhotoSave.html">PhotoSave</a></code><code class="parameterName">save</code>)</code><i class="J"><code>long</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#savePhotoBatch(java.util.List)">savePhotoBatch</a></code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Library.PhotoSave" href="api/freja.media.store.Library.PhotoSave.html">PhotoSave</a></code></code></code><code class="parameterName">saves</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#invalidate(long)">invalidate</a></code><code class="L">(<code>long</code><code class="parameterName">photoId</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#deletePhoto(long)">deletePhoto</a></code><code class="L">(<code>long</code><code class="parameterName">photoId</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#deletePhoto(java.lang.String)">deletePhoto</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#deletePhotos(java.util.Collection)">deletePhotos</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">photoIds</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setFavorites(java.util.Collection,boolean)">setFavorites</a></code><code class="L">(<code><a aria-label="java.util.Collection 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Collection.html">Collection</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">photoIds</code>, <code>boolean</code><code class="parameterName">favorite</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setRatings(java.util.Map)">setRatings</a></code><code class="L">(<code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code>, <code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code></code></code><code class="parameterName">ratings</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setCaptions(java.util.Map)">setCaptions</a></code><code class="L">(<code><a aria-label="java.util.Map 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Map.html">Map</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code><code class="parameterName">captions</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#deleteUnder(long,java.nio.file.Path)">deleteUnder</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">directory</code>)</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setFavorite(long,boolean)">setFavorite</a></code><code class="L">(<code>long</code><code class="parameterName">photoId</code>, <code>boolean</code><code class="parameterName">favorite</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setRating(long,int)">setRating</a></code><code class="L">(<code>long</code><code class="parameterName">photoId</code>, <code>int</code><code class="parameterName">rating</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setCaption(long,java.lang.String)">setCaption</a></code><code class="L">(<code>long</code><code class="parameterName">photoId</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">caption</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Library.html#setting(java.lang.String)">setting</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="J"><code><a aria-label="java.util.Optional 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Optional.html">Optional</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#setting(java.lang.String,java.lang.String)">setting</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="SYNCHRONIZED"><i class="OVERRIDE PUBLIC"></i></i><code><a href="api/freja.media.store.Library.html#close()">close</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

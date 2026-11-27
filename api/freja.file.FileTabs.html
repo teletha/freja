@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.file</code>
+				<h2 class="Class AB"><code class="Z">FileTabs</code></h2>
+				<div class="w"></div><span class="A"><p>The pinned folders of the file manager, persisted as a vertical tab strip.</p></span></section>
+			<section class="KB" id="FileTabs(freja.file.FileTabs.Listener)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">FileTabs</code><code class="L">(<code><a aria-label="freja.file.FileTabs.Listener" href="api/freja.file.FileTabs.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="freja.file.FileTabs.Listener" href="api/freja.file.FileTabs.Listener.html">Listener</a></code><code class="parameterName">listener</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="tabs()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">tabs</code><code class="L">()</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.file.FileTab" href="api/freja.file.FileTab.html">FileTab</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.file.FileTab" href="api/freja.file.FileTab.html">FileTab</a></code></code></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="selectedIndex()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">selectedIndex</code><code class="L">()</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="active()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">active</code><code class="L">()</code><i class="y"><code><a aria-label="freja.file.FileTab" href="api/freja.file.FileTab.html">FileTab</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="freja.file.FileTab" href="api/freja.file.FileTab.html">FileTab</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="add(java.nio.file.Path)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">add</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">folder</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">folder</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="duplicate(int)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">duplicate</code><code class="L">(<code>int</code><code class="parameterName">index</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">index</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Inserts a copy of the tab right after it and selects the copy.</p></span></section>
+			<section class="KB" id="remove(int)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">remove</code><code class="L">(<code>int</code><code class="parameterName">index</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">index</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="select(int)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">select</code><code class="L">(<code>int</code><code class="parameterName">index</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">index</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="rename(int,java.lang.String)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">rename</code><code class="L">(<code>int</code><code class="parameterName">index</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">index</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="move(int,int)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">move</code><code class="L">(<code>int</code><code class="parameterName">from</code>, <code>int</code><code class="parameterName">to</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">from</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">to</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="navigate(java.nio.file.Path)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">navigate</code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>void</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="back()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">back</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="forward()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">forward</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Constructors</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#FileTabs(freja.file.FileTabs.Listener)">FileTabs</a></code><code class="L">(<code><a aria-label="freja.file.FileTabs.Listener" href="api/freja.file.FileTabs.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code></li>
+				</ul>
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#tabs()">tabs</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.file.FileTab" href="api/freja.file.FileTab.html">FileTab</a></code></code></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#selectedIndex()">selectedIndex</a></code><code class="L">()</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#active()">active</a></code><code class="L">()</code><i class="J"><code><a aria-label="freja.file.FileTab" href="api/freja.file.FileTab.html">FileTab</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#add(java.nio.file.Path)">add</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">folder</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#duplicate(int)">duplicate</a></code><code class="L">(<code>int</code><code class="parameterName">index</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#remove(int)">remove</a></code><code class="L">(<code>int</code><code class="parameterName">index</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#select(int)">select</a></code><code class="L">(<code>int</code><code class="parameterName">index</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#rename(int,java.lang.String)">rename</a></code><code class="L">(<code>int</code><code class="parameterName">index</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#move(int,int)">move</a></code><code class="L">(<code>int</code><code class="parameterName">from</code>, <code>int</code><code class="parameterName">to</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#navigate(java.nio.file.Path)">navigate</a></code><code class="L">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="J"><code>void</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#back()">back</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.file.FileTabs.html#forward()">forward</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

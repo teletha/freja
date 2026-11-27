@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.media</code>
+				<h2 class="Record AB"><code class="Z">PhotoFilter</code></h2>
+				<div class="w">
+					<ul class="E G">
+						<li><code><a aria-label="java.lang.Record 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Record.html">Record</a></code></li>
+					</ul>
+				</div><span class="A"><p>A query against the photo library.</p></span></section>
+			<section class="KB" id="PhotoFilter(java.lang.Long,boolean,boolean,boolean,boolean,java.lang.String,freja.media.PhotoFilter.SortOrder,java.util.List)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">PhotoFilter</code><code class="L">(<code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code><code class="parameterName">folderId</code>, <code>boolean</code><code class="parameterName">includeSubfolders</code>, <code>boolean</code><code class="parameterName">favoritesOnly</code>, <code>boolean</code><code class="parameterName">recentOnly</code>, <code>boolean</code><code class="parameterName">videosOnly</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">search</code>, <code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">tagIds</code>)</code></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">includeSubfolders</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">favoritesOnly</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">recentOnly</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">videosOnly</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">search</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">tagIds</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="all()">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">all</code><code class="L">()</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A filter showing every photo.</p></span></section>
+			<section class="KB" id="folder(long)">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">folder</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A filter showing every photo in the given folder.</p></span></section>
+			<section class="KB" id="folderTree(long)">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">folderTree</code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>long</code><code class="parameterName">folderId</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A filter showing every photo in the given folder and its subfolders.</p></span></section>
+			<section class="KB" id="favorites()">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">favorites</code><code class="L">()</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A filter showing favorites.</p></span></section>
+			<section class="KB" id="recent()">
+				<h2 class="l"><i class="STATIC PUBLIC"></i><code class="Z">recent</code><code class="L">()</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A filter showing recently imported photos.</p></span></section>
+			<section class="KB" id="withSort(freja.media.PhotoFilter.SortOrder)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">withSort</code><code class="L">(<code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code>)</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="withSearch(java.lang.String)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">withSearch</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">search</code>)</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">search</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="withTags(java.util.List)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">withTags</code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">tagIds</code>)</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">tagIds</code></td>
+						<td><span><p>the tag identifiers, or an empty list for no tag restriction</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td><span><p>a filter with those tags</p></span></td>
+					</tr>
+				</table><span class="A"><p>Restricts the photos to folders carrying any of the given tags.</p></span></section>
+			<section class="KB" id="withVideosOnly(boolean)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">withVideosOnly</code><code class="L">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="y"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td><span><p>whether only videos should be shown</p></span></td>
+					</tr>
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></td>
+						<td><span><p>a filter with that restriction</p></span></td>
+					</tr>
+				</table><span class="A"><p>Restricts the result to playable video files.</p></span></section>
+			<section class="KB" id="groupsByDate()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">groupsByDate</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td><span><p>true for the two date orders</p></span></td>
+					</tr>
+				</table><span class="A"><p>Tests whether this filter groups by capture date.</p></span></section>
+			<section class="KB" id="toString()">
+				<h2 class="l"><i class="FINAL"><i class="PUBLIC"></i></i><code class="Z">toString</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="hashCode()">
+				<h2 class="l"><i class="FINAL"><i class="PUBLIC"></i></i><code class="Z">hashCode</code><code class="L">()</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="equals(java.lang.Object)">
+				<h2 class="l"><i class="FINAL"><i class="PUBLIC"></i></i><code class="Z">equals</code><code class="L">(<code><a aria-label="java.lang.Object 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Object.html">Object</a></code><code class="parameterName">o</code>)</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Object 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Object.html">Object</a></code><code class="parameterName">o</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="folderId()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">folderId</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="includeSubfolders()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">includeSubfolders</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="favoritesOnly()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">favoritesOnly</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="recentOnly()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">recentOnly</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="videosOnly()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">videosOnly</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="search()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">search</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="sort()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">sort</code><code class="L">()</code><i class="y"><code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="tagIds()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">tagIds</code><code class="L">()</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Constructors</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#PhotoFilter(java.lang.Long,boolean,boolean,boolean,boolean,java.lang.String,freja.media.PhotoFilter.SortOrder,java.util.List)">PhotoFilter</a></code><code class="L">(<code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code><code class="parameterName">folderId</code>, <code>boolean</code><code class="parameterName">includeSubfolders</code>, <code>boolean</code><code class="parameterName">favoritesOnly</code>, <code>boolean</code><code class="parameterName">recentOnly</code>, <code>boolean</code><code class="parameterName">videosOnly</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">search</code>, <code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">tagIds</code>)</code></li>
+				</ul>
+				<h5 class="O">Static Methods</h5>
+				<ul>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#all()">all</a></code><code class="L">()</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#folder(long)">folder</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#folderTree(long)">folderTree</a></code><code class="L">(<code>long</code><code class="parameterName">folderId</code>)</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#favorites()">favorites</a></code><code class="L">()</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#recent()">recent</a></code><code class="L">()</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+				</ul>
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#withSort(freja.media.PhotoFilter.SortOrder)">withSort</a></code><code class="L">(<code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code><code class="parameterName">sort</code>)</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#withSearch(java.lang.String)">withSearch</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">search</code>)</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#withTags(java.util.List)">withTags</a></code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code><code class="parameterName">tagIds</code>)</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#withVideosOnly(boolean)">withVideosOnly</a></code><code class="L">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="J"><code><a aria-label="freja.media.PhotoFilter" href="api/freja.media.PhotoFilter.html">PhotoFilter</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#groupsByDate()">groupsByDate</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="FINAL"><i class="PUBLIC"></i></i><code><a href="api/freja.media.PhotoFilter.html#toString()">toString</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="FINAL"><i class="PUBLIC"></i></i><code><a href="api/freja.media.PhotoFilter.html#hashCode()">hashCode</a></code><code class="L">()</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="FINAL"><i class="PUBLIC"></i></i><code><a href="api/freja.media.PhotoFilter.html#equals(java.lang.Object)">equals</a></code><code class="L">(<code><a aria-label="java.lang.Object 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Object.html">Object</a></code><code class="parameterName">o</code>)</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#folderId()">folderId</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#includeSubfolders()">includeSubfolders</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#favoritesOnly()">favoritesOnly</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#recentOnly()">recentOnly</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#videosOnly()">videosOnly</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#search()">search</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#sort()">sort</a></code><code class="L">()</code><i class="J"><code><a aria-label="freja.media.PhotoFilter.SortOrder" href="api/freja.media.PhotoFilter.SortOrder.html">SortOrder</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.PhotoFilter.html#tagIds()">tagIds</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></code></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

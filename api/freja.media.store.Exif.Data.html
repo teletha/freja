@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="DB">
+		<header class="EB" date="2026-11-27">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="g"></nav>
+		<article class="x" id="Article">
+			<section class="KB"><code class="U">freja.media.store</code>
+				<h2 class="Record AB"><code class="Z">Exif.Data</code></h2>
+				<div class="w">
+					<ul class="E G">
+						<li><code><a aria-label="java.lang.Record 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Record.html">Record</a></code></li>
+					</ul>
+				</div><span class="A"><p>The parsed values. All fields are optional.</p></span></section>
+			<section class="KB" id="EMPTY">
+				<h2 class="l"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="Z">EMPTY</code><i class="y"><code class="return"><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></h2><span class="A"><p>The empty result.</p></span></section>
+			<section class="KB" id="Data(java.lang.String,java.lang.String,java.lang.String,java.lang.Long,int,java.lang.String,java.lang.Double,java.lang.Integer,java.lang.Double)">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">Data</code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">make</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">model</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">lens</code>, <code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code><code class="parameterName">capturedAt</code>, <code>int</code><code class="parameterName">orientation</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">exposure</code>, <code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code><code class="parameterName">aperture</code>, <code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code><code class="parameterName">iso</code>, <code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code><code class="parameterName">focalLength</code>)</code></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">make</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">model</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">lens</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code><code class="parameterName">capturedAt</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code>int</code><code class="parameterName">orientation</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">exposure</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code><code class="parameterName">aperture</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code><code class="parameterName">iso</code></td>
+						<td></td>
+					</tr>
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code><code class="parameterName">focalLength</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="camera()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">camera</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td><span><p>for example &quot;SONY ILCE-7M3&quot;, or null when the file carries no camera name</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns a compact camera label.</p></span></section>
+			<section class="KB" id="toString()">
+				<h2 class="l"><i class="FINAL"><i class="PUBLIC"></i></i><code class="Z">toString</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="hashCode()">
+				<h2 class="l"><i class="FINAL"><i class="PUBLIC"></i></i><code class="Z">hashCode</code><code class="L">()</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="equals(java.lang.Object)">
+				<h2 class="l"><i class="FINAL"><i class="PUBLIC"></i></i><code class="Z">equals</code><code class="L">(<code><a aria-label="java.lang.Object 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Object.html">Object</a></code><code class="parameterName">o</code>)</code><i class="y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.Object 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Object.html">Object</a></code><code class="parameterName">o</code></td>
+						<td></td>
+					</tr>
+					<tr class="r">
+						<td><code>boolean</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="make()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">make</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="model()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">model</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="lens()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">lens</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="capturedAt()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">capturedAt</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="orientation()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">orientation</code><code class="L">()</code><i class="y"><code>int</code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code>int</code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="exposure()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">exposure</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="aperture()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">aperture</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="iso()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">iso</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="KB" id="focalLength()">
+				<h2 class="l"><i class="PUBLIC"></i><code class="Z">focalLength</code><code class="L">()</code><i class="y"><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code></i></h2>
+				<table class="s">
+					<tr class="r">
+						<td><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+		</article>
+		<aside class="q">
+			<div class="T">
+				<h5 class="O">Constructors</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#Data(java.lang.String,java.lang.String,java.lang.String,java.lang.Long,int,java.lang.String,java.lang.Double,java.lang.Integer,java.lang.Double)">Data</a></code><code class="L">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">make</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">model</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">lens</code>, <code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code><code class="parameterName">capturedAt</code>, <code>int</code><code class="parameterName">orientation</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">exposure</code>, <code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code><code class="parameterName">aperture</code>, <code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code><code class="parameterName">iso</code>, <code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code><code class="parameterName">focalLength</code>)</code></li>
+				</ul>
+				<h5 class="O">Static Fields</h5>
+				<ul>
+					<li class="CB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.store.Exif.Data.html#EMPTY">EMPTY</a></code><i class="J"><code class="return"><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></li>
+				</ul>
+				<h5 class="O">Methods</h5>
+				<ul>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#camera()">camera</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="FINAL"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Exif.Data.html#toString()">toString</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="FINAL"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Exif.Data.html#hashCode()">hashCode</a></code><code class="L">()</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="FINAL"><i class="PUBLIC"></i></i><code><a href="api/freja.media.store.Exif.Data.html#equals(java.lang.Object)">equals</a></code><code class="L">(<code><a aria-label="java.lang.Object 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Object.html">Object</a></code><code class="parameterName">o</code>)</code><i class="J"><code>boolean</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#make()">make</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#model()">model</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#lens()">lens</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#capturedAt()">capturedAt</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.Long 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Long.html">Long</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#orientation()">orientation</a></code><code class="L">()</code><i class="J"><code>int</code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#exposure()">exposure</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#aperture()">aperture</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#iso()">iso</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.Integer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Integer.html">Integer</a></code></i></li>
+					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.store.Exif.Data.html#focalLength()">focalLength</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.lang.Double 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Double.html">Double</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="FB">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>
