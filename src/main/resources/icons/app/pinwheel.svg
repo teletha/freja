@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <g transform="rotate(0 64 64)">
+    <path d="M64 64 C72 42 84 22 108 26 C108 48 94 62 64 64 Z" fill="#2E6BE6"/>
+  </g>
+  <g transform="rotate(90 64 64)">
+    <path d="M64 64 C72 42 84 22 108 26 C108 48 94 62 64 64 Z" fill="#3FAE6A"/>
+  </g>
+  <g transform="rotate(180 64 64)">
+    <path d="M64 64 C72 42 84 22 108 26 C108 48 94 62 64 64 Z" fill="#F2C53D"/>
+  </g>
+  <g transform="rotate(270 64 64)">
+    <path d="M64 64 C72 42 84 22 108 26 C108 48 94 62 64 64 Z" fill="#E4634F"/>
+  </g>
+  <circle cx="64" cy="64" r="15" fill="#F7F8FA"/>
+  <path d="M58 65 L64 56 L70 65 Z" fill="#2E6BE6"/>
+  <rect x="60" y="64" width="8" height="8" rx="1" fill="#2E6BE6"/>
+  <rect x="62.5" y="68" width="3" height="4" rx="0.5" fill="#F7F8FA"/>
+</svg>

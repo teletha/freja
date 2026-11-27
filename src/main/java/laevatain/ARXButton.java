@@ -47,6 +47,9 @@ public final class ARXButton extends JButton {
 
     private boolean hovering;
 
+    /** Toggle buttons use a soft accent fill instead of a check mark to show their active state. */
+    private boolean selected;
+
     /**
      * @param text the button label, or null for an icon-only button
      * @param icon the icon, or null for a text-only button
@@ -109,6 +112,20 @@ public final class ARXButton extends JButton {
         applyStyle();
     }
 
+    /** Whether this button is in its active state, painted with the soft accent fill. */
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /** Changes the active state and repaints with the corresponding style. */
+    public void setSelected(boolean selected) {
+        if (this.selected == selected) {
+            return;
+        }
+        this.selected = selected;
+        applyStyle();
+    }
+
     private Disposable textBinding;
 
     private Disposable tipBinding;
@@ -165,6 +182,10 @@ public final class ARXButton extends JButton {
     }
 
     private Color background() {
+        if (selected) {
+            return color(hovering ? "ARXButton.selectedHoverBackground" : "ARXButton.selectedBackground",
+                    "ARXButton.tintedBackground");
+        }
         if (blendWithParent && !hovering) {
             return enclosingBackground();
         }
@@ -192,6 +213,9 @@ public final class ARXButton extends JButton {
     }
 
     private Color foreground() {
+        if (selected) {
+            return color("ARXButton.selectedForeground", "ARXButton.tintedForeground");
+        }
         if (variant == Variant.DANGER) {
             return color("Component.error.borderColor", "Button.foreground");
         }

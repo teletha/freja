@@ -306,7 +306,8 @@ public final class PhotoInspector extends JPanel {
                 folderName.setText(shorten(photo.folderPath(), 40));
                 folderName.setToolTipText(photo.folderPath());
                 dateValue.setText(photo.capturedLabel());
-                dimensionsValue.setText(photo.dimensionsLabel() + "  ·  " + photo.formatLabel());
+                String duration = photo.durationLabel().isEmpty() ? "" : photo.durationLabel() + "  ·  ";
+                dimensionsValue.setText(duration + photo.dimensionsLabel() + "  ·  " + photo.formatLabel());
                 sizeValue.setText(photo.sizeLabel());
                 cameraValue.setText(photo.cameraLabel() == null ? "—" : html(photo.cameraLabel(), 170));
                 lensValue.setText(photo.lens() == null ? "—" : html(photo.lens(), 170));

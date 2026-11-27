@@ -10,6 +10,7 @@
 package freja.scan;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -339,6 +340,31 @@ class LibraryScannerTest {
             // Both unreadable files share the one lazily encoded placeholder.
             assertArrayEquals(brokenThumb.data(), unsupportedThumb.data());
             assertTrue(scanner.state().errors() >= 2, "the failures still have to be reported");
+        }
+    }
+
+    @Test
+    void scansVideoFilesWithThumbnails() throws Exception {
+        String sample = System.getProperty("freja.mpv.sample");
+        assumeTrue(sample != null && !sample.isBlank(), "Set -Dfreja.mpv.sample=<path to a local mp4>");
+        Path source = Path.of(sample);
+        assumeTrue(Files.isRegularFile(source), "Sample video does not exist: " + sample);
+
+        Path root = Files.createDirectories(temp.resolve("videos"));
+        Files.copy(source, root.resolve("clip.mp4"));
+        try (Library library = new Library(temp.resolve("library.db")); LibraryScanner scanner = new LibraryScanner(library)) {
+            scanner.start(false);
+            scanner.addFolder(root);
+            assertTrue(scanner.awaitIdle(Duration.ofSeconds(60)), "video scan did not finish");
+
+            List<Photo> photos = library.photos(PhotoFilter.all());
+            assertEquals(1, photos.size());
+            Photo photo = photos.get(0);
+            assertTrue(photo.isVideo());
+            assertEquals("clip.mp4", photo.fileName());
+            assertTrue(photo.width() > 0);
+            assertTrue(photo.durationMillis() > 0);
+            assertTrue(library.thumbnail(photo.id()).isPresent());
         }
     }
 

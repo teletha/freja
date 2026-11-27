@@ -54,6 +54,7 @@ import freja.store.Archives;
 import freja.store.Library;
 import freja.store.Library.FileStamp;
 import freja.store.PhotoImporter;
+import freja.store.VideoImporter;
 import freja.util.ArchiveSettings;
 import freja.util.PathUtil;
 import freja.util.PicasaTags;
@@ -704,7 +705,7 @@ public final class LibraryScanner implements AutoCloseable {
                         }
                         return FileVisitResult.CONTINUE;
                     }
-                    if (!PathUtil.isImage(file)) {
+                    if (!PathUtil.isSupported(file)) {
                         return FileVisitResult.CONTINUE;
                     }
                     total.incrementAndGet();
@@ -1044,7 +1045,7 @@ public final class LibraryScanner implements AutoCloseable {
      * @param supplied attributes already read by the directory walk, or null for a watch event
      */
     private void importFile(long folderId, Path file, String token, BasicFileAttributes supplied) {
-        if (closed.get() || !PathUtil.isImage(file)) {
+        if (closed.get() || !PathUtil.isSupported(file)) {
             return;
         }
         String key = PathUtil.key(file);
@@ -1088,7 +1089,8 @@ public final class LibraryScanner implements AutoCloseable {
                 // diagnostics, and the normal save path (token, change check) still applies.
                 errors.incrementAndGet();
                 lastError = "読み込めません: " + file.getFileName();
-                analyzed = PhotoImporter.placeholder(file, modified);
+                analyzed = PathUtil.isVideo(file) ? VideoImporter.failed(file, modified)
+                        : PhotoImporter.placeholder(file, modified);
             }
             BasicFileAttributes after = Files.readAttributes(file, BasicFileAttributes.class);
             if (after.size() != size || after.lastModifiedTime().toMillis() != modified) {
@@ -1257,7 +1259,7 @@ public final class LibraryScanner implements AutoCloseable {
                     Folder parentFolder = parent == null ? folder : folderFor(parent).orElse(folder);
                     requestFolderScan(parentFolder.id());
                 }
-            } else if (PathUtil.isImage(path)) {
+            } else if (PathUtil.isSupported(path)) {
                 Path parent = path.getParent();
                 if (parent != null && Files.isDirectory(parent)) {
                     folder = library.ensureFolder(parent);

@@ -11,6 +11,7 @@ package freja.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -31,11 +32,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -69,6 +72,10 @@ public final class SettingsPanel extends JPanel {
         void onFontChanged(float ratio);
 
         void onThemeChanged();
+
+        /** Called when the selected window icon changes; windows can refresh their icon here. */
+        default void onAppIconChanged() {
+        }
 
         void onManageFolders();
     }
@@ -276,6 +283,40 @@ public final class SettingsPanel extends JPanel {
         themeGrid.setOpaque(false);
         section.addContent(themeGrid, "theme", "themes", "colour", "color", "palette");
         showThemes();
+
+        // The window icon is selected here and applied at once; the preview makes each design
+        // recognisable even before it is chosen.
+        JComboBox<AppIcon> appIcons = new JComboBox<>(AppIcon.values());
+        appIcons.setSelectedItem(AppIcon.current());
+        appIcons.setFont(Theme.font(Font.PLAIN, 13));
+        appIcons.setPreferredSize(new Dimension(160, 30));
+        appIcons.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected, boolean focused) {
+                super.getListCellRendererComponent(list, value, index, selected, focused);
+                if (value instanceof AppIcon icon) {
+                    setText(I.translate(icon.label()).get());
+                    setIcon(icon.thumbnail(20));
+                }
+                return this;
+            }
+        });
+        JLabel iconPreview = new JLabel(AppIcon.current().thumbnail(40));
+        appIcons.addActionListener(event -> {
+            if (appIcons.getSelectedItem() instanceof AppIcon chosen) {
+                AppIcon.select(chosen);
+                iconPreview.setIcon(chosen.thumbnail(40));
+                listener.onAppIconChanged();
+            }
+        });
+        JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        iconPanel.setOpaque(false);
+        iconPanel.add(iconPreview);
+        iconPanel.add(appIcons);
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("App icon"), ARXSettingsPane.Text
+                        .of("Choose the icon shown in the window and taskbar."), iconPanel)
+                .keywords("app", "icon", "logo", "taskbar", "window"));
     }
 
     /** Rebuilds the tile grid from the current scope (picks or all) and the brightness filter. */

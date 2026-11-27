@@ -55,6 +55,9 @@ public final class Library implements AutoCloseable {
     /** How far back the "recent" view reaches. */
     private static final long RECENT_WINDOW = 3L * 24 * 60 * 60 * 1000;
 
+    /** Extensions recognised as videos, shared by the migration and the video-only filter. */
+    private static final String VIDEO_EXTENSIONS_SQL = "'mp4','m4v','mov','mkv','webm','avi','wmv','flv','mpg','mpeg','m2ts','ts','3gp','ogv','vob'";
+
     /**
      * Bumped whenever thumbnail generation changes. Rows below this revision are decoded again by
      * the next scan, which is how existing libraries pick up a new thumbnail pipeline.
@@ -215,6 +218,7 @@ public final class Library implements AutoCloseable {
                         iso INTEGER,
                         focal_length REAL,
                         orientation INTEGER NOT NULL DEFAULT 1,
+                        duration_ms INTEGER NOT NULL DEFAULT 0,
                         favorite INTEGER NOT NULL DEFAULT 0,
                         rating INTEGER NOT NULL DEFAULT 0,
                         caption TEXT,
@@ -271,9 +275,11 @@ public final class Library implements AutoCloseable {
         ensureColumn("photos", "archive_path", "TEXT");
         ensureColumn("photos", "archive_type", "TEXT");
         ensureColumn("photos", "entry_name", "TEXT");
+        ensureColumn("photos", "duration_ms", "INTEGER NOT NULL DEFAULT 0");
         normalizeExistingTags();
         backfillFolderNames();
         migrateThumbnailRevision();
+        retryFailedVideos();
     }
 
     /** Converts tags stored with full-width names to the half-width spelling used now. */
@@ -360,6 +366,24 @@ public final class Library implements AutoCloseable {
     private void migrateThumbnailRevision() throws SQLException {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("DELETE FROM thumbnails WHERE photo_id IN (SELECT id FROM photos WHERE thumbnail_revision < 4)");
+        }
+    }
+
+    /**
+     * Re-queues video rows whose first analysis failed before retries existed. This runs once, so a
+     * genuinely unplayable file is not re-analysed on every startup.
+     */
+    private void retryFailedVideos() throws SQLException {
+        try (Statement statement = connection.createStatement();
+                ResultSet results = statement.executeQuery("SELECT 1 FROM settings WHERE key='video_retry_migration'")) {
+            if (results.next()) {
+                return;
+            }
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("UPDATE photos SET thumbnail_revision=0 WHERE width<=0 AND extension IN ("
+                    + VIDEO_EXTENSIONS_SQL + ")");
+            statement.executeUpdate("INSERT INTO settings(key, value) VALUES('video_retry_migration', '1')");
         }
     }
 
@@ -1149,6 +1173,9 @@ public final class Library implements AutoCloseable {
             sql.append(" AND p.imported_at >= ?");
             parameters.add(Instant.now().minus(RECENT_WINDOW, ChronoUnit.MILLIS).toEpochMilli());
         }
+        if (filter.videosOnly()) {
+            sql.append(" AND p.extension IN (").append(VIDEO_EXTENSIONS_SQL).append(')');
+        }
         if (filter.search() != null) {
             String search = "%" + PathUtil.likeValue(filter.search()) + "%";
             // Free-text search also matches tags on the folder, including tags linked from them.
@@ -1606,6 +1633,13 @@ public final class Library implements AutoCloseable {
         long capturedAt = analyzed == null ? modifiedAt : analyzed.capturedAt();
         int width = analyzed == null ? 0 : analyzed.width();
         int height = analyzed == null ? 0 : analyzed.height();
+        long durationMillis = analyzed == null ? 0 : analyzed.durationMillis();
+        // A negative duration is the retry marker from VideoImporter.failed: leave the row below
+        // THUMBNAIL_REVISION so the next scan analyses it again instead of trusting the placeholder.
+        int revision = durationMillis < 0 ? 0 : THUMBNAIL_REVISION;
+        if (durationMillis < 0) {
+            durationMillis = 0;
+        }
         long now = System.currentTimeMillis();
         {
             long photoId;
@@ -1620,16 +1654,17 @@ public final class Library implements AutoCloseable {
                         INSERT INTO photos(folder_id, path, path_key, file_name, extension, byte_size, modified_at,
                             width, height, captured_at, camera_make, camera_model, lens, exposure, aperture, iso,
                             focal_length, orientation, thumbnail_revision, imported_at, scan_token,
-                            archive_path, archive_type, entry_name)
-                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                            archive_path, archive_type, entry_name, duration_ms)
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                         """, Statement.RETURN_GENERATED_KEYS)) {
                     bindCommon(insert, folderId, normalized, key, size, modifiedAt, exif, capturedAt, width, height);
-                    insert.setInt(19, THUMBNAIL_REVISION);
+                    insert.setInt(19, revision);
                     insert.setLong(20, now);
                     insert.setString(21, token);
                     insert.setString(22, save.archivePath());
                     insert.setString(23, save.archiveType());
                     insert.setString(24, save.entryName());
+                    insert.setLong(25, durationMillis);
                     insert.executeUpdate();
                     try (ResultSet keys = insert.getGeneratedKeys()) {
                         keys.next();
@@ -1642,7 +1677,7 @@ public final class Library implements AutoCloseable {
                         UPDATE photos SET folder_id=?, path=?, file_name=?, extension=?, byte_size=?, modified_at=?,
                             width=?, height=?, captured_at=?, camera_make=?, camera_model=?, lens=?, exposure=?,
                             aperture=?, iso=?, focal_length=?, orientation=?, thumbnail_revision=?, scan_token=?,
-                            archive_path=?, archive_type=?, entry_name=?
+                            archive_path=?, archive_type=?, entry_name=?, duration_ms=?
                         WHERE id=?
                         """)) {
                     update.setLong(1, folderId);
@@ -1662,12 +1697,13 @@ public final class Library implements AutoCloseable {
                     setInteger(update, 15, exif.iso());
                     setDouble(update, 16, exif.focalLength());
                     update.setInt(17, exif.orientation());
-                    update.setInt(18, THUMBNAIL_REVISION);
+                    update.setInt(18, revision);
                     update.setString(19, token);
                     update.setString(20, save.archivePath());
                     update.setString(21, save.archiveType());
                     update.setString(22, save.entryName());
-                    update.setLong(23, photoId);
+                    update.setLong(23, durationMillis);
+                    update.setLong(24, photoId);
                     update.executeUpdate();
                 }
             }
@@ -1991,7 +2027,7 @@ public final class Library implements AutoCloseable {
         Double focalLength = nullableDouble(results, "focal_length");
         Integer iso = nullableInteger(results, "iso");
         return new Photo(results.getLong("id"), results.getLong("folder_id"), results.getString("folder_path"), Path.of(results.getString("path")), results.getString("file_name"), results.getString("extension"), results.getLong("byte_size"), results.getLong("modified_at"), results.getInt("width"), results.getInt("height"), results.getLong("captured_at"), results.getString("camera_make"), results.getString("camera_model"), results.getString("lens"), results.getString("exposure"), aperture, iso, focalLength, results.getInt("orientation"), results.getInt("favorite") != 0, results.getInt("rating"), results.getString("caption"), results.getLong("imported_at"), results.getString("archive_path"), results
-                .getString("archive_type"), results.getString("entry_name"));
+                .getString("archive_type"), results.getString("entry_name"), results.getLong("duration_ms"));
     }
 
     private static Double nullableDouble(ResultSet results, String column) throws SQLException {

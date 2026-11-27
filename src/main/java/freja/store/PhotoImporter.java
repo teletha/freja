@@ -62,7 +62,13 @@ public final class PhotoImporter {
 
     /** The result of inspecting one image file. */
     public record AnalyzedPhoto(int width, int height, long capturedAt, Exif.Data exif, byte[] thumbnail,
-            int thumbnailWidth, int thumbnailHeight) {
+            int thumbnailWidth, int thumbnailHeight, long durationMillis) {
+
+        /** Still images have no duration. */
+        public AnalyzedPhoto(int width, int height, long capturedAt, Exif.Data exif, byte[] thumbnail,
+                int thumbnailWidth, int thumbnailHeight) {
+            this(width, height, capturedAt, exif, thumbnail, thumbnailWidth, thumbnailHeight, 0);
+        }
     }
 
     /**
@@ -93,6 +99,9 @@ public final class PhotoImporter {
      * @throws IOException when the file cannot be decoded
      */
     public static AnalyzedPhoto analyze(Path file, long modifiedAt) throws IOException {
+        if (freja.util.PathUtil.isVideo(file)) {
+            return VideoImporter.analyze(file, modifiedAt);
+        }
         long length = Files.size(file);
         if (length > MAX_SOURCE_BYTES) {
             throw new IOException("画像が大きすぎます: " + file.getFileName());

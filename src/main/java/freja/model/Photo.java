@@ -16,6 +16,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import freja.util.PathUtil;
+
 /**
  * One photo managed by the library.
  * <p>
@@ -23,13 +25,15 @@ import java.util.Locale;
  * ten thousand photos does not carry ten thousand images in memory.
  * </p>
  */
-public record Photo(long id, long folderId, String folderPath, Path path, String fileName, String extension,
-        long byteSize, long modifiedAt, int width, int height, long capturedAt, String cameraMake, String cameraModel,
-        String lens, String exposure, Double aperture, Integer iso, Double focalLength, int orientation,
-        boolean favorite, int rating, String caption, long importedAt, String archivePath, String archiveType,
-        String entryName) {
+public record Photo(long id, long folderId, String folderPath, Path path, String fileName, String extension, long byteSize, long modifiedAt, int width, int height, long capturedAt, String cameraMake, String cameraModel, String lens, String exposure, Double aperture, Integer iso, Double focalLength, int orientation, boolean favorite, int rating, String caption, long importedAt, String archivePath, String archiveType, String entryName, long durationMillis) {
+
+    /** Rows created before video support have no duration. */
+    public Photo(long id, long folderId, String folderPath, Path path, String fileName, String extension, long byteSize, long modifiedAt, int width, int height, long capturedAt, String cameraMake, String cameraModel, String lens, String exposure, Double aperture, Integer iso, Double focalLength, int orientation, boolean favorite, int rating, String caption, long importedAt, String archivePath, String archiveType, String entryName) {
+        this(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, rating, caption, importedAt, archivePath, archiveType, entryName, 0);
+    }
 
     private static volatile DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.JAPANESE);
+
     private static volatile DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", Locale.JAPANESE);
 
     private static volatile String formattedLanguage;
@@ -45,13 +49,11 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
         }
         formattedLanguage = language;
         Locale locale = laevatain.util.Language.locale();
-        DATE = "ja".equals(language)
-                ? DateTimeFormatter.ofPattern("yyyy年M月d日", locale)
+        DATE = "ja".equals(language) ? DateTimeFormatter.ofPattern("yyyy年M月d日", locale)
                 : DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(locale);
-        DATE_TIME = "ja".equals(language)
-                ? DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", locale)
-                : DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.MEDIUM,
-                        java.time.format.FormatStyle.SHORT).withLocale(locale);
+        DATE_TIME = "ja".equals(language) ? DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm", locale)
+                : DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.MEDIUM, java.time.format.FormatStyle.SHORT)
+                        .withLocale(locale);
     }
 
     /**
@@ -208,6 +210,28 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
     }
 
     /**
+     * Whether this row is a playable video file rather than a still image.
+     *
+     * @return true for a supported video extension
+     */
+    public boolean isVideo() {
+        return !archived() && PathUtil.isVideo(path);
+    }
+
+    /**
+     * Returns the playback duration as {@code m:ss}.
+     *
+     * @return the formatted duration, or an empty string for still images
+     */
+    public String durationLabel() {
+        if (durationMillis <= 0) {
+            return "";
+        }
+        long seconds = durationMillis / 1000;
+        return (seconds / 60) + ":" + String.format(Locale.ROOT, "%02d", seconds % 60);
+    }
+
+    /**
      * Whether this row is an image inside a ZIP or 7z archive rather than a file on disk.
      * Such a row has a synthetic {@link #path()} and cannot be revealed or deleted on its own.
      *
@@ -228,14 +252,14 @@ public record Photo(long id, long folderId, String folderPath, Path path, String
     }
 
     public Photo withFavorite(boolean value) {
-        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, value, rating, caption, importedAt, archivePath, archiveType, entryName);
+        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, value, rating, caption, importedAt, archivePath, archiveType, entryName, durationMillis);
     }
 
     public Photo withRating(int value) {
-        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, value, caption, importedAt, archivePath, archiveType, entryName);
+        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, value, caption, importedAt, archivePath, archiveType, entryName, durationMillis);
     }
 
     public Photo withCaption(String value) {
-        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, rating, value, importedAt, archivePath, archiveType, entryName);
+        return new Photo(id, folderId, folderPath, path, fileName, extension, byteSize, modifiedAt, width, height, capturedAt, cameraMake, cameraModel, lens, exposure, aperture, iso, focalLength, orientation, favorite, rating, value, importedAt, archivePath, archiveType, entryName, durationMillis);
     }
 }

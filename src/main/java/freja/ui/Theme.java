@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 
+import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
@@ -368,6 +369,11 @@ public final class Theme {
         }
         dark = isDarkTheme(themeId);
         FlatLaf.setup(theme);
+        // Tooltips should appear quickly enough to feel responsive during scanning and browsing,
+        // and stay long enough to read paths and explanations without the pointer moving.
+        ToolTipManager.sharedInstance().setInitialDelay(500);
+        ToolTipManager.sharedInstance().setReshowDelay(1_000);
+        ToolTipManager.sharedInstance().setDismissDelay(10_000);
         Palette base = dark ? DARK : LIGHT;
         boolean builtin = THEME_LIGHT.equals(themeId) || THEME_DARK.equals(themeId);
         palette = builtin ? base : readPalette(base, dark);
@@ -400,6 +406,11 @@ public final class Theme {
         UIManager.put("ARXButton.tintedHoverBackground", TINT_HOVER);
         UIManager.put("ARXButton.tintedForeground", ACCENT_DARK);
         UIManager.put("ARXButton.tintedHoverForeground", ACCENT);
+        // Toggle buttons reuse the navigation list's selection wash: enough colour to read as
+        // active, but light enough that the normal text colour keeps strong contrast.
+        UIManager.put("ARXButton.selectedBackground", SELECTION);
+        UIManager.put("ARXButton.selectedHoverBackground", SELECTION);
+        UIManager.put("ARXButton.selectedForeground", TEXT);
         UIManager.put("Component.selectionBackground", ACCENT_SOFT);
         UIManager.put("Component.selectionForeground", TEXT);
         UIManager.put("defaultFont", font(Font.PLAIN, 13));

@@ -15,7 +15,7 @@ import java.util.List;
  * A query against the photo library.
  */
 public record PhotoFilter(Long folderId, boolean includeSubfolders, boolean favoritesOnly, boolean recentOnly,
-        String search, SortOrder sort, List<Long> tagIds) {
+        boolean videosOnly, String search, SortOrder sort, List<Long> tagIds) {
 
     /** How a result set is ordered. */
     public enum SortOrder {
@@ -42,35 +42,35 @@ public record PhotoFilter(Long folderId, boolean includeSubfolders, boolean favo
 
     /** A filter showing every photo. */
     public static PhotoFilter all() {
-        return new PhotoFilter(null, false, false, false, null, SortOrder.NAME, List.of());
+        return new PhotoFilter(null, false, false, false, false, null, SortOrder.NAME, List.of());
     }
 
     /** A filter showing every photo in the given folder. */
     public static PhotoFilter folder(long folderId) {
-        return new PhotoFilter(folderId, false, false, false, null, SortOrder.NAME, List.of());
+        return new PhotoFilter(folderId, false, false, false, false, null, SortOrder.NAME, List.of());
     }
 
     /** A filter showing every photo in the given folder and its subfolders. */
     public static PhotoFilter folderTree(long folderId) {
-        return new PhotoFilter(folderId, true, false, false, null, SortOrder.NAME, List.of());
+        return new PhotoFilter(folderId, true, false, false, false, null, SortOrder.NAME, List.of());
     }
 
     /** A filter showing favorites. */
     public static PhotoFilter favorites() {
-        return new PhotoFilter(null, false, true, false, null, SortOrder.NAME, List.of());
+        return new PhotoFilter(null, false, true, false, false, null, SortOrder.NAME, List.of());
     }
 
     /** A filter showing recently imported photos. */
     public static PhotoFilter recent() {
-        return new PhotoFilter(null, false, false, true, null, SortOrder.NAME, List.of());
+        return new PhotoFilter(null, false, false, true, false, null, SortOrder.NAME, List.of());
     }
 
     public PhotoFilter withSort(SortOrder sort) {
-        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, search, sort, tagIds);
+        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, videosOnly, search, sort, tagIds);
     }
 
     public PhotoFilter withSearch(String search) {
-        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, search, sort, tagIds);
+        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, videosOnly, search, sort, tagIds);
     }
 
     /**
@@ -80,7 +80,17 @@ public record PhotoFilter(Long folderId, boolean includeSubfolders, boolean favo
      * @return a filter with those tags
      */
     public PhotoFilter withTags(List<Long> tagIds) {
-        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, search, sort, tagIds);
+        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, videosOnly, search, sort, tagIds);
+    }
+
+    /**
+     * Restricts the result to playable video files.
+     *
+     * @param enabled whether only videos should be shown
+     * @return a filter with that restriction
+     */
+    public PhotoFilter withVideosOnly(boolean enabled) {
+        return new PhotoFilter(folderId, includeSubfolders, favoritesOnly, recentOnly, enabled, search, sort, tagIds);
     }
 
     /**

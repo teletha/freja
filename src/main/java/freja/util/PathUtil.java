@@ -24,8 +24,12 @@ import java.util.Set;
  */
 public final class PathUtil {
 
-    /** File extensions this application is able to decode. */
+    /** File extensions this application is able to decode as still images. */
     private static final Set<String> IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp", "avif", "bmp");
+
+    /** Video containers libmpv can play. */
+    private static final Set<String> VIDEO_EXTENSIONS = Set.of("mp4", "m4v", "mov", "mkv", "webm", "avi", "wmv",
+            "flv", "mpg", "mpeg", "m2ts", "ts", "3gp", "ogv", "vob");
 
     /** The folder separator as it appears in normalized path keys. */
     public static final String SEPARATOR = File.separator;
@@ -89,6 +93,26 @@ public final class PathUtil {
      */
     public static boolean isImage(Path path) {
         return IMAGE_EXTENSIONS.contains(extension(path));
+    }
+
+    /**
+     * Tests whether the file looks like a video this application can play.
+     *
+     * @param path a file
+     * @return true when the extension is a supported video extension
+     */
+    public static boolean isVideo(Path path) {
+        return VIDEO_EXTENSIONS.contains(extension(path));
+    }
+
+    /**
+     * Tests whether the file is a supported image or video.
+     *
+     * @param path a file
+     * @return true when the extension belongs to a supported media type
+     */
+    public static boolean isSupported(Path path) {
+        return isImage(path) || isVideo(path);
     }
 
     /**

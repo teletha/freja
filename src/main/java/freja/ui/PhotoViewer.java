@@ -9,16 +9,18 @@
  */
 package freja.ui;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Color;import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Window;
@@ -41,26 +43,31 @@ import java.util.function.Function;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JWindow;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import freja.media.Mpv;
+import freja.media.MpvNative;
+import freja.media.Win32Window;
 import freja.model.Photo;
 import freja.store.Archives;
 import freja.util.ImageTransforms;
 import imagify.Imagify;
 
 /**
- * A photo viewer which covers the whole screen, with zoom, pan, keyboard navigation and a
- * slideshow. It does so as a top-most window over the owner's screen rather than through the
- * display's exclusive full-screen mode, so leaving it does not disturb the desktop.
+ * A full-screen viewer with a video-site style overlay. The controls live in a separate translucent
+ * window, so fading them in or out never changes the size of the photo or video underneath.
  */
 public final class PhotoViewer extends JDialog {
 
@@ -74,19 +81,150 @@ public final class PhotoViewer extends JDialog {
         }
     }
 
+    private static final boolean TRANSLUCENT = GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice()
+            .isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
+
     private final List<Photo> photos;
 
     private int index;
 
     private final Canvas canvas = new Canvas();
 
-    private final JLabel title = new JLabel();
+    /** Heavyweight surface libmpv renders into; invisible for still images. */
+    private final java.awt.Canvas videoCanvas = new java.awt.Canvas();
 
-    private final JLabel counter = new JLabel();
+    private final String windowTitle = "Freja Viewer " + Long.toHexString(System.nanoTime());
 
-    private final JButton favorite = button(Icons.star(17, Theme.FAINT, false), "お気に入り");
+    private Mpv player;
 
-    private final JButton slideshow = button(Icons.play(15, Color.WHITE), "スライドショー");
+    private boolean videoStarting;
+
+    private final JButton play = control(Icons.play(15, Color.WHITE), "再生");
+
+    private final JButton prevSection = control(Icons.chevron(15, Color.WHITE, true), "前の項目");
+
+    private final JButton nextSection = control(Icons.chevron(15, Color.WHITE, false), "次の項目");
+
+    private final JButton rewind10 = control(textIcon("-10", Color.WHITE), "10秒戻る");
+
+    private final JButton forward10 = control(textIcon("+10", Color.WHITE), "10秒進む");
+
+    private final JButton mute = control(speaker(false), "ミュート");
+
+    private final JButton subtitle = control(textIcon("CC", Color.WHITE), "字幕の表示");
+
+    private final JButton speed = control(textIcon("1.0x", Color.WHITE), "再生速度");
+
+    private final JPopupMenu speedMenu = new JPopupMenu();
+
+    private final Slider volume = new Slider(this::applyVolume, () -> {
+    });
+
+    private final Slider seek = new Slider(this::previewSeek, this::commitSeek);
+
+    private final JLabel videoTitle = new JLabel();
+
+    private final JLabel time = new JLabel("00:00 / 00:00");
+
+    private final JButton slideshowPlay = button(Icons.play(15, Color.WHITE), "スライドショー再生");
+
+    private final JButton slideshowStop = button(null, "スライドショー停止");
+
+    private final JLabel metadata = new JLabel();
+
+    private final JPanel imageBottom = new JPanel(new BorderLayout(16, 0));
+
+    /** A full-width transport strip under the video. */
+    private final JPanel videoControls = new JPanel(new BorderLayout(0, 6));
+
+    private JWindow controlsWindow;
+
+    private final JPanel controlsRoot = new JPanel(new BorderLayout());
+
+    private final JLabel toast = new JLabel("", SwingConstants.CENTER) {
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            if (!isVisible() || getText().isEmpty()) {
+                return;
+            }
+            Graphics2D g = (Graphics2D) graphics.create();
+            try {
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(new Color(0, 0, 0, 175));
+                g.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+                g.setColor(new Color(255, 255, 255, 70));
+                g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
+            } finally {
+                g.dispose();
+            }
+            super.paintComponent(graphics);
+        }
+    };
+
+    private final Timer toastTimer = new Timer(1200, event -> toast.setVisible(false));
+
+    private final JPanel helpPanel = new JPanel(new BorderLayout()) {
+        @Override
+        public boolean contains(int x, int y) {
+            return false;
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            if (!helpVisible) {
+                return;
+            }
+            Graphics2D g = (Graphics2D) graphics.create();
+            try {
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(new Color(0, 0, 0, 190));
+                g.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+                g.setColor(new Color(255, 255, 255, 70));
+                g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
+            } finally {
+                g.dispose();
+            }
+        }
+    };
+
+    private final JPanel toastHost = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0)) {
+        @Override
+        public boolean contains(int x, int y) {
+            return false;
+        }
+    };
+
+    private boolean helpVisible;
+
+    private boolean chromeVisible = true;
+
+    private boolean hoveringControls;
+
+    private float overlayAlpha = 1;
+
+    private boolean fadingIn = true;
+
+    /** Last pointer position that revealed the overlay; event floods must not extend the idle timer. */
+    private Point lastPointer;
+
+    /** Throttles the fast keyframe seeks issued while the seek bar is being dragged. */
+    private long lastScrubNanos;
+
+    /** Fades the overlay out four seconds after the pointer stops moving. */
+    private final Timer chromeTimer = new Timer(4000, event -> hideOverlayIfIdle());
+
+    /** Delays a single click so a double click can close the viewer instead. */
+    private final Timer clickTimer = new Timer(220, event -> togglePause());
+
+    {
+        clickTimer.setRepeats(false);
+    }
+
+    /** Advances the fade in small steps so the media underneath never resizes. */
+    private final Timer fadeTimer = new Timer(25, event -> advanceFade());
+
+    private final Timer progress = new Timer(16, event -> updateProgress());
 
     private final ExecutorService loader = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "freja-viewer");
@@ -154,7 +292,9 @@ public final class PhotoViewer extends JDialog {
 
     public PhotoViewer(Window owner, List<Photo> photos, Photo start) {
         super(owner, "Freja", ModalityType.MODELESS);
-        setIconImage(Icons.applicationImage());
+        // A unique title lets Win32Window find this dialog without reflecting into AWT internals.
+        setTitle(windowTitle);
+        setIconImages(Icons.applicationImages());
         this.photos = List.copyOf(photos);
         this.index = Math.max(0, this.photos.indexOf(start));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -163,76 +303,274 @@ public final class PhotoViewer extends JDialog {
         setLayout(new BorderLayout());
         getContentPane().setBackground(Theme.VIEWER);
 
-        JPanel toolbar = new JPanel(new BorderLayout(12, 0));
-        toolbar.setBackground(Theme.VIEWER_PANEL);
-        toolbar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 12));
-
-        JPanel labels = new JPanel();
-        labels.setOpaque(false);
-        labels.setLayout(new BoxLayout(labels, BoxLayout.Y_AXIS));
-        title.setForeground(Color.WHITE);
-        title.setFont(Theme.font(Font.BOLD, 14));
-        counter.setForeground(new Color(0x9AA0A8));
-        counter.setFont(Theme.font(Font.PLAIN, 11));
-        labels.add(title);
-        labels.add(Box.createVerticalStrut(2));
-        labels.add(counter);
-        toolbar.add(labels, BorderLayout.CENTER);
-
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
-        actions.setOpaque(false);
-        JButton previous = button(Icons.chevron(18, Color.WHITE, true), "前へ");
-        previous.addActionListener(event -> move(-1));
-        JButton next = button(Icons.chevron(18, Color.WHITE, false), "次へ");
-        next.addActionListener(event -> move(1));
-        favorite.addActionListener(event -> toggleFavorite());
-        slideshow.addActionListener(event -> toggleSlideshow());
-        JButton fitButton = button(null, "画像全体を表示");
-        fitButton.setText("フィット");
-        fitButton.setFont(Theme.font(Font.PLAIN, 11));
-        fitButton.addActionListener(event -> setFit());
-        JButton close = button(Icons.close(16, Color.WHITE), "閉じる");
-        close.addActionListener(event -> dispose());
-        actions.add(previous);
-        actions.add(next);
-        actions.add(favorite);
-        actions.add(fitButton);
-        actions.add(slideshow);
-        actions.add(close);
-        toolbar.add(actions, BorderLayout.EAST);
-        add(toolbar, BorderLayout.NORTH);
-        add(canvas, BorderLayout.CENTER);
-
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 7));
-        footer.setBackground(Theme.VIEWER_PANEL);
-        JLabel help = new JLabel("← → またはスクロールで移動   ·   ドラッグで移動   ·   + / - でズーム   ·   Space でスライドショー   ·   Esc で閉じる");
-        help.setForeground(new Color(0x858B94));
-        help.setFont(Theme.font(Font.PLAIN, 11));
-        footer.add(help);
-        add(footer, BorderLayout.SOUTH);
+        JLayeredPane stage = new JLayeredPane();
+        stage.add(canvas, JLayeredPane.DEFAULT_LAYER);
+        stage.add(videoCanvas, JLayeredPane.PALETTE_LAYER);
+        videoCanvas.setVisible(false);
+        stage.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+                canvas.setBounds(0, 0, stage.getWidth(), stage.getHeight());
+                videoCanvas.setBounds(0, 0, stage.getWidth(), stage.getHeight());
+                positionControls();
+            }
+        });
+        add(stage, BorderLayout.CENTER);
 
         slideshowTimer = new Timer(3600, event -> move(1));
         slideshowTimer.setInitialDelay(3600);
         revealTimer = new Timer(REVEAL_DELAY_MS, event -> reveal());
         revealTimer.setRepeats(false);
 
+        buildOverlay();
+        // When the overlay is hidden (or reduced to the close button for videos) the viewer itself
+        // still sees pointer movement and can bring it back.
+        getRootPane().addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                pointerMoved(event);
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent event) {
+                pointerMoved(event);
+            }
+        });
         installKeys();
-        canvas.addMouseListener(new MouseAdapter() {
+        installCanvasInput();
+
+        showPhoto(index);
+        chromeTimer.restart();
+    }
+
+    /** Builds the single translucent window which carries every control. */
+    private void buildOverlay() {
+        controlsRoot.setOpaque(false);
+        controlsRoot.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+        JButton close = circular(Icons.close(17, Color.WHITE), "閉じる");
+        close.addActionListener(event -> dispose());
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        top.setOpaque(false);
+        top.add(close);
+        controlsRoot.add(top, BorderLayout.NORTH);
+
+        // Images: slideshow controls on the left, name / size / date centred at the bottom.
+        slideshowStop.setIcon(filledSquare(11));
+        slideshowStop.setToolTipText("スライドショー停止");
+        slideshowPlay.addActionListener(event -> startSlideshow());
+        slideshowStop.addActionListener(event -> {
+            slideshowTimer.stop();
+            updateSlideshowButtons(false);
+        });
+        JPanel slideshow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        slideshow.setOpaque(false);
+        slideshow.add(slideshowPlay);
+        slideshow.add(slideshowStop);
+        metadata.setForeground(Color.WHITE);
+        metadata.setFont(Theme.font(Font.PLAIN, 12));
+        metadata.setHorizontalAlignment(JLabel.CENTER);
+        imageBottom.setOpaque(true);
+        imageBottom.setBackground(new Color(0, 0, 0, 120));
+        imageBottom.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        imageBottom.add(slideshow, BorderLayout.WEST);
+        imageBottom.add(metadata, BorderLayout.CENTER);
+
+        // Videos: a full-width seek bar, then one row with the times beside the volume, the
+        // transport buttons in the middle and the file name at the bottom right.
+        videoControls.setOpaque(false);
+        videoControls.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        videoControls.setPreferredSize(new Dimension(0, 62));
+
+        videoTitle.setForeground(Color.WHITE);
+        videoTitle.setFont(Theme.font(Font.PLAIN, 12));
+        videoTitle.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+        time.setForeground(Color.WHITE);
+        time.setFont(Theme.font(Font.PLAIN, 13));
+        time.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+        seek.setRange(0, 1000);
+        seek.setPreferredSize(new Dimension(600, 18));
+        volume.setRange(0, 100);
+        volume.value(100);
+        volume.setPreferredSize(new Dimension(110, 18));
+
+        JPanel rowLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        rowLeft.setOpaque(false);
+        rowLeft.add(subtitle);
+        rowLeft.add(mute);
+        rowLeft.add(volume);
+        rowLeft.add(time);
+
+        JPanel rowCentre = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
+        rowCentre.setOpaque(false);
+        rowCentre.add(prevSection);
+        rowCentre.add(rewind10);
+        rowCentre.add(play);
+        rowCentre.add(speed);
+        rowCentre.add(forward10);
+        rowCentre.add(nextSection);
+
+        JPanel rowRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        rowRight.setOpaque(false);
+        rowRight.add(videoTitle);
+
+        JPanel buttons = new JPanel(new BorderLayout());
+        buttons.setOpaque(false);
+        buttons.setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
+        buttons.add(rowLeft, BorderLayout.WEST);
+        buttons.add(rowCentre, BorderLayout.CENTER);
+        buttons.add(rowRight, BorderLayout.EAST);
+
+        JPanel stack = new JPanel(new BorderLayout(0, 0));
+        stack.setOpaque(false);
+        stack.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        stack.add(seek, BorderLayout.NORTH);
+        stack.add(buttons, BorderLayout.SOUTH);
+        videoControls.add(stack, BorderLayout.CENTER);
+
+        play.addActionListener(event -> togglePause());
+        mute.addActionListener(event -> toggleMute());
+        subtitle.addActionListener(event -> toggleSubtitle());
+        speed.addActionListener(event -> speedMenu.show(speed, 0, -speedMenu.getPreferredSize().height));
+        for (int step = 1; step <= 8; step++) {
+            double value = step * 0.25;
+            javax.swing.JMenuItem item = new javax.swing.JMenuItem(speedLabel(value) + "x");
+            item.addActionListener(event -> setSpeed(value));
+            speedMenu.add(item);
+        }
+        prevSection.addActionListener(event -> move(-1));
+        nextSection.addActionListener(event -> move(1));
+        rewind10.addActionListener(event -> jump(-10));
+        forward10.addActionListener(event -> jump(10));
+
+        JPanel bottom = new JPanel(new BorderLayout());
+        bottom.setOpaque(false);
+        bottom.add(imageBottom, BorderLayout.CENTER);
+        bottom.add(videoControls, BorderLayout.SOUTH);
+        controlsRoot.add(bottom, BorderLayout.SOUTH);
+        toast.setForeground(Color.WHITE);
+        toast.setFont(Theme.font(Font.BOLD, 22));
+        toast.setOpaque(false);
+        toast.setEnabled(false);
+        toast.setVisible(false);
+        toast.setBorder(BorderFactory.createEmptyBorder(10, 22, 10, 22));
+        toastHost.setOpaque(false);
+        toastHost.add(toast);
+
+        JLabel helpText = new JLabel("""
+                <html><div style='color:white;font-size:13px'>
+                <b>ショートカット</b><br>
+                Space / K / P　再生・一時停止<br>
+                ← / →　前後の項目<br>
+                J / L　10秒戻る・進む<br>
+                0〜9　0〜90% へシーク<br>
+                ↑ / ↓　音量 ±5<br>
+                M　ミュート<br>
+                C　字幕 On / Off<br>
+                Shift + &lt; / &gt;　再生速度 ±0.25<br>
+                F　フィット<br>
+                ?　この一覧<br>
+                Esc　閉じる
+                </div></html>""");
+        helpText.setForeground(Color.WHITE);
+        helpPanel.setOpaque(false);
+        helpPanel.setBorder(BorderFactory.createEmptyBorder(14, 20, 14, 20));
+        helpPanel.add(helpText, BorderLayout.CENTER);
+        helpPanel.setVisible(false);
+        JPanel centre = new JPanel();
+        centre.setLayout(null);
+        centre.setOpaque(false);
+        centre.add(helpPanel);
+        centre.add(toastHost);
+        controlsRoot.add(centre, BorderLayout.CENTER);
+        videoControls.setVisible(false);
+
+        controlsWindow = new JWindow(this);
+        controlsWindow.setFocusableWindowState(false);
+        controlsWindow.setBackground(new Color(0, 0, 0, 0));
+        controlsWindow.add(controlsRoot);
+        controlsWindow.setVisible(false);
+
+        MouseAdapter hover = new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent event) {
+                hoveringControls = true;
+                showOverlay();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent event) {
+                hoveringControls = false;
+                chromeTimer.restart();
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                showOverlay();
+            }
+        };
+        top.addMouseListener(hover);
+        top.addMouseMotionListener(hover);
+        imageBottom.addMouseListener(hover);
+        imageBottom.addMouseMotionListener(hover);
+        videoControls.addMouseListener(hover);
+        videoControls.addMouseMotionListener(hover);
+
+        // The empty part of the overlay forwards input to the picture underneath, so panning,
+        // double-click and wheel navigation keep working while the controls are on screen.
+        controlsRoot.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                relay(event);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent event) {
+                relay(event);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                relay(event);
+            }
+        });
+        controlsRoot.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                pointerMoved(event);
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent event) {
+                relay(event);
+                pointerMoved(event);
+            }
+        });
+        controlsRoot.addMouseWheelListener(this::relayWheel);
+    }
+
+    private void installCanvasInput() {
+        MouseAdapter screenClick = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent event) {
                 dragStart = event.getPoint();
                 panStartX = panX;
                 panStartY = panY;
-                if (event.getClickCount() == 2) {
-                    dispose();
-                }
             }
 
             @Override
             public void mouseReleased(MouseEvent event) {
                 dragStart = null;
             }
-        });
+
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                handleScreenClick(event);
+            }
+        };
+        canvas.addMouseListener(screenClick);
+        videoCanvas.addMouseListener(screenClick);
         canvas.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent event) {
@@ -241,6 +579,11 @@ public final class PhotoViewer extends JDialog {
                     panY = panStartY + event.getY() - dragStart.y;
                     canvas.repaint();
                 }
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                pointerMoved(event);
             }
         });
         canvas.addMouseWheelListener(this::moveWithWheel);
@@ -254,11 +597,17 @@ public final class PhotoViewer extends JDialog {
                 canvas.repaint();
             }
         });
+        videoCanvas.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                pointerMoved(event);
+            }
 
-        // Never read a file on the event dispatch thread. Nothing is painted until the full decode
-        // arrives: showing the cached thumbnail in the meantime meant a small, stretched version of
-        // the photo flashed ahead of the real one.
-        showPhoto(index);
+            @Override
+            public void mouseDragged(MouseEvent event) {
+                pointerMoved(event);
+            }
+        });
     }
 
     private static BufferedImage loadImage(Photo photo) throws IOException {
@@ -304,7 +653,8 @@ public final class PhotoViewer extends JDialog {
      */
     public void startSlideshow() {
         if (!slideshowTimer.isRunning()) {
-            toggleSlideshow();
+            slideshowTimer.restart();
+            updateSlideshowButtons(true);
         }
     }
 
@@ -340,8 +690,8 @@ public final class PhotoViewer extends JDialog {
     }
 
     /**
-     * Keeps the window hidden until the first full image has been decoded, so the viewer opens with
-     * the finished photograph instead of an empty or loading frame. The timer is the safety net for
+     * Keeps the window hidden until the first decode is in place, so the viewer opens with the
+     * finished photograph instead of an empty or loading frame. The timer is the safety net for
      * an unreadable file: the window still arrives, with the error on the canvas.
      */
     private void startReveal() {
@@ -359,13 +709,13 @@ public final class PhotoViewer extends JDialog {
         revealed = true;
         revealTimer.stop();
         coverScreen();
+        if (photo != null && photo.isVideo() && player == null && !videoStarting) {
+            startVideo(photo, generation.get());
+        }
     }
 
     /**
-     * Covers the screen the owner lives on without handing the display to the window manager. This
-     * viewer never calls {@code setDisplayMode}, so exclusive full-screen mode would buy nothing
-     * except the mode switch: on the way out Windows restores the desktop and repaints the window
-     * underneath in pieces, which is what made the main screen flicker after the viewer closed.
+     * Covers the screen the owner lives on without handing the display to the window manager.
      */
     private void coverScreen() {
         GraphicsDevice device = null;
@@ -380,15 +730,14 @@ public final class PhotoViewer extends JDialog {
         setBounds(configuration.getBounds());
         setAlwaysOnTop(true);
         setVisible(true);
+        positionControls();
         toFront();
-        // A window which has just been shown does not always accept focus on the first attempt,
-        // and the keyboard navigation below depends on it.
         if (!requestFocusInWindow()) {
             SwingUtilities.invokeLater(this::requestFocusInWindow);
         }
     }
 
-    private static JButton button(javax.swing.Icon icon, String tooltip) {
+    private static JButton button(Icon icon, String tooltip) {
         JButton button = new JButton(icon);
         button.setToolTipText(tooltip);
         button.setForeground(new Color(0xD7DADF));
@@ -400,16 +749,185 @@ public final class PhotoViewer extends JDialog {
         return button;
     }
 
+    private static JButton circular(Icon icon, String tooltip) {
+        JButton button = new JButton(icon) {
+            @Override
+            protected void paintComponent(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g.setColor(new Color(0, 0, 0, 150));
+                    g.fillOval(0, 0, getWidth(), getHeight());
+                } finally {
+                    g.dispose();
+                }
+                super.paintComponent(graphics);
+            }
+        };
+        button.setToolTipText(tooltip);
+        button.setForeground(new Color(0xD7DADF));
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setOpaque(false);
+        button.setPreferredSize(new Dimension(42, 42));
+        return button;
+    }
+
+    private static Icon textIcon(String text, Color color) {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                    g.setFont(Theme.font(Font.BOLD, 10));
+                    g.setColor(color);
+                    java.awt.FontMetrics metrics = g.getFontMetrics();
+                    int width = metrics.stringWidth(text);
+                    g.drawString(text, x + (getIconWidth() - width) / 2, y + (getIconHeight() + metrics.getAscent()) / 2 - 2);
+                } finally {
+                    g.dispose();
+                }
+            }
+
+            @Override
+            public int getIconWidth() {
+                return Math.max(26, 10 + text.length() * 7);
+            }
+
+            @Override
+            public int getIconHeight() {
+                return 16;
+            }
+        };
+    }
+
+    private static Icon filledSquare(int size) {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setColor(Color.WHITE);
+                    g.fillRect(x, y, size, size);
+                } finally {
+                    g.dispose();
+                }
+            }
+
+            @Override
+            public int getIconWidth() {
+                return size;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return size;
+            }
+        };
+    }
+
+    private static Icon speaker(boolean muted) {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g.setColor(Color.WHITE);
+                    java.awt.Polygon cone = new java.awt.Polygon();
+                    cone.addPoint(x, y + 5);
+                    cone.addPoint(x + 4, y + 5);
+                    cone.addPoint(x + 9, y + 1);
+                    cone.addPoint(x + 9, y + 13);
+                    cone.addPoint(x + 4, y + 9);
+                    cone.addPoint(x, y + 9);
+                    g.fill(cone);
+                    if (muted) {
+                        g.setStroke(new java.awt.BasicStroke(1.5f));
+                        g.drawLine(x + 11, y + 4, x + 16, y + 10);
+                        g.drawLine(x + 16, y + 4, x + 11, y + 10);
+                    } else {
+                        g.drawArc(x + 9, y + 2, 6, 10, -60, 120);
+                        g.drawArc(x + 9, y - 1, 10, 16, -55, 110);
+                    }
+                } finally {
+                    g.dispose();
+                }
+            }
+
+            @Override
+            public int getIconWidth() {
+                return 17;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return 14;
+            }
+        };
+    }
+
+    private static JButton control(Icon icon, String tooltip) {
+        JButton button = new JButton(icon) {
+            @Override
+            protected void paintComponent(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g.setColor(new Color(255, 255, 255, 30));
+                    g.fillOval(1, 1, getWidth() - 2, getHeight() - 2);
+                } finally {
+                    g.dispose();
+                }
+                super.paintComponent(graphics);
+            }
+        };
+        button.setToolTipText(tooltip);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+        button.setPreferredSize(new Dimension(38, 38));
+        return button;
+    }
+
+    private static JButton control(String text, String tooltip) {
+        JButton button = control((Icon) null, tooltip);
+        button.setText(text);
+        button.setFont(Theme.font(Font.PLAIN, 11));
+        button.setPreferredSize(new Dimension(48, 38));
+        return button;
+    }
+
     private void installKeys() {
         bind("LEFT", () -> move(-1));
         bind("RIGHT", () -> move(1));
         bind("ESCAPE", this::dispose);
-        bind("SPACE", this::toggleSlideshow);
+        bind("SPACE", this::togglePlayback);
+        bind("K", this::togglePlayback);
+        bind("P", this::togglePlayback);
         bind("PLUS", () -> zoomBy(1.18));
         bind("ADD", () -> zoomBy(1.18));
         bind("MINUS", () -> zoomBy(1 / 1.18));
         bind("SUBTRACT", () -> zoomBy(1 / 1.18));
-        bind("0", this::setFit);
+        bind("J", () -> jump(-10));
+        bind("L", () -> jump(10));
+        bind("M", this::toggleMute);
+        bind("C", this::toggleSubtitle);
+        bind("UP", () -> changeVolume(5));
+        bind("DOWN", () -> changeVolume(-5));
+        for (int digit = 0; digit <= 9; digit++) {
+            int percent = digit * 10;
+            bind(Integer.toString(digit), () -> seekToPercent(percent));
+        }
+        bind("F", this::setFit);
+        bind("shift COMMA", () -> changeSpeed(-0.25));
+        bind("shift PERIOD", () -> changeSpeed(0.25));
+        bind("shift SLASH", this::toggleHelp);
+        bind("QUESTION", this::toggleHelp);
     }
 
     private void bind(String key, Runnable action) {
@@ -435,9 +953,8 @@ public final class PhotoViewer extends JDialog {
         }
         index = next;
         photo = photos.get(index);
+        stopPlayer();
         boolean ready = image != null && loadedPhotoId == photo.id();
-        // Keep the previous frame on screen until the next one is decoded; clearing it here makes
-        // every arrow press flash the viewer background.
         if (ready) {
             error = null;
         }
@@ -445,15 +962,24 @@ public final class PhotoViewer extends JDialog {
         zoom = 1;
         panX = 0;
         panY = 0;
-        updateToolbar();
+        updateOverlay();
+        showOverlay();
         canvas.repaint();
+        long token = generation.incrementAndGet();
+        if (photo.isVideo()) {
+            error = null;
+            image = null;
+            loadedPhotoId = -1;
+            reveal();
+            startVideo(photo, token);
+            return;
+        }
         if (ready) {
             return;
         }
 
         Photo target = photo;
         long id = target.id();
-        long token = generation.incrementAndGet();
         loader.execute(() -> {
             BufferedImage loaded = null;
             String failure = null;
@@ -461,14 +987,11 @@ public final class PhotoViewer extends JDialog {
                 try {
                     loaded = loadImage(target);
                 } catch (IOException | RuntimeException | Error e) {
-                    // Remember the file so arrow keys and slideshow ticks do not decode it again.
                     unreadable.add(id);
                     failure = e.getMessage() == null ? "画像を読み込めません" : e.getMessage();
                 }
             }
             if (loaded == null && unreadable.contains(id)) {
-                // The catalog already holds a generated placeholder for this row; show it instead
-                // of an error, so the photo still looks like a photo while it is browsed.
                 BufferedImage fallback = placeholder(target);
                 if (fallback != null) {
                     loaded = fallback;
@@ -490,45 +1013,410 @@ public final class PhotoViewer extends JDialog {
                     zoom = fitScale();
                 }
                 canvas.repaint();
-                // The first decoded frame is what the window opens on; later navigations find the
-                // window already revealed and this call does nothing.
                 reveal();
             });
         });
     }
 
-    private void updateToolbar() {
+    private void updateOverlay() {
         if (photo == null) {
-            title.setText("");
-            counter.setText("");
+            metadata.setText("");
             return;
         }
-        title.setText(photo.fileName());
-        counter.setText((index + 1) + " / " + photos.size() + "   ·   " + photo.dimensionsLabel() + "   ·   " + photo.sizeLabel());
-        favorite.setIcon(Icons.star(17, photo.favorite() ? Theme.GOLD : Theme.FAINT, photo.favorite()));
-        favorite.setToolTipText(photo.favorite() ? "お気に入りから外す" : "お気に入りに追加");
+        metadata.setText(photo.fileName() + "     ·     " + photo.sizeLabel() + "     ·     " + photo.capturedLabel());
+        boolean video = photo.isVideo();
+        videoTitle.setText(withoutExtension(photo.fileName()));
+        imageBottom.setVisible(!video);
+        videoControls.setVisible(video && player != null);
+        positionControls();
     }
 
-    private void toggleFavorite() {
-        if (photo == null) {
+    private void updateSlideshowButtons(boolean running) {
+        slideshowPlay.setIcon(running ? Icons.pause(15, Theme.GOLD) : Icons.play(15, Color.WHITE));
+        slideshowPlay.setToolTipText(running ? "スライドショー一時停止" : "スライドショー再生");
+    }
+
+    /** A single click toggles video playback; a double click closes the viewer. */
+    private void handleScreenClick(MouseEvent event) {
+        if (event.getClickCount() >= 2) {
+            clickTimer.stop();
+            dispose();
+        } else if (photo != null && photo.isVideo()) {
+            clickTimer.restart();
+        }
+    }
+
+    /** An mpv instance may emit identical events endlessly; only real movement reveals the controls. */
+    private void pointerMoved(MouseEvent event) {
+        Point now = event.getLocationOnScreen();
+        if (lastPointer != null && Math.abs(now.x - lastPointer.x) <= 2 && Math.abs(now.y - lastPointer.y) <= 2) {
             return;
         }
-        photo = photo.withFavorite(!photo.favorite());
-        updateToolbar();
-        listener.onFavorite(photo, photo.favorite());
-        canvas.repaint();
+        lastPointer = now;
+        showOverlay();
     }
 
-    private void toggleSlideshow() {
-        if (slideshowTimer.isRunning()) {
-            slideshowTimer.stop();
-            slideshow.setIcon(Icons.play(15, Color.WHITE));
-            slideshow.setToolTipText("スライドショー");
+    private void showOverlay() {
+        if (!chromeVisible) {
+            setOverlayVisible(true);
         } else {
-            slideshowTimer.restart();
-            slideshow.setIcon(Icons.pause(15, Theme.GOLD));
-            slideshow.setToolTipText("スライドショーを停止");
+            fade(true);
         }
+    }
+
+    private void setOverlayVisible(boolean visible) {
+        chromeVisible = visible;
+        fade(visible);
+    }
+
+    private void fade(boolean in) {
+        if (!TRANSLUCENT) {
+            controlsWindow.setVisible(in);
+            return;
+        }
+        if (in && !controlsWindow.isVisible()) {
+            controlsWindow.setVisible(true);
+            overlayAlpha = 0;
+            controlsWindow.setOpacity(0);
+        }
+        fadingIn = in;
+        fadeTimer.restart();
+    }
+
+    private void advanceFade() {
+        overlayAlpha += fadingIn ? 0.12f : -0.12f;
+        overlayAlpha = Math.max(0, Math.min(1, overlayAlpha));
+        controlsWindow.setOpacity(overlayAlpha);
+        if ((fadingIn && overlayAlpha >= 1) || (!fadingIn && overlayAlpha <= 0)) {
+            fadeTimer.stop();
+            if (!fadingIn) {
+                controlsWindow.setVisible(false);
+            }
+        }
+    }
+
+    private void hideOverlayIfIdle() {
+        boolean paused = false;
+        try {
+            paused = player != null && "yes".equals(player.property("pause"));
+        } catch (RuntimeException ignored) {
+            // The player may be mid-seek; hiding is fine in that case.
+        }
+        if (helpVisible || hoveringControls || seek.dragging() || volume.dragging() || paused) {
+            fade(true);
+            return;
+        }
+        setOverlayVisible(false);
+    }
+
+    /** Anchors the overlay to the full viewer bounds; its children never change the media size. */
+    private void positionControls() {
+        if (!isDisplayable()) {
+            return;
+        }
+        Point origin = getLocationOnScreen();
+        controlsWindow.setBounds(origin.x, origin.y, getWidth(), getHeight());
+        Dimension helpSize = helpPanel.getPreferredSize();
+        helpPanel.setBounds((getWidth() - helpSize.width) / 2, (getHeight() - helpSize.height) / 2,
+                helpSize.width, helpSize.height);
+        Dimension toastSize = toastHost.getPreferredSize();
+        toastHost.setBounds((getWidth() - toastSize.width) / 2, (getHeight() - toastSize.height) / 2,
+                toastSize.width, toastSize.height);
+        controlsRoot.revalidate();
+    }
+
+    private void relay(MouseEvent event) {
+        Point screen = event.getLocationOnScreen();
+        Point origin = canvas.getLocationOnScreen();
+        canvas.dispatchEvent(new MouseEvent(canvas, event.getID(), event.getWhen(), event.getModifiersEx(),
+                screen.x - origin.x, screen.y - origin.y, event.getClickCount(), event.isPopupTrigger(), event.getButton()));
+    }
+
+    private void relayWheel(MouseWheelEvent event) {
+        Point screen = event.getLocationOnScreen();
+        Point origin = canvas.getLocationOnScreen();
+        canvas.dispatchEvent(new MouseWheelEvent(canvas, event.getID(), event.getWhen(), event.getModifiersEx(),
+                screen.x - origin.x, screen.y - origin.y, 0, false, event.getScrollType(), event.getScrollAmount(),
+                event.getWheelRotation()));
+    }
+
+    private void toggleHelp() {
+        helpVisible = !helpVisible;
+        helpPanel.setVisible(helpVisible);
+        helpPanel.revalidate();
+        showOverlay();
+        positionControls();
+    }
+
+    private void showToast(String text) {
+        if (!isDisplayable()) {
+            return;
+        }
+        toast.setText(text);
+        toast.setVisible(true);
+        showOverlay();
+        positionControls();
+        toastTimer.restart();
+    }
+
+    private void changeVolume(int delta) {
+        if (player == null) {
+            return;
+        }
+        int level = (int) Math.max(0, Math.min(100, Math.rint(volume.value()) + delta));
+        volume.value(level);
+        player.set("volume", Double.toString(level));
+        updateMuteButton(false);
+        showToast("音量 " + level + "%");
+    }
+
+    private void seekToPercent(int percent) {
+        if (player == null) {
+            return;
+        }
+        double duration = parseSeconds(player.property("duration"));
+        if (duration <= 0) {
+            return;
+        }
+        player.command("seek", Double.toString(duration * percent / 100), "absolute+exact");
+        showToast(percent + "%");
+    }
+
+    private void togglePlayback() {
+        if (player != null) {
+            togglePause();
+        } else if (slideshowTimer.isRunning()) {
+            slideshowTimer.stop();
+            updateSlideshowButtons(false);
+        } else {
+            startSlideshow();
+        }
+    }
+
+    private void togglePause() {
+        if (player == null) {
+            return;
+        }
+        if (player.property("time-pos") == null && photo != null && !photo.archived()) {
+            player.command("loadfile", photo.path().toAbsolutePath().normalize().toString(), "replace");
+            player.set("pause", "no");
+            updatePlayButton(false);
+            showToast("再生");
+            return;
+        }
+        boolean paused = "yes".equals(player.property("pause"));
+        player.set("pause", paused ? "no" : "yes");
+        updatePlayButton(!paused);
+        showToast(paused ? "再生" : "一時停止");
+    }
+
+    private void updatePlayButton(boolean paused) {
+        play.setIcon(paused ? Icons.play(15, Color.WHITE) : Icons.pause(15, Color.WHITE));
+        play.setToolTipText(paused ? "再生" : "一時停止");
+    }
+
+    private void stopPlayback() {
+        if (player == null) {
+            return;
+        }
+        player.command("stop");
+        updatePlayButton(true);
+        time.setText("00:00 / 00:00");
+        seek.value(0);
+    }
+
+    private void toggleMute() {
+        if (player == null) {
+            return;
+        }
+        boolean muted = "yes".equals(player.property("mute"));
+        player.set("mute", muted ? "no" : "yes");
+        updateMuteButton(!muted);
+        showToast(muted ? "ミュート解除" : "ミュート");
+    }
+
+    private void toggleSubtitle() {
+        if (player == null) {
+            return;
+        }
+        boolean visible = !"no".equals(player.property("sub-visibility"));
+        player.set("sub-visibility", visible ? "no" : "yes");
+        updateSubtitleButton(!visible);
+        showToast(visible ? "字幕 OFF" : "字幕 ON");
+    }
+
+    private void updateSubtitleButton(boolean visible) {
+        subtitle.setIcon(textIcon("CC", visible ? Color.WHITE : new Color(0x9AA0A8)));
+        subtitle.setToolTipText(visible ? "字幕を隠す" : "字幕を表示");
+    }
+
+    private void setSpeed(double value) {
+        if (player == null) {
+            return;
+        }
+        player.set("speed", Double.toString(value));
+        updateSpeedButton(value);
+        showToast(speedLabel(value) + "x");
+    }
+
+    private void changeSpeed(double delta) {
+        if (player == null) {
+            return;
+        }
+        double current = parseSeconds(player.property("speed"));
+        if (current <= 0) {
+            current = 1;
+        }
+        double next = Math.max(0.25, Math.min(2.0, Math.rint((current + delta) * 100) / 100));
+        setSpeed(next);
+    }
+
+    private void updateSpeedButton(double value) {
+        String label = speedLabel(value);
+        speed.setIcon(textIcon(label + "x", value == 1 ? Color.WHITE : new Color(0x3EA6FF)));
+        speed.setToolTipText("再生速度 " + label + "x");
+    }
+
+    private static String speedLabel(double value) {
+        return value == Math.rint(value) ? String.format(java.util.Locale.ROOT, "%.1f", value)
+                : String.format(java.util.Locale.ROOT, "%.2f", value);
+    }
+
+    private void updateMuteButton(boolean muted) {
+        mute.setIcon(speaker(muted));
+        mute.setToolTipText(muted ? "ミュート解除" : "ミュート");
+    }
+
+    private void setVideoControlsVisible(boolean visible) {
+        videoControls.setVisible(visible && photo != null && photo.isVideo());
+    }
+
+    /**
+     * Creates a libmpv instance for the current video on the background loader. The native window is
+     * only available after the viewer has been realized, which is why this never runs in the
+     * constructor.
+     */
+    private void startVideo(Photo target, long token) {
+        if (videoStarting || player != null || closed) {
+            return;
+        }
+        videoStarting = true;
+        loader.execute(() -> {
+            Mpv created = null;
+            String failure = null;
+            try {
+                if (!MpvNative.isAvailable()) {
+                    throw new IllegalStateException("libmpv is not available");
+                }
+                // The stock OSC would draw a second control bar over ours.
+                created = Mpv.open(Map.of("vo", "gpu", "config", "no", "pause", "yes", "osc", "no"));
+                created.set("sub-visibility", "no");
+                long parent = Win32Window.window(windowTitle);
+                long handle = Win32Window.child(parent, "SunAwtCanvas");
+                if (handle == 0) {
+                    throw new IllegalStateException("The video surface has no native window");
+                }
+                created.setLong("wid", handle);
+                created.load(target.path());
+                created.set("pause", "no");
+            } catch (Throwable e) {
+                if (created != null) {
+                    created.close();
+                }
+                created = null;
+                failure = e.getMessage() == null ? "動画を再生できません" : e.getMessage();
+            }
+            Mpv result = created;
+            String message = failure;
+            SwingUtilities.invokeLater(() -> {
+                videoStarting = false;
+                if (token != generation.get() || closed) {
+                    if (result != null) {
+                        result.close();
+                    }
+                    return;
+                }
+                if (result == null) {
+                    error = message;
+                    canvas.repaint();
+                    return;
+                }
+                player = result;
+                videoCanvas.setVisible(true);
+                showOverlay();
+                updatePlayButton(false);
+                volume.value(parseInt(player.property("volume"), 100));
+                updateMuteButton("yes".equals(player.property("mute")));
+                updateSubtitleButton(false);
+                updateSpeedButton(parseSeconds(player.property("speed")));
+                videoTitle.setText(photo == null ? "" : photo.fileName());
+                progress.start();
+                updateProgress();
+                updateOverlay();
+                reveal();
+            });
+        });
+    }
+
+    private void stopPlayer() {
+        progress.stop();
+        videoStarting = false;
+        videoCanvas.setVisible(false);
+        setVideoControlsVisible(false);
+        Mpv old = player;
+        player = null;
+        if (old != null) {
+            old.close();
+        }
+        updateOverlay();
+    }
+
+    private void updateProgress() {
+        if (player == null) {
+            return;
+        }
+        try {
+            double position = parseSeconds(player.property("time-pos"));
+            double duration = parseSeconds(player.property("duration"));
+            if (seek.dragging()) {
+                // The drag preview owns the time label and the knob while the user scrubs.
+                return;
+            }
+            String text = clock(position) + " / " + clock(duration);
+            if (!text.equals(time.getText())) {
+                time.setText(text);
+            }
+            updatePlayButton("yes".equals(player.property("pause")));
+            seek.value(duration > 0 ? position / duration * 1000 : 0);
+        } catch (RuntimeException ignored) {
+            // A property can be briefly unavailable while a new file is being loaded.
+        }
+    }
+
+    private static double parseSeconds(String value) {
+        try {
+            return value == null ? 0 : Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static int parseInt(String value, int fallback) {
+        try {
+            return value == null ? fallback : Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private static String withoutExtension(String name) {
+        int dot = name.lastIndexOf('.');
+        return dot > 0 ? name.substring(0, dot) : name;
+    }
+
+    private static String clock(double seconds) {
+        long whole = (long) seconds;
+        return String.format(java.util.Locale.ROOT, "%02d:%02d", whole / 60, whole % 60);
     }
 
     private void setFit() {
@@ -577,19 +1465,21 @@ public final class PhotoViewer extends JDialog {
             return;
         }
         closed = true;
+        stopPlayer();
+        chromeTimer.stop();
+        toastTimer.stop();
+        clickTimer.stop();
+        fadeTimer.stop();
         revealTimer.stop();
         slideshowTimer.stop();
+        progress.stop();
         generation.incrementAndGet();
         loader.shutdownNow();
-        // Leave the screen and give up the top-most rank before the window goes away, then hand
-        // activation back to the owner in one step, so the main window is shown once fully painted
-        // instead of being expose-painted while the viewer is still on top of it.
         Window owner = getOwner();
         setVisible(false);
         setAlwaysOnTop(false);
+        controlsWindow.dispose();
         super.dispose();
-        // The grid should keep its focus and scroll position on the photo actually being viewed
-        // when the viewer was closed, not on the one it was opened with.
         listener.onClose(photo);
         if (owner instanceof Frame frame) {
             frame.toFront();
@@ -599,9 +1489,151 @@ public final class PhotoViewer extends JDialog {
         }
     }
 
+    private void applyVolume() {
+        if (player != null) {
+            player.set("volume", Double.toString(volume.value()));
+        }
+    }
+
+    private void previewSeek() {
+        if (player == null) {
+            return;
+        }
+        double duration = parseSeconds(player.property("duration"));
+        double target = duration * seek.value() / 1000;
+        time.setText(clock(target) + " / " + clock(duration));
+        long now = System.nanoTime();
+        if (now - lastScrubNanos >= 60_000_000L) {
+            lastScrubNanos = now;
+            // Exact seeks keep the picture in step with the knob; throttled so they stay smooth.
+            player.command("seek", Double.toString(target), "absolute+exact");
+        }
+    }
+
+    private void commitSeek() {
+        if (player == null) {
+            return;
+        }
+        lastScrubNanos = 0;
+        double duration = parseSeconds(player.property("duration"));
+        player.command("seek", Double.toString(duration * seek.value() / 1000), "absolute+exact");
+    }
+
+    private void jump(double seconds) {
+        if (player == null) {
+            return;
+        }
+        double duration = parseSeconds(player.property("duration"));
+        double position = parseSeconds(player.property("time-pos"));
+        if (duration <= 0) {
+            return;
+        }
+        double target = Math.max(0, Math.min(duration - 0.05, position + seconds));
+        player.command("seek", Double.toString(target), "absolute+exact");
+        showToast(seconds < 0 ? "10秒戻る" : "10秒進む");
+    }
+
     /**
-     * The painting surface.
+     * A double-valued slider so the knob follows the pointer exactly. Swing's JSlider works on
+     * integer values, which made the handle jump in visible steps, and its partial repaints left
+     * the old knob behind.
      */
+    private final class Slider extends JComponent {
+
+        private double minimum;
+        private double maximum = 1;
+        private double value;
+        private boolean dragging;
+        private final Runnable onChange;
+        private final Runnable onRelease;
+
+        Slider(Runnable onChange, Runnable onRelease) {
+            this.onChange = onChange;
+            this.onRelease = onRelease;
+            setOpaque(false);
+            MouseAdapter pointer = new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent event) {
+                    dragging = true;
+                    update(event.getX());
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent event) {
+                    update(event.getX());
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent event) {
+                    dragging = false;
+                    onRelease.run();
+                }
+            };
+            addMouseListener(pointer);
+            addMouseMotionListener(pointer);
+        }
+
+        void setRange(double min, double max) {
+            minimum = min;
+            maximum = max;
+        }
+
+        double value() {
+            return value;
+        }
+
+        void value(double next) {
+            double clamped = Math.max(minimum, Math.min(maximum, next));
+            if (clamped == value) {
+                return;
+            }
+            value = clamped;
+            repaint();
+        }
+
+        boolean dragging() {
+            return dragging;
+        }
+
+        private void update(int x) {
+            double fraction = clampFraction((double) x / Math.max(1, getWidth() - 1));
+            double next = minimum + (maximum - minimum) * fraction;
+            if (next != value) {
+                value = next;
+                repaint();
+            }
+            onChange.run();
+        }
+
+        private double clampFraction(double fraction) {
+            return Math.max(0, Math.min(1, fraction));
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            try {
+                // Erase the previous knob to full transparency; the video shows through the overlay.
+                g.setComposite(AlphaComposite.Clear);
+                g.fillRect(0, 0, getWidth(), getHeight());
+                g.setComposite(AlphaComposite.SrcOver);
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int width = getWidth();
+                int height = getHeight();
+                double fraction = maximum > minimum ? (value - minimum) / (maximum - minimum) : 0;
+                double centre = fraction * width;
+                g.setColor(new Color(255, 255, 255, 90));
+                g.fillRoundRect(0, height / 2 - 2, width, 4, 3, 3);
+                g.setColor(new Color(0x3EA6FF));
+                g.fillRoundRect(0, height / 2 - 2, (int) Math.round(centre), 4, 3, 3);
+                g.setColor(new Color(0x3EA6FF));
+                g.fillOval((int) Math.round(centre) - 6, height / 2 - 6, 12, 12);
+            } finally {
+                g.dispose();
+            }
+        }
+    }
+
     private final class Canvas extends JComponent {
 
         Canvas() {
@@ -619,12 +1651,10 @@ public final class PhotoViewer extends JDialog {
                 g.setColor(Theme.VIEWER);
                 g.fillRect(0, 0, getWidth(), getHeight());
                 if (image == null) {
-                    // Nothing intermediate is painted: the window only appears once the full image
-                    // is ready, or when there is an error to report.
                     if (error != null) {
                         paintCentered(g, "画像を読み込めません", new Color(0xC9CDD3));
                         paintCentered(g, error, new Color(0x777D86), 24);
-                    } else {
+                    } else if (photo == null || !photo.isVideo()) {
                         paintCentered(g, "写真を選択してください", Theme.FAINT);
                     }
                     return;
@@ -634,7 +1664,6 @@ public final class PhotoViewer extends JDialog {
                 int h = Math.max(1, (int) Math.round(image.getHeight() * scale));
                 int x = (getWidth() - w) / 2 + (int) Math.round(panX);
                 int y = (getHeight() - h) / 2 + (int) Math.round(panY);
-
                 g.setColor(new Color(0, 0, 0, 130));
                 g.fillRoundRect(x + 6, y + 10, w, h, 8, 8);
                 g.drawImage(image, x, y, w, h, null);
@@ -655,3 +1684,5 @@ public final class PhotoViewer extends JDialog {
         }
     }
 }
+
+

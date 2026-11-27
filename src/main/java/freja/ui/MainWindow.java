@@ -96,6 +96,8 @@ public final class MainWindow extends JFrame {
 
     private static final String INSPECTOR_VISIBLE_PREFERENCE = "view.inspectorVisible";
 
+    private static final String VIDEOS_ONLY_PREFERENCE = "view.videosOnly";
+
     private static final String SCAN_ON_STARTUP_PREFERENCE = "scan.onStartup";
 
     private static final String SCAN_SWEEP_PREFERENCE = "scan.sweep";
@@ -203,9 +205,14 @@ public final class MainWindow extends JFrame {
 
     private ARXButton tagFilterButton;
 
+    private ARXButton videoFilterButton;
+
+    /** Whether the grid is restricted to playable video files. */
+    private boolean videosOnly = PREFERENCES.getBoolean(VIDEOS_ONLY_PREFERENCE, false);
+
     public MainWindow(Library library, LibraryScanner scanner) {
         super("Freja");
-        setIconImage(Icons.applicationImage());
+        setIconImages(Icons.applicationImages());
         this.library = library;
         this.tasks = new LibraryTasks(library, SwingUtilities::invokeLater);
         tasks.setErrorHandler(error -> JOptionPane.showMessageDialog(this,
@@ -327,6 +334,14 @@ public final class MainWindow extends JFrame {
             @Override
             public void onThemeChanged() {
                 applyThemeUi();
+            }
+
+            @Override
+            public void onAppIconChanged() {
+                setIconImages(Icons.applicationImages());
+                if (viewer != null) {
+                    viewer.setIconImages(Icons.applicationImages());
+                }
             }
 
             @Override
@@ -459,6 +474,13 @@ public final class MainWindow extends JFrame {
         tagFilterButton.setFont(Theme.font(Font.PLAIN, 12));
         tagFilterButton.setToolTipText("タグで絞り込む");
         bar.add(tagFilterButton);
+        bar.add(Box.createHorizontalStrut(6));
+
+        videoFilterButton = new ARXButton("動画", Icons.play(14, Theme.MUTED), ARXButton.Variant.SECONDARY, this::toggleVideosOnly);
+        videoFilterButton.setFont(Theme.font(Font.PLAIN, 12));
+        videoFilterButton.setToolTipText("動画だけを表示する");
+        updateVideoFilterButton();
+        bar.add(videoFilterButton);
         bar.add(Box.createHorizontalGlue());
         bar.add(Box.createHorizontalStrut(14));
 
@@ -1604,6 +1626,20 @@ public final class MainWindow extends JFrame {
         tagFilterButton.setText(selectedTagIds.isEmpty() ? "タグ" : "タグ (" + selectedTagIds.size() + ")");
     }
 
+    /** Toggles the video-only restriction without changing the sidebar mode or the search text. */
+    private void toggleVideosOnly() {
+        videosOnly = !videosOnly;
+        PREFERENCES.putBoolean(VIDEOS_ONLY_PREFERENCE, videosOnly);
+        updateVideoFilterButton();
+        scheduleRefresh();
+    }
+
+    private void updateVideoFilterButton() {
+        if (videoFilterButton != null) {
+            videoFilterButton.setSelected(videosOnly);
+        }
+    }
+
     /** Called after tags or folder assignments changed in one of the tag dialogs. */
     private void tagsChanged() {
         tasks.query(library::tags, tags -> {
@@ -1665,11 +1701,11 @@ public final class MainWindow extends JFrame {
         case FAVORITES -> PhotoFilter.favorites();
         case RECENT -> PhotoFilter.recent();
         };
-        filter = filter.withSort(order).withSearch(searchText).withTags(tagIds);
+        filter = filter.withSort(order).withSearch(searchText).withTags(tagIds).withVideosOnly(videosOnly);
 
         List<Photo> photos = library.photos(filter);
         List<Folder> visibleFolders = folders.stream().filter(folder -> folder.photoCount() > 0).toList();
-        if (filter.search() != null || !filter.tagIds().isEmpty()) {
+        if (filter.search() != null || !filter.tagIds().isEmpty() || filter.videosOnly()) {
             java.util.Set<Long> matched = new java.util.HashSet<>();
             for (Photo photo : photos) {
                 matched.add(photo.folderId());
@@ -1794,7 +1830,8 @@ public final class MainWindow extends JFrame {
         }
         if (selected.size() == 1) {
             Photo photo = selected.get(0);
-            selectionInfo.setText(photo.fileName() + "  ·  " + photo.dimensionsLabel() + "  ·  " + photo
+            String duration = photo.durationLabel().isEmpty() ? "" : photo.durationLabel() + "  ·  ";
+            selectionInfo.setText(photo.fileName() + "  ·  " + duration + photo.dimensionsLabel() + "  ·  " + photo
                     .capturedLabel() + "  ·  " + Photo.formatSize(photo.byteSize()));
         } else {
             long bytes = 0;

@@ -91,6 +91,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
 
     private static final DateTimeFormatter RANGE_DATE = DateTimeFormatter.ofPattern("yyyy/M/d");
 
+    /** Badge glyphs are shared: painting hundreds of cells must not create SVG icons each frame. */
+    private static final Icon FAVORITE_ICON = Icons.star(17, Theme.GOLD, true);
+
+    private static final Icon VIDEO_ICON = Icons.play(11, Color.WHITE);
+
     private final ThumbnailCache cache;
 
     private List<Photo> photos = List.of();
@@ -210,8 +215,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     };
 
     /** One visual row, either a date header or a row of cells with per-photo heights. */
-    private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey,
-            int[] cellHeights, List<String> tags, SortOrder order) {
+    private record LayoutRow(int y, int height, int[] indices, String title, int count, String note, String groupKey, int[] cellHeights, List<String> tags, SortOrder order) {
 
         boolean header() {
             return indices.length == 0;
@@ -352,8 +356,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 }
                 if (pane != null) {
                     JScrollBar bar = pane.getVerticalScrollBar();
-                    int destination = Math.max(bar.getMinimum(),
-                            Math.min(bar.getMaximum() - bar.getVisibleAmount(), after.y() + offset));
+                    int destination = Math.max(bar.getMinimum(), Math.min(bar.getMaximum() - bar.getVisibleAmount(), after.y() + offset));
                     bar.setValue(destination);
                 }
             }
@@ -525,8 +528,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
      * @param viewOrder the order used for the whole view, shown when folders do not override it
      * @param perFolderOrder whether each folder is ordered by its own saved sort
      */
-    public void setPhotos(List<Photo> photos, GroupMode grouping, List<Folder> sections, SortOrder viewOrder,
-            boolean perFolderOrder) {
+    public void setPhotos(List<Photo> photos, GroupMode grouping, List<Folder> sections, SortOrder viewOrder, boolean perFolderOrder) {
         Set<Long> selectedIds = new HashSet<>();
         for (int index : selectedIndices) {
             if (index >= 0 && index < photos.size()) {
@@ -878,7 +880,9 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         return true;
     }
 
-    /** Pins the sidebar selection so sticky headers do not move it until the folder reaches the top. */
+    /**
+     * Pins the sidebar selection so sticky headers do not move it until the folder reaches the top.
+     */
     public void pinFolder(long folderId) {
         pinnedFolder = folderId;
     }
@@ -1087,7 +1091,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                         index++;
                     }
                     SortOrder applied = perFolderOrder ? (section.sort() == null ? SortOrder.NAME : section.sort()) : viewOrder;
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long.toString(section.id()), null, section.tags(), applied));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], section.name(), index - start, dateRange(start, index), Long
+                            .toString(section.id()), null, section.tags(), applied));
                     y += HEADER_HEIGHT;
                     y = addPhotoRows(y, start, index);
                     y += 8;
@@ -1095,7 +1100,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 if (index < photos.size()) {
                     int start = index;
                     index = photos.size();
-                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null, List.of(), viewOrder));
+                    rows.add(new LayoutRow(y, HEADER_HEIGHT, new int[0], "その他", index - start, dateRange(start, index), null, null, List
+                            .of(), viewOrder));
                     y += HEADER_HEIGHT;
                     y = addPhotoRows(y, start, index);
                     y += 8;
@@ -1510,8 +1516,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         if (grouping == GroupMode.FOLDER && stickyKey != null) {
             LayoutRow sticky = headerFor(stickyKey);
             if (sticky != null) {
-                SortHit hit = sortHitFor(sticky, stickyHeaderY(sticky, getVisibleRect().y), point, countMetrics,
-                        orderMetrics);
+                SortHit hit = sortHitFor(sticky, stickyHeaderY(sticky, getVisibleRect().y), point, countMetrics, orderMetrics);
                 if (hit != null) {
                     return hit;
                 }
@@ -1529,9 +1534,10 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         return null;
     }
 
-    /** The sort label rectangle of one header drawn at {@code rowY}, or null when it is not there. */
-    private SortHit sortHitFor(LayoutRow row, int rowY, Point point, FontMetrics countMetrics,
-            FontMetrics orderMetrics) {
+    /**
+     * The sort label rectangle of one header drawn at {@code rowY}, or null when it is not there.
+     */
+    private SortHit sortHitFor(LayoutRow row, int rowY, Point point, FontMetrics countMetrics, FontMetrics orderMetrics) {
         if (row.order() == null) {
             return null;
         }
@@ -1591,7 +1597,6 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         return null;
     }
 
-
     private void paintHeader(Graphics2D g, LayoutRow row, int y, boolean sticky) {
         // Headers start at the outer edge, independent of how the thumbnail grid is centred.
         int x = OUTER;
@@ -1638,7 +1643,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             int room = metaRight - metaX;
             int control = sortControlWidth(orderMetrics, row.order());
             if (control <= room) {
-                // A painted select control: a subtle rounded box with a chevron, sized to the label.
+                // A painted select control: a subtle rounded box with a chevron, sized to the
+                // label.
                 // It stays inside the metadata line, and metaX advances by exactly its width.
                 int boxY = metaBaseline - 14;
                 g.setColor(Theme.SURFACE);
@@ -1651,8 +1657,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 int arrowX = metaX + control - SELECT_PADDING - SELECT_CHEVRON;
                 int arrowY = metaBaseline - 6;
                 g.setColor(Theme.MUTED);
-                g.fillPolygon(new int[] { arrowX, arrowX + SELECT_CHEVRON, arrowX + SELECT_CHEVRON / 2 },
-                        new int[] { arrowY, arrowY, arrowY + 4 }, 3);
+                g.fillPolygon(new int[] {arrowX, arrowX + SELECT_CHEVRON, arrowX + SELECT_CHEVRON / 2}, new int[] {arrowY, arrowY,
+                        arrowY + 4}, 3);
                 sortHits.add(new SortHit(folderIdOf(row), row.order(), new Rectangle(metaX, boxY, control, 20)));
                 metaX += control + 10;
             } else {
@@ -1661,8 +1667,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
                 int width = orderMetrics.stringWidth(shown);
                 g.setColor(Theme.TEXT);
                 g.drawString(shown, metaX, metaBaseline);
-                sortHits.add(new SortHit(folderIdOf(row), row.order(),
-                        new Rectangle(metaX - 2, metaBaseline - 13, width + 4, 20)));
+                sortHits.add(new SortHit(folderIdOf(row), row.order(), new Rectangle(metaX - 2, metaBaseline - 13, width + 4, 20)));
                 metaX += Math.min(orderMetrics.stringWidth(sortLabel(row.order())), room) + 10;
             }
         }
@@ -1727,8 +1732,35 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             g.fill(new RoundRectangle2D.Float(cardX + 1, cardY + 1, cardWidth - 2, cardHeight - 2, 12, 12));
         }
 
+        // Videos carry a play badge with their duration in the opposite corner from the favourite
+        // star, so a favourite clip shows both marks. It is painted after the selection tint to
+        // stay
+        // legible even over a bright thumbnail.
+        if (photo.isVideo()) {
+            Icon play = VIDEO_ICON;
+            String duration = photo.durationLabel();
+            Font font = Theme.font(Font.BOLD, 10);
+            g.setFont(font);
+            FontMetrics metrics = g.getFontMetrics();
+            int iconWidth = play.getIconWidth();
+            int iconHeight = play.getIconHeight();
+            int textWidth = duration.isEmpty() ? 0 : metrics.stringWidth(duration);
+            int height = Math.max(20, Math.max(iconHeight, metrics.getHeight()) + 6);
+            int width = Math.min(cardWidth - 16, iconWidth + textWidth + 14);
+            double x = cardX + 8;
+            double y = cardY + cardHeight - 6 - height;
+            g.setColor(new Color(0, 0, 0, 200));
+            g.fill(new RoundRectangle2D.Double(x, y, width, height, height / 2.0, height / 2.0));
+            play.paintIcon(this, g, (int) Math.round(x + 4), (int) Math.round(y + (height - iconHeight) / 2.0));
+            if (!duration.isEmpty()) {
+                g.setColor(Color.WHITE);
+                g.drawString(duration, (int) Math.round(x + 4 + iconWidth + 1), (int) Math
+                        .round(y + (height + metrics.getAscent() - metrics.getDescent()) / 2.0));
+            }
+        }
+
         if (photo.favorite()) {
-            Icon star = Icons.star(17, Theme.GOLD, true);
+            Icon star = FAVORITE_ICON;
             // FlatSVGIcon reports a display-scaled size, so fixed offsets used to push the star
             // down and right of the badge on HiDPI screens. Centre it from the icon's own bounds.
             int diameter = Math.max(26, Math.max(star.getIconWidth(), star.getIconHeight()) + 9);
@@ -1736,9 +1768,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             double circleY = cardY + 8;
             g.setColor(new Color(255, 255, 255, 225));
             g.fill(new Ellipse2D.Double(circleX, circleY, diameter, diameter));
-            star.paintIcon(this, g,
-                    (int) Math.round(circleX + (diameter - star.getIconWidth()) / 2.0),
-                    (int) Math.round(circleY + (diameter - star.getIconHeight()) / 2.0));
+            star.paintIcon(this, g, (int) Math.round(circleX + (diameter - star.getIconWidth()) / 2.0), (int) Math
+                    .round(circleY + (diameter - star.getIconHeight()) / 2.0));
         }
 
         // The file name is shown in the status bar, so the cell contains only the thumbnail.
@@ -1756,8 +1787,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         g.setColor(withAlpha(Theme.BACKGROUND, 160));
         g.fill(new RoundRectangle2D.Float(inner.x, inner.y, inner.width, inner.height, 10, 10));
         int icon = Math.max(18, Math.min(40, Math.min(inner.width, inner.height) / 3));
-        Icons.image(icon, Theme.FAINT).paintIcon(this, g,
-                inner.x + (inner.width - icon) / 2, inner.y + (inner.height - icon) / 2);
+        Icons.image(icon, Theme.FAINT).paintIcon(this, g, inner.x + (inner.width - icon) / 2, inner.y + (inner.height - icon) / 2);
     }
 
     private void paintEmpty(Graphics2D g) {

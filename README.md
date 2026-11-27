@@ -24,7 +24,20 @@ Freja ships two interchangeable user interfaces on top of the same SQLite catalo
 | Browser (Apocrypha) | `freja.web.FrejaWeb` | HTML/CSS/JS via [Apocrypha](https://github.com/teletha/apocrypha) |
 
 All editions read and write the same library (`%LOCALAPPDATA%\Freja\library.db` by default), so
-you can switch between them freely. They share the single-instance port, meaning starting one
+you can switch between them freely.
+
+Supported video files are scanned like photos: their catalog row stores a still-frame thumbnail,
+the source dimensions and the duration. The Swing viewer plays them in place with libmpv (play/pause,
+seek with the slider, Space/P, and the usual navigation keys). Its toolbar and player controls behave
+entirely as an overlay on a separate translucent window, so showing or hiding the controls never
+resizes the picture. Still images show the slideshow play/stop controls on the left and the file
+name, size and date centred at the bottom. Videos show an OSC-style strip at the bottom edge: the
+title above a full-width blue seek bar with the elapsed and total times at its ends, and a row of
+round transport buttons (skip, play/pause, stop, mute, volume) underneath; a single click on the
+picture toggles playback and a double click closes the viewer. A circular close button sits at the top right. The
+overlay fades in on mouse movement and fades out after four seconds of inactivity, but stays put
+while paused or while the pointer is over a control. The browser edition currently shows video
+thumbnails but does not stream the video itself. They share the single-instance port, meaning starting one
 asks the other to close (disable with `-Dfreja.singleInstance=false` for testing).
 
 To start the browser edition:
@@ -54,6 +67,14 @@ tree and falls back to the prebuilt assets in `src/main/resources/web/svelte`. U
 ## Prerequisites
 Freja runs on all major operating systems and requires only [Java version 25](https://docs.oracle.com/en/java/javase/25/) or later to run.
 To check, please run `java -version` on your terminal.
+
+Video support uses libmpv through the Foreign Function & Memory API, so the JVM needs native access enabled (already included in the commands below and in the test configuration):
+
+```
+java --enable-native-access=ALL-UNNAMED -cp <dependencies> freja.Freja
+```
+
+On Windows x86_64, `libmpv-2.dll` is downloaded from the official mpv release on first use. For an offline or custom build, place it in a directory and pass `-Dfreja.mpv.path=<directory>`.
 <p align="right"><a href="#top">back to top</a></p>
 
 ## Install
@@ -176,6 +197,7 @@ Freja depends on the following products on runtime.
 * [sqlite-jdbc-3.54.1.0](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc/3.54.1.0)
 * [stylist-1.16.1](https://mvnrepository.com/artifact/io.github.teletha/stylist/1.16.1)
 * [swing-tree-1.1.2](https://mvnrepository.com/artifact/io.github.globaltcad/swing-tree/1.1.2)
+* [libmpv 0.42.0 (LGPL)](https://github.com/mpv-player/mpv/releases/tag/v0.42.0) — native video backend, downloaded on first use into `%LOCALAPPDATA%\Freja\native\mpv` and verified against a pinned SHA-256
 <p align="right"><a href="#top">back to top</a></p>
 
 
