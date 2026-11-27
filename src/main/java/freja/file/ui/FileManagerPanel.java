@@ -35,8 +35,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -44,6 +46,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.ListCellRenderer;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
@@ -118,6 +122,22 @@ public final class FileManagerPanel extends JPanel {
         }
     };
     private final JTable table = new JTable(tableModel);
+
+    /** The three explorer-style presentations of the same directory. */
+    private enum View {
+        DETAILS, CONTENT, TILES
+    }
+
+    private View view = View.DETAILS;
+
+    private final JScrollPane listScroll = new JScrollPane(table);
+
+    private final DefaultListModel<FileBrowser.Entry> entryListModel = new DefaultListModel<>();
+
+    private final JList<FileBrowser.Entry> contentList = new JList<>(entryListModel);
+
+    private final JList<FileBrowser.Entry> tileList = new JList<>(entryListModel);
+
     private final JButton back = new JButton(Icons.chevron(15, Theme.MUTED, true));
     private final JButton forward = new JButton(Icons.chevron(15, Theme.MUTED, false));
     private final JButton up = new JButton(Icons.of("mdi:arrow-up", 15, Theme.MUTED));
@@ -296,6 +316,15 @@ public final class FileManagerPanel extends JPanel {
             bar.add(button);
         }
         bar.add(pathLabel);
+
+        JComboBox<String> views = new JComboBox<>(new String[] {"詳細表示", "コンテンツ表示", "並べて表示"});
+        views.setFont(Theme.font(Font.PLAIN, 11));
+        views.setPreferredSize(new Dimension(112, 26));
+        views.setFocusable(false);
+        views.addActionListener(event -> switchView(View.values()[views.getSelectedIndex()]));
+        bar.add(Box.createHorizontalStrut(12));
+        bar.add(views);
+
         JButton copy = new JButton(Icons.of("mdi:content-copy", 15, Theme.MUTED));
         copy.setToolTipText("選択した項目をコピー");
         copy.addActionListener(event -> transfer(false));
@@ -340,28 +369,141 @@ public final class FileManagerPanel extends JPanel {
                 }
             }
         });
+        sorter.addRowSorterListener(event -> updateViews());
+        contentList.setCellRenderer(new ContentRenderer());
+        contentList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        tileList.setCellRenderer(new TileRenderer());
+        tileList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        tileList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        tileList.setVisibleRowCount(-1);
+        tileList.setFixedCellWidth(132);
+        tileList.setFixedCellHeight(104);
+        installOpenOnDoubleClick(contentList);
+        installOpenOnDoubleClick(tileList);
         status.setFont(Theme.font(Font.PLAIN, 11));
         status.setForeground(Theme.MUTED);
         status.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 10, 4, 10));
         panel.add(bar, BorderLayout.NORTH);
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(listScroll, BorderLayout.CENTER);
         panel.add(status, BorderLayout.SOUTH);
         return panel;
     }
     /** Applies the separately configurable file list font and row height. */
     public void applyListSettings() {
-        table.setFont(Theme.fileListFont());
-        table.getTableHeader().setFont(Theme.fileListFont());
+        Font font = Theme.fileListFont();
+        table.setFont(font);
+        table.getTableHeader().setFont(font);
         table.setRowHeight(Theme.scaledFileListRowHeight());
+        contentList.setFont(font);
+        contentList.setFixedCellHeight(Math.max(48, Theme.scaledFileListRowHeight() + 20));
+        tileList.setFont(font);
         table.revalidate();
         table.repaint();
         table.getTableHeader().repaint();
+        contentList.repaint();
+        tileList.repaint();
     }
+
+    /** Switches the presentation while keeping the same files selected. */
+    private void switchView(View next) {
+        if (view == next) {
+            return;
+        }
+        List<Path> selected = selectedPaths();
+        view = next;
+        listScroll.setViewportView(switch (view) {
+            case DETAILS -> table;
+            case CONTENT -> contentList;
+            case TILES -> tileList;
+        });
+        updateViews();
+        restoreSelection(selected);
+    }
+
+    private JList<FileBrowser.Entry> activeList() {
+        return view == View.TILES ? tileList : contentList;
+    }
+
+    /** Mirrors the sorted table rows into the models used by the two icon views. */
+    private void updateViews() {
+        entryListModel.clear();
+        for (FileBrowser.Entry entry : sortedEntries()) {
+            entryListModel.addElement(entry);
+        }
+    }
+
+    private List<FileBrowser.Entry> sortedEntries() {
+        List<FileBrowser.Entry> sorted = new ArrayList<>(entries);
+        List<? extends SortKey> keys = sorter.getSortKeys();
+        if (keys.isEmpty()) {
+            return sorted;
+        }
+        sorted.sort((left, right) -> {
+            for (SortKey key : keys) {
+                int comparison = compare(left, right, key.getColumn());
+                if (comparison != 0) {
+                    return key.getSortOrder() == SortOrder.DESCENDING ? -comparison : comparison;
+                }
+            }
+            return 0;
+        });
+        return sorted;
+    }
+
+    private static int compare(FileBrowser.Entry left, FileBrowser.Entry right, int column) {
+        return switch (column) {
+            case 2 -> Long.compare(left.directory() ? 0 : left.size(), right.directory() ? 0 : right.size());
+            case 3 -> Long.compare(left.modified(), right.modified());
+            default -> left.name().compareToIgnoreCase(right.name());
+        };
+    }
+
+    private void installOpenOnDoubleClick(JList<FileBrowser.Entry> list) {
+        list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    int index = list.locationToIndex(event.getPoint());
+                    if (index >= 0) {
+                        open(entryListModel.get(index));
+                    }
+                }
+            }
+        });
+    }
+
+    private void restoreSelection(List<Path> paths) {
+        if (paths.isEmpty()) {
+            return;
+        }
+        Set<Path> wanted = new HashSet<>(paths);
+        if (view == View.DETAILS) {
+            table.clearSelection();
+            for (int row = 0; row < table.getRowCount(); row++) {
+                int model = table.convertRowIndexToModel(row);
+                if (wanted.contains(entries.get(model).path())) {
+                    table.addRowSelectionInterval(row, row);
+                }
+            }
+        } else {
+            JList<FileBrowser.Entry> list = activeList();
+            list.clearSelection();
+            for (int index = 0; index < entryListModel.size(); index++) {
+                if (wanted.contains(entryListModel.get(index).path())) {
+                    list.addSelectionInterval(index, index);
+                }
+            }
+        }
+    }
+
     private void open(int row) {
         if (row < 0 || row >= entries.size()) {
             return;
         }
-        FileBrowser.Entry entry = entries.get(row);
+        open(entries.get(row));
+    }
+
+    private void open(FileBrowser.Entry entry) {
         if (entry.directory() || entry.archive()) {
             tabs.navigate(entry.path());
             return;
@@ -392,9 +534,14 @@ public final class FileManagerPanel extends JPanel {
     }
     private List<Path> selectedPaths() {
         List<Path> paths = new ArrayList<>();
-        for (int row : table.getSelectedRows()) {
-            FileBrowser.Entry entry = entries.get(table.convertRowIndexToModel(row));
-            paths.add(entry.path());
+        if (view == View.DETAILS) {
+            for (int row : table.getSelectedRows()) {
+                paths.add(entries.get(table.convertRowIndexToModel(row)).path());
+            }
+        } else {
+            for (int index : activeList().getSelectedIndices()) {
+                paths.add(entryListModel.get(index).path());
+            }
         }
         return paths;
     }
@@ -550,6 +697,7 @@ public final class FileManagerPanel extends JPanel {
         if (active == null) {
             entries.clear();
             tableModel.fireTableDataChanged();
+            updateViews();
             pathLabel.setText("フォルダを追加してください");
             status.setText("");
             return;
@@ -565,6 +713,7 @@ public final class FileManagerPanel extends JPanel {
                 entries.addAll(found);
             }
             tableModel.fireTableDataChanged();
+            updateViews();
             long bytes = 0;
             for (FileBrowser.Entry entry : entries) {
                 bytes += entry.size();
@@ -613,27 +762,117 @@ public final class FileManagerPanel extends JPanel {
         public Object getValueAt(int row, int column) {
             FileBrowser.Entry entry = entries.get(row);
             return switch (column) {
-                case 0 -> icon(entry);
+                case 0 -> iconFor(entry, 16);
                 case 1 -> entry.name();
                 case 2 -> entry.directory() ? "" : humanSize(entry.size());
                 case 3 -> date(entry.modified());
                 default -> null;
             };
         }
-        private javax.swing.Icon icon(FileBrowser.Entry entry) {
-            if (entry.directory()) {
-                return Icons.folder(16, Theme.MUTED);
-            }
-            if (entry.archive()) {
-                return Icons.of("mdi:zip-box", 16, Theme.MUTED);
-            }
-            if (PathUtil.isImage(entry.path())) {
-                return Icons.image(16, Theme.MUTED);
-            }
-            if (PathUtil.isVideo(entry.path())) {
-                return Icons.play(16, Theme.MUTED);
-            }
-            return Icons.of("mdi:file", 16, Theme.MUTED);
+    }
+
+    private static javax.swing.Icon iconFor(FileBrowser.Entry entry, int size) {
+        if (entry.directory()) {
+            return Icons.folder(size, Theme.MUTED);
+        }
+        if (entry.archive()) {
+            return Icons.of("mdi:zip-box", size, Theme.MUTED);
+        }
+        if (PathUtil.isImage(entry.path())) {
+            return Icons.image(size, Theme.MUTED);
+        }
+        if (PathUtil.isVideo(entry.path())) {
+            return Icons.play(size, Theme.MUTED);
+        }
+        return Icons.of("mdi:file", size, Theme.MUTED);
+    }
+
+    private static String kindLabel(FileBrowser.Entry entry) {
+        if (entry.directory()) {
+            return "フォルダ";
+        }
+        if (entry.archive()) {
+            return "アーカイブ";
+        }
+        if (PathUtil.isImage(entry.path())) {
+            return "画像";
+        }
+        if (PathUtil.isVideo(entry.path())) {
+            return "動画";
+        }
+        return "ファイル";
+    }
+
+    private static String sizeLabel(FileBrowser.Entry entry) {
+        return entry.directory() ? "" : humanSize(entry.size());
+    }
+
+    /** Explorer-style content view: a large icon beside the name and its details. */
+    private static final class ContentRenderer extends JPanel implements ListCellRenderer<FileBrowser.Entry> {
+
+        private final JLabel icon = new JLabel();
+        private final JLabel name = new JLabel();
+        private final JLabel info = new JLabel();
+
+        ContentRenderer() {
+            setLayout(new BorderLayout(12, 0));
+            JPanel text = new JPanel(new java.awt.GridLayout(2, 1));
+            text.setOpaque(false);
+            text.add(name);
+            text.add(info);
+            add(icon, BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+            setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 12, 4, 8));
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList<? extends FileBrowser.Entry> list, FileBrowser.Entry value,
+                int index, boolean selected, boolean focused) {
+            icon.setIcon(iconFor(value, 32));
+            name.setText(value.name());
+            info.setText(kindLabel(value) + "  ·  " + sizeLabel(value) + "  ·  " + date(value.modified()));
+            name.setFont(list.getFont().deriveFont(Font.PLAIN, list.getFont().getSize2D() + 1));
+            info.setFont(list.getFont());
+            setBackground(selected ? Theme.SELECTION : list.getBackground());
+            name.setForeground(selected ? Theme.TEXT : Theme.TEXT);
+            info.setForeground(selected ? Theme.TEXT : Theme.MUTED);
+            return this;
+        }
+    }
+
+    /** Explorer-style tiles: a grid of large icons with a short caption. */
+    private static final class TileRenderer extends JPanel implements ListCellRenderer<FileBrowser.Entry> {
+
+        private final JLabel icon = new JLabel();
+        private final JLabel name = new JLabel();
+        private final JLabel info = new JLabel();
+
+        TileRenderer() {
+            setLayout(new BorderLayout(4, 4));
+            icon.setHorizontalAlignment(SwingConstants.CENTER);
+            name.setHorizontalAlignment(SwingConstants.CENTER);
+            info.setHorizontalAlignment(SwingConstants.CENTER);
+            JPanel caption = new JPanel(new java.awt.GridLayout(2, 1));
+            caption.setOpaque(false);
+            caption.add(name);
+            caption.add(info);
+            add(icon, BorderLayout.CENTER);
+            add(caption, BorderLayout.SOUTH);
+            setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 6, 8, 6));
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList<? extends FileBrowser.Entry> list, FileBrowser.Entry value,
+                int index, boolean selected, boolean focused) {
+            icon.setIcon(iconFor(value, 40));
+            name.setText(value.name());
+            info.setText(kindLabel(value) + "  ·  " + sizeLabel(value));
+            name.setFont(list.getFont().deriveFont(Font.PLAIN, list.getFont().getSize2D() + 1));
+            info.setFont(list.getFont());
+            setBackground(selected ? Theme.SELECTION : list.getBackground());
+            name.setForeground(Theme.TEXT);
+            info.setForeground(selected ? Theme.TEXT : Theme.MUTED);
+            return this;
         }
     }
     private static final class IconRenderer extends DefaultTableCellRenderer {
