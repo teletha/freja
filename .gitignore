@@ -2,7 +2,6 @@
 !/.gitignore
 !/.github
 !/.gitattributes
-!/src/main/frontend/.gitignore
 # Created by https://www.toptal.com/developers/gitignore/api/Java,Maven,Windows,Linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=Java,Maven,Windows,Linux
 

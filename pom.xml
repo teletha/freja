@@ -6,10 +6,6 @@
 	<packaging>jar</packaging>
 	<name>freja</name>
 	<description>A fast, local-first photo library for the desktop.</description>
-	<properties>
-		<javafx.version>28-ea+12</javafx.version>
-		<javafx.classifier>win</javafx.classifier>
-	</properties>
 	<licenses>
 		<license>
 			<name>MIT License</name>
@@ -22,20 +18,6 @@
 			<artifactId>antibug</artifactId>
 			<version>1.16.1</version>
 			<scope>test</scope>
-			<exclusions/>
-		</dependency>
-		<dependency>
-			<groupId>io.github.teletha</groupId>
-			<artifactId>apocrypha</artifactId>
-			<version>0.1</version>
-			<scope>compile</scope>
-			<exclusions/>
-		</dependency>
-		<dependency>
-			<groupId>io.github.teletha</groupId>
-			<artifactId>bun4j</artifactId>
-			<version>1.0.1</version>
-			<scope>compile</scope>
 			<exclusions/>
 		</dependency>
 		<dependency>
@@ -102,37 +84,6 @@
 			<scope>compile</scope>
 			<exclusions/>
 		</dependency>
-		<!-- JavaFX remains required by the browser edition's WebView. -->
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${javafx.classifier}</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${javafx.classifier}</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${javafx.classifier}</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-media</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${javafx.classifier}</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${javafx.classifier}</classifier>
-		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
@@ -146,31 +97,6 @@
 			<url>https://jitpack.io/</url>
 		</repository>
 	</repositories>
-	<profiles>
-		<profile>
-			<id>javafx-linux</id>
-			<activation>
-				<os>
-					<family>unix</family>
-					<name>Linux</name>
-				</os>
-			</activation>
-			<properties>
-				<javafx.classifier>linux</javafx.classifier>
-			</properties>
-		</profile>
-		<profile>
-			<id>javafx-mac</id>
-			<activation>
-				<os>
-					<family>mac</family>
-				</os>
-			</activation>
-			<properties>
-				<javafx.classifier>mac</javafx.classifier>
-			</properties>
-		</profile>
-	</profiles>
 	<url>https://github.com/teletha/freja</url>
 	<scm>
 		<url>https://github.com/teletha/freja</url>

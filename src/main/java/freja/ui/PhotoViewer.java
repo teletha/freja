@@ -47,10 +47,12 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JWindow;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -164,29 +166,11 @@ public final class PhotoViewer extends JDialog {
 
     private final Timer toastTimer = new Timer(1200, event -> toast.setVisible(false));
 
-    private final JPanel helpPanel = new JPanel(new BorderLayout()) {
-        @Override
-        public boolean contains(int x, int y) {
-            return false;
-        }
+    private final JPanel helpPanel = new JPanel(new BorderLayout());
 
-        @Override
-        protected void paintComponent(Graphics graphics) {
-            if (!helpVisible) {
-                return;
-            }
-            Graphics2D g = (Graphics2D) graphics.create();
-            try {
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g.setColor(new Color(0, 0, 0, 190));
-                g.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
-                g.setColor(new Color(255, 255, 255, 70));
-                g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
-            } finally {
-                g.dispose();
-            }
-        }
-    };
+    private JPanel topPanel;
+
+    private JPanel bottomPanel;
 
     private final JPanel toastHost = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0)) {
         @Override
@@ -350,10 +334,10 @@ public final class PhotoViewer extends JDialog {
 
         JButton close = circular(Icons.close(17, Color.WHITE), "閉じる");
         close.addActionListener(event -> dispose());
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        top.setOpaque(false);
-        top.add(close);
-        controlsRoot.add(top, BorderLayout.NORTH);
+        topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        topPanel.setOpaque(false);
+        topPanel.add(close);
+        controlsRoot.add(topPanel, BorderLayout.NORTH);
 
         // Images: slideshow controls on the left, name / size / date centred at the bottom.
         slideshowStop.setIcon(filledSquare(11));
@@ -424,7 +408,7 @@ public final class PhotoViewer extends JDialog {
 
         JPanel stack = new JPanel(new BorderLayout(0, 0));
         stack.setOpaque(false);
-        stack.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        stack.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
         stack.add(seek, BorderLayout.NORTH);
         stack.add(buttons, BorderLayout.SOUTH);
         videoControls.add(stack, BorderLayout.CENTER);
@@ -444,11 +428,11 @@ public final class PhotoViewer extends JDialog {
         rewind10.addActionListener(event -> jump(-10));
         forward10.addActionListener(event -> jump(10));
 
-        JPanel bottom = new JPanel(new BorderLayout());
-        bottom.setOpaque(false);
-        bottom.add(imageBottom, BorderLayout.CENTER);
-        bottom.add(videoControls, BorderLayout.SOUTH);
-        controlsRoot.add(bottom, BorderLayout.SOUTH);
+        bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setOpaque(false);
+        bottomPanel.add(imageBottom, BorderLayout.CENTER);
+        bottomPanel.add(videoControls, BorderLayout.SOUTH);
+        controlsRoot.add(bottomPanel, BorderLayout.SOUTH);
         toast.setForeground(Color.WHITE);
         toast.setFont(Theme.font(Font.BOLD, 22));
         toast.setOpaque(false);
@@ -510,8 +494,8 @@ public final class PhotoViewer extends JDialog {
                 showOverlay();
             }
         };
-        top.addMouseListener(hover);
-        top.addMouseMotionListener(hover);
+        topPanel.addMouseListener(hover);
+        topPanel.addMouseMotionListener(hover);
         imageBottom.addMouseListener(hover);
         imageBottom.addMouseMotionListener(hover);
         videoControls.addMouseListener(hover);
