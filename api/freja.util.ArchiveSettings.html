@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="k">
+		<header class="l" date="2026-11-27">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="p"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="q"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="o"></nav>
+		<article class="m" id="Article">
+			<section class="Y"><code class="DB">freja.util</code>
+				<h2 class="Class N"><code class="i">ArchiveSettings</code></h2>
+				<div class="w"></div><span class="A"><p>The user&apos;s preference for indexing images inside ZIP and 7z containers.</p><p>
+Scanning archives is on by default, so a library which contains photo archives shows their
+contents on the first run. Turning it off stops new entries from being indexed; the next full
+scan also removes rows which were indexed from archives previously.
+</p></span></section>
+			<section class="Y" id="scanArchives()">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">scanArchives</code><code class="d">()</code><i class="T"><code>boolean</code></i></h2>
+				<table class="HB">
+					<tr class="S">
+						<td><code>boolean</code></td>
+						<td><span><p>true unless the user turned the option off</p></span></td>
+					</tr>
+				</table><span class="A"><p>Whether the scanner should look inside compressed files.</p></span></section>
+			<section class="Y" id="scanArchives(boolean)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">scanArchives</code><code class="d">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="T"><code>void</code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td><span><p>whether archives should be scanned</p></span></td>
+					</tr>
+				</table><span class="A"><p>Remembers the choice for this and future sessions.</p></span></section>
+		</article>
+		<aside class="U">
+			<div class="z">
+				<h5 class="u">Static Methods</h5>
+				<ul>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ArchiveSettings.html#scanArchives()">scanArchives</a></code><code class="d">()</code><i class="c"><code>boolean</code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ArchiveSettings.html#scanArchives(boolean)">scanArchives</a></code><code class="d">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="c"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="n">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="x">
-		<header class="y" date="2026-11-24">
-			<h1 class="q"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="f"><a href="api/main.html" id="API"><svg class="package">
+	<body class="k">
+		<header class="l" date="2026-11-27">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="p"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="h"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="q"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="p"></nav>
-		<article class="z" id="Article">
-			<section class="n"><code class="k">freja.ui</code>
-				<h2 class="Class X"><code class="GB">Sidebar</code></h2>
-				<div class="EB">
+		<nav class="o"></nav>
+		<article class="m" id="Article">
+			<section class="Y"><code class="DB">freja.ui</code>
+				<h2 class="Class N"><code class="i">Sidebar</code></h2>
+				<div class="w">
 					<ul class="E G">
 						<li><code><a aria-label="javax.swing.JPanel 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JPanel.html">JPanel</a></code></li>
 						<li><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></li>
@@ -60,65 +60,66 @@
 						<li><code><a aria-label="java.awt.MenuContainer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/MenuContainer.html">MenuContainer</a></code></li>
 						<li><code><a aria-label="java.io.Serializable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/Serializable.html">Serializable</a></code></li>
 					</ul>
-				</div><span class="A"><p>The navigation sidebar: a library list and the registered folders, both built from the reusable
-<code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">ARXNavList</a></code>, with captions bound to live translations from
-I#translate(String, Object...).</p></span></section>
-			<section class="n" id="Sidebar()">
-				<h2 class="w"><i class="PUBLIC"></i><code class="GB">Sidebar</code><code class="b">()</code></h2>
+				</div><span class="A"><p>The navigation sidebar: a library list built from the reusable <code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">ARXNavList</a></code> and the
+registered folders, which use the virtualized <code><a aria-label="freja.ui.FolderList" href="api/freja.ui.FolderList.html">FolderList</a></code> so a library with tens of
+thousands of directories paints only what the viewport shows. Captions are bound to live
+translations from I#translate(String, Object...).</p></span></section>
+			<section class="Y" id="Sidebar()">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="i">Sidebar</code><code class="d">()</code></h2>
 			</section>
-			<section class="n" id="setListener(freja.ui.Sidebar.Listener)">
-				<h2 class="w"><i class="PUBLIC"></i><code class="GB">setListener</code><code class="b">(<code><a aria-label="freja.ui.Sidebar.Listener" href="api/freja.ui.Sidebar.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="L"><code>void</code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="setListener(freja.ui.Sidebar.Listener)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="i">setListener</code><code class="d">(<code><a aria-label="freja.ui.Sidebar.Listener" href="api/freja.ui.Sidebar.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="T"><code>void</code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code><a aria-label="freja.ui.Sidebar.Listener" href="api/freja.ui.Sidebar.Listener.html">Listener</a></code><code class="parameterName">listener</code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="selectFolderSilently(long)">
-				<h2 class="w"><i class="PUBLIC"></i><code class="GB">selectFolderSilently</code><code class="b">(<code>long</code><code class="parameterName">id</code>)</code><i class="L"><code>void</code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="selectFolderSilently(long)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="i">selectFolderSilently</code><code class="d">(<code>long</code><code class="parameterName">id</code>)</code><i class="T"><code>void</code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>long</code><code class="parameterName">id</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Highlights a folder from outside without feeding a selection event back to the window.</p></span></section>
-			<section class="n" id="setData(freja.model.LibraryStats,java.util.List,freja.ui.Sidebar.Mode,long)">
-				<h2 class="w"><i class="PUBLIC"></i><code class="GB">setData</code><code class="b">(<code><a aria-label="freja.model.LibraryStats" href="api/freja.model.LibraryStats.html">LibraryStats</a></code><code class="parameterName">stats</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Folder" href="api/freja.model.Folder.html">Folder</a></code></code></code><code class="parameterName">registered</code>, <code><a aria-label="freja.ui.Sidebar.Mode" href="api/freja.ui.Sidebar.Mode.html">Mode</a></code><code class="parameterName">mode</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="L"><code>void</code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="setData(freja.model.LibraryStats,java.util.List,freja.ui.Sidebar.Mode,long)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="i">setData</code><code class="d">(<code><a aria-label="freja.model.LibraryStats" href="api/freja.model.LibraryStats.html">LibraryStats</a></code><code class="parameterName">stats</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Folder" href="api/freja.model.Folder.html">Folder</a></code></code></code><code class="parameterName">registered</code>, <code><a aria-label="freja.ui.Sidebar.Mode" href="api/freja.ui.Sidebar.Mode.html">Mode</a></code><code class="parameterName">mode</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="T"><code>void</code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code><a aria-label="freja.model.LibraryStats" href="api/freja.model.LibraryStats.html">LibraryStats</a></code><code class="parameterName">stats</code></td>
 						<td><span><p>library counters</p></span></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Folder" href="api/freja.model.Folder.html">Folder</a></code></code></code><code class="parameterName">registered</code></td>
 						<td><span><p>the registered folders</p></span></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="freja.ui.Sidebar.Mode" href="api/freja.ui.Sidebar.Mode.html">Mode</a></code><code class="parameterName">mode</code></td>
 						<td><span><p>the active mode</p></span></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code>long</code><code class="parameterName">folderId</code></td>
 						<td><span><p>the active folder, or -1</p></span></td>
 					</tr>
 				</table><span class="A"><p>Replaces the navigation data.</p></span></section>
 		</article>
-		<aside class="R">
-			<div class="V">
-				<h5 class="BB">Constructors</h5>
+		<aside class="U">
+			<div class="z">
+				<h5 class="u">Constructors</h5>
 				<ul>
-					<li class="e"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#Sidebar()">Sidebar</a></code><code class="b">()</code></li>
+					<li class="X"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#Sidebar()">Sidebar</a></code><code class="d">()</code></li>
 				</ul>
-				<h5 class="BB">Methods</h5>
+				<h5 class="u">Methods</h5>
 				<ul>
-					<li class="e"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#setListener(freja.ui.Sidebar.Listener)">setListener</a></code><code class="b">(<code><a aria-label="freja.ui.Sidebar.Listener" href="api/freja.ui.Sidebar.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="HB"><code>void</code></i></li>
-					<li class="e"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#selectFolderSilently(long)">selectFolderSilently</a></code><code class="b">(<code>long</code><code class="parameterName">id</code>)</code><i class="HB"><code>void</code></i></li>
-					<li class="e"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#setData(freja.model.LibraryStats,java.util.List,freja.ui.Sidebar.Mode,long)">setData</a></code><code class="b">(<code><a aria-label="freja.model.LibraryStats" href="api/freja.model.LibraryStats.html">LibraryStats</a></code><code class="parameterName">stats</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Folder" href="api/freja.model.Folder.html">Folder</a></code></code></code><code class="parameterName">registered</code>, <code><a aria-label="freja.ui.Sidebar.Mode" href="api/freja.ui.Sidebar.Mode.html">Mode</a></code><code class="parameterName">mode</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="HB"><code>void</code></i></li>
+					<li class="X"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#setListener(freja.ui.Sidebar.Listener)">setListener</a></code><code class="d">(<code><a aria-label="freja.ui.Sidebar.Listener" href="api/freja.ui.Sidebar.Listener.html">Listener</a></code><code class="parameterName">listener</code>)</code><i class="c"><code>void</code></i></li>
+					<li class="X"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#selectFolderSilently(long)">selectFolderSilently</a></code><code class="d">(<code>long</code><code class="parameterName">id</code>)</code><i class="c"><code>void</code></i></li>
+					<li class="X"><i class="PUBLIC"></i><code><a href="api/freja.ui.Sidebar.html#setData(freja.model.LibraryStats,java.util.List,freja.ui.Sidebar.Mode,long)">setData</a></code><code class="d">(<code><a aria-label="freja.model.LibraryStats" href="api/freja.model.LibraryStats.html">LibraryStats</a></code><code class="parameterName">stats</code>, <code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.model.Folder" href="api/freja.model.Folder.html">Folder</a></code></code></code><code class="parameterName">registered</code>, <code><a aria-label="freja.ui.Sidebar.Mode" href="api/freja.ui.Sidebar.Mode.html">Mode</a></code><code class="parameterName">mode</code>, <code>long</code><code class="parameterName">folderId</code>)</code><i class="c"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="P">
+		<footer class="n">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

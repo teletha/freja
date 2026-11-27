@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="k">
+		<header class="l" date="2026-11-27">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="p"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="q"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="o"></nav>
+		<article class="m" id="Article">
+			<section class="Y"><code class="DB">freja.media</code>
+				<h2 class="Class N"><code class="i">Win32Window</code></h2>
+				<div class="w"></div><span class="A"><p>Locates the native window behind a Swing component so libmpv can render into it.</p><p>
+Only the two <code>FindWindow</code> variants are needed: the viewer has a unique title, and its
+heavyweight canvas has the well-known <code>SunAwtCanvas</code> class name. This avoids reflecting into
+JDK internals and the extra <code>--add-exports</code> flag that would require.
+</p></span></section>
+			<section class="Y" id="window(java.lang.String)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">window</code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code>)</code><i class="T"><code>long</code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code></td>
+						<td><span><p>the exact window title</p></span></td>
+					</tr>
+					<tr class="S">
+						<td><code>long</code></td>
+						<td><span><p>the native window handle, or zero when not found</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finds a top-level window by its title.</p></span></section>
+			<section class="Y" id="child(long,java.lang.String)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">child</code><code class="d">(<code>long</code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code>)</code><i class="T"><code>long</code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>long</code><code class="parameterName">parent</code></td>
+						<td><span><p>the parent window handle</p></span></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code></td>
+						<td><span><p>the window class, e.g. <code>SunAwtCanvas</code></p></span></td>
+					</tr>
+					<tr class="S">
+						<td><code>long</code></td>
+						<td><span><p>the native window handle, or zero when not found</p></span></td>
+					</tr>
+				</table><span class="A"><p>Finds the first child window with the given class name.</p></span></section>
+		</article>
+		<aside class="U">
+			<div class="z">
+				<h5 class="u">Static Methods</h5>
+				<ul>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.Win32Window.html#window(java.lang.String)">window</a></code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code>)</code><i class="c"><code>long</code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.Win32Window.html#child(long,java.lang.String)">child</a></code><code class="d">(<code>long</code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code>)</code><i class="c"><code>long</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="n">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

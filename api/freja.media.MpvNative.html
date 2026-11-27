@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="k">
+		<header class="l" date="2026-11-27">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="p"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="q"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="o"></nav>
+		<article class="m" id="Article">
+			<section class="Y"><code class="DB">freja.media</code>
+				<h2 class="Class N"><code class="i">MpvNative</code></h2>
+				<div class="w"></div><span class="A"><p>Downloads and loads the libmpv native library.</p><p>
+Freja does not ship the binary. On first use it is downloaded from the official mpv release into
+the application data directory and verified against a pinned SHA-256. A failed download is not
+fatal: video support stays unavailable for the rest of the process and is retried on next start.
+Use <code>-Dfreja.mpv.path=&lt;directory&gt;</code> to point at an already extracted <code>libmpv-2.dll</code>.
+</p></span></section>
+			<section class="Y" id="VERSION">
+				<h2 class="CB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="i">VERSION</code><i class="T"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The pinned mpv release.</p></span></section>
+			<section class="Y" id="LIBRARY">
+				<h2 class="CB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="i">LIBRARY</code><i class="T"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The native library file name inside the release archive.</p></span></section>
+			<section class="Y" id="bindings()">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">bindings</code><code class="d">()</code><i class="T"><code><a aria-label="freja.media.MpvBindings" href="api/freja.media.MpvBindings.html">MpvBindings</a></code></i></h2>
+				<table class="HB">
+					<tr class="S">
+						<td><code><a aria-label="freja.media.MpvBindings" href="api/freja.media.MpvBindings.html">MpvBindings</a></code></td>
+						<td><span><p>the bindings</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the native bindings, downloading and linking the library on first use.</p></span></section>
+			<section class="Y" id="isAvailable()">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">isAvailable</code><code class="d">()</code><i class="T"><code>boolean</code></i></h2>
+				<table class="HB">
+					<tr class="S">
+						<td><code>boolean</code></td>
+						<td><span><p>true when libmpv is linked and ready</p></span></td>
+					</tr>
+				</table><span class="A"><p>Tests whether the native library can be used.</p></span></section>
+			<section class="Y" id="failure()">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">failure</code><code class="d">()</code><i class="T"><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></i></h2>
+				<table class="HB">
+					<tr class="S">
+						<td><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></td>
+						<td><span><p>the failure or null</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the last loading failure, if any.</p></span></section>
+		</article>
+		<aside class="U">
+			<div class="z">
+				<h5 class="u">Static Fields</h5>
+				<ul>
+					<li class="X"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.MpvNative.html#VERSION">VERSION</a></code><i class="c"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="X"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.MpvNative.html#LIBRARY">LIBRARY</a></code><i class="c"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+				</ul>
+				<h5 class="u">Static Methods</h5>
+				<ul>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.MpvNative.html#bindings()">bindings</a></code><code class="d">()</code><i class="c"><code><a aria-label="freja.media.MpvBindings" href="api/freja.media.MpvBindings.html">MpvBindings</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.MpvNative.html#isAvailable()">isAvailable</a></code><code class="d">()</code><i class="c"><code>boolean</code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.MpvNative.html#failure()">failure</a></code><code class="d">()</code><i class="c"><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="n">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

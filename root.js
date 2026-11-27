@@ -9,6 +9,7 @@ const root = {
 		"freja.model",
 		"freja.ui",
 		"freja",
+		"freja.media",
 		"freja.store"
 	],
 	"types": [
@@ -138,12 +139,22 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "PicasaTags",
+			"packageName": "freja.util",
+			"type": "Class"
+		},
+		{
 			"name": "SmartTags",
 			"packageName": "freja.util",
 			"type": "Class"
 		},
 		{
 			"name": "PathUtil",
+			"packageName": "freja.util",
+			"type": "Class"
+		},
+		{
+			"name": "ArchiveSettings",
 			"packageName": "freja.util",
 			"type": "Class"
 		},
@@ -198,6 +209,11 @@ const root = {
 			"type": "Record"
 		},
 		{
+			"name": "AppIcon",
+			"packageName": "freja.ui",
+			"type": "Enum"
+		},
+		{
 			"name": "PhotoInspector",
 			"packageName": "freja.ui",
 			"type": "Class"
@@ -224,6 +240,11 @@ const root = {
 		},
 		{
 			"name": "MainWindow",
+			"packageName": "freja.ui",
+			"type": "Class"
+		},
+		{
+			"name": "SettingsBackup",
 			"packageName": "freja.ui",
 			"type": "Class"
 		},
@@ -258,9 +279,19 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "PhotoGrid.SortOrderListener",
+			"packageName": "freja.ui",
+			"type": "Functional"
+		},
+		{
 			"name": "PhotoGrid.GroupMode",
 			"packageName": "freja.ui",
 			"type": "Enum"
+		},
+		{
+			"name": "FolderList",
+			"packageName": "freja.ui",
+			"type": "Class"
 		},
 		{
 			"name": "ScanFoldersDialog",
@@ -293,6 +324,31 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "Mpv",
+			"packageName": "freja.media",
+			"type": "Class"
+		},
+		{
+			"name": "Mpv.MpvException",
+			"packageName": "freja.media",
+			"type": "Exception"
+		},
+		{
+			"name": "MpvNative",
+			"packageName": "freja.media",
+			"type": "Class"
+		},
+		{
+			"name": "MpvNative.UnavailableException",
+			"packageName": "freja.media",
+			"type": "Exception"
+		},
+		{
+			"name": "Win32Window",
+			"packageName": "freja.media",
+			"type": "Class"
+		},
+		{
 			"name": "PhotoImporter",
 			"packageName": "freja.store",
 			"type": "Class"
@@ -309,6 +365,31 @@ const root = {
 		},
 		{
 			"name": "Exif.Data",
+			"packageName": "freja.store",
+			"type": "Record"
+		},
+		{
+			"name": "VideoImporter",
+			"packageName": "freja.store",
+			"type": "Class"
+		},
+		{
+			"name": "Archives",
+			"packageName": "freja.store",
+			"type": "Class"
+		},
+		{
+			"name": "Archives.Entry",
+			"packageName": "freja.store",
+			"type": "Record"
+		},
+		{
+			"name": "LibraryTasks",
+			"packageName": "freja.store",
+			"type": "Class"
+		},
+		{
+			"name": "LibraryTasks.DeleteResult",
 			"packageName": "freja.store",
 			"type": "Record"
 		},

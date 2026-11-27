@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="x">
-		<header class="y" date="2026-11-24">
-			<h1 class="q"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="f"><a href="api/main.html" id="API"><svg class="package">
+	<body class="k">
+		<header class="l" date="2026-11-27">
+			<h1 class="h"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="p"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,391 +35,658 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="h"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="q"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="p"></nav>
-		<article class="z" id="Article">
-			<section class="n"><code class="k">freja.ui</code>
-				<h2 class="Class X"><code class="GB">Icons</code></h2>
-				<div class="EB"></div><span class="A"><p>Small vector icons drawn with Java2D, so the application does not depend on image assets or on
-emoji fonts.</p></span></section>
-			<section class="n" id="applicationImage()">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">applicationImage</code><code class="b">()</code><i class="L"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></i></h2>
-				<table class="K">
-					<tr class="Y">
+		<nav class="o"></nav>
+		<article class="m" id="Article">
+			<section class="Y"><code class="DB">freja.ui</code>
+				<h2 class="Class N"><code class="i">Icons</code></h2>
+				<div class="w"></div><span class="A"><p>Bundled SVG icons loaded from the classpath. The application stays offline-capable because the
+assets are shipped under <code>src/main/resources/icons/mdi</code>. During development, missing icons
+are fetched once from Iconify and cached in the source resource tree and in the compiled class
+path, so the next build bundles them and a packaged application never needs the network.</p></span></section>
+			<section class="Y" id="applicationImage()">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">applicationImage</code><code class="d">()</code><i class="T"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></i></h2>
+				<table class="HB">
+					<tr class="S">
 						<td><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></td>
-						<td><span><p>a 128x128 application image</p></span></td>
+						<td><span><p>the 128x128 image of the currently selected design</p></span></td>
 					</tr>
-				</table><span class="A"><p>The application image: a four-colour pinwheel with a small house at its centre, reminiscent
-of Picasa. Drawn once into a bitmap because windows need an <code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code>, not an <code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code>.</p></span></section>
-			<section class="n" id="plus(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">plus</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+				</table><span class="A"><p>The application image for the icon selected in the settings page. Windows need an
+<code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code> rather than an <code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code>, so <code><a aria-label="freja.ui.AppIcon" href="api/freja.ui.AppIcon.html">AppIcon</a></code> paints each design into a bitmap.</p></span></section>
+			<section class="Y" id="applicationImages()">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">applicationImages</code><code class="d">()</code><i class="T"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></code></code></i></h2>
+				<table class="HB">
+					<tr class="S">
+						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></code></code></td>
+						<td><span><p>images from 16 to 128 pixels, smallest first</p></span></td>
+					</tr>
+				</table><span class="A"><p>The vector-rendered variants of the selected application icon. Supplying all of them lets the
+window manager pick a crisp 16 or 32px image instead of scaling the largest one down.</p></span></section>
+			<section class="Y" id="of(java.lang.String,int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">of</code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">iconifyName</code>, <code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">iconifyName</code></td>
+						<td><span><p>the icon name, with or without an <code>mdi:</code> prefix</p></span></td>
+					</tr>
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
-						<td></td>
+						<td><span><p>the display size in pixels</p></span></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
-						<td></td>
+						<td><span><p>the tint colour (may be a <code><a aria-label="freja.ui.Theme" href="api/freja.ui.Theme.html">Theme</a></code> dynamic colour)</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
-						<td></td>
+						<td><span><p>the loaded icon</p></span></td>
 					</tr>
-				</table>
-			</section>
-			<section class="n" id="close(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">close</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
-						<td><code>int</code><code class="parameterName">size</code></td>
-						<td></td>
+				</table><span class="A"><p>Loads any bundled Material Design Icons SVG by name. Accepts either <code>&quot;mdi:&lt;name&gt;&quot;</code> or
+just <code>&quot;&lt;name&gt;&quot;</code>.</p><p>
+If the SVG is not bundled, the behaviour depends on the mode:
+</p><ul>
+						<li><b>Packaged application:</b> returns a neutral fallback icon. No network call is made,
+even when the working directory happens to be the project root.</li>
+						<li><b>Development:</b> when running from an unpackaged class path that contains a
+<code>src/main/resources</code> tree, the icon is fetched once from Iconify, saved both into that
+tree (for the next build) and into the live class path (for this run), then used. The fetch
+runs on a background thread so the EDT is not frozen; a placeholder is shown until it
+completes. Invalid names or failed downloads also return the fallback.</li>
+					</ul>
+Set <code>-Dfreja.icons.download=false</code> to force offline behaviour and
+<code>-Dfreja.icons.endpoint=...</code> to override the Iconify base URL.
+</span></section>
+			<section class="Y" id="nav(java.lang.String,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">nav</code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">iconifyName</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">iconifyName</code></td>
+						<td><span><p>the icon name, with or without an <code>mdi:</code> prefix</p></span></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
-						<td></td>
+						<td><span><p>the tint colour</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
-						<td></td>
+						<td><span><p>the icon at the shared navigation size</p></span></td>
 					</tr>
-				</table>
-			</section>
-			<section class="n" id="star(int,java.awt.Color,boolean)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">star</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">filled</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
-						<td><code>int</code><code class="parameterName">size</code></td>
-						<td></td>
-					</tr>
-					<tr class="KB">
-						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
-						<td></td>
-					</tr>
-					<tr class="KB">
-						<td><code>boolean</code><code class="parameterName">filled</code></td>
-						<td></td>
-					</tr>
-					<tr class="Y">
-						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
-						<td></td>
-					</tr>
-				</table>
-			</section>
-			<section class="n" id="folder(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">folder</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
-						<td><code>int</code><code class="parameterName">size</code></td>
-						<td></td>
-					</tr>
-					<tr class="KB">
-						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
-						<td></td>
-					</tr>
-					<tr class="Y">
-						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
-						<td></td>
-					</tr>
-				</table>
-			</section>
-			<section class="n" id="tag(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">tag</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
-						<td><code>int</code><code class="parameterName">size</code></td>
-						<td></td>
-					</tr>
-					<tr class="KB">
-						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
-						<td></td>
-					</tr>
-					<tr class="Y">
-						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
-						<td></td>
-					</tr>
-				</table>
-			</section>
-			<section class="n" id="letter(java.lang.String,int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">letter</code><code class="b">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+				</table><span class="A"><p>An icon for a navigation row, sized from the shared <code>ARX.navIconSize</code> UI default. All
+navigation lists use the same value, so their icons and text columns stay in step.</p></span></section>
+			<section class="Y" id="navLetter(java.lang.String,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">navLetter</code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
-						<td><code>int</code><code class="parameterName">size</code></td>
-						<td></td>
-					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A glyph icon at the shared navigation size, for captions which read better as a letter.</p></span></section>
+			<section class="Y" id="plus(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">plus</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="Y" id="close(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">close</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="Y" id="trash(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">trash</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A trash can, used for operations which remove files from disk.</p></span></section>
+			<section class="Y" id="star(int,java.awt.Color,boolean)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">star</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">filled</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code>boolean</code><code class="parameterName">filled</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="Y" id="folder(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">folder</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="Y" id="tag(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">tag</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="Y" id="letter(java.lang.String,int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">letter</code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>A glyph icon painted with the configured application font, for the cases where a letter reads
 better than an outline: the font row shows an &quot;A&quot; in the very typeface it configures.</p></span></section>
-			<section class="n" id="contrast(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">contrast</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="contrast(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">contrast</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The theme glyph: an outlined circle with its right half filled, like the contrast symbol.</p></span></section>
-			<section class="n" id="settings(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">settings</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="settings(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">settings</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="grid(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">grid</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="exportSettings(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">exportSettings</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>An arrow leaving a box: write the whole user profile to a file.</p></span></section>
+			<section class="Y" id="importSettings(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">importSettings</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>An arrow entering a box: restore the whole user profile from a file.</p></span></section>
+			<section class="Y" id="grid(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">grid</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="clock(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">clock</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="clock(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">clock</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="image(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">image</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="image(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">image</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="search(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">search</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="search(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">search</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="refresh(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">refresh</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="refresh(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">refresh</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="play(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">play</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="play(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">play</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="sun(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">sun</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="sun(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">sun</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="moon(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">moon</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="moon(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">moon</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="pause(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">pause</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="pause(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">pause</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="chevron(int,java.awt.Color,boolean)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">chevron</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">left</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="chevron(int,java.awt.Color,boolean)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">chevron</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">left</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code>boolean</code><code class="parameterName">left</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
-			<section class="n" id="check(int,java.awt.Color)">
-				<h2 class="w"><i class="PUBLIC STATIC"></i><code class="GB">check</code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="L"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
-				<table class="K">
-					<tr class="KB">
+			<section class="Y" id="check(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">check</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td></td>
 					</tr>
-					<tr class="KB">
+					<tr class="J">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td></td>
 					</tr>
-					<tr class="Y">
+					<tr class="S">
 						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
+			<section class="Y" id="clipboard(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">clipboard</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A clipboard page with a clip at the top, used for copying a file path.</p></span></section>
+			<section class="Y" id="pencil(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">pencil</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A pencil with an eraser, used for renaming.</p></span></section>
+			<section class="Y" id="sortName(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">sortName</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>An &quot;A -&gt; Z&quot; glyph for sorting by name.</p></span></section>
+			<section class="Y" id="sortNewestFirst(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">sortNewestFirst</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A clock with an upward arrow: newest photos first.</p></span></section>
+			<section class="Y" id="sortOldestFirst(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">sortOldestFirst</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>A clock with a downward arrow: oldest photos first.</p></span></section>
+			<section class="Y" id="sortBySize(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">sortBySize</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Three vertical bars of increasing height for sorting by size.</p></span></section>
+			<section class="Y" id="sortOrder(int,java.awt.Color)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">sortOrder</code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="T"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
+						<td></td>
+					</tr>
+					<tr class="S">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Two opposed arrows, used as the heading icon for sort-order submenus.</p></span></section>
+			<section class="Y" id="markSelected(javax.swing.AbstractButton,boolean)">
+				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="i">markSelected</code><code class="d">(<code><a aria-label="javax.swing.AbstractButton 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/AbstractButton.html">AbstractButton</a></code><code class="parameterName">item</code>, <code>boolean</code><code class="parameterName">selected</code>)</code><i class="T"><code>void</code></i></h2>
+				<table class="HB">
+					<tr class="J">
+						<td><code><a aria-label="javax.swing.AbstractButton 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/AbstractButton.html">AbstractButton</a></code><code class="parameterName">item</code></td>
+						<td></td>
+					</tr>
+					<tr class="J">
+						<td><code>boolean</code><code class="parameterName">selected</code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Styles a menu item so the current selection is readable without overlapping the leading icon.
+FlatLaf suppresses the native check/radio mark when a custom icon is set, so the selected row
+is shown with a bold, accent-coloured label instead.</p></span></section>
 		</article>
-		<aside class="R">
-			<div class="V">
-				<h5 class="BB">Static Methods</h5>
+		<aside class="U">
+			<div class="z">
+				<h5 class="u">Static Methods</h5>
 				<ul>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#applicationImage()">applicationImage</a></code><code class="b">()</code><i class="HB"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#plus(int,java.awt.Color)">plus</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#close(int,java.awt.Color)">close</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#star(int,java.awt.Color,boolean)">star</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">filled</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#folder(int,java.awt.Color)">folder</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#tag(int,java.awt.Color)">tag</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#letter(java.lang.String,int,java.awt.Color)">letter</a></code><code class="b">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#contrast(int,java.awt.Color)">contrast</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#settings(int,java.awt.Color)">settings</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#grid(int,java.awt.Color)">grid</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#clock(int,java.awt.Color)">clock</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#image(int,java.awt.Color)">image</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#search(int,java.awt.Color)">search</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#refresh(int,java.awt.Color)">refresh</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#play(int,java.awt.Color)">play</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#sun(int,java.awt.Color)">sun</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#moon(int,java.awt.Color)">moon</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#pause(int,java.awt.Color)">pause</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#chevron(int,java.awt.Color,boolean)">chevron</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">left</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
-					<li class="e"><i class="PUBLIC STATIC"></i><code><a href="api/freja.ui.Icons.html#check(int,java.awt.Color)">check</a></code><code class="b">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="HB"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#applicationImage()">applicationImage</a></code><code class="d">()</code><i class="c"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#applicationImages()">applicationImages</a></code><code class="d">()</code><i class="c"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.awt.Image 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Image.html">Image</a></code></code></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#of(java.lang.String,int,java.awt.Color)">of</a></code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">iconifyName</code>, <code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#nav(java.lang.String,java.awt.Color)">nav</a></code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">iconifyName</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#navLetter(java.lang.String,java.awt.Color)">navLetter</a></code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#plus(int,java.awt.Color)">plus</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#close(int,java.awt.Color)">close</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#trash(int,java.awt.Color)">trash</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#star(int,java.awt.Color,boolean)">star</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">filled</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#folder(int,java.awt.Color)">folder</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#tag(int,java.awt.Color)">tag</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#letter(java.lang.String,int,java.awt.Color)">letter</a></code><code class="d">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>, <code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#contrast(int,java.awt.Color)">contrast</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#settings(int,java.awt.Color)">settings</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#exportSettings(int,java.awt.Color)">exportSettings</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#importSettings(int,java.awt.Color)">importSettings</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#grid(int,java.awt.Color)">grid</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#clock(int,java.awt.Color)">clock</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#image(int,java.awt.Color)">image</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#search(int,java.awt.Color)">search</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#refresh(int,java.awt.Color)">refresh</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#play(int,java.awt.Color)">play</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#sun(int,java.awt.Color)">sun</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#moon(int,java.awt.Color)">moon</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#pause(int,java.awt.Color)">pause</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#chevron(int,java.awt.Color,boolean)">chevron</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>boolean</code><code class="parameterName">left</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#check(int,java.awt.Color)">check</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#clipboard(int,java.awt.Color)">clipboard</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#pencil(int,java.awt.Color)">pencil</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#sortName(int,java.awt.Color)">sortName</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#sortNewestFirst(int,java.awt.Color)">sortNewestFirst</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#sortOldestFirst(int,java.awt.Color)">sortOldestFirst</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#sortBySize(int,java.awt.Color)">sortBySize</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#sortOrder(int,java.awt.Color)">sortOrder</a></code><code class="d">(<code>int</code><code class="parameterName">size</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="c"><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code></i></li>
+					<li class="X"><i class="STATIC PUBLIC"></i><code><a href="api/freja.ui.Icons.html#markSelected(javax.swing.AbstractButton,boolean)">markSelected</a></code><code class="d">(<code><a aria-label="javax.swing.AbstractButton 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/AbstractButton.html">AbstractButton</a></code><code class="parameterName">item</code>, <code>boolean</code><code class="parameterName">selected</code>)</code><i class="c"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="P">
+		<footer class="n">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
