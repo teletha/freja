@@ -15,35 +15,9 @@ A fast, local-first photo library for the desktop.
 
 
 
-## Edition
-Freja is a Swing application backed by a local SQLite catalog and scanner. It reads and writes the
-library at `%LOCALAPPDATA%\Freja\library.db` by default.
-
-Supported video files are scanned like photos: their catalog row stores a still-frame thumbnail,
-the source dimensions and the duration. The viewer plays them in place with libmpv (play/pause,
-seek with the slider, Space/P, and the usual navigation keys). Its toolbar and player controls behave
-entirely as an overlay on a separate translucent window, so showing or hiding the controls never
-resizes the picture. Still images show the slideshow play/stop controls on the left and the file
-name, size and date centred at the bottom. Videos show an OSC-style strip at the bottom edge: the
-title above a full-width blue seek bar with the elapsed and total times at its ends, and a row of
-round transport buttons (skip, play/pause, stop, mute, volume) underneath; a single click on the
-picture toggles playback and a double click closes the viewer. A circular close button sits at the top right. The
-overlay fades in on mouse movement and fades out after four seconds of inactivity, but stays put
-while paused or while the pointer is over a control. A single-instance port prevents two copies from
-running at once (disable with `-Dfreja.singleInstance=false` for testing).
-
-
 ## Prerequisites
 Freja runs on all major operating systems and requires only [Java version 25](https://docs.oracle.com/en/java/javase/25/) or later to run.
 To check, please run `java -version` on your terminal.
-
-Video support uses libmpv through the Foreign Function & Memory API, so the JVM needs native access enabled (already included in the commands below and in the test configuration):
-
-```
-java --enable-native-access=ALL-UNNAMED -cp <dependencies> freja.Freja
-```
-
-On Windows x86_64, `libmpv-2.dll` is downloaded from the official mpv release on first use. For an offline or custom build, place it in a directory and pass `-Dfreja.mpv.path=<directory>`.
 <p align="right"><a href="#top">back to top</a></p>
 
 ## Install
@@ -125,23 +99,20 @@ If you think something might be a bug, but you're not sure, ask on StackOverflow
 
 
 ## Dependency
-Freja depends on the following products at runtime.
+Freja depends on the following products on runtime.
+* [commons-codec-1.19.0](https://mvnrepository.com/artifact/commons-codec/commons-codec/1.19.0)
+* [commons-compress-1.28.0](https://mvnrepository.com/artifact/org.apache.commons/commons-compress/1.28.0)
+* [commons-io-2.20.0](https://mvnrepository.com/artifact/commons-io/commons-io/2.20.0)
+* [commons-lang3-3.18.0](https://mvnrepository.com/artifact/org.apache.commons/commons-lang3/3.18.0)
 * [flatlaf-3.8](https://mvnrepository.com/artifact/com.formdev/flatlaf/3.8)
-* [flatlaf-intellij-themes-3.8](https://mvnrepository.com/artifact/com.formdev/flatlaf-intellij-themes/3.8)
 * [flatlaf-extras-3.8](https://mvnrepository.com/artifact/com.formdev/flatlaf-extras/3.8)
-* [jsvg-2.2.0](https://mvnrepository.com/artifact/com.github.weisj/jsvg/2.2.0)
+* [flatlaf-intellij-themes-3.8](https://mvnrepository.com/artifact/com.formdev/flatlaf-intellij-themes/3.8)
 * [imagify-1.3.1](https://mvnrepository.com/artifact/io.github.teletha/imagify/1.3.1)
+* [jsvg-2.2.0](https://mvnrepository.com/artifact/com.github.weisj/jsvg/2.2.0)
 * [psychopath-2.3.0](https://mvnrepository.com/artifact/io.github.teletha/psychopath/2.3.0)
 * [sinobu-4.16.0](https://mvnrepository.com/artifact/io.github.teletha/sinobu/4.16.0)
 * [sqlite-jdbc-3.54.1.0](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc/3.54.1.0)
-* [commons-compress-1.28.0](https://mvnrepository.com/artifact/org.apache.commons/commons-compress/1.28.0)
-* [commons-codec-1.19.0](https://mvnrepository.com/artifact/commons-codec/commons-codec/1.19.0)
-* [commons-io-2.20.0](https://mvnrepository.com/artifact/commons-io/commons-io/2.20.0)
-* [commons-lang3-3.18.0](https://mvnrepository.com/artifact/org.apache.commons/commons-lang3/3.18.0)
-* [xz-1.10](https://mvnrepository.com/artifact/org.tukaani/xz/1.10)
-* [libmpv 0.42.0 (LGPL)](https://github.com/mpv-player/mpv/releases/tag/v0.42.0) — native video backend, downloaded on first use into `%LOCALAPPDATA%\Freja\native\mpv` and verified against a pinned SHA-256
-
-[antibug-1.16.1](https://mvnrepository.com/artifact/io.github.teletha/antibug/1.16.1) and its JUnit 5 dependencies are test-only.
+* [xz-1.12](https://mvnrepository.com/artifact/org.tukaani/xz/1.12)
 <p align="right"><a href="#top">back to top</a></p>
 
 
