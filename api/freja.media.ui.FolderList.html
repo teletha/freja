@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="DB">
-		<header class="EB" date="2026-11-27">
-			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+	<body class="R">
+		<header class="S" date="2026-11-27">
+			<h1 class="q"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="d"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="v"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="g"></nav>
-		<article class="x" id="Article">
-			<section class="KB"><code class="U">freja.media.ui</code>
-				<h2 class="Class AB"><code class="Z">FolderList</code></h2>
-				<div class="w">
+		<nav class="V"></nav>
+		<article class="T" id="Article">
+			<section class="i"><code class="P">freja.media.ui</code>
+				<h2 class="Class Q"><code class="o">FolderList</code></h2>
+				<div class="e">
 					<ul class="E G">
 						<li><code><a aria-label="javax.swing.JList 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JList.html">JList</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></li>
 						<li><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></li>
@@ -68,127 +68,127 @@ shared cell.</p><p>
 The visuals mirror <code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">laevatain.ARXNavList</a></code>: a rounded selection wash, hover feedback, an
 icon, an ellipsised title and a right-aligned count.
 </p></span></section>
-			<section class="KB" id="FolderList()">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">FolderList</code><code class="L">()</code></h2>
+			<section class="i" id="FolderList()">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">FolderList</code><code class="x">()</code></h2>
 			</section>
-			<section class="KB" id="updateUI()">
-				<h2 class="l"><i class="OVERRIDE PUBLIC"></i><code class="Z">updateUI</code><code class="L">()</code><i class="y"><code>void</code></i></h2><span class="A"><p>Reinstalls the look and the pointer handling after a look and feel change. <code><a aria-label="javax.swing.JList 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JList.html">JList</a></code>
+			<section class="i" id="updateUI()">
+				<h2 class="CB"><i class="OVERRIDE PUBLIC"></i><code class="o">updateUI</code><code class="x">()</code><i class="k"><code>void</code></i></h2><span class="A"><p>Reinstalls the look and the pointer handling after a look and feel change. <code><a aria-label="javax.swing.JList 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JList.html">JList</a></code>
 installs its own mouse handler on every <code>updateUI</code>; leaving it in place would select a
 row twice and report the same click to the host twice.</p></span></section>
-			<section class="KB" id="setFolders(java.util.List)">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setFolders</code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">folders</code>)</code><i class="y"><code>void</code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="setFolders(java.util.List)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">setFolders</code><code class="x">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">folders</code>)</code><i class="k"><code>void</code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">folders</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Replaces the folder rows. Rows which did not change are left alone. Selection follows folder
 identities: a removed folder cannot fall through to the row which took its place.</p></span></section>
-			<section class="KB" id="setOnSelect(java.util.function.Consumer)">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setOnSelect</code><code class="L">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>void</code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="setOnSelect(java.util.function.Consumer)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">setOnSelect</code><code class="x">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">handler</code>)</code><i class="k"><code>void</code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">handler</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Receives every folder the user selected with the pointer or the keyboard.</p></span></section>
-			<section class="KB" id="setOnRemove(java.util.function.Consumer)">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setOnRemove</code><code class="L">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>void</code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="setOnRemove(java.util.function.Consumer)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">setOnRemove</code><code class="x">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></code></code><code class="parameterName">handler</code>)</code><i class="k"><code>void</code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></code></code><code class="parameterName">handler</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Receives all folders selected when Delete is pressed.</p></span></section>
-			<section class="KB" id="selectedFolders()">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">selectedFolders</code><code class="L">()</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></h2>
-				<table class="s">
-					<tr class="r">
+			<section class="i" id="selectedFolders()">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">selectedFolders</code><code class="x">()</code><i class="k"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></h2>
+				<table class="m">
+					<tr class="f">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The selected folders, in list order.</p></span></section>
-			<section class="KB" id="setMenu(java.util.function.Function)">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setMenu</code><code class="L">(<code><a aria-label="java.util.function.Function 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Function.html">Function</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code>, <code><a aria-label="javax.swing.JPopupMenu 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JPopupMenu.html">JPopupMenu</a></code></code></code><code class="parameterName">provider</code>)</code><i class="y"><code>void</code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="setMenu(java.util.function.Function)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">setMenu</code><code class="x">(<code><a aria-label="java.util.function.Function 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Function.html">Function</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code>, <code><a aria-label="javax.swing.JPopupMenu 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JPopupMenu.html">JPopupMenu</a></code></code></code><code class="parameterName">provider</code>)</code><i class="k"><code>void</code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code><a aria-label="java.util.function.Function 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Function.html">Function</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code>, <code><a aria-label="javax.swing.JPopupMenu 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JPopupMenu.html">JPopupMenu</a></code></code></code><code class="parameterName">provider</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Installs the context menu. The provider builds the menu for the clicked folder; null disables
 the popup entirely.</p></span></section>
-			<section class="KB" id="setSelectedId(long)">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">setSelectedId</code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="y"><code>void</code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="setSelectedId(long)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">setSelectedId</code><code class="x">(<code>long</code><code class="parameterName">id</code>)</code><i class="k"><code>void</code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code>long</code><code class="parameterName">id</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Marks a folder as selected without notifying the host. A negative id clears the selection.
 A multi-selection is kept when the requested folder is one of its rows: refreshing the view
 while several folders are selected must not silently reduce them to one.</p></span></section>
-			<section class="KB" id="reveal(long)">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">reveal</code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="y"><code>void</code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="reveal(long)">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">reveal</code><code class="x">(<code>long</code><code class="parameterName">id</code>)</code><i class="k"><code>void</code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code>long</code><code class="parameterName">id</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Scrolls the list so the folder is visible; does nothing when it is not in the model.</p></span></section>
-			<section class="KB" id="scrolled()">
-				<h2 class="l"><i class="PUBLIC"></i><code class="Z">scrolled</code><code class="L">()</code><i class="y"><code><a aria-label="javax.swing.JScrollPane 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JScrollPane.html">JScrollPane</a></code></i></h2>
-				<table class="s">
-					<tr class="r">
+			<section class="i" id="scrolled()">
+				<h2 class="CB"><i class="PUBLIC"></i><code class="o">scrolled</code><code class="x">()</code><i class="k"><code><a aria-label="javax.swing.JScrollPane 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JScrollPane.html">JScrollPane</a></code></i></h2>
+				<table class="m">
+					<tr class="f">
 						<td><code><a aria-label="javax.swing.JScrollPane 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JScrollPane.html">JScrollPane</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Wraps the list in a borderless scroll pane whose rows span the viewport width, so a long
 folder name cannot push the count out of sight.</p></span></section>
-			<section class="KB" id="getScrollableTracksViewportWidth()">
-				<h2 class="l"><i class="OVERRIDE PUBLIC"></i><code class="Z">getScrollableTracksViewportWidth</code><code class="L">()</code><i class="y"><code>boolean</code></i></h2>
-				<table class="s">
-					<tr class="r">
+			<section class="i" id="getScrollableTracksViewportWidth()">
+				<h2 class="CB"><i class="OVERRIDE PUBLIC"></i><code class="o">getScrollableTracksViewportWidth</code><code class="x">()</code><i class="k"><code>boolean</code></i></h2>
+				<table class="m">
+					<tr class="f">
 						<td><code>boolean</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>The row runs the full width of the viewport rather than the widest name.</p></span></section>
-			<section class="KB" id="getToolTipText(java.awt.event.MouseEvent)">
-				<h2 class="l"><i class="OVERRIDE PUBLIC"></i><code class="Z">getToolTipText</code><code class="L">(<code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code><code class="parameterName">event</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="s">
-					<tr class="M">
+			<section class="i" id="getToolTipText(java.awt.event.MouseEvent)">
+				<h2 class="CB"><i class="OVERRIDE PUBLIC"></i><code class="o">getToolTipText</code><code class="x">(<code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code><code class="parameterName">event</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="m">
+					<tr class="l">
 						<td><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code><code class="parameterName">event</code></td>
 						<td></td>
 					</tr>
-					<tr class="r">
+					<tr class="f">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
 		</article>
-		<aside class="q">
-			<div class="T">
-				<h5 class="O">Constructors</h5>
+		<aside class="W">
+			<div class="s">
+				<h5 class="HB">Constructors</h5>
 				<ul>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#FolderList()">FolderList</a></code><code class="L">()</code></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#FolderList()">FolderList</a></code><code class="x">()</code></li>
 				</ul>
-				<h5 class="O">Methods</h5>
+				<h5 class="HB">Methods</h5>
 				<ul>
-					<li class="CB"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#updateUI()">updateUI</a></code><code class="L">()</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setFolders(java.util.List)">setFolders</a></code><code class="L">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">folders</code>)</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setOnSelect(java.util.function.Consumer)">setOnSelect</a></code><code class="L">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">handler</code>)</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setOnRemove(java.util.function.Consumer)">setOnRemove</a></code><code class="L">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></code></code><code class="parameterName">handler</code>)</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#selectedFolders()">selectedFolders</a></code><code class="L">()</code><i class="J"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setMenu(java.util.function.Function)">setMenu</a></code><code class="L">(<code><a aria-label="java.util.function.Function 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Function.html">Function</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code>, <code><a aria-label="javax.swing.JPopupMenu 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JPopupMenu.html">JPopupMenu</a></code></code></code><code class="parameterName">provider</code>)</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setSelectedId(long)">setSelectedId</a></code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#reveal(long)">reveal</a></code><code class="L">(<code>long</code><code class="parameterName">id</code>)</code><i class="J"><code>void</code></i></li>
-					<li class="CB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#scrolled()">scrolled</a></code><code class="L">()</code><i class="J"><code><a aria-label="javax.swing.JScrollPane 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JScrollPane.html">JScrollPane</a></code></i></li>
-					<li class="CB"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#getScrollableTracksViewportWidth()">getScrollableTracksViewportWidth</a></code><code class="L">()</code><i class="J"><code>boolean</code></i></li>
-					<li class="CB"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#getToolTipText(java.awt.event.MouseEvent)">getToolTipText</a></code><code class="L">(<code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code><code class="parameterName">event</code>)</code><i class="J"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#updateUI()">updateUI</a></code><code class="x">()</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setFolders(java.util.List)">setFolders</a></code><code class="x">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">folders</code>)</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setOnSelect(java.util.function.Consumer)">setOnSelect</a></code><code class="x">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setOnRemove(java.util.function.Consumer)">setOnRemove</a></code><code class="x">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#selectedFolders()">selectedFolders</a></code><code class="x">()</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code></code></code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setMenu(java.util.function.Function)">setMenu</a></code><code class="x">(<code><a aria-label="java.util.function.Function 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Function.html">Function</a><code class="parameters"><code><a aria-label="freja.media.Folder" href="api/freja.media.Folder.html">Folder</a></code>, <code><a aria-label="javax.swing.JPopupMenu 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JPopupMenu.html">JPopupMenu</a></code></code></code><code class="parameterName">provider</code>)</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#setSelectedId(long)">setSelectedId</a></code><code class="x">(<code>long</code><code class="parameterName">id</code>)</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#reveal(long)">reveal</a></code><code class="x">(<code>long</code><code class="parameterName">id</code>)</code><i class="y"><code>void</code></i></li>
+					<li class="K"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#scrolled()">scrolled</a></code><code class="x">()</code><i class="y"><code><a aria-label="javax.swing.JScrollPane 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JScrollPane.html">JScrollPane</a></code></i></li>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#getScrollableTracksViewportWidth()">getScrollableTracksViewportWidth</a></code><code class="x">()</code><i class="y"><code>boolean</code></i></li>
+					<li class="K"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.FolderList.html#getToolTipText(java.awt.event.MouseEvent)">getToolTipText</a></code><code class="x">(<code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code><code class="parameterName">event</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="FB">
+		<footer class="U">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
