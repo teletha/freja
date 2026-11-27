@@ -25,10 +25,8 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import freja.scan.LibraryScanner;
-import freja.store.Library;
-import freja.ui.MainWindow;
-import freja.ui.Theme;
+import freja.media.scan.LibraryScanner;
+import freja.media.store.Library;
 import laevatain.util.Language;
 
 /**

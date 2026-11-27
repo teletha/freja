@@ -9,6 +9,10 @@
  */
 package freja.media;
 
+import freja.mpv.Mpv;
+
+import freja.mpv.MpvNative;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
