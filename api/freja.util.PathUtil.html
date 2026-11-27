@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="R">
-		<header class="S" date="2026-11-27">
-			<h1 class="q"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="d"><a href="api/main.html" id="API"><svg class="package">
+	<body class="p">
+		<header class="q" date="2026-11-27">
+			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,206 +35,206 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="v"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="V"></nav>
-		<article class="T" id="Article">
-			<section class="i"><code class="P">freja.util</code>
-				<h2 class="Class Q"><code class="o">PathUtil</code></h2>
-				<div class="e"></div><span class="A"><p>Path normalization helpers shared by the database and the scanner.</p><p>
+		<nav class="s"></nav>
+		<article class="b" id="Article">
+			<section class="JB"><code class="CB">freja.util</code>
+				<h2 class="Class u"><code class="e">PathUtil</code></h2>
+				<div class="BB"></div><span class="A"><p>Path normalization helpers shared by the database and the scanner.</p><p>
 SQLite compares text byte by byte, while Windows compares paths without regard to case. Every
 path that is stored therefore goes through <code><a aria-label="freja.util.PathUtil" href="api/freja.util.PathUtil.html#key(java.nio.file.Path)">#key(Path)</a></code>, and every lookup uses the same
 normalized form.
 </p></span></section>
-			<section class="i" id="SEPARATOR">
-				<h2 class="CB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="o">SEPARATOR</code><i class="k"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The folder separator as it appears in normalized path keys.</p></span></section>
-			<section class="i" id="key(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">key</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="SEPARATOR">
+				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="e">SEPARATOR</code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The folder separator as it appears in normalized path keys.</p></span></section>
+			<section class="JB" id="key(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">key</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file system path</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>an absolute, normalized path key which is lower case on Windows</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns a stable, comparable key for the given path.</p></span></section>
-			<section class="i" id="key(java.lang.String,java.nio.file.Path,java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">key</code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">rootKey</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="key(java.lang.String,java.nio.file.Path,java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">key</code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">rootKey</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">rootKey</code></td>
 						<td><span><p>the normalized key of the containing root</p></span></td>
 					</tr>
-					<tr class="l">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code></td>
 						<td><span><p>the containing root, as handed to the walk</p></span></td>
 					</tr>
-					<tr class="l">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
 						<td><span><p>a file below the root</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the same key <code><a aria-label="freja.util.PathUtil" href="api/freja.util.PathUtil.html#key(java.nio.file.Path)">#key(Path)</a></code> would return for the file</p></span></td>
 					</tr>
 				</table><span class="A"><p>Builds a key for a file below a root whose key is already known. This avoids re-resolving and
 re-normalizing every absolute path in a large directory walk.</p></span></section>
-			<section class="i" id="normalize(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">normalize</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="normalize(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">normalize</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file system path</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></td>
 						<td><span><p>an absolute normalized path</p></span></td>
 					</tr>
 				</table><span class="A"><p>Normalizes the path for storage and display.</p></span></section>
-			<section class="i" id="extension(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">extension</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="extension(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">extension</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the extension or an empty string</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the lower-cased extension of a file name, without the leading dot.</p></span></section>
-			<section class="i" id="isImage(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">isImage</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code>boolean</code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="isImage(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">isImage</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code>boolean</code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code>boolean</code></td>
 						<td><span><p>true when the extension is a supported image extension</p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether the file looks like an image this application supports.</p></span></section>
-			<section class="i" id="isVideo(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">isVideo</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code>boolean</code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="isVideo(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">isVideo</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code>boolean</code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code>boolean</code></td>
 						<td><span><p>true when the extension is a supported video extension</p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether the file looks like a video this application can play.</p></span></section>
-			<section class="i" id="isSupported(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">isSupported</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code>boolean</code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="isSupported(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">isSupported</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code>boolean</code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code>boolean</code></td>
 						<td><span><p>true when the extension belongs to a supported media type</p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether the file is a supported image or video.</p></span></section>
-			<section class="i" id="isArchive(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">isArchive</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code>boolean</code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="isArchive(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">isArchive</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code>boolean</code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code>boolean</code></td>
 						<td><span><p>true when the extension belongs to a supported archive format</p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether the file is an archive the file manager can browse.</p></span></section>
-			<section class="i" id="contains(java.nio.file.Path,java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">contains</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">parent</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">child</code>)</code><i class="k"><code>boolean</code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="contains(java.nio.file.Path,java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">contains</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">parent</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">child</code>)</code><i class="V"><code>boolean</code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">parent</code></td>
 						<td><span><p>a path</p></span></td>
 					</tr>
-					<tr class="l">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">child</code></td>
 						<td><span><p>another path</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code>boolean</code></td>
 						<td><span><p>true when <code>child</code> is at or below <code>parent</code></p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether one path contains another.</p></span></section>
-			<section class="i" id="prefix(java.lang.String)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">prefix</code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="prefix(java.lang.String)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">prefix</code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
 						<td><span><p>a normalized path key</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the key followed by a separator unless it already ends with one</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the path key of a directory as a prefix suitable for containment checks.</p></span></section>
-			<section class="i" id="likeValue(java.lang.String)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">likeValue</code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="likeValue(java.lang.String)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">likeValue</code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code></td>
 						<td><span><p>a literal value</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the value escaped for use with <code>ESCAPE &apos;&amp;apos;</code></p></span></td>
 					</tr>
 				</table><span class="A"><p>Escapes the wildcards used by SQL <code>LIKE</code>.</p></span></section>
-			<section class="i" id="folderName(java.nio.file.Path)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">folderName</code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="folderName(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">folderName</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a folder</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the last element of the path, or the path itself for a drive root</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns a human readable name for a folder path.</p></span></section>
 		</article>
-		<aside class="W">
-			<div class="s">
-				<h5 class="HB">Static Fields</h5>
+		<aside class="t">
+			<div class="x">
+				<h5 class="FB">Static Fields</h5>
 				<ul>
-					<li class="K"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.PathUtil.html#SEPARATOR">SEPARATOR</a></code><i class="y"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.util.PathUtil.html#SEPARATOR">SEPARATOR</a></code><i class="o"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
-				<h5 class="HB">Static Methods</h5>
+				<h5 class="FB">Static Methods</h5>
 				<ul>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#key(java.nio.file.Path)">key</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#key(java.lang.String,java.nio.file.Path,java.nio.file.Path)">key</a></code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">rootKey</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#normalize(java.nio.file.Path)">normalize</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#extension(java.nio.file.Path)">extension</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#isImage(java.nio.file.Path)">isImage</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>boolean</code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#isVideo(java.nio.file.Path)">isVideo</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>boolean</code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#isSupported(java.nio.file.Path)">isSupported</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>boolean</code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#isArchive(java.nio.file.Path)">isArchive</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code>boolean</code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#contains(java.nio.file.Path,java.nio.file.Path)">contains</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">parent</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">child</code>)</code><i class="y"><code>boolean</code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#prefix(java.lang.String)">prefix</a></code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#likeValue(java.lang.String)">likeValue</a></code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.PathUtil.html#folderName(java.nio.file.Path)">folderName</a></code><code class="x">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#key(java.nio.file.Path)">key</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#key(java.lang.String,java.nio.file.Path,java.nio.file.Path)">key</a></code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">rootKey</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">root</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#normalize(java.nio.file.Path)">normalize</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#extension(java.nio.file.Path)">extension</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#isImage(java.nio.file.Path)">isImage</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code>boolean</code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#isVideo(java.nio.file.Path)">isVideo</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code>boolean</code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#isSupported(java.nio.file.Path)">isSupported</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code>boolean</code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#isArchive(java.nio.file.Path)">isArchive</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code>boolean</code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#contains(java.nio.file.Path,java.nio.file.Path)">contains</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">parent</code>, <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">child</code>)</code><i class="o"><code>boolean</code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#prefix(java.lang.String)">prefix</a></code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#likeValue(java.lang.String)">likeValue</a></code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.PathUtil.html#folderName(java.nio.file.Path)">folderName</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="U">
+		<footer class="r">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

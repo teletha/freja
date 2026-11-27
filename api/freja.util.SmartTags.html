@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="R">
-		<header class="S" date="2026-11-27">
-			<h1 class="q"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="d"><a href="api/main.html" id="API"><svg class="package">
+	<body class="p">
+		<header class="q" date="2026-11-27">
+			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,58 +35,58 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="v"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="V"></nav>
-		<article class="T" id="Article">
-			<section class="i"><code class="P">freja.util</code>
-				<h2 class="Class Q"><code class="o">SmartTags</code></h2>
-				<div class="e"></div><span class="A"><p>Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
+		<nav class="s"></nav>
+		<article class="b" id="Article">
+			<section class="JB"><code class="CB">freja.util</code>
+				<h2 class="Class u"><code class="e">SmartTags</code></h2>
+				<div class="BB"></div><span class="A"><p>Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
 tagged with them, e.g. <code>【旅行】(２０２４) 写真</code> yields <code>旅行</code> and <code>2024</code>.</p><p>Nested brackets are split into separate tags, so a doujin-style name such as
 <code>(C71) [サークル (作者)] 作品</code> yields <code>C71</code>, <code>サークル</code> and <code>作者</code>.
 </p>
 				</span></section>
-			<section class="i" id="fromFolderName(java.lang.String)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">fromFolderName</code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="k"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="fromFolderName(java.lang.String)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">fromFolderName</code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="V"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code></td>
 						<td><span><p>a folder name</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></td>
 						<td><span><p>normalised tags, in the order they appear</p></span></td>
 					</tr>
 				</table><span class="A"><p>Reads the bracketed groups at the beginning of a folder name.</p></span></section>
-			<section class="i" id="normalize(java.lang.String)">
-				<h2 class="CB"><i class="STATIC PUBLIC"></i><code class="o">normalize</code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="k"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="m">
-					<tr class="l">
+			<section class="JB" id="normalize(java.lang.String)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">normalize</code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code></td>
 						<td><span><p>the raw tag name</p></span></td>
 					</tr>
-					<tr class="f">
+					<tr class="m">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the normalised tag name, or an empty string when there is nothing usable</p></span></td>
 					</tr>
 				</table><span class="A"><p>Normalises a tag: full-width letters and digits become half width, while Japanese kana stay
 full width, and surrounding whitespace is removed.</p></span></section>
 		</article>
-		<aside class="W">
-			<div class="s">
-				<h5 class="HB">Static Methods</h5>
+		<aside class="t">
+			<div class="x">
+				<h5 class="FB">Static Methods</h5>
 				<ul>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.SmartTags.html#fromFolderName(java.lang.String)">fromFolderName</a></code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></li>
-					<li class="K"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.SmartTags.html#normalize(java.lang.String)">normalize</a></code><code class="x">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.SmartTags.html#fromFolderName(java.lang.String)">fromFolderName</a></code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="o"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></code></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.SmartTags.html#normalize(java.lang.String)">normalize</a></code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">value</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="U">
+		<footer class="r">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="R">
-		<header class="S" date="2026-11-27">
-			<h1 class="q"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="d"><a href="api/main.html" id="API"><svg class="package">
+	<body class="p">
+		<header class="q" date="2026-11-27">
+			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,22 +35,28 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="v"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="V"></nav>
-		<article class="T" id="Article">
-			<div class="i">
+		<nav class="s"></nav>
+		<article class="b" id="Article">
+			<div class="JB">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
 					<section class="A">
 						<h4>🛠️ Interface</h4>
 						<table>
+							<tr>
+								<td><code><a href="api/freja.file.FileLocation.html">FileLocation</a></code></td>
+								<td>Where a file tab is looking: a real folder or archive, or the virtual home which gathers drives
+and network locations. Keeping it separate from Path lets the home take part in the same
+history and persistence as ordinary folders.</td>
+							</tr>
 							<tr>
 								<td><code><a href="api/freja.file.FileOperations.Listener.html">FileOperations.Listener</a></code></td>
 								<td>no description</td>
@@ -224,6 +230,10 @@ whitespace-separated word of that description becomes a tag, so an old Picasa al
 survive a move to Freja.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/freja.util.VideoThumbnailSettings.html">VideoThumbnailSettings</a></code></td>
+								<td>The user&apos;s preference for the position from which a video&apos;s catalog thumbnail is taken.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/freja.util.SmartTags.html">SmartTags</a></code></td>
 								<td>Derives tags from folder names. A folder whose name starts with one or more bracketed strings is
 tagged with them, e.g. 【旅行】(２０２４) 写真 yields 旅行 and 2024.</td>
@@ -294,6 +304,14 @@ path, so the next build bundles them and a packaged application never needs the 
 							<tr>
 								<td><code><a href="api/freja.setting.SettingsBackup.html">SettingsBackup</a></code></td>
 								<td>Bulk export and import of the application&apos;s user preferences.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.setting.FileSettings.html">FileSettings</a></code></td>
+								<td>File manager preferences shared by the settings page and the browser.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.setting.FavoriteFolders.html">FavoriteFolders</a></code></td>
+								<td>Favourite paths, each optionally bound to a single number key on the home page.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.setting.ui.SettingsPanel.html">SettingsPanel</a></code></td>
@@ -394,6 +412,10 @@ keeps the same vector pipeline as the rest of the interface and lets FlatLaf pro
 variants for small sizes and HiDPI screens instead of shrinking a single 128px bitmap.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/freja.file.FileLocation.Home.html">FileLocation.Home</a></code></td>
+								<td>The Windows-style &quot;HOME&quot; view, with drives and network locations.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/freja.media.PhotoFilter.SortOrder.html">PhotoFilter.SortOrder</a></code></td>
 								<td>How a result set is ordered.</td>
 							</tr>
@@ -421,7 +443,11 @@ translation, while the origin stays stable so a query finds a row in every langu
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.file.FileBrowser.Entry.html">FileBrowser.Entry</a></code></td>
-								<td>One row of the file list.</td>
+								<td>One row of the file list. Home entries carry a section and drive capacities.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.file.FileLocation.Folder.html">FileLocation.Folder</a></code></td>
+								<td>An ordinary directory, archive or archive entry.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.Theme.Preview.html">Theme.Preview</a></code></td>
@@ -489,8 +515,8 @@ carry a short id, IntelliJ themes their look and feel class name.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="W"></aside>
-		<footer class="U">
+		<aside class="t"></aside>
+		<footer class="r">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

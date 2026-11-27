@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="p">
+		<header class="q" date="2026-11-27">
+			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="s"></nav>
+		<article class="b" id="Article">
+			<section class="JB"><code class="CB">freja.file</code>
+				<h2 class="Interface u"><code class="e">FileLocation</code></h2>
+				<div class="BB">
+					<ul class="E I">
+						<li><code><a aria-label="freja.file.FileLocation.Folder" href="api/freja.file.FileLocation.Folder.html">Folder</a></code></li>
+						<li><code><a aria-label="freja.file.FileLocation.Home" href="api/freja.file.FileLocation.Home.html">Home</a></code></li>
+					</ul>
+				</div><span class="A"><p>Where a file tab is looking: a real folder or archive, or the virtual home which gathers drives
+and network locations. Keeping it separate from <code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code> lets the home take part in the same
+history and persistence as ordinary folders.</p></span></section>
+			<section class="JB" id="key()">
+				<h2 class="z"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code class="e">key</code><code class="K">()</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="KB">
+					<tr class="m">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Persisted form of this location.</p></span></section>
+			<section class="JB" id="path()">
+				<h2 class="z"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="e">path</code><code class="K">()</code><i class="V"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
+				<table class="KB">
+					<tr class="m">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>The real path, or <code>null</code> for the virtual home.</p></span></section>
+			<section class="JB" id="folder(java.nio.file.Path)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">folder</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="freja.file.FileLocation" href="api/freja.file.FileLocation.html">FileLocation</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
+						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
+						<td></td>
+					</tr>
+					<tr class="m">
+						<td><code><a aria-label="freja.file.FileLocation" href="api/freja.file.FileLocation.html">FileLocation</a></code></td>
+						<td></td>
+					</tr>
+				</table>
+			</section>
+			<section class="JB" id="from(java.lang.String)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">from</code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="V"><code><a aria-label="freja.file.FileLocation" href="api/freja.file.FileLocation.html">FileLocation</a></code></i></h2>
+				<table class="KB">
+					<tr class="v">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
+						<td></td>
+					</tr>
+					<tr class="m">
+						<td><code><a aria-label="freja.file.FileLocation" href="api/freja.file.FileLocation.html">FileLocation</a></code></td>
+						<td></td>
+					</tr>
+				</table><span class="A"><p>Reads a saved location, accepting plain paths written by earlier versions.</p></span></section>
+		</article>
+		<aside class="t">
+			<div class="x">
+				<h5 class="FB">Static Methods</h5>
+				<ul>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.file.FileLocation.html#folder(java.nio.file.Path)">folder</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="o"><code><a aria-label="freja.file.FileLocation" href="api/freja.file.FileLocation.html">FileLocation</a></code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.file.FileLocation.html#from(java.lang.String)">from</a></code><code class="K">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="o"><code><a aria-label="freja.file.FileLocation" href="api/freja.file.FileLocation.html">FileLocation</a></code></i></li>
+				</ul>
+				<h5 class="FB">Methods</h5>
+				<ul>
+					<li class="P"><i class="ABSTRACT"><i class="PUBLIC"></i></i><code><a href="api/freja.file.FileLocation.html#key()">key</a></code><code class="K">()</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/freja.file.FileLocation.html#path()">path</a></code><code class="K">()</code><i class="o"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="r">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

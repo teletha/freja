@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="p">
+		<header class="q" date="2026-11-27">
+			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="s"></nav>
+		<article class="b" id="Article">
+			<section class="JB"><code class="CB">freja.util</code>
+				<h2 class="Class u"><code class="e">VideoThumbnailSettings</code></h2>
+				<div class="BB"></div><span class="A"><p>The user&apos;s preference for the position from which a video&apos;s catalog thumbnail is taken.</p><p>
+The value is a number of seconds from the start of the clip. Zero keeps the very first frame;
+any other value is clamped to the middle of shorter clips so the thumbnail never lands in the
+closing credits. The preference lives under <code>/freja</code>, so
+<code>freja.setting.SettingsBackup</code> includes it in exported profiles.
+</p></span></section>
+			<section class="JB" id="DEFAULT_SECONDS">
+				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="e">DEFAULT_SECONDS</code><i class="V"><code class="return">int</code></i></h2><span class="A"><p>The thumbnail position used when the user has not chosen one: three minutes in.</p></span></section>
+			<section class="JB" id="MIN_SECONDS">
+				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="e">MIN_SECONDS</code><i class="V"><code class="return">int</code></i></h2><span class="A"><p>The earliest position; zero asks for the first frame without seeking.</p></span></section>
+			<section class="JB" id="MAX_SECONDS">
+				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="e">MAX_SECONDS</code><i class="V"><code class="return">int</code></i></h2><span class="A"><p>The latest position the settings control offers.</p></span></section>
+			<section class="JB" id="thumbnailSeconds()">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">thumbnailSeconds</code><code class="K">()</code><i class="V"><code>int</code></i></h2>
+				<table class="KB">
+					<tr class="m">
+						<td><code>int</code></td>
+						<td><span><p>seconds from the start of a video</p></span></td>
+					</tr>
+				</table><span class="A"><p>Returns the configured position, clamped to the supported range.</p></span></section>
+			<section class="JB" id="thumbnailSeconds(int)">
+				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">thumbnailSeconds</code><code class="K">(<code>int</code><code class="parameterName">seconds</code>)</code><i class="V"><code>void</code></i></h2>
+				<table class="KB">
+					<tr class="v">
+						<td><code>int</code><code class="parameterName">seconds</code></td>
+						<td><span><p>seconds from the start of a video</p></span></td>
+					</tr>
+				</table><span class="A"><p>Remembers the configured position for this and future sessions.</p></span></section>
+		</article>
+		<aside class="t">
+			<div class="x">
+				<h5 class="FB">Static Fields</h5>
+				<ul>
+					<li class="P"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#DEFAULT_SECONDS">DEFAULT_SECONDS</a></code><i class="o"><code class="return">int</code></i></li>
+					<li class="P"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#MIN_SECONDS">MIN_SECONDS</a></code><i class="o"><code class="return">int</code></i></li>
+					<li class="P"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#MAX_SECONDS">MAX_SECONDS</a></code><i class="o"><code class="return">int</code></i></li>
+				</ul>
+				<h5 class="FB">Static Methods</h5>
+				<ul>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.VideoThumbnailSettings.html#thumbnailSeconds()">thumbnailSeconds</a></code><code class="K">()</code><i class="o"><code>int</code></i></li>
+					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.VideoThumbnailSettings.html#thumbnailSeconds(int)">thumbnailSeconds</a></code><code class="K">(<code>int</code><code class="parameterName">seconds</code>)</code><i class="o"><code>void</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="r">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

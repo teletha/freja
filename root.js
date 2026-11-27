@@ -148,6 +148,11 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "VideoThumbnailSettings",
+			"packageName": "freja.util",
+			"type": "Class"
+		},
+		{
 			"name": "SmartTags",
 			"packageName": "freja.util",
 			"type": "Class"
@@ -209,6 +214,21 @@ const root = {
 		},
 		{
 			"name": "FileBrowser.Entry",
+			"packageName": "freja.file",
+			"type": "Record"
+		},
+		{
+			"name": "FileLocation",
+			"packageName": "freja.file",
+			"type": "Interface"
+		},
+		{
+			"name": "FileLocation.Home",
+			"packageName": "freja.file",
+			"type": "Enum"
+		},
+		{
+			"name": "FileLocation.Folder",
 			"packageName": "freja.file",
 			"type": "Record"
 		},
@@ -279,6 +299,16 @@ const root = {
 		},
 		{
 			"name": "SettingsBackup",
+			"packageName": "freja.setting",
+			"type": "Class"
+		},
+		{
+			"name": "FileSettings",
+			"packageName": "freja.setting",
+			"type": "Class"
+		},
+		{
+			"name": "FavoriteFolders",
 			"packageName": "freja.setting",
 			"type": "Class"
 		},
