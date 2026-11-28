@@ -31,12 +31,25 @@ public final class FileTab {
     private int index = -1;
 
     public FileTab(Path root, String displayName) {
-        this.root = root.toAbsolutePath().normalize();
-        this.current = FileLocation.folder(this.root);
+        this(FileLocation.folder(root), displayName, root.toAbsolutePath().normalize());
+    }
+
+    private FileTab(FileLocation location, String displayName, Path root) {
+        this.root = root;
+        this.current = location;
         customName = displayName != null && !displayName.isBlank();
-        this.displayName = customName ? displayName : nameOf(this.root);
+        this.displayName = customName ? displayName : nameOf(location);
         history.add(this.current);
         index = 0;
+    }
+
+    /** A tab which starts on the virtual home page rather than a real folder. */
+    public static FileTab home() {
+        return new FileTab(FileLocation.Home.INSTANCE, null, null);
+    }
+
+    private static String nameOf(FileLocation location) {
+        return location instanceof FileLocation.Folder folder ? nameOf(folder.path()) : "HOME";
     }
 
     private FileLocation current;
@@ -47,6 +60,10 @@ public final class FileTab {
 
     public Path root() {
         return root;
+    }
+
+    public boolean isHome() {
+        return root == null;
     }
 
     public FileLocation current() {
@@ -86,7 +103,7 @@ public final class FileTab {
      * duplicated tab can be browsed separately from the original.
      */
     public FileTab duplicate() {
-        FileTab copy = new FileTab(root, customName ? displayName : null);
+        FileTab copy = root == null ? home() : new FileTab(root, customName ? displayName : null);
         copy.history.clear();
         copy.history.addAll(history);
         copy.index = index;

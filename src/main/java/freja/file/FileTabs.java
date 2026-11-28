@@ -56,6 +56,13 @@ public final class FileTabs {
         changed();
     }
 
+    /** Opens the virtual home page in a new tab. */
+    public void addHome() {
+        tabs.add(FileTab.home());
+        selected = tabs.size() - 1;
+        changed();
+    }
+
     /** Inserts a copy of the tab right after it and selects the copy. */
     public void duplicate(int index) {
         if (index < 0 || index >= tabs.size()) {
@@ -149,6 +156,21 @@ public final class FileTabs {
                 continue;
             }
             try {
+                if ("@home".equals(root)) {
+                    FileTab tab = FileTab.home();
+                    String current = PREFERENCES.get("current." + i, null);
+                    if (current != null && !current.isBlank()) {
+                        tab.goTo(FileLocation.from(current));
+                    }
+                    String name = PREFERENCES.get("name." + i, null);
+                    String customStored = PREFERENCES.get("custom." + i, null);
+                    if (name != null && !name.isBlank()
+                            && (customStored == null || Boolean.parseBoolean(customStored))) {
+                        tab.displayName(name);
+                    }
+                    tabs.add(tab);
+                    continue;
+                }
                 Path rootPath = Path.of(root);
                 String name = PREFERENCES.get("name." + i, null);
                 // Saves made before the custom-name flag have no marker: a name other than the
@@ -175,7 +197,7 @@ public final class FileTabs {
         PREFERENCES.putInt("selected", selected);
         for (int i = 0; i < tabs.size(); i++) {
             FileTab tab = tabs.get(i);
-            PREFERENCES.put("root." + i, tab.root().toString());
+            PREFERENCES.put("root." + i, tab.isHome() ? "@home" : tab.root().toString());
             PREFERENCES.put("name." + i, tab.displayName());
             PREFERENCES.put("custom." + i, Boolean.toString(tab.customName()));
             PREFERENCES.put("current." + i, tab.current().key());

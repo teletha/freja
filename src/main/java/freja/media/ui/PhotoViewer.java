@@ -77,6 +77,13 @@ public final class PhotoViewer extends JDialog {
         /** Called when the viewer closes, with the photo that was on screen last. */
         default void onClose(Photo photo) {
         }
+        /** Returns where a video was last left, in milliseconds. Called off the UI thread. */
+        default long playbackPosition(long photoId) {
+            return 0;
+        }
+        /** Stores the last playback position, in milliseconds. Called off the UI thread. */
+        default void onPlaybackPosition(long photoId, long millis) {
+        }
     }
     private static final boolean TRANSLUCENT = GraphicsEnvironment.getLocalGraphicsEnvironment()
             .getDefaultScreenDevice()
@@ -88,12 +95,16 @@ public final class PhotoViewer extends JDialog {
     private final java.awt.Canvas videoCanvas = new java.awt.Canvas();
     private final String windowTitle = "Freja Viewer " + Long.toHexString(System.nanoTime());
     private Mpv player;
+    /** Identifies the video whose position is being played, not the photo currently on screen. */
+    private long playingPhotoId = -1;
     private boolean videoStarting;
     private final JButton play = control(Icons.play(15, Color.WHITE), "再生");
     private final JButton prevSection = control(Icons.chevron(15, Color.WHITE, true), "前の項目");
     private final JButton nextSection = control(Icons.chevron(15, Color.WHITE, false), "次の項目");
     private final JButton rewind10 = control(textIcon("-10", Color.WHITE), "10秒戻る");
     private final JButton forward10 = control(textIcon("+10", Color.WHITE), "10秒進む");
+    private final JButton prevChapter = control(textIcon("|<", Color.WHITE), "前のチャプター");
+    private final JButton nextChapter = control(textIcon(">|", Color.WHITE), "次のチャプター");
     private final JButton mute = control(speaker(false), "ミュート");
     private final JButton subtitle = control(textIcon("CC", Color.WHITE), "字幕の表示");
     private final JButton speed = control(textIcon("1.0x", Color.WHITE), "再生速度");
@@ -101,6 +112,8 @@ public final class PhotoViewer extends JDialog {
     private final Slider volume = new Slider(this::applyVolume, () -> {
     });
     private final Slider seek = new Slider(this::previewSeek, this::commitSeek);
+    /** Chapters of the loaded video, used for the seek bar marks and chapter navigation. */
+    private List<Mpv.Chapter> chapters = List.of();
     private final JLabel videoTitle = new JLabel();
     private final JLabel time = new JLabel("00:00 / 00:00");
     private final JButton slideshowPlay = button(Icons.play(15, Color.WHITE), "スライドショー再生");
@@ -161,6 +174,12 @@ public final class PhotoViewer extends JDialog {
     private final Timer progress = new Timer(16, event -> updateProgress());
     private final ExecutorService loader = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "freja-viewer");
+        thread.setDaemon(true);
+        return thread;
+    });
+    /** Position saves outlive the decode queue so closing the viewer cannot drop the last one. */
+    private final ExecutorService saves = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "freja-viewer-save");
         thread.setDaemon(true);
         return thread;
     });
@@ -302,10 +321,12 @@ public final class PhotoViewer extends JDialog {
         JPanel rowCentre = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         rowCentre.setOpaque(false);
         rowCentre.add(prevSection);
+        rowCentre.add(prevChapter);
         rowCentre.add(rewind10);
         rowCentre.add(play);
         rowCentre.add(speed);
         rowCentre.add(forward10);
+        rowCentre.add(nextChapter);
         rowCentre.add(nextSection);
         JPanel rowRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         rowRight.setOpaque(false);
@@ -336,6 +357,8 @@ public final class PhotoViewer extends JDialog {
         nextSection.addActionListener(event -> move(1));
         rewind10.addActionListener(event -> jump(-10));
         forward10.addActionListener(event -> jump(10));
+        prevChapter.addActionListener(event -> jumpChapter(-1));
+        nextChapter.addActionListener(event -> jumpChapter(1));
         bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
         bottomPanel.add(imageBottom, BorderLayout.CENTER);
@@ -784,6 +807,8 @@ public final class PhotoViewer extends JDialog {
         bind("SUBTRACT", () -> zoomBy(1 / 1.18));
         bind("J", () -> jump(-10));
         bind("L", () -> jump(10));
+        bind("[", () -> jumpChapter(-1));
+        bind("]", () -> jumpChapter(1));
         bind("M", this::toggleMute);
         bind("C", this::toggleSubtitle);
         bind("UP", () -> changeVolume(5));
@@ -1014,6 +1039,8 @@ public final class PhotoViewer extends JDialog {
         helpRow(html, "再生／一時停止", "Space / K / P");
         helpRow(html, "10秒戻る", "J");
         helpRow(html, "10秒進む", "L");
+        helpRow(html, "前のチャプター", "[");
+        helpRow(html, "次のチャプター", "]");
         helpRow(html, "前後の項目", "← / →");
         helpRow(html, "指定位置へ移動", "0 〜 9");
         helpRow(html, "フィット表示", "F");
@@ -1228,6 +1255,10 @@ public final class PhotoViewer extends JDialog {
                 updateSubtitleButton(false);
                 updateSpeedButton(parseSeconds(player.property("speed")));
                 videoTitle.setText(photo == null ? "" : photo.fileName());
+                chapters = player.chapters();
+                double length = parseSeconds(player.property("duration"));
+                seek.marks(chapters.stream().map(chapter -> length > 0
+                        ? Math.max(0, Math.min(1, chapter.time() / length)) : 0).toList());
                 progress.start();
                 updateProgress();
                 updateOverlay();
@@ -1239,6 +1270,8 @@ public final class PhotoViewer extends JDialog {
         progress.stop();
         videoStarting = false;
         videoCanvas.setVisible(false);
+        chapters = List.of();
+        seek.marks(List.of());
         setVideoControlsVisible(false);
         Mpv old = player;
         player = null;
@@ -1395,6 +1428,27 @@ public final class PhotoViewer extends JDialog {
         player.command("seek", Double.toString(target), "absolute+exact");
         showToast(seconds < 0 ? "10秒戻る" : "10秒進む");
     }
+    /** Moves to the previous or next chapter, showing its title when mpv reports one. */
+    private void jumpChapter(int delta) {
+        if (player == null) {
+            return;
+        }
+        if (chapters.isEmpty()) {
+            showToast("チャプターがありません");
+            return;
+        }
+        double position = parseSeconds(player.property("time-pos"));
+        int current = -1;
+        for (int i = 0; i < chapters.size(); i++) {
+            if (chapters.get(i).time() <= position + 0.2) {
+                current = i;
+            }
+        }
+        int target = Math.max(0, Math.min(chapters.size() - 1, current + delta));
+        player.chapter(target);
+        Mpv.Chapter chapter = chapters.get(target);
+        showToast(chapter.title().isEmpty() ? "チャプター " + (target + 1) : chapter.title());
+    }
     /**
      * A double-valued slider so the knob follows the pointer exactly. Swing's JSlider works on
      * integer values, which made the handle jump in visible steps, and its partial repaints left
@@ -1405,6 +1459,8 @@ public final class PhotoViewer extends JDialog {
         private double maximum = 1;
         private double value;
         private boolean dragging;
+        /** Chapter start positions as a fraction of the track; empty for other sliders. */
+        private List<Double> marks = List.of();
         private final Runnable onChange;
         private final Runnable onRelease;
         Slider(Runnable onChange, Runnable onRelease) {
@@ -1433,6 +1489,10 @@ public final class PhotoViewer extends JDialog {
         void setRange(double min, double max) {
             minimum = min;
             maximum = max;
+        }
+        void marks(List<Double> positions) {
+            marks = positions;
+            repaint();
         }
         double value() {
             return value;
@@ -1479,6 +1539,13 @@ public final class PhotoViewer extends JDialog {
                 g.fillRoundRect(0, trackY - 2, width, 4, 3, 3);
                 g.setColor(new Color(0x3EA6FF));
                 g.fillRoundRect(0, trackY - 2, (int) Math.round(centre), 4, 3, 3);
+                for (double mark : marks) {
+                    int x = (int) Math.round(mark * width);
+                    g.setColor(new Color(0, 0, 0, 110));
+                    g.fillRect(x - 1, trackY - 5, 3, 10);
+                    g.setColor(new Color(255, 255, 255, 190));
+                    g.fillRect(x, trackY - 4, 1, 8);
+                }
                 g.setColor(new Color(0x3EA6FF));
                 g.fillOval((int) Math.round(centre) - 6, trackY - 6, 12, 12);
             } finally {

@@ -30,11 +30,12 @@ import javax.swing.SwingUtilities;
 
 import freja.Icons;
 import freja.Theme;
+import laevatain.ARXSectionHeader;
+import laevatain.ARXSectionListPanel;
 import freja.media.Folder;
 import freja.media.LibraryStats;
 import freja.media.PhotoFilter.SortOrder;
 import kiss.I;
-import laevatain.ARXButton;
 import laevatain.ARXLabel;
 import laevatain.ARXMenu;
 import laevatain.ARXMenuItem;
@@ -131,54 +132,31 @@ public final class Sidebar extends JPanel {
         libraryHolder.add(library, BorderLayout.CENTER);
         top.add(libraryHolder);
         top.add(Box.createVerticalStrut(18));
-        top.add(folderHeader());
         add(top, BorderLayout.NORTH);
         folders.setMenu(this::folderMenu);
         folders.setOnSelect(folder -> select(Mode.FOLDER, folder.id()));
         folders.setOnRemove(this::removeSelectedFolders);
-        JScrollPane folderScroll = folders.scrolled();
+        folderCount.setFont(Theme.font(Font.PLAIN, 11));
+        folderCount.setForeground(Theme.MUTED);
+        String title = I.translate("Folders").get();
+        ARXSectionHeader.Action[] actions = {
+                new ARXSectionHeader.Action(I.translate("Tags").get(), Icons.tag(13, Theme.MUTED),
+                        I.translate("Manage tags").get(), () -> listener.onManageTags()),
+                new ARXSectionHeader.Action(Icons.plus(14, Theme.MUTED),
+                        I.translate("Manage watched folders").get(), listener::onAddFolder)
+        };
         ARXLabel empty = new ARXLabel(I.translate("No folders are registered"));
         empty.setForeground(Theme.FAINT);
         empty.setFont(Theme.font(Font.PLAIN, 11));
         empty.setBorder(BorderFactory.createEmptyBorder(10, 12, 0, 0));
-        JPanel emptyHolder = new JPanel(new BorderLayout());
-        emptyHolder.setOpaque(true);
-        emptyHolder.setBackground(Theme.SIDEBAR);
-        emptyHolder.add(empty, BorderLayout.NORTH);
         folderCard.setOpaque(true);
         folderCard.setBackground(Theme.SIDEBAR);
-        folderCard.add(folderScroll, "list");
-        folderCard.add(emptyHolder, "empty");
+        folderCard.add(new ARXSectionListPanel(title, folderCount, folders.scrolled(), actions), "list");
+        folderCard.add(new ARXSectionListPanel(title, folderCount, new JScrollPane(empty), actions), "empty");
         add(folderCard, BorderLayout.CENTER);
     }
     public void setListener(Listener listener) {
         this.listener = listener == null ? this.listener : listener;
-    }
-    private JComponent folderHeader() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setOpaque(false);
-        JPanel heading = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        heading.setOpaque(false);
-        ARXLabel title = ARXNavList.headingLabel(I.translate("Folders"));
-        heading.add(title);
-        folderCount.setFont(Theme.font(Font.PLAIN, 11));
-        folderCount.setForeground(Theme.MUTED);
-        heading.add(folderCount);
-        panel.add(heading, BorderLayout.CENTER);
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        buttons.setOpaque(false);
-        buttons.add(headerButton("Tags", Icons.tag(13, Theme.MUTED), "Manage tags", () -> listener.onManageTags()));
-        buttons.add(headerButton(null, Icons.plus(14, Theme.MUTED), "Manage watched folders", () -> listener.onAddFolder()));
-        panel.add(buttons, BorderLayout.EAST);
-        return panel;
-    }
-    /** A small flat header button whose background and text change on hover. */
-    private ARXButton headerButton(String text, javax.swing.Icon icon, String tooltip, Runnable action) {
-        // A null label keeps the button icon-only, so there is nothing to translate.
-        ARXButton button = new ARXButton(text == null ? null : I.translate(text), icon, ARXButton.Variant.SECONDARY, action);
-        button.setFont(Theme.font(Font.PLAIN, 12));
-        button.setToolTipText(I.translate(tooltip));
-        return button;
     }
     private void select(Mode mode, long folderId) {
         this.mode = mode;

@@ -74,6 +74,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
+import freja.setting.WindowSettings;
 import freja.media.Folder;
 import freja.media.LibraryStats;
 import freja.media.Photo;
@@ -252,12 +253,15 @@ public final class MainWindow extends JFrame {
         sidebarSplit.setResizeWeight(0.0);
         sidebarSplit.setContinuousLayout(true);
         sidebarSplit.setBackground(Theme.BORDER);
-        savedSidebarDivider = PREFERENCES.getInt(SIDEBAR_DIVIDER_PREFERENCE, 246);
+        savedSidebarDivider = WindowSettings.sidebarDivider();
         sidebarSplit.addPropertyChangeListener(javax.swing.JSplitPane.DIVIDER_LOCATION_PROPERTY, event -> {
             int location = sidebarSplit.getDividerLocation();
             // The initial layout reports 0. Persisting that would destroy the saved position.
             if (location > 0 && sidebarSplit.isShowing()) {
-                PREFERENCES.putInt(SIDEBAR_DIVIDER_PREFERENCE, location);
+                WindowSettings.sidebarDivider(location);
+                if (fileManager != null) {
+                    fileManager.setTabWidth(location);
+                }
             }
         });
         panes = new JPanel(new java.awt.CardLayout());
@@ -324,7 +328,7 @@ public final class MainWindow extends JFrame {
         panes.add(fileManager, "files");
         add(panes, BorderLayout.CENTER);
         add(activityBar(), BorderLayout.WEST);
-        switchPane("viewer");
+        switchPane(WindowSettings.activity());
         setJMenuBar(menuBar());
         // Apply the saved visibility before the window is shown. Doing it in start() let a hidden
         // inspector appear for one frame and then disappear once the scanner had started.
@@ -349,6 +353,7 @@ public final class MainWindow extends JFrame {
         return bar;
     }
     private void switchPane(String id) {
+        WindowSettings.activity(id);
         ((java.awt.CardLayout) panes.getLayout()).show(panes, id);
         for (ActivityButton button : activityButtons) {
             button.setSelected(id.equals(button.id));
@@ -1826,7 +1831,7 @@ public final class MainWindow extends JFrame {
             PREFERENCES.put(SORT_PREFERENCE, viewSort.name());
         }
         if (sidebarSplit != null && sidebarSplit.getWidth() > 0 && sidebarSplit.getDividerLocation() > 0) {
-            PREFERENCES.putInt(SIDEBAR_DIVIDER_PREFERENCE, sidebarSplit.getDividerLocation());
+            WindowSettings.sidebarDivider(sidebarSplit.getDividerLocation());
         }
         PREFERENCES.putBoolean("window.maximized", (getExtendedState() & MAXIMIZED_BOTH) != 0);
         if ((getExtendedState() & MAXIMIZED_BOTH) == 0) {

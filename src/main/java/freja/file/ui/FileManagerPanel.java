@@ -11,6 +11,8 @@ package freja.file.ui;
 
 import freja.Icons;
 import freja.Theme;
+import laevatain.ARXSectionHeader;
+import laevatain.ARXSectionListPanel;
 import freja.file.FileBrowser;
 import freja.file.FileLocation;
 import freja.file.FileOperations;
@@ -87,6 +89,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import freja.setting.FavoriteFolders;
+import freja.setting.WindowSettings;
+import freja.util.FileIcons;
 import freja.util.PathUtil;
 import psychopath.Progress;
 /** A file manager with pinned folder tabs and a detailed file list, without a directory tree. */
@@ -112,6 +116,16 @@ public final class FileManagerPanel extends JPanel {
             if (event.isPopupTrigger()) {
                 event.consume();
                 showTabMenu(event);
+                return;
+            }
+            if (event.getButton() == MouseEvent.BUTTON2) {
+                event.consume();
+                if (event.getID() == MouseEvent.MOUSE_RELEASED) {
+                    int index = tabList.locationToIndex(event.getPoint());
+                    if (index >= 0) {
+                        tabs.remove(index);
+                    }
+                }
                 return;
             }
             super.processMouseEvent(event);
@@ -158,6 +172,8 @@ public final class FileManagerPanel extends JPanel {
     private final JScrollPane listScroll = new JScrollPane(table);
 
     private JPanel homePanel;
+
+    private JPanel tabPaneRoot;
 
     private JPanel homeContent;
 
@@ -264,9 +280,11 @@ public final class FileManagerPanel extends JPanel {
     }
     /** The vertical tab strip on the left: pinned folders, not a directory tree. */
     private JPanel tabPane() {
-        JPanel panel = new JPanel(new BorderLayout());
+        ARXSectionListPanel panel = new ARXSectionListPanel("フォルダ", new JScrollPane(tabList),
+                new ARXSectionHeader.Action(Icons.plus(14, Theme.MUTED), "フォルダをタブに追加", this::addTab));
+        tabPaneRoot = panel;
         panel.setBackground(Theme.SIDEBAR);
-        panel.setPreferredSize(new Dimension(190, 0));
+        panel.setPreferredSize(new Dimension(WindowSettings.sidebarDivider(), 0));
         tabList.setBackground(Theme.SIDEBAR);
         tabList.setFixedCellHeight(36);
         tabList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -276,7 +294,9 @@ public final class FileManagerPanel extends JPanel {
                 super.getListCellRendererComponent(list, value, index, selected, focused);
                 FileTab tab = (FileTab) value;
                 setText(tab.displayName());
-                setIcon(Icons.folder(16, selected ? Color.WHITE : Theme.MUTED));
+                setIcon(tab.isHome()
+                        ? Icons.of("mdi:home", 16, selected ? Color.WHITE : Theme.MUTED)
+                        : Icons.folder(16, selected ? Color.WHITE : Theme.MUTED));
                 setBackground(selected ? UIManager.getColor("ARX.selection") : Theme.SIDEBAR);
                 setForeground(selected ? Theme.TEXT : Theme.MUTED);
                 setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 8));
@@ -288,10 +308,6 @@ public final class FileManagerPanel extends JPanel {
                 tabs.select(tabList.getSelectedIndex());
             }
         });
-        JScrollPane tabsScroll = new JScrollPane(tabList);
-        tabsScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-        tabsScroll.getViewport().setBackground(Theme.SIDEBAR);
-        panel.add(tabsScroll, BorderLayout.CENTER);
         return panel;
     }
     private void showTabMenu(MouseEvent event) {
@@ -459,6 +475,17 @@ public final class FileManagerPanel extends JPanel {
         panel.add(status, BorderLayout.SOUTH);
         return panel;
     }
+    /** Keeps the folder list in step with the library sidebar width. */
+    public void setTabWidth(int width) {
+        if (tabPaneRoot != null && width > 0) {
+            Dimension size = new Dimension(width, 0);
+            tabPaneRoot.setPreferredSize(size);
+            tabPaneRoot.setMinimumSize(size);
+            revalidate();
+            repaint();
+        }
+    }
+
     /** Applies the separately configurable file list font and row height. */
     public void applyListSettings() {
         Font font = Theme.fileListFont();
@@ -897,11 +924,15 @@ public final class FileManagerPanel extends JPanel {
             return;
         }
         homeContent.removeAll();
-        addHomeSection("ドライブ", "ドライブ", Icons.of("mdi:harddisk", 14, Theme.MUTED));
-        addHomeSection("ネットワーク", "ネットワーク", Icons.of("mdi:lan", 14, Theme.MUTED));
+        addHomeSection("ドライブ", "ドライブ", Icons.of("iconoir:hard-drive", 16, Theme.MUTED));
+        gap();
+        addHomeSection("ネットワーク", "ネットワーク", Icons.of("mdi:lan", 16, Theme.MUTED));
+        gap();
         addFavoriteSection();
         if (System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows")) {
+            gap();
             addPinnedSection();
+            gap();
             addSystemSection();
         }
         homeContent.add(Box.createVerticalGlue());
@@ -915,9 +946,9 @@ public final class FileManagerPanel extends JPanel {
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         JLabel label = new JLabel("お気に入り");
-        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(Icons.of("mdi:star", 14, Theme.MUTED)));
+        header.add(new JLabel(Icons.of("mdi:star", 16, Theme.MUTED)));
         header.add(label);
         homeContent.add(header);
 
@@ -995,9 +1026,9 @@ public final class FileManagerPanel extends JPanel {
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         JLabel label = new JLabel("システムフォルダ");
-        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(Icons.folder(14, Theme.MUTED)));
+        header.add(new JLabel(Icons.folder(16, Theme.MUTED)));
         header.add(label);
         homeContent.add(header);
 
@@ -1037,9 +1068,9 @@ public final class FileManagerPanel extends JPanel {
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         JLabel label = new JLabel("システムツール");
-        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(Icons.settings(14, Theme.MUTED)));
+        header.add(new JLabel(Icons.settings(16, Theme.MUTED)));
         header.add(label);
         homeContent.add(header);
 
@@ -1107,12 +1138,16 @@ public final class FileManagerPanel extends JPanel {
         }
     }
 
+    private void gap() {
+        homeContent.add(Box.createVerticalStrut(12));
+    }
+
     private void addHomeSection(String title, String section, Icon icon) {
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         JLabel label = new JLabel(title);
-        label.setFont(Theme.font(Font.BOLD, 12));
+        label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
         header.add(new JLabel(icon));
         header.add(label);
@@ -1143,8 +1178,8 @@ public final class FileManagerPanel extends JPanel {
         tile.setMaximumSize(size);
         tile.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 8, 5, 8));
         boolean network = "ネットワーク".equals(entry.section());
-        Icon nativeIcon = nativeIcon(entry);
-        JLabel icon = new JLabel(nativeIcon != null ? nativeIcon : glyphIcon(network, 20));
+        Icon cardIcon = network ? nativeIcon(entry) : Icons.of("iconoir:hard-drive", 20, Theme.MUTED);
+        JLabel icon = new JLabel(cardIcon != null ? cardIcon : glyphIcon(network, 20));
         tile.add(icon, BorderLayout.WEST);
         JPanel text = new JPanel();
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
@@ -1152,14 +1187,26 @@ public final class FileManagerPanel extends JPanel {
         JLabel name = new JLabel(truncate(entry.name(), 24));
         name.setFont(Theme.font(Font.PLAIN, 12));
         name.setForeground(Theme.TEXT);
+        name.setAlignmentX(Component.LEFT_ALIGNMENT);
         text.add(name);
         if (entry.total() > 0) {
             text.add(Box.createVerticalStrut(2));
+            // The number is the free share, but the warning thresholds describe how full the drive
+            // is: 70% used is worth a second look, 90% is urgent.
             int percent = (int) Math.round(entry.free() * 100.0 / entry.total());
-            JLabel detail = new JLabel("空き " + humanSize(entry.free()) + " / " + humanSize(entry.total())
-                    + " (" + percent + "%)");
-            detail.setFont(Theme.fileListFont());
-            detail.setForeground(Theme.MUTED);
+            int used = 100 - percent;
+            Font detailFont = Theme.fileListFont();
+            JPanel detail = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            detail.setOpaque(false);
+            detail.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JLabel sizes = new JLabel("残り " + humanSize(entry.free()) + " / " + humanSize(entry.total()) + " ");
+            sizes.setFont(detailFont);
+            sizes.setForeground(Theme.MUTED);
+            JLabel ratio = new JLabel("(" + percent + "%)");
+            ratio.setFont(detailFont);
+            ratio.setForeground(used >= 90 ? Theme.DANGER : used >= 70 ? Theme.GOLD : Theme.MUTED);
+            detail.add(sizes);
+            detail.add(ratio);
             text.add(detail);
         }
         tile.add(text, BorderLayout.CENTER);
@@ -1381,16 +1428,7 @@ public final class FileManagerPanel extends JPanel {
         if (entry.directory()) {
             return Icons.folder(size, Theme.MUTED);
         }
-        if (entry.archive()) {
-            return Icons.of("mdi:zip-box", size, Theme.MUTED);
-        }
-        if (PathUtil.isImage(entry.path())) {
-            return Icons.image(size, Theme.MUTED);
-        }
-        if (PathUtil.isVideo(entry.path())) {
-            return Icons.play(size, Theme.MUTED);
-        }
-        return Icons.of("mdi:file", size, Theme.MUTED);
+        return FileIcons.icon(entry.path(), size);
     }
 
     private static String kindLabel(FileBrowser.Entry entry) {

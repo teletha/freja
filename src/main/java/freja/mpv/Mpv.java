@@ -17,6 +17,8 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import kiss.I;
@@ -36,6 +38,10 @@ public final class Mpv implements AutoCloseable {
 
     /** mpv event: playback of the current file ended. */
     public static final int END_FILE = 7;
+
+    /** One chapter of the loaded file: its starting second and its optional title. */
+    public record Chapter(double time, String title) {
+    }
 
     private final MpvBindings bindings;
     private final MemorySegment handle;
@@ -108,6 +114,48 @@ public final class Mpv implements AutoCloseable {
             return bindings.getString(handle, name, arena);
         } catch (Throwable e) {
             throw failure("Cannot read the mpv property " + name, e);
+        }
+    }
+
+    /**
+     * Reads the chapters of the loaded file in their chronological order.
+     *
+     * @return the chapters, or an empty list when the file has none
+     */
+    public List<Chapter> chapters() {
+        int count = (int) number(property("chapter-list/count"), 0);
+        List<Chapter> result = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            String title = property("chapter-list/" + i + "/title");
+            result.add(new Chapter(number(property("chapter-list/" + i + "/time"), 0),
+                    title == null ? "" : title));
+        }
+        return result;
+    }
+
+    /**
+     * Returns the index of the chapter containing the current position, or -1 outside any chapter.
+     *
+     * @return the zero-based chapter index
+     */
+    public int chapter() {
+        return (int) number(property("chapter"), -1);
+    }
+
+    /**
+     * Seeks to the start of the given chapter.
+     *
+     * @param index the zero-based chapter index
+     */
+    public void chapter(int index) {
+        set("chapter", Integer.toString(index));
+    }
+
+    private static double number(String value, double fallback) {
+        try {
+            return value == null ? fallback : Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            return fallback;
         }
     }
 

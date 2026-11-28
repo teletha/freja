@@ -61,7 +61,25 @@ public final class Icons {
 
     private static final Logger LOG = Logger.getLogger(Icons.class.getName());
 
-    private static final String ICONIFY = "https://api.iconify.design/mdi/";
+    private static final String ICONIFY = "https://api.iconify.design/";
+
+    /** One Iconify asset: a collection such as {@code mdi} or {@code circum} plus the icon name. */
+    private record Ref(String collection, String name) {
+
+        static Ref of(String value) {
+            if (value == null) {
+                return null;
+            }
+            int colon = value.indexOf(':');
+            String collection = colon < 0 ? "mdi" : value.substring(0, colon);
+            String name = colon < 0 ? value : value.substring(colon + 1);
+            return validName(collection) && validName(name) ? new Ref(collection, name) : null;
+        }
+
+        String key() {
+            return collection + ":" + name;
+        }
+    }
 
     private Icons() {
     }
@@ -142,20 +160,24 @@ public final class Icons {
      * @return the loaded icon
      */
     public static Icon of(String iconifyName, int size, Color color) {
+        return load(iconifyName, size, color);
+    }
+
+    /** Loads an icon without tinting it, preserving the colours of icon sets such as Material Icon Theme. */
+    public static Icon raw(String iconifyName, int size) {
+        return load(iconifyName, size, null);
+    }
+
+    private static Icon load(String iconifyName, int size, Color color) {
         if (iconifyName == null) {
             return fallback(size, color);
         }
-        String name;
-        if (iconifyName.startsWith("mdi:")) {
-            name = iconifyName.substring(4);
-        } else {
-            name = iconifyName;
-        }
-        if (!validName(name)) {
+        Ref ref = Ref.of(iconifyName);
+        if (ref == null) {
             return fallback(size, color);
         }
-        if (bundled(name)) {
-            return svg(name, size, color);
+        if (bundled(ref)) {
+            return svg(ref, size, color);
         }
         if (!devMode()) {
             return fallback(size, color);
@@ -163,12 +185,12 @@ public final class Icons {
 
         // A file from an earlier fetch (or a previous run) can be used directly. Do not read it
         // while a fetch is still writing it.
-        Path cachedFile = cachedFile(name);
-        if (cachedFile != null && !fetchTasks.containsKey(name)) {
+        Path cachedFile = cachedFile(ref);
+        if (cachedFile != null && !fetchTasks.containsKey(ref.key())) {
             return svg(cachedFile.toFile(), size, color);
         }
 
-        DevKey key = new DevKey(name, size, color);
+        DevKey key = new DevKey(ref.key(), size, color);
         Placeholder cached = devCache.get(key);
         if (cached != null) {
             return cached;
@@ -179,8 +201,8 @@ public final class Icons {
             return existing;
         }
 
-        CompletableFuture<Path> task = fetchTasks.computeIfAbsent(name,
-                missing -> CompletableFuture.supplyAsync(() -> fetchToCache(missing), fetcher));
+        CompletableFuture<Path> task = fetchTasks.computeIfAbsent(ref.key(),
+                missing -> CompletableFuture.supplyAsync(() -> fetchToCache(ref), fetcher));
         task.whenComplete((path, error) -> {
             if (path != null) {
                 placeholder.setDelegate(svg(path.toFile(), size, color));
@@ -215,12 +237,12 @@ public final class Icons {
     }
 
     /** Returns the first cached SVG for the asset, or null when none exists yet. */
-    private static Path cachedFile(String name) {
+    private static Path cachedFile(Ref ref) {
         if (CACHE_DIRS == null) {
             return null;
         }
         for (Path dir : CACHE_DIRS) {
-            Path candidate = dir.resolve(name + ".svg");
+            Path candidate = dir.resolve(ref.collection()).resolve(ref.name() + ".svg");
             if (Files.isRegularFile(candidate)) {
                 return candidate;
             }
@@ -228,24 +250,28 @@ public final class Icons {
         return null;
     }
 
-    private static FlatSVGIcon svg(String name, int size, Color color) {
-        FlatSVGIcon icon = new FlatSVGIcon("icons/mdi/" + name + ".svg", size, size);
-        icon.setColorFilter(new FlatSVGIcon.ColorFilter(ignored -> color));
+    private static FlatSVGIcon svg(Ref ref, int size, Color color) {
+        FlatSVGIcon icon = new FlatSVGIcon("icons/" + ref.collection() + "/" + ref.name() + ".svg", size, size);
+        if (color != null) {
+            icon.setColorFilter(new FlatSVGIcon.ColorFilter(ignored -> color));
+        }
         return icon;
     }
 
     private static Icon svg(File file, int size, Color color) {
         try {
             FlatSVGIcon icon = new FlatSVGIcon(file).derive(size, size);
-            icon.setColorFilter(new FlatSVGIcon.ColorFilter(ignored -> color));
+            if (color != null) {
+                icon.setColorFilter(new FlatSVGIcon.ColorFilter(ignored -> color));
+            }
             return icon;
         } catch (Exception e) {
             return fallback(size, color);
         }
     }
 
-    private static boolean bundled(String name) {
-        return Icons.class.getResource("/icons/mdi/" + name + ".svg") != null;
+    private static boolean bundled(Ref ref) {
+        return Icons.class.getResource("/icons/" + ref.collection() + "/" + ref.name() + ".svg") != null;
     }
 
     private static boolean validName(String name) {
@@ -271,7 +297,7 @@ public final class Icons {
         }
         // An explicit opt-in still works when the class path cannot be resolved to a source tree.
         if ("true".equals(System.getProperty("freja.icons.download"))) {
-            Path source = Path.of("src/main/resources/icons/mdi").toAbsolutePath().normalize();
+            Path source = Path.of("src/main/resources/icons").toAbsolutePath().normalize();
             if (Files.isDirectory(source)) {
                 return new Path[]{source};
             }
@@ -299,7 +325,7 @@ public final class Icons {
         }
         Path sourceDir = null;
         for (Path dir = runtime; dir != null; dir = dir.getParent()) {
-            Path candidate = dir.resolve("src/main/resources/icons/mdi");
+            Path candidate = dir.resolve("src/main/resources/icons");
             if (Files.isDirectory(candidate)) {
                 sourceDir = candidate;
                 break;
@@ -308,22 +334,22 @@ public final class Icons {
         if (sourceDir == null) {
             return null;
         }
-        Path runtimeDir = runtime.resolve("icons/mdi");
+        Path runtimeDir = runtime.resolve("icons");
         return sourceDir.equals(runtimeDir) ? new Path[]{sourceDir} : new Path[]{sourceDir, runtimeDir};
     }
 
-    private static String endpoint() {
+    private static String endpoint(Ref ref) {
         String custom = System.getProperty("freja.icons.endpoint");
-        return custom != null ? custom : ICONIFY;
+        return custom != null ? custom : ICONIFY + ref.collection() + "/";
     }
 
     /** Downloads one SVG and writes it into every cache directory, returning the first copy. */
-    private static Path fetchToCache(String name) {
+    private static Path fetchToCache(Ref ref) {
         try {
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(3))
                     .build();
-            HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint() + name + ".svg"))
+            HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint(ref) + ref.name() + ".svg"))
                     .timeout(Duration.ofSeconds(3))
                     .GET()
                     .build();
@@ -344,24 +370,25 @@ public final class Icons {
             Path first = null;
             for (Path dir : CACHE_DIRS) {
                 try {
-                    Files.createDirectories(dir);
-                    Path target = dir.resolve(name + ".svg");
+                    Path collection = dir.resolve(ref.collection());
+                    Files.createDirectories(collection);
+                    Path target = collection.resolve(ref.name() + ".svg");
                     writeAtomically(target, bytes);
                     if (first == null) {
                         first = target;
                     }
                 } catch (Exception e) {
-                    LOG.log(Level.WARNING, "Cannot cache icon ''" + name + "'' in " + dir, e);
+                    LOG.log(Level.WARNING, "Cannot cache icon ''" + ref.key() + "'' in " + dir, e);
                 }
             }
             if (first == null) {
                 throw new IllegalStateException("No cache directory accepted the icon");
             }
             LOG.log(Level.INFO, "Fetched icon ''{0}'' from Iconify and cached it in {1}",
-                    new Object[]{name, first});
+                    new Object[]{ref.key(), first});
             return first;
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "Cannot fetch icon ''" + name + "'' from Iconify", e);
+            LOG.log(Level.WARNING, "Cannot fetch icon ''" + ref.key() + "'' from Iconify", e);
             return null;
         }
     }

@@ -219,6 +219,7 @@ public final class Library implements AutoCloseable {
                         focal_length REAL,
                         orientation INTEGER NOT NULL DEFAULT 1,
                         duration_ms INTEGER NOT NULL DEFAULT 0,
+                        playback_position_ms INTEGER NOT NULL DEFAULT 0,
                         favorite INTEGER NOT NULL DEFAULT 0,
                         rating INTEGER NOT NULL DEFAULT 0,
                         caption TEXT,
@@ -276,6 +277,7 @@ public final class Library implements AutoCloseable {
         ensureColumn("photos", "archive_type", "TEXT");
         ensureColumn("photos", "entry_name", "TEXT");
         ensureColumn("photos", "duration_ms", "INTEGER NOT NULL DEFAULT 0");
+        ensureColumn("photos", "playback_position_ms", "INTEGER NOT NULL DEFAULT 0");
         normalizeExistingTags();
         backfillFolderNames();
         migrateThumbnailRevision();
@@ -1785,6 +1787,41 @@ public final class Library implements AutoCloseable {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new LibraryException("Failed to invalidate the photo", e);
+        }
+    }
+
+    /**
+     * Returns where playback of a video last stopped.
+     *
+     * @param photoId a photo identifier
+     * @return milliseconds from the start of the video, or 0 when it has not been played
+     */
+    public synchronized long playbackPosition(long photoId) {
+        assertOffUiThread();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT playback_position_ms FROM photos WHERE id=?")) {
+            statement.setLong(1, photoId);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next() ? Math.max(0, results.getLong(1)) : 0;
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the playback position", e);
+        }
+    }
+
+    /**
+     * Remembers where playback of a video stopped. Zero marks a video watched to the end.
+     *
+     * @param photoId a photo identifier
+     * @param millis milliseconds from the start of the video
+     */
+    public synchronized void savePlaybackPosition(long photoId, long millis) {
+        assertOffUiThread();
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET playback_position_ms=? WHERE id=?")) {
+            statement.setLong(1, Math.max(0, millis));
+            statement.setLong(2, photoId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to save the playback position", e);
         }
     }
 
