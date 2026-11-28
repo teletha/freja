@@ -12,12 +12,13 @@ package laevatain;
 import javax.swing.JTextField;
 
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A text field whose contents can follow a {@link Variable}. Useful for values which are edited in
  * place and also change elsewhere, such as the current name of a folder.
  */
-public final class ARXTextField extends JTextField {
+public final class ARXTextField extends JTextField implements ComponentHelper<ARXTextField> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 

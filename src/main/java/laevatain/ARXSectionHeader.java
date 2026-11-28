@@ -26,12 +26,13 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+import laevatain.api.ComponentHelper;
 
 /**
  * The section heading shared by the library sidebar and the file manager: a label on the left and
  * flat icon actions on the right.
  */
-public final class ARXSectionHeader extends JPanel {
+public final class ARXSectionHeader extends JPanel implements ComponentHelper<ARXSectionHeader> {
 
     /** One flat action shown at the right end of the heading. */
     public record Action(String text, Icon icon, String tooltip, Runnable action) {

@@ -13,12 +13,13 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A menu item whose caption can follow a {@link Variable}. Menus are built on demand, so a late
  * translation still reaches an item which is already on screen.
  */
-public final class ARXMenuItem extends JMenuItem {
+public final class ARXMenuItem extends JMenuItem implements ComponentHelper<ARXMenuItem> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 

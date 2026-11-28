@@ -17,12 +17,13 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
+import laevatain.api.ComponentHelper;
 
 /**
  * The shell around a sidebar list: a shared section heading above a caller-supplied scroll pane.
  * The list itself stays specialised for each host (library folders or file manager tabs).
  */
-public final class ARXSectionListPanel extends JPanel {
+public final class ARXSectionListPanel extends JPanel implements ComponentHelper<ARXSectionListPanel> {
 
     private final JScrollPane scroll;
 

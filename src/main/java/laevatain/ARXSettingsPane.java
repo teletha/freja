@@ -45,6 +45,7 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 
 import kiss.I;
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A Windows 11-style settings surface: an {@link ARXNavList} rail on the left and one continuous,
@@ -57,7 +58,7 @@ import kiss.Variable;
  * {@link Row#keywords extra terms} the host registers. That way "フォント", "font" and "typeface"
  * all find the same setting, whatever language the page is currently shown in.
  */
-public final class ARXSettingsPane extends JPanel {
+public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARXSettingsPane> {
 
     /**
      * A caption with its English origin kept for search. The displayed wording follows a live

@@ -48,7 +48,7 @@ import javax.swing.UIManager;
 import com.formdev.flatlaf.util.UIScale;
 
 import kiss.Variable;
-import laevatain.api.LayoutHelper;
+import laevatain.api.ComponentHelper;
 
 /**
  * A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
@@ -57,7 +57,7 @@ import laevatain.api.LayoutHelper;
  * Colours and fonts come from the {@code ARX.*} UI defaults rather than from a concrete theme
  * class, so any host application can drive the look of the list by publishing those keys.
  */
-public final class ARXNavList extends JPanel implements LayoutHelper<ARXNavList> {
+public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavList> {
 
     /**
      * A display-only label. It refuses to answer for the point under it, so the row keeps the

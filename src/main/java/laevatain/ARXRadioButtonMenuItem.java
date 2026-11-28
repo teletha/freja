@@ -13,9 +13,10 @@ import javax.swing.Icon;
 import javax.swing.JRadioButtonMenuItem;
 
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /** A radio menu item whose caption can follow a {@link Variable}, mirroring {@link ARXMenuItem}. */
-public final class ARXRadioButtonMenuItem extends JRadioButtonMenuItem {
+public final class ARXRadioButtonMenuItem extends JRadioButtonMenuItem implements ComponentHelper<ARXRadioButtonMenuItem> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 

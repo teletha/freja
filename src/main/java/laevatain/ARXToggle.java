@@ -20,6 +20,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
+import laevatain.api.ComponentHelper;
 
 /**
  * A Windows-style on/off switch. The state is delegated to Swing's toggle button model, so
@@ -27,7 +28,7 @@ import javax.swing.UIManager;
  * any other button; the component only paints the Fluent pill and glides the knob between the two
  * positions.
  */
-public final class ARXToggle extends JToggleButton {
+public final class ARXToggle extends JToggleButton implements ComponentHelper<ARXToggle> {
 
     private static final int WIDTH = 40;
 

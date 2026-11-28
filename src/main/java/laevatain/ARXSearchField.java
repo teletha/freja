@@ -34,12 +34,13 @@ import javax.swing.text.StyleConstants;
 import com.formdev.flatlaf.FlatClientProperties;
 
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A reusable search field with a leading icon, placeholder, clear button and a debounced text
  * callback. Fonts and colours come from the active FlatLaf theme.
  */
-public final class ARXSearchField extends JTextField {
+public final class ARXSearchField extends JTextField implements ComponentHelper<ARXSearchField> {
 
     /** Default idle time before a text change is reported to the owner. */
     private static final int DEFAULT_DEBOUNCE_MS = 120;

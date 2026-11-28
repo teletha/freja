@@ -13,12 +13,13 @@ import javax.swing.Icon;
 import javax.swing.JCheckBox;
 
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A check box whose caption can follow a {@link Variable}, so a translated option keeps its wording
  * when the interface language changes.
  */
-public final class ARXCheckBox extends JCheckBox {
+public final class ARXCheckBox extends JCheckBox implements ComponentHelper<ARXCheckBox> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 

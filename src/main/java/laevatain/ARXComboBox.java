@@ -18,6 +18,7 @@ import javax.swing.JComboBox;
 import kiss.Disposable;
 import kiss.I;
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A combo box whose items follow live translations. Each source string is translated through
@@ -25,7 +26,7 @@ import kiss.Variable;
  * translation changes,
  * while the selected index stays put.
  */
-public final class ARXComboBox extends JComboBox<String> {
+public final class ARXComboBox extends JComboBox<String> implements ComponentHelper<ARXComboBox> {
 
     private final List<Disposable> subscriptions = new ArrayList<>();
 

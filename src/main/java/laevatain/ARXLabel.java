@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 
 import kiss.I;
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A label whose caption can follow a {@link Variable}, e.g. the value returned by
@@ -22,7 +23,7 @@ import kiss.Variable;
  * subscription, so
  * the caption stays in sync when the interface language changes.
  */
-public final class ARXLabel extends JLabel {
+public final class ARXLabel extends JLabel implements ComponentHelper<ARXLabel> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 

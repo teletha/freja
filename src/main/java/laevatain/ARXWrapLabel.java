@@ -21,6 +21,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
+import laevatain.api.ComponentHelper;
 
 /**
  * A label which breaks its text into lines instead of asking for as much width as the longest line
@@ -33,7 +34,7 @@ import javax.swing.text.DefaultCaret;
  * {@code BoxLayout} would otherwise stretch it across the leftover room in the row, and its caret
  * made deaf to the viewport, because a caret otherwise drags the scroll pane around.
  */
-public final class ARXWrapLabel extends JTextArea {
+public final class ARXWrapLabel extends JTextArea implements ComponentHelper<ARXWrapLabel> {
 
     /** The width asked for before the label knows how much room it will actually get. */
     private static final int CAPPED_WIDTH = 460;

@@ -23,13 +23,14 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 
 import kiss.Disposable;
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A reusable FlatLaf button with a flat look, rounded corners and a hover style. All colours and
  * the
  * corner radius come from the active FlatLaf theme, so the button follows runtime theme changes.
  */
-public final class ARXButton extends JButton {
+public final class ARXButton extends JButton implements ComponentHelper<ARXButton> {
 
     /** Predefined button roles, each mapped to FlatLaf UI defaults. */
     public enum Variant {

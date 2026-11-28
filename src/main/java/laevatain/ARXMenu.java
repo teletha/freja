@@ -12,11 +12,12 @@ package laevatain;
 import javax.swing.JMenu;
 
 import kiss.Variable;
+import laevatain.api.ComponentHelper;
 
 /**
  * A menu whose caption can follow a {@link Variable}, mirroring {@link ARXMenuItem}.
  */
-public final class ARXMenu extends JMenu {
+public final class ARXMenu extends JMenu implements ComponentHelper<ARXMenu> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 
