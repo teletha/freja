@@ -93,6 +93,11 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXSectionListPanel",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
 			"name": "ARXNavList",
 			"packageName": "laevatain",
 			"type": "Class"
@@ -133,6 +138,16 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXSectionHeader",
+			"packageName": "laevatain",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSectionHeader.Action",
+			"packageName": "laevatain",
+			"type": "Record"
+		},
+		{
 			"name": "ARXMenu",
 			"packageName": "laevatain",
 			"type": "Class"
@@ -144,6 +159,11 @@ const root = {
 		},
 		{
 			"name": "PicasaTags",
+			"packageName": "freja.util",
+			"type": "Class"
+		},
+		{
+			"name": "FileIcons",
 			"packageName": "freja.util",
 			"type": "Class"
 		},
@@ -181,6 +201,11 @@ const root = {
 			"name": "Mpv.MpvException",
 			"packageName": "freja.mpv",
 			"type": "Exception"
+		},
+		{
+			"name": "Mpv.Chapter",
+			"packageName": "freja.mpv",
+			"type": "Record"
 		},
 		{
 			"name": "MpvNative",
@@ -295,6 +320,11 @@ const root = {
 		{
 			"name": "Freja",
 			"packageName": "freja",
+			"type": "Class"
+		},
+		{
+			"name": "WindowSettings",
+			"packageName": "freja.setting",
 			"type": "Class"
 		},
 		{

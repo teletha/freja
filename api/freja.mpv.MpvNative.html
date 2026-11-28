@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="p">
-		<header class="q" date="2026-11-27">
-			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
+	<body class="b">
+		<header class="c" date="2026-11-28">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="U"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,85 +35,85 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="p"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="s"></nav>
-		<article class="b" id="Article">
-			<section class="JB"><code class="CB">freja.mpv</code>
-				<h2 class="Class u"><code class="e">MpvNative</code></h2>
-				<div class="BB"></div><span class="A"><p>Downloads and loads the libmpv native library.</p><p>
+		<nav class="R"></nav>
+		<article class="O" id="Article">
+			<section class="r"><code class="W">freja.mpv</code>
+				<h2 class="Class BB"><code class="X">MpvNative</code></h2>
+				<div class="JB"></div><span class="A"><p>Downloads and loads the libmpv native library.</p><p>
 Freja does not ship the binary. On first use it is downloaded from the official mpv release into
 the application data directory and verified against a pinned SHA-256. A failed download is not
 fatal: video support stays unavailable for the rest of the process and is retried on next start.
 Use <code>-Dfreja.mpv.path=&lt;directory&gt;</code> to point at an already extracted <code>libmpv-2.dll</code>.
 </p></span></section>
-			<section class="JB" id="VERSION">
-				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="e">VERSION</code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The pinned mpv release.</p></span></section>
-			<section class="JB" id="LIBRARY">
-				<h2 class="z"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code class="e">LIBRARY</code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The native library file name inside the release archive.</p></span></section>
-			<section class="JB" id="bindings()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">bindings</code><code class="K">()</code><i class="V"><code><a aria-label="freja.mpv.MpvBindings" href="api/freja.mpv.MpvBindings.html">MpvBindings</a></code></i></h2>
-				<table class="KB">
-					<tr class="m">
+			<section class="r" id="VERSION">
+				<h2 class="g"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="X">VERSION</code><i class="Y"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The pinned mpv release.</p></span></section>
+			<section class="r" id="LIBRARY">
+				<h2 class="g"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="X">LIBRARY</code><i class="Y"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The native library file name inside the release archive.</p></span></section>
+			<section class="r" id="bindings()">
+				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">bindings</code><code class="M">()</code><i class="Y"><code><a aria-label="freja.mpv.MpvBindings" href="api/freja.mpv.MpvBindings.html">MpvBindings</a></code></i></h2>
+				<table class="s">
+					<tr class="Z">
 						<td><code><a aria-label="freja.mpv.MpvBindings" href="api/freja.mpv.MpvBindings.html">MpvBindings</a></code></td>
 						<td><span><p>the bindings</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the native bindings, downloading and linking the library on first use.</p></span></section>
-			<section class="JB" id="isAvailable()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">isAvailable</code><code class="K">()</code><i class="V"><code>boolean</code></i></h2>
-				<table class="KB">
-					<tr class="m">
+			<section class="r" id="isAvailable()">
+				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">isAvailable</code><code class="M">()</code><i class="Y"><code>boolean</code></i></h2>
+				<table class="s">
+					<tr class="Z">
 						<td><code>boolean</code></td>
 						<td><span><p>true when libmpv is linked and ready</p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether the native library can be used.</p></span></section>
-			<section class="JB" id="failure()">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">failure</code><code class="K">()</code><i class="V"><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></i></h2>
-				<table class="KB">
-					<tr class="m">
+			<section class="r" id="failure()">
+				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">failure</code><code class="M">()</code><i class="Y"><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></i></h2>
+				<table class="s">
+					<tr class="Z">
 						<td><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></td>
 						<td><span><p>the failure or null</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the last loading failure, if any.</p></span></section>
-			<section class="JB" id="sha256(java.nio.file.Path)">
-				<h2 class="z"><i class="PUBLIC STATIC"></i><code class="e">sha256</code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="KB">
-					<tr class="v">
+			<section class="r" id="sha256(java.nio.file.Path)">
+				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">sha256</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="Y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="s">
+					<tr class="P">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="m">
+					<tr class="Z">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the lower-case hex digest</p></span></td>
 					</tr>
-					<tr class="N">
+					<tr class="LB">
 						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Computes the SHA-256 digest of a file.</p></span></section>
 		</article>
-		<aside class="t">
-			<div class="x">
-				<h5 class="FB">Static Fields</h5>
+		<aside class="d">
+			<div class="u">
+				<h5 class="J">Static Fields</h5>
 				<ul>
-					<li class="P"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.mpv.MpvNative.html#VERSION">VERSION</a></code><i class="o"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="P"><i class="FINAL"><i class="PUBLIC STATIC"></i></i><code><a href="api/freja.mpv.MpvNative.html#LIBRARY">LIBRARY</a></code><i class="o"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="L"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.mpv.MpvNative.html#VERSION">VERSION</a></code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="L"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.mpv.MpvNative.html#LIBRARY">LIBRARY</a></code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
-				<h5 class="FB">Static Methods</h5>
+				<h5 class="J">Static Methods</h5>
 				<ul>
-					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.mpv.MpvNative.html#bindings()">bindings</a></code><code class="K">()</code><i class="o"><code><a aria-label="freja.mpv.MpvBindings" href="api/freja.mpv.MpvBindings.html">MpvBindings</a></code></i></li>
-					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.mpv.MpvNative.html#isAvailable()">isAvailable</a></code><code class="K">()</code><i class="o"><code>boolean</code></i></li>
-					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.mpv.MpvNative.html#failure()">failure</a></code><code class="K">()</code><i class="o"><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></i></li>
-					<li class="P"><i class="PUBLIC STATIC"></i><code><a href="api/freja.mpv.MpvNative.html#sha256(java.nio.file.Path)">sha256</a></code><code class="K">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="o"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.MpvNative.html#bindings()">bindings</a></code><code class="M">()</code><i class="V"><code><a aria-label="freja.mpv.MpvBindings" href="api/freja.mpv.MpvBindings.html">MpvBindings</a></code></i></li>
+					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.MpvNative.html#isAvailable()">isAvailable</a></code><code class="M">()</code><i class="V"><code>boolean</code></i></li>
+					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.MpvNative.html#failure()">failure</a></code><code class="M">()</code><i class="V"><code><a aria-label="java.lang.Throwable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Throwable.html">Throwable</a></code></i></li>
+					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.MpvNative.html#sha256(java.nio.file.Path)">sha256</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="r">
+		<footer class="S">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

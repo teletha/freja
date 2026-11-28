@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="p">
-		<header class="q" date="2026-11-27">
-			<h1 class="DB"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="J"><a href="api/main.html" id="API"><svg class="package">
+	<body class="b">
+		<header class="c" date="2026-11-28">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="U"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="i"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="p"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="s"></nav>
-		<article class="b" id="Article">
-			<div class="JB">
+		<nav class="R"></nav>
+		<article class="O" id="Article">
+			<div class="r">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -176,6 +176,11 @@ translation changes,
 while the selected index stays put.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/laevatain.ARXSectionListPanel.html">ARXSectionListPanel</a></code></td>
+								<td>The shell around a sidebar list: a shared section heading above a caller-supplied scroll pane.
+The list itself stays specialised for each host (library folders or file manager tabs).</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/laevatain.ARXNavList.html">ARXNavList</a></code></td>
 								<td>A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
 trailing annotation, hover feedback, arrow-key navigation and an optional context menu.</td>
@@ -213,6 +218,11 @@ needs. A plain JLabel never wraps, so a long sentence widens the whole column wi
 limit.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/laevatain.ARXSectionHeader.html">ARXSectionHeader</a></code></td>
+								<td>The section heading shared by the library sidebar and the file manager: a label on the left and
+flat icon actions on the right.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/laevatain.ARXMenu.html">ARXMenu</a></code></td>
 								<td>A menu whose caption can follow a Variable, mirroring ARXMenuItem.</td>
 							</tr>
@@ -228,6 +238,10 @@ the caption stays in sync when the interface language changes.</td>
 								<td>Reads the folder-level description Picasa keeps in its hidden .picasa.ini file. Each
 whitespace-separated word of that description becomes a tag, so an old Picasa album&apos;s keywords
 survive a move to Freja.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.util.FileIcons.html">FileIcons</a></code></td>
+								<td>File-type icons from the Material Icon Theme set, keyed by extension.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.util.VideoThumbnailSettings.html">VideoThumbnailSettings</a></code></td>
@@ -300,6 +314,10 @@ path, so the next build bundles them and a packaged application never needs the 
 							<tr>
 								<td><code><a href="api/freja.Freja.html">Freja</a></code></td>
 								<td>The application entry point.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.setting.WindowSettings.html">WindowSettings</a></code></td>
+								<td>Window layout values shared by the library pane and the file manager.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.setting.SettingsBackup.html">SettingsBackup</a></code></td>
@@ -442,6 +460,14 @@ variants for small sizes and HiDPI screens instead of shrinking a single 128px b
 translation, while the origin stays stable so a query finds a row in every language.</td>
 							</tr>
 							<tr>
+								<td><code><a href="api/laevatain.ARXSectionHeader.Action.html">ARXSectionHeader.Action</a></code></td>
+								<td>One flat action shown at the right end of the heading.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/freja.mpv.Mpv.Chapter.html">Mpv.Chapter</a></code></td>
+								<td>One chapter of the loaded file: its starting second and its optional title.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/freja.file.FileBrowser.Entry.html">FileBrowser.Entry</a></code></td>
 								<td>One row of the file list. Home entries carry a section and drive capacities.</td>
 							</tr>
@@ -515,8 +541,8 @@ carry a short id, IntelliJ themes their look and feel class name.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="t"></aside>
-		<footer class="r">
+		<aside class="d"></aside>
+		<footer class="S">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
