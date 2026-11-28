@@ -424,4 +424,35 @@ class LibraryTest {
             assertEquals(0, library.deletePhotos(null));
         }
     }
+
+    @Test
+    void remembersPlaybackPositionPerVideo() throws Exception {
+        Path folder = Files.createDirectories(temp.resolve("playback"));
+        Exif.Data exif = Exif.Data.EMPTY;
+        PhotoImporter.AnalyzedPhoto analyzed = new PhotoImporter.AnalyzedPhoto(100, 80, 0, exif,
+                new byte[] {1, 2, 3}, 40, 30, 120_000);
+        try (Library library = new Library(temp.resolve("playback.db"))) {
+            Folder added = library.addFolder(folder);
+            long first = library.savePhoto(added.id(), Files.write(folder.resolve("a.mp4"), new byte[] {1}),
+                    1, 1, analyzed, "scan");
+            long second = library.savePhoto(added.id(), Files.write(folder.resolve("b.mp4"), new byte[] {2}),
+                    2, 1, analyzed, "scan");
+            assertEquals(0, library.playbackPosition(first));
+            assertEquals(0, library.playbackPosition(second));
+
+            library.savePlaybackPosition(first, 5_000);
+            assertEquals(0, library.playbackPosition(first));
+            assertTrue(library.playbackPositions().isEmpty());
+
+            library.savePlaybackPosition(first, 45_000);
+            assertEquals(45_000, library.playbackPosition(first));
+            assertEquals(0, library.playbackPosition(second));
+            assertEquals(1, library.playbackPositions().size());
+            assertEquals(45_000, library.playbackPositions().get(first));
+
+            library.savePlaybackPosition(first, 0);
+            assertEquals(0, library.playbackPosition(first));
+            assertTrue(library.playbackPositions().isEmpty());
+        }
+    }
 }

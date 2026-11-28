@@ -11,6 +11,7 @@ package freja.file.ui;
 
 import freja.Icons;
 import freja.Theme;
+import laevatain.ARXNavList;
 import laevatain.ARXSectionHeader;
 import laevatain.ARXSectionListPanel;
 import freja.file.FileBrowser;
@@ -52,7 +53,6 @@ import java.util.function.Function;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.InputMap;
@@ -81,7 +81,6 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.AbstractTableModel;
@@ -107,41 +106,8 @@ public final class FileManagerPanel extends JPanel {
     private final FileTabs tabs;
     private final FileBrowser browser = new FileBrowser();
     private final FileOperations operations = new FileOperations();
-    private final DefaultListModel<FileTab> tabModel = new DefaultListModel<>();
-    private final JList<FileTab> tabList = new JList<>(tabModel) {
-        @Override
-        protected void processMouseEvent(MouseEvent event) {
-            // A popup click must not fall through to the list's selection handler, which would
-            // navigate to the tab before the context menu is shown.
-            if (event.isPopupTrigger()) {
-                event.consume();
-                showTabMenu(event);
-                return;
-            }
-            if (event.getButton() == MouseEvent.BUTTON2) {
-                event.consume();
-                if (event.getID() == MouseEvent.MOUSE_RELEASED) {
-                    int index = tabList.locationToIndex(event.getPoint());
-                    if (index >= 0) {
-                        tabs.remove(index);
-                    }
-                }
-                return;
-            }
-            super.processMouseEvent(event);
-        }
-
-        @Override
-        protected void processKeyEvent(KeyEvent event) {
-            // A/B/N belong to the pane. Consuming alone would still reach the UI's KeyListener, so
-            // the typed event must not be passed on to the list's first-letter tab search at all.
-            if (event.getID() == KeyEvent.KEY_TYPED && isShortcutChar(event.getKeyChar())) {
-                event.consume();
-                return;
-            }
-            super.processKeyEvent(event);
-        }
-    };
+    /** The pinned folders use the same navigation list as the library sidebar and settings. */
+    private final ARXNavList tabList = new ARXNavList();
     private final List<FileBrowser.Entry> entries = new ArrayList<>();
     private final FileTableModel tableModel = new FileTableModel();
     /** Header clicks cycle ascending, descending and back to the list's original order. */
@@ -250,10 +216,6 @@ public final class FileManagerPanel extends JPanel {
         }
     }
 
-    private static boolean isShortcutChar(char key) {
-        return key == 'a' || key == 'A' || key == 'b' || key == 'B' || key == 'n' || key == 'N'
-                || (key >= '0' && key <= '9');
-    }
     private void goUp() {
         FileTab tab = tabs.active();
         if (tab == null || !(tab.current() instanceof FileLocation.Folder folder)) {
@@ -280,45 +242,30 @@ public final class FileManagerPanel extends JPanel {
     }
     /** The vertical tab strip on the left: pinned folders, not a directory tree. */
     private JPanel tabPane() {
-        ARXSectionListPanel panel = new ARXSectionListPanel("フォルダ", new JScrollPane(tabList),
+        ARXSectionListPanel panel = new ARXSectionListPanel("フォルダ", tabList.scrolled(),
                 new ARXSectionHeader.Action(Icons.plus(14, Theme.MUTED), "フォルダをタブに追加", this::addTab));
         tabPaneRoot = panel;
+        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 16, 8, 16));
+        panel.scroll().setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         panel.setBackground(Theme.SIDEBAR);
         panel.setPreferredSize(new Dimension(WindowSettings.sidebarDivider(), 0));
-        tabList.setBackground(Theme.SIDEBAR);
-        tabList.setFixedCellHeight(36);
-        tabList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected, boolean focused) {
-                super.getListCellRendererComponent(list, value, index, selected, focused);
-                FileTab tab = (FileTab) value;
-                setText(tab.displayName());
-                setIcon(tab.isHome()
-                        ? Icons.of("mdi:home", 16, selected ? Color.WHITE : Theme.MUTED)
-                        : Icons.folder(16, selected ? Color.WHITE : Theme.MUTED));
-                setBackground(selected ? UIManager.getColor("ARX.selection") : Theme.SIDEBAR);
-                setForeground(selected ? Theme.TEXT : Theme.MUTED);
-                setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 8));
-                return this;
+        tabList.setOnSelect(key -> {
+            int index = indexOfTab(key);
+            if (index >= 0) {
+                tabs.select(index);
             }
         });
-        tabList.addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting()) {
-                tabs.select(tabList.getSelectedIndex());
-            }
-        });
+        tabList.setMenu(row -> tabMenu(row.key()));
         return panel;
     }
-    private void showTabMenu(MouseEvent event) {
+    private JPopupMenu tabMenu(String key) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem add = new JMenuItem("フォルダをタブに追加");
         add.addActionListener(e -> addTab());
         menu.add(add);
-        int index = tabList.locationToIndex(event.getPoint());
+        int index = indexOfTab(key);
         if (index < 0) {
-            menu.show(tabList, event.getX(), event.getY());
-            return;
+            return menu;
         }
         menu.addSeparator();
         Path folder = tabs.tabs().get(index).current().path();
@@ -353,7 +300,16 @@ public final class FileManagerPanel extends JPanel {
         menu.add(moveDown);
         menu.addSeparator();
         menu.add(remove);
-        menu.show(tabList, event.getX(), event.getY());
+        return menu;
+    }
+
+    private int indexOfTab(String key) {
+        for (int i = 0; i < tabs.tabs().size(); i++) {
+            if (tabs.tabs().get(i).id().equals(key)) {
+                return i;
+            }
+        }
+        return -1;
     }
     /** Adds a pinned folder as a tab; also used by drag-and-drop in a later phase. */
     public void addTab(Path folder) {
@@ -666,14 +622,31 @@ public final class FileManagerPanel extends JPanel {
         }
     }
     private void tabsChanged() {
-        tabModel.clear();
+        tabList.clear();
         for (FileTab tab : tabs.tabs()) {
-            tabModel.addElement(tab);
-        }
-        if (tabs.selectedIndex() >= 0 && tabs.selectedIndex() < tabModel.size()) {
-            tabList.setSelectedIndex(tabs.selectedIndex());
+            Path path = tab.current().path();
+            String full = path == null ? "HOME" : path.toString();
+            ARXNavList.Row row = tabList.add(tab.id(), tab.displayName(), tab.isHome()
+                    ? Icons.of("mdi:home", 16, Theme.MUTED) : Icons.folder(16, Theme.MUTED));
+            row.setTrailing(full.equals(tab.displayName()) ? "" : truncate(full, 28));
+            row.setToolTipText(full);
+            String id = tab.id();
+            row.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseReleased(MouseEvent event) {
+                    if (event.getButton() == MouseEvent.BUTTON2) {
+                        int index = indexOfTab(id);
+                        if (index >= 0) {
+                            tabs.remove(index);
+                        }
+                    }
+                }
+            });
         }
         FileTab active = tabs.active();
+        if (active != null) {
+            tabList.setSelected(active.id());
+        }
         boolean home = active != null && active.current() instanceof FileLocation.Home;
         back.setEnabled(active != null && active.canBack());
         forward.setEnabled(active != null && active.canForward());

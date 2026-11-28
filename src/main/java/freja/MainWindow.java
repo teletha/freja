@@ -149,7 +149,7 @@ public final class MainWindow extends JFrame {
     });
     private long refreshGeneration;
     /** Everything a background refresh needs to hand back to the event dispatch thread. */
-    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, SortOrder order, boolean fallback, boolean hasFolders) {
+    private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, SortOrder order, boolean fallback, boolean hasFolders, Map<Long, Long> playbackPositions) {
     }
     private Sidebar.Mode mode = Sidebar.Mode.ALL;
     private long folderId = -1;
@@ -1310,6 +1310,15 @@ public final class MainWindow extends JFrame {
                 // viewer closed rather than the one it was opened with.
                 grid.select(lastViewed);
             }
+            @Override
+            public long playbackPosition(long photoId) {
+                return tasks.library().playbackPosition(photoId);
+            }
+            @Override
+            public void onPlaybackPosition(long photoId, long millis) {
+                tasks.execute(() -> tasks.library().savePlaybackPosition(photoId, millis), () -> tasks
+                        .query(() -> tasks.library().playbackPositions(), grid::setPlaybackPositions));
+            }
         }, this::viewerPlaceholder);
     }
     /**
@@ -1619,8 +1628,9 @@ public final class MainWindow extends JFrame {
             }
         }
         cache.warm(photos, warmFrom, THUMBNAIL_WARMUP);
+        Map<Long, Long> positions = tasks.library().playbackPositions();
         return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, order, fallback,
-                !folders.isEmpty());
+                !folders.isEmpty(), positions);
     }
     /** Installs a loaded view on the event dispatch thread. Never touches the catalog. */
     private void applyRefresh(RefreshData data) {
@@ -1646,6 +1656,7 @@ public final class MainWindow extends JFrame {
         }
         grid.setHasFolders(data.hasFolders());
         grid.setPhotos(data.photos(), data.grouping(), data.sections(), data.order(), data.mode() == Sidebar.Mode.FOLDER);
+        grid.setPlaybackPositions(data.playbackPositions());
         // Only folders with a matching photo are shown while searching.
         sidebar.setData(data.stats(), data.visibleFolders(), data.mode(), data.folderId());
         statusCount.setText(data.stats().photos() + " 枚  ·  " + Photo.formatSize(data.stats().bytes()));

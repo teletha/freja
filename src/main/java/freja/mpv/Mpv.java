@@ -226,6 +226,35 @@ public final class Mpv implements AutoCloseable {
         throw new IOException("mpv did not write a complete screenshot to " + target);
     }
 
+    /**
+     * Captures the current frame as PNG bytes, retrying while mpv has not decoded one yet.
+     *
+     * @param file a scratch path for the PNG
+     * @return the PNG bytes
+     * @throws IOException when no frame can be captured
+     */
+    public byte[] capture(Path file) throws IOException {
+        long deadline = System.nanoTime() + 3_000_000_000L;
+        while (true) {
+            try {
+                // A missing path keeps mpv's stability check from accepting an old screenshot.
+                Files.deleteIfExists(file);
+                screenshot(file);
+                return Files.readAllBytes(file);
+            } catch (MpvException e) {
+                if (System.nanoTime() >= deadline) {
+                    throw new IOException("mpv could not capture a frame", e);
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupted while waiting for a video frame", interrupted);
+                }
+            }
+        }
+    }
+
     /** Checks the PNG signature so a partial or foreign file is never fed to the image decoder. */
     private static boolean isPng(Path file) {
         try (InputStream in = Files.newInputStream(file)) {

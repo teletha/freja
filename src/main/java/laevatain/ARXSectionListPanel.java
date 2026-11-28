@@ -26,20 +26,25 @@ public final class ARXSectionListPanel extends JPanel {
 
     private final JScrollPane scroll;
 
-    public ARXSectionListPanel(String title, JScrollPane scroll, ARXSectionHeader.Action... actions) {
-        this(title, null, scroll, actions);
-    }
-
-    public ARXSectionListPanel(String title, Component detail, JScrollPane scroll, ARXSectionHeader.Action... actions) {
+    /** A panel without a separate heading, for lists whose ARXNavList carries its own section. */
+    public ARXSectionListPanel(JScrollPane scroll) {
         setLayout(new BorderLayout());
         setOpaque(false);
-        add(new ARXSectionHeader(title, detail, actions), BorderLayout.NORTH);
         this.scroll = scroll;
         this.scroll.setBorder(BorderFactory.createEmptyBorder());
         Object background = UIManager.get("ARX.navBackground");
         this.scroll.getViewport().setBackground(background instanceof Color chosen
                 ? chosen : new Color(0xF1F3F6));
         add(this.scroll, BorderLayout.CENTER);
+    }
+
+    public ARXSectionListPanel(String title, JScrollPane scroll, ARXSectionHeader.Action... actions) {
+        this(title, null, scroll, actions);
+    }
+
+    public ARXSectionListPanel(String title, Component detail, JScrollPane scroll, ARXSectionHeader.Action... actions) {
+        this(scroll);
+        add(new ARXSectionHeader(title, detail, actions), BorderLayout.NORTH);
     }
 
     public JScrollPane scroll() {

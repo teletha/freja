@@ -151,8 +151,13 @@ public final class Sidebar extends JPanel {
         empty.setBorder(BorderFactory.createEmptyBorder(10, 12, 0, 0));
         folderCard.setOpaque(true);
         folderCard.setBackground(Theme.SIDEBAR);
-        folderCard.add(new ARXSectionListPanel(title, folderCount, folders.scrolled(), actions), "list");
-        folderCard.add(new ARXSectionListPanel(title, folderCount, new JScrollPane(empty), actions), "empty");
+        ARXSectionListPanel listPanel = new ARXSectionListPanel(title, folderCount, folders.scrolled(), actions);
+        ARXSectionListPanel emptyPanel = new ARXSectionListPanel(title, folderCount, new JScrollPane(empty), actions);
+        for (ARXSectionListPanel pane : new ARXSectionListPanel[] {listPanel, emptyPanel}) {
+            pane.setBorder(BorderFactory.createEmptyBorder(0, 16, 8, 16));
+        }
+        folderCard.add(listPanel, "list");
+        folderCard.add(emptyPanel, "empty");
         add(folderCard, BorderLayout.CENTER);
     }
     public void setListener(Listener listener) {

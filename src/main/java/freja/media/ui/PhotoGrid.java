@@ -34,8 +34,10 @@ import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -87,6 +89,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private static final Icon VIDEO_ICON = Icons.play(11, Color.WHITE);
     private final ThumbnailCache cache;
     private List<Photo> photos = List.of();
+    /** Photo id to saved playback position, used to mark videos which are only partly watched. */
+    private Map<Long, Long> playbackPositions = Map.of();
     private final List<LayoutRow> rows = new ArrayList<>();
     private GroupMode grouping = GroupMode.DATE;
     private List<Folder> sections = List.of();
@@ -419,6 +423,11 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             hasFolders = value;
             repaint();
         }
+    }
+    /** Supplies the saved playback positions used to mark partly watched videos. */
+    public void setPlaybackPositions(Map<Long, Long> positions) {
+        this.playbackPositions = positions == null ? Map.of() : Map.copyOf(positions);
+        repaint();
     }
     /**
      * Replaces the visible photos.
@@ -1585,27 +1594,30 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         // over a bright thumbnail.
         if (photo.isVideo()) {
             String name = withoutExtension(photo.fileName());
-            String duration = photo.durationLabel();
+            // A partly watched video shows where playback stopped beside its full length.
+            long saved = playbackPositions.getOrDefault(photo.id(), 0L);
+            long total = photo.durationMillis();
+            String duration = saved > 0 && total > 0 ? clock(saved) + "/" + clock(total) : photo.durationLabel();
             Icon play = VIDEO_ICON;
             Font nameFont = Theme.font(Font.BOLD, 11);
-            Font durationFont = Theme.font(Font.BOLD, 10);
+            Font durationFont = nameFont;
             g.setFont(durationFont);
             FontMetrics durationMetrics = g.getFontMetrics();
             int iconWidth = play.getIconWidth();
             int iconHeight = play.getIconHeight();
             int textWidth = duration.isEmpty() ? 0 : durationMetrics.stringWidth(duration);
-            int badgeHeight = Math.max(20, Math.max(iconHeight, durationMetrics.getHeight()) + 6);
-            int badgeWidth = Math.min(cardWidth - 16, iconWidth + textWidth + 14);
+            int badgeHeight = Math.max(18, Math.max(iconHeight, durationMetrics.getHeight()) + 4);
+            int badgeWidth = Math.min(cardWidth - 16, iconWidth + textWidth + 8);
             double badgeX = cardX + 8;
             double badgeY = cardY + 8;
             g.setColor(new Color(0, 0, 0, 200));
             g.fill(new RoundRectangle2D.Double(badgeX, badgeY, badgeWidth, badgeHeight,
                     badgeHeight / 2.0, badgeHeight / 2.0));
-            play.paintIcon(this, g, (int) Math.round(badgeX + 4),
+            play.paintIcon(this, g, (int) Math.round(badgeX + 1),
                     (int) Math.round(badgeY + (badgeHeight - iconHeight) / 2.0));
             if (!duration.isEmpty()) {
                 g.setColor(Color.WHITE);
-                g.drawString(duration, (int) Math.round(badgeX + 4 + iconWidth + 1), (int) Math
+                g.drawString(duration, (int) Math.round(badgeX + 1 + iconWidth + 1), (int) Math
                         .round(badgeY + (badgeHeight + durationMetrics.getAscent() - durationMetrics.getDescent()) / 2.0));
             }
             g.setFont(nameFont);
@@ -1645,6 +1657,14 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     private static String withoutExtension(String name) {
         int dot = name.lastIndexOf('.');
         return dot > 0 ? name.substring(0, dot) : name;
+    }
+    /** Formats a duration as mm:ss, or h:mm:ss for videos longer than an hour. */
+    private static String clock(long millis) {
+        long seconds = Math.max(0, millis / 1000);
+        long hours = seconds / 3600;
+        long minutes = seconds % 3600 / 60;
+        return hours > 0 ? String.format(Locale.ROOT, "%1$d:%2$02d:%3$02d", hours, minutes, seconds % 60)
+                : String.format(Locale.ROOT, "%1$02d:%2$02d", minutes, seconds % 60);
     }
     /**
      * Draws the fallback for a photo whose pixels cannot be decoded and whose generated thumbnail

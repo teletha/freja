@@ -1790,6 +1790,31 @@ public final class Library implements AutoCloseable {
         }
     }
 
+    /** Positions in the opening ten seconds start from the beginning instead of resuming. */
+    public static final long RESUME_THRESHOLD_MS = 10_000;
+
+    /**
+     * Returns every stored playback position, keyed by photo id.
+     *
+     * @return positions in milliseconds, only for videos which have been played past the threshold
+     */
+    public synchronized Map<Long, Long> playbackPositions() {
+        assertOffUiThread();
+        Map<Long, Long> positions = new HashMap<>();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT id, playback_position_ms FROM photos WHERE playback_position_ms > ?")) {
+            statement.setLong(1, RESUME_THRESHOLD_MS);
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    positions.put(results.getLong(1), results.getLong(2));
+                }
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Failed to read the playback positions", e);
+        }
+        return positions;
+    }
+
     /**
      * Returns where playback of a video last stopped.
      *
@@ -1801,7 +1826,8 @@ public final class Library implements AutoCloseable {
         try (PreparedStatement statement = connection.prepareStatement("SELECT playback_position_ms FROM photos WHERE id=?")) {
             statement.setLong(1, photoId);
             try (ResultSet results = statement.executeQuery()) {
-                return results.next() ? Math.max(0, results.getLong(1)) : 0;
+                long value = results.next() ? results.getLong(1) : 0;
+                return value > RESUME_THRESHOLD_MS ? value : 0;
             }
         } catch (SQLException e) {
             throw new LibraryException("Failed to read the playback position", e);
@@ -1817,7 +1843,7 @@ public final class Library implements AutoCloseable {
     public synchronized void savePlaybackPosition(long photoId, long millis) {
         assertOffUiThread();
         try (PreparedStatement statement = connection.prepareStatement("UPDATE photos SET playback_position_ms=? WHERE id=?")) {
-            statement.setLong(1, Math.max(0, millis));
+            statement.setLong(1, millis > RESUME_THRESHOLD_MS ? millis : 0);
             statement.setLong(2, photoId);
             statement.executeUpdate();
         } catch (SQLException e) {

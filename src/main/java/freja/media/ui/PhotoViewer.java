@@ -22,6 +22,7 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -32,6 +33,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -124,6 +128,22 @@ public final class PhotoViewer extends JDialog {
     private final JPanel videoControls = new JPanel(new BorderLayout(0, 6));
     private JWindow controlsWindow;
     private final JPanel controlsRoot = new JPanel(new BorderLayout());
+    /**
+     * A glass pane which only claims hits inside the seek bar. The bar itself stays transparent so
+     * the video shows through; this catches clicks in its full height and lets every other click
+     * reach the picture underneath.
+     */
+    private final JPanel seekCatcher = new JPanel() {
+        @Override
+        public boolean contains(int x, int y) {
+            if (!controlsWindow.isVisible() || !videoControls.isVisible()) {
+                return false;
+            }
+            Point screen = getLocationOnScreen();
+            screen.translate(x, y);
+            return seekScreenBounds().contains(screen);
+        }
+    };
     private final JLabel toast = new JLabel("", SwingConstants.CENTER) {
         @Override
         protected void paintComponent(Graphics graphics) {
@@ -248,6 +268,7 @@ public final class PhotoViewer extends JDialog {
         revealTimer = new Timer(REVEAL_DELAY_MS, event -> reveal());
         revealTimer.setRepeats(false);
         buildOverlay();
+        installSeekCatcher();
         // When the overlay is hidden (or reduced to the close button for videos) the viewer itself
         // still sees pointer movement and can bring it back.
         getRootPane().addMouseMotionListener(new MouseAdapter() {
@@ -308,7 +329,7 @@ public final class PhotoViewer extends JDialog {
         time.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         seek.setRange(0, 1000);
         // Taller than the painted bar so the pointer does not have to land on a 4px line.
-        seek.setPreferredSize(new Dimension(600, 36));
+        seek.setPreferredSize(new Dimension(600, 48));
         volume.setRange(0, 100);
         volume.value(100);
         volume.setPreferredSize(new Dimension(110, 18));
@@ -462,6 +483,40 @@ public final class PhotoViewer extends JDialog {
             }
         });
         controlsRoot.addMouseWheelListener(this::relayWheel);
+    }
+    /** Puts a transparent click catcher over the seek bar without covering the rest of the picture. */
+    private void installSeekCatcher() {
+        seekCatcher.setOpaque(false);
+        setGlassPane(seekCatcher);
+        seekCatcher.setVisible(true);
+        seekCatcher.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                seek.dragging = true;
+                dragSeek(event);
+            }
+            @Override
+            public void mouseReleased(MouseEvent event) {
+                if (seek.dragging) {
+                    seek.dragging = false;
+                    commitSeek();
+                }
+            }
+        });
+        seekCatcher.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent event) {
+                dragSeek(event);
+            }
+        });
+    }
+    private void dragSeek(MouseEvent event) {
+        seek.update(event.getLocationOnScreen().x - seek.getLocationOnScreen().x);
+    }
+    private Rectangle seekScreenBounds() {
+        Point origin = seek.getLocationOnScreen();
+        Dimension size = seek.getSize();
+        return new Rectangle(origin.x, origin.y, size.width, size.height);
     }
     private void installCanvasInput() {
         MouseAdapter screenClick = new MouseAdapter() {
@@ -928,9 +983,23 @@ public final class PhotoViewer extends JDialog {
         if (event.getClickCount() >= 2) {
             clickTimer.stop();
             dispose();
-        } else if (photo != null && photo.isVideo()) {
+        } else if (photo != null && photo.isVideo() && !clickInControls(event)) {
             clickTimer.restart();
         }
+    }
+    /**
+     * The translucent control window lets clicks land on the video canvas underneath. The bottom
+     * strip belongs to the controls, so a click there must not toggle playback.
+     */
+    private boolean clickInControls(MouseEvent event) {
+        if (!videoControls.isVisible() || !controlsWindow.isVisible()) {
+            return false;
+        }
+        Point origin = videoControls.getLocationOnScreen();
+        Rectangle area = videoControls.getBounds();
+        area.setLocation(origin);
+        area.grow(0, 8);
+        return area.contains(event.getLocationOnScreen());
     }
     /** An mpv instance may emit identical events endlessly; only real movement reveals the controls. */
     private void pointerMoved(MouseEvent event) {
@@ -1223,6 +1292,15 @@ public final class PhotoViewer extends JDialog {
                 }
                 created.setLong("wid", handle);
                 created.load(target.path());
+                // Resume before playback starts so the first visible frame is the saved position.
+                long saved = listener.playbackPosition(target.id());
+                double length = parseSeconds(created.property("duration"));
+                if (saved > 0 && length > 0) {
+                    double resume = Math.min(saved / 1000.0, Math.max(0, length - 0.5));
+                    if (resume > 0) {
+                        awaitResumedFrame(created, resume);
+                    }
+                }
                 created.set("pause", "no");
             } catch (Throwable e) {
                 if (created != null) {
@@ -1247,6 +1325,7 @@ public final class PhotoViewer extends JDialog {
                     return;
                 }
                 player = result;
+                playingPhotoId = target.id();
                 videoCanvas.setVisible(true);
                 showOverlay();
                 updatePlayButton(false);
@@ -1266,6 +1345,33 @@ public final class PhotoViewer extends JDialog {
             });
         });
     }
+    /**
+     * Waits until the frame at the resume position has really been decoded. mpv updates
+     * {@code time-pos} the moment a seek is issued, while the picture still shows the first frame;
+     * handing the window over at that point made the opening frame flash briefly.
+     */
+    private static void awaitResumedFrame(Mpv mpv, double resume) throws IOException {
+        Path directory = Files.createTempDirectory("freja-resume-");
+        Path before = directory.resolve("before.png");
+        Path after = directory.resolve("after.png");
+        try {
+            byte[] baseline = mpv.capture(before);
+            mpv.command("seek", Double.toString(resume), "absolute+exact");
+            long deadline = System.nanoTime() + 3_000_000_000L;
+            while (System.nanoTime() < deadline && Arrays.equals(baseline, mpv.capture(after))) {
+                Thread.sleep(100);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            try {
+                Files.deleteIfExists(before);
+                Files.deleteIfExists(after);
+                Files.deleteIfExists(directory);
+            } catch (IOException ignored) {
+            }
+        }
+    }
     private void stopPlayer() {
         progress.stop();
         videoStarting = false;
@@ -1276,7 +1382,16 @@ public final class PhotoViewer extends JDialog {
         Mpv old = player;
         player = null;
         if (old != null) {
+            double position = parseSeconds(old.property("time-pos"));
+            double length = parseSeconds(old.property("duration"));
+            // A video watched to the end starts from the beginning the next time.
+            long millis = length > 0 && position >= length - 0.5 ? 0 : Math.round(position * 1000);
+            long id = playingPhotoId;
+            playingPhotoId = -1;
             old.close();
+            if (id >= 0) {
+                saves.execute(() -> listener.onPlaybackPosition(id, millis));
+            }
         }
         updateOverlay();
     }
@@ -1366,6 +1481,8 @@ public final class PhotoViewer extends JDialog {
         }
         closed = true;
         stopPlayer();
+        // Graceful shutdown lets the last position write finish before the viewer goes away.
+        saves.shutdown();
         chromeTimer.stop();
         toastTimer.stop();
         clickTimer.stop();
@@ -1455,6 +1572,8 @@ public final class PhotoViewer extends JDialog {
      * the old knob behind.
      */
     private final class Slider extends JComponent {
+        /** Half the knob width; the track is inset by this much so the knob stays inside the bar. */
+        private static final int KNOB = 6;
         private double minimum;
         private double maximum = 1;
         private double value;
@@ -1509,7 +1628,8 @@ public final class PhotoViewer extends JDialog {
             return dragging;
         }
         private void update(int x) {
-            double fraction = clampFraction((double) x / Math.max(1, getWidth() - 1));
+            double track = Math.max(1, getWidth() - 2 * KNOB);
+            double fraction = clampFraction((double) (x - KNOB) / track);
             double next = minimum + (maximum - minimum) * fraction;
             if (next != value) {
                 value = next;
@@ -1524,7 +1644,8 @@ public final class PhotoViewer extends JDialog {
         protected void paintComponent(Graphics graphics) {
             Graphics2D g = (Graphics2D) graphics.create();
             try {
-                // Erase the previous knob to full transparency; the video shows through the overlay.
+                // Keep the strip transparent: the video shows through, and clicks in this area are
+                // picked up by the viewer's seek catcher instead of a painted, opaque overlay.
                 g.setComposite(AlphaComposite.Clear);
                 g.fillRect(0, 0, getWidth(), getHeight());
                 g.setComposite(AlphaComposite.SrcOver);
@@ -1533,21 +1654,22 @@ public final class PhotoViewer extends JDialog {
                 int height = getHeight();
                 // Keep the painted bar at its old position while the hit target grows upward.
                 int trackY = height - 9;
+                int trackWidth = Math.max(1, width - 2 * KNOB);
                 double fraction = maximum > minimum ? (value - minimum) / (maximum - minimum) : 0;
-                double centre = fraction * width;
+                double centre = KNOB + fraction * trackWidth;
                 g.setColor(new Color(255, 255, 255, 90));
-                g.fillRoundRect(0, trackY - 2, width, 4, 3, 3);
+                g.fillRoundRect(KNOB, trackY - 2, trackWidth, 4, 3, 3);
                 g.setColor(new Color(0x3EA6FF));
-                g.fillRoundRect(0, trackY - 2, (int) Math.round(centre), 4, 3, 3);
+                g.fillRoundRect(KNOB, trackY - 2, (int) Math.round(centre - KNOB), 4, 3, 3);
                 for (double mark : marks) {
-                    int x = (int) Math.round(mark * width);
+                    int x = (int) Math.round(KNOB + mark * trackWidth);
                     g.setColor(new Color(0, 0, 0, 110));
                     g.fillRect(x - 1, trackY - 5, 3, 10);
                     g.setColor(new Color(255, 255, 255, 190));
                     g.fillRect(x, trackY - 4, 1, 8);
                 }
                 g.setColor(new Color(0x3EA6FF));
-                g.fillOval((int) Math.round(centre) - 6, trackY - 6, 12, 12);
+                g.fillOval((int) Math.round(centre) - KNOB, trackY - 6, 2 * KNOB, 2 * KNOB);
             } finally {
                 g.dispose();
             }

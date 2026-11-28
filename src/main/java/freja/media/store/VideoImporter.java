@@ -162,25 +162,7 @@ public final class VideoImporter {
      * @throws IOException when no frame appears within the deadline
      */
     private static byte[] screenshot(Mpv mpv, Path file) throws IOException {
-        long deadline = System.nanoTime() + 3_000_000_000L;
-        while (true) {
-            try {
-                // Start from a missing file so mpv's stability check cannot accept an old image.
-                Files.deleteIfExists(file);
-                mpv.screenshot(file);
-                return Files.readAllBytes(file);
-            } catch (Mpv.MpvException e) {
-                if (System.nanoTime() >= deadline) {
-                    throw new IOException("mpv could not capture a frame", e);
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException interrupted) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Interrupted while waiting for a video frame", interrupted);
-                }
-            }
-        }
+        return mpv.capture(file);
     }
 
     /**

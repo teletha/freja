@@ -545,7 +545,7 @@ public final class ARXSettingsPane extends JPanel {
         rail.setSection(railTitle.get());
         railTitle.observing().to(rail::setSection);
         rail.setOnSelect(this::show);
-        JPanel railPane = new JPanel(new BorderLayout());
+        ARXSectionListPanel railPane = new ARXSectionListPanel(rail.scrolled());
         railPane.setOpaque(true);
         railPane.setBackground(navColor());
         railPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, hairlineColor()), BorderFactory
@@ -553,7 +553,6 @@ public final class ARXSettingsPane extends JPanel {
         railPane.setMinimumSize(new Dimension(railWidth, 0));
         railPane.setPreferredSize(new Dimension(railWidth, 0));
         railPane.setMaximumSize(new Dimension(railWidth, Integer.MAX_VALUE));
-        railPane.add(rail, BorderLayout.NORTH);
         add(railPane, BorderLayout.WEST);
 
         document.setOpaque(false);
