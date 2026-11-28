@@ -9,19 +9,6 @@
  */
 package freja;
 
-import com.formdev.flatlaf.extras.FlatInspector;
-import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
-import freja.setting.ui.SettingsPanel;
-import freja.media.ui.ScanFoldersDialog;
-import freja.media.ui.TagPicker;
-import freja.file.ui.FileManagerPanel;
-import freja.media.ui.PhotoGrid;
-import freja.media.ui.PhotoInspector;
-import freja.media.ui.PhotoViewer;
-import freja.media.ui.Sidebar;
-import freja.media.ui.TagManager;
-import freja.media.ui.ThumbnailCache;
-import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Cursor;
@@ -35,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -54,6 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
+
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -78,7 +67,10 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
-import freja.setting.WindowSettings;
+
+import com.formdev.flatlaf.extras.FlatInspector;
+
+import freja.file.ui.FileManagerPanel;
 import freja.media.Folder;
 import freja.media.LibraryStats;
 import freja.media.Photo;
@@ -87,6 +79,16 @@ import freja.media.PhotoFilter.SortOrder;
 import freja.media.scan.LibraryScanner;
 import freja.media.store.Library;
 import freja.media.store.LibraryTasks;
+import freja.media.ui.PhotoGrid;
+import freja.media.ui.PhotoInspector;
+import freja.media.ui.PhotoViewer;
+import freja.media.ui.ScanFoldersDialog;
+import freja.media.ui.Sidebar;
+import freja.media.ui.TagManager;
+import freja.media.ui.TagPicker;
+import freja.media.ui.ThumbnailCache;
+import freja.setting.WindowSettings;
+import freja.setting.ui.SettingsPanel;
 import freja.util.PathUtil;
 import imagify.Imagify;
 import laevatain.component.ARXButton;
@@ -95,59 +97,97 @@ import laevatain.component.ARXLabel;
 import laevatain.component.ARXPanel;
 import laevatain.component.ARXScrollPane;
 import laevatain.component.ARXSearchField;
+
 /**
  * The main application window.
  */
 public final class MainWindow extends JFrame {
     private static final Preferences PREFERENCES = Preferences.userNodeForPackage(MainWindow.class);
+
     private static final String SORT_PREFERENCE = "view.sortOrder";
+
     private static final String SELECTED_FOLDER_PREFERENCE = "view.selectedFolderPath";
+
     private static final String VIEW_MODE_PREFERENCE = "view.mode";
+
     private static final String SIDEBAR_DIVIDER_PREFERENCE = "view.sidebarDivider";
+
     private static final String INSPECTOR_VISIBLE_PREFERENCE = "view.inspectorVisible";
+
     private static final String VIDEOS_ONLY_PREFERENCE = "view.videosOnly";
+
     private static final String SCAN_ON_STARTUP_PREFERENCE = "scan.onStartup";
+
     private static final String SCAN_SWEEP_PREFERENCE = "scan.sweep";
+
     /** How many thumbnails of the visible page are decoded before its first paint. */
     private static final int THUMBNAIL_WARMUP = 36;
+
     private final Library library;
+
     /** Serialises UI-originated catalog work off the EDT and delivers results back to it. */
     private final LibraryTasks tasks;
+
     private final LibraryScanner scanner;
+
     private final ThumbnailCache cache;
+
     private final PhotoGrid grid;
+
     private final Sidebar sidebar = new Sidebar();
+
     private final PhotoInspector inspector;
+
     private final ARXSearchField search;
+
     /**
      * The order applied to the whole view. In the folder view each folder header shows - and
      * changes - its own saved sort, and that order also becomes this value for the selected folder.
      */
     private SortOrder viewSort = preferredSort();
+
     private final JSlider zoom = new JSlider(120, 220, 170);
+
     private final JLabel statusMessage = new ARXLabel("準備完了");
+
     private final JLabel statusCount = new ARXLabel();
+
     private final JLabel selectionInfo = new ARXLabel();
+
     private final JProgressBar progress = new JProgressBar();
+
     private final CardLayout centerCards = new CardLayout();
+
     private final JPanel center = new ARXPanel(centerCards);
+
     private final JLabel welcomePath = new ARXLabel();
+
     private final JCheckBoxMenuItem darkModeItem = new JCheckBoxMenuItem("ダークモード", Theme.isDark());
+
     private final JCheckBoxMenuItem inspectorItem = new JCheckBoxMenuItem("インスペクター", true);
+
     private ScanFoldersDialog scanFoldersDialog;
+
     private JPanel panes;
+
     private SettingsPanel settingsPanel;
+
     private FileManagerPanel fileManager;
+
     private javax.swing.JSplitPane split;
 
     /** Development inspector owned by this window, created on demand. */
     private FlatInspector uiInspector;
+
     private javax.swing.JSplitPane sidebarSplit;
+
     /**
      * Read before the split pane fires initial layout events that would overwrite the preference.
      */
     private int savedSidebarDivider;
+
     private final Timer refreshTimer;
+
     /**
      * Loads and sorts the catalog off the event dispatch thread. Two threads let a search refresh
      * start while an unrelated full refresh (a finished scan, a sort change) is still running; the
@@ -158,32 +198,48 @@ public final class MainWindow extends JFrame {
         thread.setDaemon(true);
         return thread;
     });
+
     private long refreshGeneration;
+
     /** Everything a background refresh needs to hand back to the event dispatch thread. */
     private record RefreshData(LibraryStats stats, List<Photo> photos, List<Folder> visibleFolders, Sidebar.Mode mode, long folderId, PhotoGrid.GroupMode grouping, List<Folder> sections, SortOrder order, boolean fallback, boolean hasFolders, Map<Long, Long> playbackPositions) {
     }
+
     private Sidebar.Mode mode = Sidebar.Mode.ALL;
+
     private long folderId = -1;
+
     private Photo inspectorPhoto;
+
     private PhotoViewer viewer;
+
     private boolean refreshScheduled;
+
     private boolean shuttingDown;
+
     private volatile long uiHeartbeat = System.nanoTime();
+
     private volatile boolean uiWatchdogRunning = true;
+
     private boolean scrollToSelectedFolder;
+
     /** Tag identifiers selected in the toolbar filter; empty means no tag restriction. */
     private final List<Long> selectedTagIds = new ArrayList<>();
+
     private ARXButton tagFilterButton;
+
     private ARXButton videoFilterButton;
+
     /** Whether the grid is restricted to playable video files. */
     private boolean videosOnly = PREFERENCES.getBoolean(VIDEOS_ONLY_PREFERENCE, false);
+
     public MainWindow(Library library, LibraryScanner scanner) {
         super("Freja");
         setIconImages(Icons.applicationImages());
         this.library = library;
         this.tasks = new LibraryTasks(library, SwingUtilities::invokeLater);
-        tasks.setErrorHandler(error -> JOptionPane.showMessageDialog(this,
-                "ライブラリ操作に失敗しました: " + error.getMessage(), "Freja", JOptionPane.ERROR_MESSAGE));
+        tasks.setErrorHandler(error -> JOptionPane
+                .showMessageDialog(this, "ライブラリ操作に失敗しました: " + error.getMessage(), "Freja", JOptionPane.ERROR_MESSAGE));
         this.scanner = scanner;
         this.cache = new ThumbnailCache(library);
         this.inspector = new PhotoInspector();
@@ -213,6 +269,7 @@ public final class MainWindow extends JFrame {
             public void onStateChanged(LibraryScanner.State state) {
                 SwingUtilities.invokeLater(() -> applyState(state));
             }
+
             @Override
             public void onLibraryChanged() {
                 cache.retryMissing();
@@ -241,6 +298,7 @@ public final class MainWindow extends JFrame {
         // are known, so the grid never shows the first folder before jumping to the last one.
         restoreViewSelection();
     }
+
     private void buildUi() {
         setLayout(new BorderLayout());
         JPanel main = new ARXPanel(new BorderLayout());
@@ -298,32 +356,38 @@ public final class MainWindow extends JFrame {
                 }
                 repaint();
             }
+
             @Override
             public void onFileListFontChanged() {
                 if (fileManager != null) {
                     fileManager.applyListSettings();
                 }
             }
+
             @Override
             public void onFileListRowHeightChanged() {
                 if (fileManager != null) {
                     fileManager.applyListSettings();
                 }
             }
+
             @Override
             public void onHiddenFilesChanged() {
                 if (fileManager != null) {
                     fileManager.refresh();
                 }
             }
+
             @Override
             public void onUiInspectorChanged(boolean enabled) {
                 applyUiInspector(enabled);
             }
+
             @Override
             public void onThemeChanged() {
                 applyThemeUi();
             }
+
             @Override
             public void onAppIconChanged() {
                 setIconImages(Icons.applicationImages());
@@ -331,6 +395,7 @@ public final class MainWindow extends JFrame {
                     viewer.setIconImages(Icons.applicationImages());
                 }
             }
+
             @Override
             public void onManageFolders() {
                 openScanFolders();
@@ -343,6 +408,7 @@ public final class MainWindow extends JFrame {
             public void openMedia(Path path) {
                 openMediaFile(path);
             }
+
             @Override
             public void filesChanged() {
                 scanner.scanAll();
@@ -365,12 +431,10 @@ public final class MainWindow extends JFrame {
                 uiInspector = new FlatInspector(getRootPane());
             }
             uiInspector.setEnabled(true);
-            FlatUIDefaultsInspector.show();
         } else {
             if (uiInspector != null) {
                 uiInspector.setEnabled(false);
             }
-            FlatUIDefaultsInspector.hide();
         }
     }
 
@@ -383,6 +447,7 @@ public final class MainWindow extends JFrame {
     }
 
     private final List<ActivityButton> activityButtons = new ArrayList<>();
+
     /** The VS Code-style strip on the far left which switches between the main panes. */
     private JComponent activityBar() {
         JPanel bar = new ARXPanel();
@@ -400,6 +465,7 @@ public final class MainWindow extends JFrame {
         bar.add(Box.createVerticalGlue());
         return bar;
     }
+
     private void switchPane(String id) {
         WindowSettings.activity(id);
         ((java.awt.CardLayout) panes.getLayout()).show(panes, id);
@@ -409,10 +475,14 @@ public final class MainWindow extends JFrame {
         panes.revalidate();
         panes.repaint();
     }
+
     private final class ActivityButton extends JPanel {
         private final String id;
+
         private boolean selected;
+
         private boolean hovered;
+
         ActivityButton(String id, javax.swing.Icon icon, String tooltip, Runnable action) {
             this.id = id;
             setOpaque(true);
@@ -427,11 +497,13 @@ public final class MainWindow extends JFrame {
                 public void mouseClicked(java.awt.event.MouseEvent event) {
                     action.run();
                 }
+
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent event) {
                     hovered = true;
                     paintState();
                 }
+
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent event) {
                     hovered = false;
@@ -439,10 +511,12 @@ public final class MainWindow extends JFrame {
                 }
             });
         }
+
         void setSelected(boolean value) {
             selected = value;
             paintState();
         }
+
         @Override
         protected void paintComponent(java.awt.Graphics graphics) {
             super.paintComponent(graphics);
@@ -451,11 +525,13 @@ public final class MainWindow extends JFrame {
                 graphics.fillRect(0, 0, 3, getHeight());
             }
         }
+
         private void paintState() {
             setBackground(selected ? Theme.ACCENT_SOFT : hovered ? Theme.HOVER : Theme.SIDEBAR);
             repaint();
         }
     }
+
     private JComponent toolbar() {
         JToolBar bar = new JToolBar();
         bar.setFloatable(false);
@@ -503,6 +579,7 @@ public final class MainWindow extends JFrame {
         bar.add(slideshow);
         return bar;
     }
+
     private JComponent statusBar() {
         JPanel bar = new ARXPanel(new BorderLayout(12, 0));
         bar.setBackground(Theme.SURFACE);
@@ -530,6 +607,7 @@ public final class MainWindow extends JFrame {
         bar.add(right, BorderLayout.EAST);
         return bar;
     }
+
     private JComponent welcome() {
         JPanel outer = new ARXPanel(new GridBagLayout());
         outer.setBackground(Theme.BACKGROUND);
@@ -580,6 +658,7 @@ public final class MainWindow extends JFrame {
         outer.add(card, constraints);
         return outer;
     }
+
     private JMenuBar menuBar() {
         JMenuBar bar = new JMenuBar();
         JMenu file = new JMenu("ファイル");
@@ -613,6 +692,7 @@ public final class MainWindow extends JFrame {
         bar.add(help);
         return bar;
     }
+
     private JMenuItem menuItem(String text, String accelerator, Runnable action) {
         JMenuItem item = new JMenuItem(text);
         if (accelerator != null) {
@@ -621,21 +701,25 @@ public final class MainWindow extends JFrame {
         item.addActionListener(event -> action.run());
         return item;
     }
+
     private void wireActions() {
         sidebar.setListener(new Sidebar.Listener() {
             @Override
             public void onSelect(Sidebar.Mode mode, long folderId) {
                 selectMode(mode, folderId);
             }
+
             @Override
             public void onAddFolder() {
                 openScanFolders();
             }
+
             @Override
             public void onRescanFolder(long folderId) {
                 scanner.scanFolder(folderId);
                 statusMessage.setText("フォルダを再スキャンしています…");
             }
+
             @Override
             public void onSortFolder(long folderId, SortOrder order) {
                 boolean applies = mode == Sidebar.Mode.FOLDER && MainWindow.this.folderId == folderId;
@@ -646,22 +730,27 @@ public final class MainWindow extends JFrame {
                     }
                 });
             }
+
             @Override
             public void onRenameFolder(long folderId) {
                 renameFolder(folderId);
             }
+
             @Override
             public void onRemoveFolder(long folderId) {
                 removeFolder(folderId);
             }
+
             @Override
             public void onRemoveFolders(List<Long> folderIds) {
                 removeFolders(folderIds);
             }
+
             @Override
             public void onDeleteFolderFromDisk(List<Long> folderIds) {
                 deleteFolderFromDisk(folderIds);
             }
+
             @Override
             public void onRevealFolder(long folderId) {
                 tasks.query(() -> library.folder(folderId), found -> {
@@ -670,6 +759,7 @@ public final class MainWindow extends JFrame {
                     }
                 });
             }
+
             @Override
             public void onEditFolderTags(long folderId) {
                 java.awt.Point point = sidebar.getMousePosition();
@@ -677,6 +767,7 @@ public final class MainWindow extends JFrame {
                 int y = point == null ? 24 : point.y;
                 TagPicker.show(sidebar, x, y, tasks, folderId, MainWindow.this::tagsChanged);
             }
+
             @Override
             public void onManageTags() {
                 new TagManager(MainWindow.this, tasks, MainWindow.this::tagsChanged).setVisible(true);
@@ -709,18 +800,22 @@ public final class MainWindow extends JFrame {
             public void onOpen(Photo photo) {
                 openViewer(photo);
             }
+
             @Override
             public void onReveal(Photo photo) {
                 reveal(photo.origin());
             }
+
             @Override
             public void onFavorite(Photo photo, boolean favorite) {
                 setFavorite(photo, favorite);
             }
+
             @Override
             public void onRating(Photo photo, int rating) {
                 tasks.setRating(photo.id(), rating, MainWindow.this::refreshAll);
             }
+
             @Override
             public void onCaption(Photo photo, String caption) {
                 tasks.setCaption(photo.id(), caption, () -> {
@@ -731,6 +826,7 @@ public final class MainWindow extends JFrame {
         });
         zoom.addChangeListener(event -> savePreferences());
     }
+
     /**
      * Applies a sort order to one folder when the folder view is active, and to the whole view
      * otherwise. The folder header select is the only caller.
@@ -754,6 +850,7 @@ public final class MainWindow extends JFrame {
             savePreferences();
         }
     }
+
     /** Shows or hides the details panel and remembers the choice. */
     private void setInspectorVisible(boolean visible) {
         inspectorItem.setSelected(visible);
@@ -776,6 +873,7 @@ public final class MainWindow extends JFrame {
         split.repaint();
         PREFERENCES.putBoolean(INSPECTOR_VISIBLE_PREFERENCE, visible);
     }
+
     /**
      * Starts the background scanner.
      */
@@ -799,6 +897,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     /**
      * Adds folders, typically from the command line.
      *
@@ -826,14 +925,15 @@ public final class MainWindow extends JFrame {
         }
         refreshAll();
     }
+
     /** Renames the sidebar label only; the directory on disk is never touched. */
     private void renameFolder(long id) {
         tasks.query(() -> library.folder(id), found -> {
             if (found == null || found.isEmpty()) {
                 return;
             }
-            String name = (String) JOptionPane.showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane
-                    .QUESTION_MESSAGE, null, null, found.get().name());
+            String name = (String) JOptionPane
+                    .showInputDialog(this, "フォルダの表示名", "名前を変更", JOptionPane.QUESTION_MESSAGE, null, null, found.get().name());
             if (name == null) {
                 return;
             }
@@ -848,6 +948,7 @@ public final class MainWindow extends JFrame {
             });
         });
     }
+
     private void openScanFolders() {
         if (scanFoldersDialog == null) {
             scanFoldersDialog = new ScanFoldersDialog(this);
@@ -856,6 +957,7 @@ public final class MainWindow extends JFrame {
                 public void onRegisterFolder(Path path) {
                     registerFolder(path);
                 }
+
                 @Override
                 public void onClearFolders() {
                     int answer = JOptionPane
@@ -870,10 +972,12 @@ public final class MainWindow extends JFrame {
                         statusMessage.setText("監視フォルダをクリアしました");
                     });
                 }
+
                 @Override
                 public void onRemoveFolders(List<Long> folderIds) {
                     removeFolders(folderIds);
                 }
+
                 @Override
                 public void onScanFolders(List<Long> folderIds) {
                     for (Long id : folderIds) {
@@ -881,6 +985,7 @@ public final class MainWindow extends JFrame {
                     }
                     statusMessage.setText(folderIds.size() + " 件のフォルダをスキャンしています…");
                 }
+
                 @Override
                 public void onScanEnabled(long folderId, boolean enabled) {
                     tasks.setFolderScanEnabled(folderId, enabled, () -> {
@@ -888,6 +993,7 @@ public final class MainWindow extends JFrame {
                         refreshAll();
                     });
                 }
+
                 @Override
                 public void onStartupScanChanged(boolean enabled) {
                     PREFERENCES.putBoolean(SCAN_ON_STARTUP_PREFERENCE, enabled);
@@ -896,6 +1002,7 @@ public final class MainWindow extends JFrame {
                     } catch (Exception ignored) {
                     }
                 }
+
                 @Override
                 public void onSweepChanged(boolean enabled) {
                     PREFERENCES.putBoolean(SCAN_SWEEP_PREFERENCE, enabled);
@@ -909,6 +1016,7 @@ public final class MainWindow extends JFrame {
         refreshScanFolders();
         scanFoldersDialog.setVisible(true);
     }
+
     private void refreshScanFolders() {
         if (scanFoldersDialog == null) {
             return;
@@ -921,6 +1029,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     private void registerFolder(Path path) {
         // scanner.addFolder() writes to the catalog; carry the result back to the EDT.
         Folder[] added = new Folder[1];
@@ -943,16 +1052,17 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
     }
+
     private void removeFolder(long folderId) {
         tasks.query(() -> library.folder(folderId), found -> {
             if (found == null || found.isEmpty()) {
                 return;
             }
             int answer = JOptionPane.showConfirmDialog(this, "「" + found.get()
-                    .name() + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。", "フォルダを削除", JOptionPane
-                    .OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    .name() + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。", "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.OK_OPTION) {
-                // User-initiated removal deletes the whole tree in one transaction and unregisters its watches.
+                // User-initiated removal deletes the whole tree in one transaction and unregisters
+                // its watches.
                 tasks.execute(() -> scanner.removeFolders(List.of(folderId)), () -> {
                     if (mode == Sidebar.Mode.FOLDER && this.folderId == folderId) {
                         mode = Sidebar.Mode.ALL;
@@ -965,7 +1075,10 @@ public final class MainWindow extends JFrame {
             }
         });
     }
-    /** Removes one or more folders (and their subfolders) from the catalog, keeping files on disk. */
+
+    /**
+     * Removes one or more folders (and their subfolders) from the catalog, keeping files on disk.
+     */
     private void removeFolders(List<Long> folderIds) {
         if (folderIds.isEmpty()) {
             return;
@@ -976,8 +1089,8 @@ public final class MainWindow extends JFrame {
             }
             String message = folderIds.size() == 1 ? "「" + names.get(0) + "」と配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。"
                     : "選択した " + folderIds.size() + " 件のフォルダと配下のサブフォルダをライブラリから削除します。\n写真ファイル自体は削除されません。";
-            int answer = JOptionPane.showConfirmDialog(this, message, "フォルダを削除", JOptionPane
-                    .OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+            int answer = JOptionPane
+                    .showConfirmDialog(this, message, "フォルダを削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (answer != JOptionPane.OK_OPTION) {
                 return;
             }
@@ -995,6 +1108,7 @@ public final class MainWindow extends JFrame {
             });
         });
     }
+
     /** Deletes the file or directory behind each selected folder, including everything below it. */
     private void deleteFolderFromDisk(List<Long> folderIds) {
         if (folderIds.isEmpty()) {
@@ -1013,13 +1127,13 @@ public final class MainWindow extends JFrame {
             String message;
             if (folders.size() == 1) {
                 Folder folder = folders.getFirst();
-                message = Files.isDirectory(folder.path())
-                        ? "「" + folder.name() + "」とその中身をディスクから完全に削除します。元に戻せません。"
+                message = Files.isDirectory(folder.path()) ? "「" + folder.name() + "」とその中身をディスクから完全に削除します。元に戻せません。"
                         : "「" + folder.name() + "」をディスクから完全に削除します。元に戻せません。";
             } else {
                 message = "選択した " + folders.size() + " 件のフォルダとその中身をディスクから完全に削除します。元に戻せません。";
             }
-            int answer = JOptionPane.showConfirmDialog(this, message, "ディスクから削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            int answer = JOptionPane
+                    .showConfirmDialog(this, message, "ディスクから削除", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
             if (answer != JOptionPane.OK_OPTION) {
                 return;
             }
@@ -1050,7 +1164,10 @@ public final class MainWindow extends JFrame {
             });
         });
     }
-    /** Removes a directory and everything inside it, files first so every directory ends up empty. */
+
+    /**
+     * Removes a directory and everything inside it, files first so every directory ends up empty.
+     */
     private void deleteTree(Path root) throws IOException {
         Files.walkFileTree(root, new SimpleFileVisitor<>() {
             @Override
@@ -1058,6 +1175,7 @@ public final class MainWindow extends JFrame {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
+
             @Override
             public FileVisitResult postVisitDirectory(Path directory, IOException error) throws IOException {
                 if (error != null) {
@@ -1068,6 +1186,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     private void selectMode(Sidebar.Mode mode, long folderId) {
         if (this.mode == mode && this.folderId == folderId) {
             // Clicking the entry which is already selected is not a no-op: the grid has been
@@ -1096,6 +1215,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     /**
      * Returns the grid to what the sidebar already has selected: the folder's section, or the first
      * photo for a whole-library view. A folder whose section is missing - nothing scanned yet - is
@@ -1113,6 +1233,7 @@ public final class MainWindow extends JFrame {
         }
         grid.scrollToTop();
     }
+
     /**
      * Remembers the sidebar selection - the view mode and, for a folder, its path - so the next
      * launch opens the same place even when the catalog is rebuilt with fresh identifiers.
@@ -1137,6 +1258,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     /** Restores the selection saved by the previous launch, when it still exists. */
     private void restoreViewSelection() {
         Sidebar.Mode saved = Sidebar.Mode.ALL;
@@ -1193,9 +1315,11 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
     }
+
     private void applySortForCurrentView() {
         applySortForCurrentView(null);
     }
+
     /** Reads the folder's sort off the EDT, then optionally continues on the EDT once it is set. */
     private void applySortForCurrentView(Runnable onApplied) {
         Sidebar.Mode requestedMode = mode;
@@ -1218,10 +1342,12 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     /** Records the order {@link #refreshAll()} should load the view with. */
     private void setViewSort(SortOrder order) {
         viewSort = order;
     }
+
     private SortOrder preferredSort() {
         try {
             return SortOrder.valueOf(PREFERENCES.get(SORT_PREFERENCE, SortOrder.NAME.name()));
@@ -1229,6 +1355,7 @@ public final class MainWindow extends JFrame {
             return SortOrder.NAME;
         }
     }
+
     private void showPhotoMenu(Photo photo, java.awt.Point point) {
         List<Photo> selected = grid.selectedPhotos();
         List<Photo> targets = selected.size() > 1 && selected.contains(photo) ? selected : List.of(photo);
@@ -1237,8 +1364,8 @@ public final class MainWindow extends JFrame {
         JMenuItem open = new JMenuItem("開く" + suffix, Icons.image(14, Theme.MUTED));
         open.addActionListener(event -> openViewer(photo, targets));
         menu.add(open);
-        JMenuItem favorite = new JMenuItem((photo.favorite() ? "お気に入りから外す" : "お気に入りに追加") + suffix,
-                Icons.star(14, Theme.GOLD, photo.favorite()));
+        JMenuItem favorite = new JMenuItem((photo.favorite() ? "お気に入りから外す" : "お気に入りに追加") + suffix, Icons
+                .star(14, Theme.GOLD, photo.favorite()));
         favorite.addActionListener(event -> setFavorites(targets, !photo.favorite()));
         menu.add(favorite);
         menu.addSeparator();
@@ -1269,6 +1396,7 @@ public final class MainWindow extends JFrame {
         menu.add(deleteFromDisk);
         menu.show(grid, point.x, point.y);
     }
+
     /** Removes catalog entries only; the files on disk are left alone. */
     private void removeFromLibrary(List<Photo> photos) {
         if (photos.isEmpty()) {
@@ -1287,6 +1415,7 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
     }
+
     /** Removes the original files as well as their catalog entries. Cannot be undone. */
     private void deleteFromDisk(List<Photo> photos) {
         if (photos.isEmpty()) {
@@ -1309,6 +1438,7 @@ public final class MainWindow extends JFrame {
             statusMessage.setText(failed == 0 ? deleted + " 枚をディスクから削除しました" : deleted + " 枚を削除し、" + failed + " 枚は削除できませんでした");
         });
     }
+
     private void setFavorites(List<Photo> photos, boolean favorite) {
         List<Long> ids = photos.stream().map(Photo::id).toList();
         tasks.setFavorites(ids, favorite, () -> {
@@ -1318,7 +1448,11 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
     }
-    /** Opens a file chosen in the file manager in Freja's viewer when catalogued, otherwise in the OS. */
+
+    /**
+     * Opens a file chosen in the file manager in Freja's viewer when catalogued, otherwise in the
+     * OS.
+     */
     private void openMediaFile(Path path) {
         tasks.query(() -> library.photo(path), photo -> {
             if (photo != null) {
@@ -1332,9 +1466,11 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     private void openViewer(Photo photo) {
         openViewer(photo, grid.photos());
     }
+
     private void openViewer(Photo photo, List<Photo> selection) {
         if (photo == null) {
             return;
@@ -1352,16 +1488,19 @@ public final class MainWindow extends JFrame {
             public void onFavorite(Photo updated, boolean favorite) {
                 tasks.setFavorites(List.of(updated.id()), favorite, MainWindow.this::refreshAll);
             }
+
             @Override
             public void onClose(Photo lastViewed) {
                 // Leave the grid focused on, and scrolled to, the photo that was on screen when the
                 // viewer closed rather than the one it was opened with.
                 grid.select(lastViewed);
             }
+
             @Override
             public long playbackPosition(long photoId) {
                 return tasks.library().playbackPosition(photoId);
             }
+
             @Override
             public void onPlaybackPosition(long photoId, long millis) {
                 tasks.execute(() -> tasks.library().savePlaybackPosition(photoId, millis), () -> tasks
@@ -1369,6 +1508,7 @@ public final class MainWindow extends JFrame {
             }
         }, this::viewerPlaceholder);
     }
+
     /**
      * Loads the placeholder image stored for an unreadable photo, so the viewer can show the same
      * picture as the grid instead of an error. Runs on the viewer's loader thread.
@@ -1378,13 +1518,12 @@ public final class MainWindow extends JFrame {
      */
     private BufferedImage viewerPlaceholder(Photo photo) {
         try {
-            return tasks.library().thumbnail(photo.id())
-                    .map(thumbnail -> Imagify.read(thumbnail.data()).toBufferedImage())
-                    .orElse(null);
+            return tasks.library().thumbnail(photo.id()).map(thumbnail -> Imagify.read(thumbnail.data()).toBufferedImage()).orElse(null);
         } catch (RuntimeException | IOError | LinkageError e) {
             return null;
         }
     }
+
     private void openSlideshow() {
         List<Photo> photos = grid.photos();
         if (photos.isEmpty()) {
@@ -1397,6 +1536,7 @@ public final class MainWindow extends JFrame {
             viewer.startSlideshow();
         }
     }
+
     private void setFavorite(Photo photo, boolean favorite) {
         tasks.setFavorites(List.of(photo.id()), favorite, () -> {
             Photo updated = photo.withFavorite(favorite);
@@ -1405,6 +1545,7 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
     }
+
     private void copyPaths(List<Photo> photos) {
         if (photos.isEmpty()) {
             return;
@@ -1423,6 +1564,7 @@ public final class MainWindow extends JFrame {
             statusMessage.setText("パスをコピーできませんでした: " + e.getMessage());
         }
     }
+
     private void reveal(Path path) {
         try {
             Path target = java.nio.file.Files.isDirectory(path) ? path : path.getParent();
@@ -1433,6 +1575,7 @@ public final class MainWindow extends JFrame {
             statusMessage.setText("フォルダを開けません: " + e.getMessage());
         }
     }
+
     private void about() {
         tasks.query(library::stats, stats -> {
             if (stats == null) {
@@ -1451,10 +1594,12 @@ public final class MainWindow extends JFrame {
                     .getProperty("java.version")), "Freja について", JOptionPane.INFORMATION_MESSAGE);
         });
     }
+
     private void setDarkMode(boolean dark) {
         Theme.setDark(dark);
         applyThemeUi();
     }
+
     /** Refreshes the UI after the theme was changed elsewhere (e.g. the settings dialog). */
     private void applyThemeUi() {
         boolean dark = Theme.isDark();
@@ -1476,12 +1621,14 @@ public final class MainWindow extends JFrame {
         }
         repaint();
     }
+
     /**
      * Switches between light and dark mode.
      */
     public void toggleDarkMode() {
         setDarkMode(!Theme.isDark());
     }
+
     /** Opens the toolbar popup for choosing which tags a photo's folder must carry. */
     private void showTagFilter() {
         tasks.query(library::tags, tags -> {
@@ -1490,6 +1637,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     private void showTagFilterPopup(List<freja.media.Tag> tags) {
         JPopupMenu popup = new JPopupMenu();
         JPanel panel = new ARXPanel(new BorderLayout(10, 10));
@@ -1566,9 +1714,11 @@ public final class MainWindow extends JFrame {
         popup.show(tagFilterButton, 0, tagFilterButton.getHeight());
         SwingUtilities.invokeLater(filter::requestFocusInWindow);
     }
+
     private void updateTagFilterButton() {
         tagFilterButton.setText(selectedTagIds.isEmpty() ? "タグ" : "タグ (" + selectedTagIds.size() + ")");
     }
+
     /** Toggles the video-only restriction without changing the sidebar mode or the search text. */
     private void toggleVideosOnly() {
         videosOnly = !videosOnly;
@@ -1576,11 +1726,13 @@ public final class MainWindow extends JFrame {
         updateVideoFilterButton();
         scheduleRefresh();
     }
+
     private void updateVideoFilterButton() {
         if (videoFilterButton != null) {
             videoFilterButton.setSelected(videosOnly);
         }
     }
+
     /** Called after tags or folder assignments changed in one of the tag dialogs. */
     private void tagsChanged() {
         tasks.query(library::tags, tags -> {
@@ -1591,12 +1743,14 @@ public final class MainWindow extends JFrame {
             refreshAll();
         });
     }
+
     private void scheduleRefresh() {
         if (!refreshScheduled) {
             refreshScheduled = true;
         }
         refreshTimer.restart();
     }
+
     /**
      * Starts a refresh. Called on the event dispatch thread, so every piece of UI state is captured
      * here; the catalog is then read and sorted on the refresh thread and only the result comes
@@ -1630,6 +1784,7 @@ public final class MainWindow extends JFrame {
             }
         });
     }
+
     /** Reads and sorts everything the current view needs. Never touches a Swing component. */
     private RefreshData loadView(Sidebar.Mode requestedMode, long requestedFolder, SortOrder order, String searchText, List<Long> tagIds) {
         List<Folder> folders = library.folders();
@@ -1677,9 +1832,10 @@ public final class MainWindow extends JFrame {
         }
         cache.warm(photos, warmFrom, THUMBNAIL_WARMUP);
         Map<Long, Long> positions = tasks.library().playbackPositions();
-        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, order, fallback,
-                !folders.isEmpty(), positions);
+        return new RefreshData(stats, photos, visibleFolders, effectiveMode, effectiveFolder, grouping, sections, order, fallback, !folders
+                .isEmpty(), positions);
     }
+
     /** Installs a loaded view on the event dispatch thread. Never touches the catalog. */
     private void applyRefresh(RefreshData data) {
         if (data.fallback()) {
@@ -1723,6 +1879,7 @@ public final class MainWindow extends JFrame {
             grid.scrollToFolder(data.folderId());
         }
     }
+
     private List<Photo> orderByFolder(List<Photo> photos, List<Folder> folders, boolean perFolderSort) {
         if (photos.isEmpty()) {
             return photos;
@@ -1746,6 +1903,7 @@ public final class MainWindow extends JFrame {
         }
         return ordered;
     }
+
     private Comparator<Photo> comparator(SortOrder order) {
         Comparator<Photo> name = Comparator.comparing(Photo::fileName, String.CASE_INSENSITIVE_ORDER);
         return switch (order) {
@@ -1755,6 +1913,7 @@ public final class MainWindow extends JFrame {
         default -> Comparator.comparingLong(Photo::capturedAt).reversed().thenComparing(name);
         };
     }
+
     /** Shows the selected file's details, or the aggregate of a multi-selection. */
     private void updateSelectionInfo() {
         List<Photo> selected = grid.selectedPhotos();
@@ -1775,6 +1934,7 @@ public final class MainWindow extends JFrame {
             selectionInfo.setText(selected.size() + " 枚  ·  合計 " + Photo.formatSize(bytes));
         }
     }
+
     private void showInspector(Photo photo) {
         if (photo == null) {
             if (inspectorPhoto != null) {
@@ -1789,6 +1949,7 @@ public final class MainWindow extends JFrame {
         inspectorPhoto = photo;
         inspector.show(photo);
     }
+
     private void applyState(LibraryScanner.State state) {
         progress.setVisible(state.scanning());
         if (state.scanning()) {
@@ -1820,6 +1981,7 @@ public final class MainWindow extends JFrame {
             }
         }
     }
+
     /** Renders a scan duration in a form that stays readable from milliseconds to hours. */
     private static String formatDuration(java.time.Duration duration) {
         long millis = duration.toMillis();
@@ -1837,9 +1999,11 @@ public final class MainWindow extends JFrame {
         }
         return minutes / 60 + "時間" + minutes % 60 + "分";
     }
+
     private static String shorten(String text, int max) {
         return text == null || text.length() <= max ? text : text.substring(0, Math.max(0, max - 1)) + "…";
     }
+
     private static String shortenPath(String text, int max) {
         if (text.length() <= max) {
             return text;
@@ -1847,6 +2011,7 @@ public final class MainWindow extends JFrame {
         int side = Math.max(8, (max - 1) / 2);
         return text.substring(0, side) + "…" + text.substring(text.length() - side);
     }
+
     private void restorePreferences() {
         Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         int width = Math.min(PREFERENCES.getInt("window.width", 1420), Math.max(980, screen.width - 40));
@@ -1867,6 +2032,7 @@ public final class MainWindow extends JFrame {
         grid.setThumbSize(zoom.getValue());
         viewSort = preferredSort();
     }
+
     private void savePreferences() {
         // A folder jump animates through the sections between the old and the new selection. When
         // the window closes mid-glide the sticky header still names a folder on the way, so persist
@@ -1904,10 +2070,12 @@ public final class MainWindow extends JFrame {
         } catch (Exception ignored) {
         }
     }
+
     /** Called when a newer instance takes over; shuts down on the event dispatch thread. */
     public void requestShutdown() {
         SwingUtilities.invokeLater(this::shutdown);
     }
+
     /** Logs every thread when the event dispatch thread stops responding, for hang diagnosis. */
     private void watchUiResponsiveness() {
         boolean dumped = false;
@@ -1936,6 +2104,7 @@ public final class MainWindow extends JFrame {
             }
         }
     }
+
     private void shutdown() {
         if (shuttingDown) {
             return;
