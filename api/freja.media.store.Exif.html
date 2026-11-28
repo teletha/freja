@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="Y">
-		<header class="K" date="2026-11-28">
-			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+	<body class="S">
+		<header class="T" date="2026-11-28">
+			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,58 +35,58 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="x"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="Z"></nav>
-		<article class="R" id="Article">
-			<section class="LB"><code class="l">freja.media.store</code>
-				<h2 class="Class IB"><code class="p">Exif</code></h2>
-				<div class="v"></div><span class="A"><p>A small, dependency-free reader for the EXIF block of a JPEG file.</p><p>
+		<nav class="W"></nav>
+		<article class="U" id="Article">
+			<section class="CB"><code class="d">freja.media.store</code>
+				<h2 class="Class s"><code class="DB">Exif</code></h2>
+				<div class="M"></div><span class="A"><p>A small, dependency-free reader for the EXIF block of a JPEG file.</p><p>
 The application only needs a handful of tags, so this reads the TIFF structure directly instead
 of pulling in a general purpose metadata library. Anything malformed is treated as absent: a
 damaged camera file must never stop the library from being scanned.
 </p></span></section>
-			<section class="LB" id="read(java.nio.file.Path)">
-				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">read</code><code class="T">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="X"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="read(java.nio.file.Path)">
+				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">read</code><code class="o">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="O"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
 						<td><span><p>an image file</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></td>
 						<td><span><p>the metadata, or <code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html#EMPTY">Data#EMPTY</a></code> when the file is not a JPEG or has no EXIF block</p></span></td>
 					</tr>
 				</table><span class="A"><p>Reads the EXIF block of a file.</p></span></section>
-			<section class="LB" id="read(byte[])">
-				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">read</code><code class="T">(<code array="fix">byte</code><code class="parameterName">data</code>)</code><i class="X"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="read(byte[])">
+				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">read</code><code class="o">(<code array="fix">byte</code><code class="parameterName">data</code>)</code><i class="O"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code array="fix">byte</code><code class="parameterName">data</code></td>
 						<td><span><p>a complete JPEG file</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></td>
 						<td><span><p>the metadata, or <code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html#EMPTY">Data#EMPTY</a></code> when there is no usable EXIF block</p></span></td>
 					</tr>
 				</table><span class="A"><p>Reads the EXIF block from an in-memory JPEG, which is what a scan already has after reading
 the file for decoding. It avoids opening the same file a second time.</p></span></section>
 		</article>
-		<aside class="a">
-			<div class="W">
-				<h5 class="n">Static Methods</h5>
+		<aside class="X">
+			<div class="r">
+				<h5 class="z">Static Methods</h5>
 				<ul>
-					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Exif.html#read(java.nio.file.Path)">read</a></code><code class="T">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="EB"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></li>
-					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Exif.html#read(byte[])">read</a></code><code class="T">(<code array="fix">byte</code><code class="parameterName">data</code>)</code><i class="EB"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></li>
+					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Exif.html#read(java.nio.file.Path)">read</a></code><code class="o">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="N"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></li>
+					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Exif.html#read(byte[])">read</a></code><code class="o">(<code array="fix">byte</code><code class="parameterName">data</code>)</code><i class="N"><code><a aria-label="freja.media.store.Exif.Data" href="api/freja.media.store.Exif.Data.html">Data</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="S">
+		<footer class="V">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

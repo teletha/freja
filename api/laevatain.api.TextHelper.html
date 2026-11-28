@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="Y">
-		<header class="K" date="2026-11-28">
-			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+	<body class="S">
+		<header class="T" date="2026-11-28">
+			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="x"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="Z"></nav>
-		<article class="R" id="Article">
-			<section class="LB"><code class="l">laevatain.api</code>
-				<h2 class="Interface IB"><code class="p">TextHelper</code><code class="T">&lt;<code>C</code>&gt;</code></h2>
-				<div class="v">
+		<nav class="W"></nav>
+		<article class="U" id="Article">
+			<section class="CB"><code class="d">laevatain.api</code>
+				<h2 class="Interface s"><code class="DB">TextHelper</code><code class="o">&lt;<code>C</code>&gt;</code></h2>
+				<div class="M">
 					<ul class="E F">
 						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.text.JTextComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/JTextComponent.html">JTextComponent</a></code></code><span><p>the concrete text component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
 					</ul>
@@ -56,67 +56,67 @@
 				</div><span class="A"><p>Fluent helpers for text components: editing, the caret and the wrapping flags of a text area. The
 text-area-only settings check the component type and are no-ops on a plain text field, so every
 <code><a aria-label="javax.swing.text.JTextComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/JTextComponent.html">JTextComponent</a></code> can share this interface.</p></span></section>
-			<section class="LB" id="editable(boolean)">
-				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">editable</code><code class="T">(<code>boolean</code><code class="parameterName">editable</code>)</code><i class="X"><code>C</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="editable(boolean)">
+				<h2 class="u"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="DB">editable</code><code class="o">(<code>boolean</code><code class="parameterName">editable</code>)</code><i class="O"><code>C</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code>boolean</code><code class="parameterName">editable</code></td>
 						<td><span><p>true to allow editing</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets whether the text can be edited. Read-only labels and viewers turn this off.</p></span></section>
-			<section class="LB" id="caret(javax.swing.text.Caret)">
-				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">caret</code><code class="T">(<code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code>)</code><i class="X"><code>C</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="caret(javax.swing.text.Caret)">
+				<h2 class="u"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="DB">caret</code><code class="o">(<code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code>)</code><i class="O"><code>C</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code></td>
 						<td><span><p>the caret to install, or null for none</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Replaces the caret. A read-only component can install a caret which never scrolls the viewport.</p></span></section>
-			<section class="LB" id="lineWrap(boolean)">
-				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">lineWrap</code><code class="T">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="X"><code>C</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="lineWrap(boolean)">
+				<h2 class="u"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="DB">lineWrap</code><code class="o">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="O"><code>C</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code>boolean</code><code class="parameterName">wrap</code></td>
 						<td><span><p>true to wrap lines</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Enables word wrapping, but only on a <code><a aria-label="javax.swing.JTextArea 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JTextArea.html">JTextArea</a></code>; other text components ignore it.</p></span></section>
-			<section class="LB" id="wrapStyleWord(boolean)">
-				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">wrapStyleWord</code><code class="T">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="X"><code>C</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="wrapStyleWord(boolean)">
+				<h2 class="u"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="DB">wrapStyleWord</code><code class="o">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="O"><code>C</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code>boolean</code><code class="parameterName">wrap</code></td>
 						<td><span><p>true to wrap at words</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Wraps at word boundaries instead of mid-word, but only on a <code><a aria-label="javax.swing.JTextArea 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JTextArea.html">JTextArea</a></code>.</p></span></section>
 		</article>
-		<aside class="a">
-			<div class="W">
-				<h5 class="n">Methods</h5>
+		<aside class="X">
+			<div class="r">
+				<h5 class="z">Methods</h5>
 				<ul>
-					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#editable(boolean)">editable</a></code><code class="T">(<code>boolean</code><code class="parameterName">editable</code>)</code><i class="EB"><code>C</code></i></li>
-					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#caret(javax.swing.text.Caret)">caret</a></code><code class="T">(<code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code>)</code><i class="EB"><code>C</code></i></li>
-					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#lineWrap(boolean)">lineWrap</a></code><code class="T">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="EB"><code>C</code></i></li>
-					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#wrapStyleWord(boolean)">wrapStyleWord</a></code><code class="T">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#editable(boolean)">editable</a></code><code class="o">(<code>boolean</code><code class="parameterName">editable</code>)</code><i class="N"><code>C</code></i></li>
+					<li class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#caret(javax.swing.text.Caret)">caret</a></code><code class="o">(<code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code>)</code><i class="N"><code>C</code></i></li>
+					<li class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#lineWrap(boolean)">lineWrap</a></code><code class="o">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="N"><code>C</code></i></li>
+					<li class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#wrapStyleWord(boolean)">wrapStyleWord</a></code><code class="o">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="N"><code>C</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="S">
+		<footer class="V">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

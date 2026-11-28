@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="Y">
-		<header class="K" date="2026-11-28">
-			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+	<body class="S">
+		<header class="T" date="2026-11-28">
+			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,61 +35,61 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="x"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="Z"></nav>
-		<article class="R" id="Article">
-			<section class="LB"><code class="l">freja.mpv</code>
-				<h2 class="Class IB"><code class="p">Win32Window</code></h2>
-				<div class="v"></div><span class="A"><p>Locates the native window behind a Swing component so libmpv can render into it.</p><p>
+		<nav class="W"></nav>
+		<article class="U" id="Article">
+			<section class="CB"><code class="d">freja.mpv</code>
+				<h2 class="Class s"><code class="DB">Win32Window</code></h2>
+				<div class="M"></div><span class="A"><p>Locates the native window behind a Swing component so libmpv can render into it.</p><p>
 Only the two <code>FindWindow</code> variants are needed: the viewer has a unique title, and its
 heavyweight canvas has the well-known <code>SunAwtCanvas</code> class name. This avoids reflecting into
 JDK internals and the extra <code>--add-exports</code> flag that would require.
 </p></span></section>
-			<section class="LB" id="window(java.lang.String)">
-				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">window</code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code>)</code><i class="X"><code>long</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="window(java.lang.String)">
+				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">window</code><code class="o">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code>)</code><i class="O"><code>long</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code></td>
 						<td><span><p>the exact window title</p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code>long</code></td>
 						<td><span><p>the native window handle, or zero when not found</p></span></td>
 					</tr>
 				</table><span class="A"><p>Finds a top-level window by its title.</p></span></section>
-			<section class="LB" id="child(long,java.lang.String)">
-				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">child</code><code class="T">(<code>long</code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code>)</code><i class="X"><code>long</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="child(long,java.lang.String)">
+				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">child</code><code class="o">(<code>long</code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code>)</code><i class="O"><code>long</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code>long</code><code class="parameterName">parent</code></td>
 						<td><span><p>the parent window handle</p></span></td>
 					</tr>
-					<tr class="g">
+					<tr class="Z">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code></td>
 						<td><span><p>the window class, e.g. <code>SunAwtCanvas</code></p></span></td>
 					</tr>
-					<tr class="JB">
+					<tr class="Y">
 						<td><code>long</code></td>
 						<td><span><p>the native window handle, or zero when not found</p></span></td>
 					</tr>
 				</table><span class="A"><p>Finds the first child window with the given class name.</p></span></section>
 		</article>
-		<aside class="a">
-			<div class="W">
-				<h5 class="n">Static Methods</h5>
+		<aside class="X">
+			<div class="r">
+				<h5 class="z">Static Methods</h5>
 				<ul>
-					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.Win32Window.html#window(java.lang.String)">window</a></code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code>)</code><i class="EB"><code>long</code></i></li>
-					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.Win32Window.html#child(long,java.lang.String)">child</a></code><code class="T">(<code>long</code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code>)</code><i class="EB"><code>long</code></i></li>
+					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.Win32Window.html#window(java.lang.String)">window</a></code><code class="o">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">title</code>)</code><i class="N"><code>long</code></i></li>
+					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.mpv.Win32Window.html#child(long,java.lang.String)">child</a></code><code class="o">(<code>long</code><code class="parameterName">parent</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">className</code>)</code><i class="N"><code>long</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="S">
+		<footer class="V">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

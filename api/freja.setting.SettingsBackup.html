@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="Y">
-		<header class="K" date="2026-11-28">
-			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+	<body class="S">
+		<header class="T" date="2026-11-28">
+			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,59 +35,59 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="x"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="Z"></nav>
-		<article class="R" id="Article">
-			<section class="LB"><code class="l">freja.setting</code>
-				<h2 class="Class IB"><code class="p">SettingsBackup</code></h2>
-				<div class="v"></div><span class="A"><p>Bulk export and import of the application&apos;s user preferences.</p><p>
+		<nav class="W"></nav>
+		<article class="U" id="Article">
+			<section class="CB"><code class="d">freja.setting</code>
+				<h2 class="Class s"><code class="DB">SettingsBackup</code></h2>
+				<div class="M"></div><span class="A"><p>Bulk export and import of the application&apos;s user preferences.</p><p>
 Freja keeps its settings in a handful of Java <code><a aria-label="java.util.prefs.Preferences 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.prefs/java/util/prefs/Preferences.html">Preferences</a></code> nodes - the theme, font,
 language and window layout under <code>/freja</code>, and the reusable components&apos; language and
 chooser folders under <code>/laevatain</code>. Collecting those nodes into one properties file makes
 a profile portable; restoring it replaces their contents so stale values from the current
 machine cannot survive the import. Keys outside those two roots are never touched.
 </p></span></section>
-			<section class="LB" id="exportTo(java.nio.file.Path)">
-				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">exportTo</code><code class="T">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="X"><code>void</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="exportTo(java.nio.file.Path)">
+				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">exportTo</code><code class="o">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="O"><code>void</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
 						<td><span><p>the destination</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="q">
 						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Writes every application preference to a file the user can keep or move to another machine.</p></span></section>
-			<section class="LB" id="importFrom(java.nio.file.Path)">
-				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">importFrom</code><code class="T">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="X"><code>void</code></i></h2>
-				<table class="KB">
-					<tr class="g">
+			<section class="CB" id="importFrom(java.nio.file.Path)">
+				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">importFrom</code><code class="o">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="O"><code>void</code></i></h2>
+				<table class="b">
+					<tr class="Z">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code></td>
 						<td><span><p>the file written by <code><a aria-label="freja.setting.SettingsBackup" href="api/freja.setting.SettingsBackup.html#exportTo(java.nio.file.Path)">#exportTo(Path)</a></code></p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="q">
 						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Replaces the application preferences with the contents of a backup file.</p></span></section>
 		</article>
-		<aside class="a">
-			<div class="W">
-				<h5 class="n">Static Methods</h5>
+		<aside class="X">
+			<div class="r">
+				<h5 class="z">Static Methods</h5>
 				<ul>
-					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.setting.SettingsBackup.html#exportTo(java.nio.file.Path)">exportTo</a></code><code class="T">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="EB"><code>void</code></i></li>
-					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.setting.SettingsBackup.html#importFrom(java.nio.file.Path)">importFrom</a></code><code class="T">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="EB"><code>void</code></i></li>
+					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.setting.SettingsBackup.html#exportTo(java.nio.file.Path)">exportTo</a></code><code class="o">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="N"><code>void</code></i></li>
+					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.setting.SettingsBackup.html#importFrom(java.nio.file.Path)">importFrom</a></code><code class="o">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">file</code>)</code><i class="N"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="S">
+		<footer class="V">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
