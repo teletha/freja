@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="Y">
+		<header class="K" date="2026-11-28">
+			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Z"></nav>
+		<article class="R" id="Article">
+			<section class="LB"><code class="l">laevatain.api</code>
+				<h2 class="Interface IB"><code class="p">ContainerHelper</code><code class="T">&lt;<code>C</code>&gt;</code></h2>
+				<div class="v">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="java.awt.Container 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Container.html">Container</a></code></code><span><p>the concrete container type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXButton" href="api/laevatain.ARXButton.html">ARXButton</a></code></li>
+						<li><code><a aria-label="laevatain.ARXCheckBox" href="api/laevatain.ARXCheckBox.html">ARXCheckBox</a></code></li>
+						<li><code><a aria-label="laevatain.ARXComboBox" href="api/laevatain.ARXComboBox.html">ARXComboBox</a></code></li>
+						<li><code><a aria-label="laevatain.ARXLabel" href="api/laevatain.ARXLabel.html">ARXLabel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXMenu" href="api/laevatain.ARXMenu.html">ARXMenu</a></code></li>
+						<li><code><a aria-label="laevatain.ARXMenuItem" href="api/laevatain.ARXMenuItem.html">ARXMenuItem</a></code></li>
+						<li><code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">ARXNavList</a></code></li>
+						<li><code><a aria-label="laevatain.ARXRadioButtonMenuItem" href="api/laevatain.ARXRadioButtonMenuItem.html">ARXRadioButtonMenuItem</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSearchField" href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSectionHeader" href="api/laevatain.ARXSectionHeader.html">ARXSectionHeader</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSectionListPanel" href="api/laevatain.ARXSectionListPanel.html">ARXSectionListPanel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane" href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></li>
+						<li><code><a aria-label="laevatain.ARXTextField" href="api/laevatain.ARXTextField.html">ARXTextField</a></code></li>
+						<li><code><a aria-label="laevatain.ARXToggle" href="api/laevatain.ARXToggle.html">ARXToggle</a></code></li>
+						<li><code><a aria-label="laevatain.ARXWrapLabel" href="api/laevatain.ARXWrapLabel.html">ARXWrapLabel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Block" href="api/laevatain.ARXSettingsPane.Block.html">Block</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Card" href="api/laevatain.ARXSettingsPane.Card.html">Card</a></code></li>
+						<li><code><a aria-label="laevatain.api.ComponentHelper" href="api/laevatain.api.ComponentHelper.html">ComponentHelper</a><code class="parameters"><code>C</code></code></code></li>
+						<li><code><a aria-label="freja.file.ui.FileManagerPanel" href="api/freja.file.ui.FileManagerPanel.html">FileManagerPanel</a></code></li>
+						<li><code><a aria-label="freja.media.ui.FolderList" href="api/freja.media.ui.FolderList.html">FolderList</a></code></li>
+						<li><code><a aria-label="freja.media.ui.PhotoGrid" href="api/freja.media.ui.PhotoGrid.html">PhotoGrid</a></code></li>
+						<li><code><a aria-label="freja.media.ui.PhotoInspector" href="api/freja.media.ui.PhotoInspector.html">PhotoInspector</a></code></li>
+						<li><code><a aria-label="laevatain.ARXNavList.Row" href="api/laevatain.ARXNavList.Row.html">Row</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Section" href="api/laevatain.ARXSettingsPane.Section.html">Section</a></code></li>
+						<li><code><a aria-label="freja.setting.ui.SettingsPanel" href="api/freja.setting.ui.SettingsPanel.html">SettingsPanel</a></code></li>
+						<li><code><a aria-label="freja.media.ui.Sidebar" href="api/freja.media.ui.Sidebar.html">Sidebar</a></code></li>
+						<li><code><a aria-label="freja.media.ui.TagPicker" href="api/freja.media.ui.TagPicker.html">TagPicker</a></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent helpers for the child list every panel inherits from <code><a aria-label="java.awt.Container 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Container.html">Container</a></code>. The bound is
+Container, the class which actually implements add and remove, so panels and compound components
+can share these methods.</p><p>
+Swing&apos;s <code>add</code> methods return void and a class method always wins over an interface default,
+so they cannot be turned into fluent methods under the same name. These helpers use distinct
+names for the chainable variants instead.
+</p></span></section>
+			<section class="LB" id="children(java.awt.Component...)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">children</code><code class="T">(<code array="var"><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">components</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code array="var"><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">components</code></td>
+						<td><span><p>the children to add</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this container</p></span></td>
+					</tr>
+				</table><span class="A"><p>Adds components in order, e.g. the rows assembled by a panel constructor.</p></span></section>
+			<section class="LB" id="removeChildren()">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">removeChildren</code><code class="T">()</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this container</p></span></td>
+					</tr>
+				</table><span class="A"><p>Removes every child. A panel which rebuilds its content calls this before adding new rows.</p></span></section>
+		</article>
+		<aside class="a">
+			<div class="W">
+				<h5 class="n">Methods</h5>
+				<ul>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ContainerHelper.html#children(java.awt.Component...)">children</a></code><code class="T">(<code array="var"><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">components</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ContainerHelper.html#removeChildren()">removeChildren</a></code><code class="T">()</code><i class="EB"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="S">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

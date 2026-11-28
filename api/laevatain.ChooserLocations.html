@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="t">
-		<header class="Z" date="2026-11-28">
-			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="a"><a href="api/main.html" id="API"><svg class="package">
+	<body class="Y">
+		<header class="K" date="2026-11-28">
+			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,66 +35,66 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="b"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="v"></nav>
-		<article class="L" id="Article">
-			<section class="LB"><code class="O">laevatain</code>
-				<h2 class="Class DB"><code class="w">ChooserLocations</code></h2>
-				<div class="M"></div><span class="A"><p>Remembers the last directory used by each file chooser, keyed by the dialog that owns it.</p></span></section>
+		<nav class="Z"></nav>
+		<article class="R" id="Article">
+			<section class="LB"><code class="l">laevatain</code>
+				<h2 class="Class IB"><code class="p">ChooserLocations</code></h2>
+				<div class="v"></div><span class="A"><p>Remembers the last directory used by each file chooser, keyed by the dialog that owns it.</p></span></section>
 			<section class="LB" id="get(java.lang.String)">
-				<h2 class="Q"><i class="STATIC PUBLIC"></i><code class="w">get</code><code class="e">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="z"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">get</code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="X"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
 						<td><span><p>an identifier unique to one dialog</p></span></td>
 					</tr>
-					<tr class="AB">
+					<tr class="JB">
 						<td><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></td>
 						<td><span><p>an existing directory, or the user&apos;s home directory</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the remembered directory for a chooser.</p></span></section>
 			<section class="LB" id="getOrNull(java.lang.String)">
-				<h2 class="Q"><i class="STATIC PUBLIC"></i><code class="w">getOrNull</code><code class="e">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="z"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">getOrNull</code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="X"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
 						<td></td>
 					</tr>
-					<tr class="AB">
+					<tr class="JB">
 						<td><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Returns the remembered directory, or null when this chooser has never been used.</p></span></section>
 			<section class="LB" id="remember(java.lang.String,java.io.File)">
-				<h2 class="Q"><i class="STATIC PUBLIC"></i><code class="w">remember</code><code class="e">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">location</code>)</code><i class="z"><code>void</code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="STATIC PUBLIC"></i><code class="p">remember</code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">location</code>)</code><i class="X"><code>void</code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code></td>
 						<td></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">location</code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Stores the directory a chooser was last left in.</p></span></section>
 		</article>
-		<aside class="o">
-			<div class="J">
-				<h5 class="BB">Static Methods</h5>
+		<aside class="a">
+			<div class="W">
+				<h5 class="n">Static Methods</h5>
 				<ul>
-					<li class="s"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.ChooserLocations.html#get(java.lang.String)">get</a></code><code class="e">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="k"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></li>
-					<li class="s"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.ChooserLocations.html#getOrNull(java.lang.String)">getOrNull</a></code><code class="e">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="k"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></li>
-					<li class="s"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.ChooserLocations.html#remember(java.lang.String,java.io.File)">remember</a></code><code class="e">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">location</code>)</code><i class="k"><code>void</code></i></li>
+					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.ChooserLocations.html#get(java.lang.String)">get</a></code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="EB"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></li>
+					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.ChooserLocations.html#getOrNull(java.lang.String)">getOrNull</a></code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>)</code><i class="EB"><code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code></i></li>
+					<li class="DB"><i class="STATIC PUBLIC"></i><code><a href="api/laevatain.ChooserLocations.html#remember(java.lang.String,java.io.File)">remember</a></code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">key</code>, <code><a aria-label="java.io.File 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/File.html">File</a></code><code class="parameterName">location</code>)</code><i class="EB"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="u">
+		<footer class="S">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

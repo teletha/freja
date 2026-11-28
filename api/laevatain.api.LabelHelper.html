@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="Y">
+		<header class="K" date="2026-11-28">
+			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="Z"></nav>
+		<article class="R" id="Article">
+			<section class="LB"><code class="l">laevatain.api</code>
+				<h2 class="Interface IB"><code class="p">LabelHelper</code><code class="T">&lt;<code>C</code>&gt;</code></h2>
+				<div class="v">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JLabel 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JLabel.html">JLabel</a></code></code><span><p>the concrete label type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXLabel" href="api/laevatain.ARXLabel.html">ARXLabel</a></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent helpers for the settings declared by <code><a aria-label="javax.swing.JLabel 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JLabel.html">JLabel</a></code>. The interface is bounded to JLabel,
+the class which owns these methods, so it works on any label subclass; colours, fonts and borders
+stay in <code><a aria-label="laevatain.api.StyleHelper" href="api/laevatain.api.StyleHelper.html">StyleHelper</a></code> and <code><a aria-label="laevatain.api.LayoutHelper" href="api/laevatain.api.LayoutHelper.html">LayoutHelper</a></code>, which are shared by every component.</p></span></section>
+			<section class="LB" id="text(java.lang.String)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">text</code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code></td>
+						<td><span><p>the caption</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the caption. Null clears it.</p></span></section>
+			<section class="LB" id="icon(javax.swing.Icon)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">icon</code><code class="T">(<code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code></td>
+						<td><span><p>the icon</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the icon. Null removes it.</p></span></section>
+			<section class="LB" id="disabledIcon(javax.swing.Icon)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">disabledIcon</code><code class="T">(<code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code></td>
+						<td><span><p>the disabled icon</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the icon shown while the label is disabled. Null falls back to a greyed normal icon.</p></span></section>
+			<section class="LB" id="horizontalAlignment(int)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">horizontalAlignment</code><code class="T">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code>int</code><code class="parameterName">alignment</code></td>
+						<td><span><p>a <code>SwingConstants</code> alignment</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets where the caption sits relative to the icon.</p></span></section>
+			<section class="LB" id="verticalAlignment(int)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">verticalAlignment</code><code class="T">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code>int</code><code class="parameterName">alignment</code></td>
+						<td><span><p>a <code>SwingConstants</code> alignment</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the vertical alignment of the contents.</p></span></section>
+			<section class="LB" id="horizontalTextPosition(int)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">horizontalTextPosition</code><code class="T">(<code>int</code><code class="parameterName">position</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code>int</code><code class="parameterName">position</code></td>
+						<td><span><p>a <code>SwingConstants</code> position</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets where the text sits relative to the icon.</p></span></section>
+			<section class="LB" id="verticalTextPosition(int)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">verticalTextPosition</code><code class="T">(<code>int</code><code class="parameterName">position</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code>int</code><code class="parameterName">position</code></td>
+						<td><span><p>a <code>SwingConstants</code> position</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the vertical position of the text relative to the icon.</p></span></section>
+			<section class="LB" id="iconTextGap(int)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">iconTextGap</code><code class="T">(<code>int</code><code class="parameterName">gap</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code>int</code><code class="parameterName">gap</code></td>
+						<td><span><p>the gap in pixels</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the gap between the icon and the caption.</p></span></section>
+			<section class="LB" id="labelFor(java.awt.Component)">
+				<h2 class="b"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="p">labelFor</code><code class="T">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">component</code>)</code><i class="X"><code>C</code></i></h2>
+				<table class="KB">
+					<tr class="g">
+						<td><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">component</code></td>
+						<td><span><p>the labelled component</p></span></td>
+					</tr>
+					<tr class="JB">
+						<td><code>C</code></td>
+						<td><span><p>this label</p></span></td>
+					</tr>
+				</table><span class="A"><p>Marks another component as the one this label describes, so clicking the caption focuses it.</p></span></section>
+		</article>
+		<aside class="a">
+			<div class="W">
+				<h5 class="n">Methods</h5>
+				<ul>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#text(java.lang.String)">text</a></code><code class="T">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#icon(javax.swing.Icon)">icon</a></code><code class="T">(<code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#disabledIcon(javax.swing.Icon)">disabledIcon</a></code><code class="T">(<code><a aria-label="javax.swing.Icon 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/Icon.html">Icon</a></code><code class="parameterName">icon</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#horizontalAlignment(int)">horizontalAlignment</a></code><code class="T">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#verticalAlignment(int)">verticalAlignment</a></code><code class="T">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#horizontalTextPosition(int)">horizontalTextPosition</a></code><code class="T">(<code>int</code><code class="parameterName">position</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#verticalTextPosition(int)">verticalTextPosition</a></code><code class="T">(<code>int</code><code class="parameterName">position</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#iconTextGap(int)">iconTextGap</a></code><code class="T">(<code>int</code><code class="parameterName">gap</code>)</code><i class="EB"><code>C</code></i></li>
+					<li class="DB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LabelHelper.html#labelFor(java.awt.Component)">labelFor</a></code><code class="T">(<code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code><code class="parameterName">component</code>)</code><i class="EB"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="S">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="t">
-		<header class="Z" date="2026-11-28">
-			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="a"><a href="api/main.html" id="API"><svg class="package">
+	<body class="Y">
+		<header class="K" date="2026-11-28">
+			<h1 class="L"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="M"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="b"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="v"></nav>
-		<article class="L" id="Article">
-			<section class="LB"><code class="O">freja.media.ui</code>
-				<h2 class="Class DB"><code class="w">ThumbnailCache</code></h2>
-				<div class="M">
+		<nav class="Z"></nav>
+		<article class="R" id="Article">
+			<section class="LB"><code class="l">freja.media.ui</code>
+				<h2 class="Class IB"><code class="p">ThumbnailCache</code></h2>
+				<div class="v">
 					<ul class="E H">
 						<li><code><a aria-label="java.lang.AutoCloseable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/AutoCloseable.html">AutoCloseable</a></code></li>
 					</ul>
@@ -55,54 +55,54 @@ The cache key includes the file modification time, so a photo which is edited on
 fresh entry instead of keeping the stale thumbnail.
 </p></span></section>
 			<section class="LB" id="ThumbnailCache(freja.media.store.Library)">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">ThumbnailCache</code><code class="e">(<code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code>)</code></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">ThumbnailCache</code><code class="T">(<code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code>)</code></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code></td>
 						<td></td>
 					</tr>
 				</table>
 			</section>
 			<section class="LB" id="get(long,long)">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">get</code><code class="e">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="z"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">get</code><code class="T">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="X"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code>long</code><code class="parameterName">photoId</code></td>
 						<td><span><p>a photo identifier</p></span></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code>long</code><code class="parameterName">modifiedAt</code></td>
 						<td><span><p>the modification time of the source file</p></span></td>
 					</tr>
-					<tr class="AB">
+					<tr class="JB">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>the image, or null while it is loading or absent</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns a cached thumbnail without blocking.</p></span></section>
 			<section class="LB" id="request(long,long,java.lang.Runnable)">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">request</code><code class="e">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">whenLoaded</code>)</code><i class="z"><code>void</code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">request</code><code class="T">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">whenLoaded</code>)</code><i class="X"><code>void</code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code>long</code><code class="parameterName">photoId</code></td>
 						<td><span><p>a photo identifier</p></span></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code>long</code><code class="parameterName">modifiedAt</code></td>
 						<td><span><p>the modification time of the source file</p></span></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">whenLoaded</code></td>
 						<td><span><p>a callback, may be null</p></span></td>
 					</tr>
 				</table><span class="A"><p>Requests a thumbnail and calls <code>whenLoaded</code> on the event dispatch thread.</p></span></section>
 			<section class="LB" id="warm(java.util.List,int)">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">warm</code><code class="e">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="z"><code>void</code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">warm</code><code class="T">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="X"><code>void</code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code></td>
 						<td><span><p>the photos in display order</p></span></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">limit</code></td>
 						<td><span><p>the maximum number to warm</p></span></td>
 					</tr>
@@ -110,49 +110,49 @@ fresh entry instead of keeping the stale thumbnail.
 thread, so the first frame already has images instead of showing empty cells for a moment.
 Only a bounded prefix is warmed: scrolling still loads the rest lazily.</p></span></section>
 			<section class="LB" id="warm(java.util.List,int,int)">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">warm</code><code class="e">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">from</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="z"><code>void</code></i></h2>
-				<table class="i">
-					<tr class="n">
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">warm</code><code class="T">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">from</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="X"><code>void</code></i></h2>
+				<table class="KB">
+					<tr class="g">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code></td>
 						<td><span><p>the photos in display order</p></span></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">from</code></td>
 						<td><span><p>the first index to warm</p></span></td>
 					</tr>
-					<tr class="n">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">limit</code></td>
 						<td><span><p>the maximum number to warm</p></span></td>
 					</tr>
 				</table><span class="A"><p>Same as <code><a aria-label="freja.media.ui.ThumbnailCache" href="api/freja.media.ui.ThumbnailCache.html#warm(java.util.List,int)">#warm(List, int)</a></code> but starts at an arbitrary row, e.g. the folder restored at
 startup which may be far down the list.</p></span></section>
 			<section class="LB" id="retryMissing()">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">retryMissing</code><code class="e">()</code><i class="z"><code>void</code></i></h2><span class="A"><p>Allows thumbnails which were previously absent to be requested again.</p></span></section>
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">retryMissing</code><code class="T">()</code><i class="X"><code>void</code></i></h2><span class="A"><p>Allows thumbnails which were previously absent to be requested again.</p></span></section>
 			<section class="LB" id="clear()">
-				<h2 class="Q"><i class="PUBLIC"></i><code class="w">clear</code><code class="e">()</code><i class="z"><code>void</code></i></h2><span class="A"><p>Drops every cached image, for example after a re-import.</p></span></section>
+				<h2 class="b"><i class="PUBLIC"></i><code class="p">clear</code><code class="T">()</code><i class="X"><code>void</code></i></h2><span class="A"><p>Drops every cached image, for example after a re-import.</p></span></section>
 			<section class="LB" id="close()">
-				<h2 class="Q"><i class="OVERRIDE PUBLIC"></i><code class="w">close</code><code class="e">()</code><i class="z"><code>void</code></i></h2>
+				<h2 class="b"><i class="OVERRIDE PUBLIC"></i><code class="p">close</code><code class="T">()</code><i class="X"><code>void</code></i></h2>
 			</section>
 		</article>
-		<aside class="o">
-			<div class="J">
-				<h5 class="BB">Constructors</h5>
+		<aside class="a">
+			<div class="W">
+				<h5 class="n">Constructors</h5>
 				<ul>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#ThumbnailCache(freja.media.store.Library)">ThumbnailCache</a></code><code class="e">(<code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code>)</code></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#ThumbnailCache(freja.media.store.Library)">ThumbnailCache</a></code><code class="T">(<code><a aria-label="freja.media.store.Library" href="api/freja.media.store.Library.html">Library</a></code><code class="parameterName">library</code>)</code></li>
 				</ul>
-				<h5 class="BB">Methods</h5>
+				<h5 class="n">Methods</h5>
 				<ul>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#get(long,long)">get</a></code><code class="e">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="k"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#request(long,long,java.lang.Runnable)">request</a></code><code class="e">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">whenLoaded</code>)</code><i class="k"><code>void</code></i></li>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#warm(java.util.List,int)">warm</a></code><code class="e">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="k"><code>void</code></i></li>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#warm(java.util.List,int,int)">warm</a></code><code class="e">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">from</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="k"><code>void</code></i></li>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#retryMissing()">retryMissing</a></code><code class="e">()</code><i class="k"><code>void</code></i></li>
-					<li class="s"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#clear()">clear</a></code><code class="e">()</code><i class="k"><code>void</code></i></li>
-					<li class="s"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#close()">close</a></code><code class="e">()</code><i class="k"><code>void</code></i></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#get(long,long)">get</a></code><code class="T">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#request(long,long,java.lang.Runnable)">request</a></code><code class="T">(<code>long</code><code class="parameterName">photoId</code>, <code>long</code><code class="parameterName">modifiedAt</code>, <code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">whenLoaded</code>)</code><i class="EB"><code>void</code></i></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#warm(java.util.List,int)">warm</a></code><code class="T">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="EB"><code>void</code></i></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#warm(java.util.List,int,int)">warm</a></code><code class="T">(<code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code></code></code><code class="parameterName">photos</code>, <code>int</code><code class="parameterName">from</code>, <code>int</code><code class="parameterName">limit</code>)</code><i class="EB"><code>void</code></i></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#retryMissing()">retryMissing</a></code><code class="T">()</code><i class="EB"><code>void</code></i></li>
+					<li class="DB"><i class="PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#clear()">clear</a></code><code class="T">()</code><i class="EB"><code>void</code></i></li>
+					<li class="DB"><i class="OVERRIDE PUBLIC"></i><code><a href="api/freja.media.ui.ThumbnailCache.html#close()">close</a></code><code class="T">()</code><i class="EB"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="u">
+		<footer class="S">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
