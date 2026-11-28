@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="S">
-		<header class="T" date="2026-11-28">
-			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+	<body class="DB">
+		<header class="j" date="2026-11-28">
+			<h1 class="k"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="l"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,30 +35,30 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="x"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="W"></nav>
-		<article class="U" id="Article">
-			<section class="CB"><code class="d">freja.util</code>
-				<h2 class="Class s"><code class="DB">ImageTransforms</code></h2>
-				<div class="M"></div><span class="A"><p>Pixel operations shared by thumbnail generation and the full screen viewer.</p></span></section>
-			<section class="CB" id="orient(java.awt.image.BufferedImage,int)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">orient</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">orientation</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+		<nav class="f"></nav>
+		<article class="m" id="Article">
+			<section class="M"><code class="Z">freja.util</code>
+				<h2 class="Class BB"><code class="N">ImageTransforms</code></h2>
+				<div class="g"></div><span class="A"><p>Pixel operations shared by thumbnail generation and the full screen viewer.</p></span></section>
+			<section class="M" id="orient(java.awt.image.BufferedImage,int)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">orient</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">orientation</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the decoded image</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="w">
 						<td><code>int</code><code class="parameterName">orientation</code></td>
 						<td><span><p>the EXIF orientation, from 1 to 8</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>a correctly oriented image, or the source itself when no rotation is needed</p></span></td>
 					</tr>
@@ -66,58 +66,58 @@
 The mapping is the one described by the EXIF specification. Orientations outside the known
 range leave the image untouched.
 </p></span></section>
-			<section class="CB" id="rotate(java.awt.image.BufferedImage,int)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">rotate</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">degrees</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="rotate(java.awt.image.BufferedImage,int)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">rotate</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">degrees</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the source image</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="w">
 						<td><code>int</code><code class="parameterName">degrees</code></td>
 						<td><span><p>90, 180 or 270</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>the rotated image</p></span></td>
 					</tr>
 				</table><span class="A"><p>Rotates an image clockwise.</p></span></section>
-			<section class="CB" id="flipHorizontal(java.awt.image.BufferedImage)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">flipHorizontal</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="flipHorizontal(java.awt.image.BufferedImage)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">flipHorizontal</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the source image</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>the mirrored image</p></span></td>
 					</tr>
 				</table><span class="A"><p>Mirrors an image left to right.</p></span></section>
-			<section class="CB" id="flipVertical(java.awt.image.BufferedImage)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">flipVertical</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="flipVertical(java.awt.image.BufferedImage)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">flipVertical</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the source image</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>the mirrored image</p></span></td>
 					</tr>
 				</table><span class="A"><p>Mirrors an image top to bottom.</p></span></section>
-			<section class="CB" id="scale(java.awt.image.BufferedImage,int)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">scale</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="scale(java.awt.image.BufferedImage,int)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">scale</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the source image</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="w">
 						<td><code>int</code><code class="parameterName">maxSize</code></td>
 						<td><span><p>the maximum length of either edge</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>the scaled image</p></span></td>
 					</tr>
@@ -125,18 +125,18 @@ range leave the image untouched.
 The resampling is done by imagify&apos;s Catmull-Rom filter. Catmull-Rom is sharper than Java2D&apos;s
 default bicubic interpolation and is the algorithm imagify uses as its own default.
 </p></span></section>
-			<section class="CB" id="downscale(java.awt.image.BufferedImage,int)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">downscale</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="downscale(java.awt.image.BufferedImage,int)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">downscale</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the decoded image</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="w">
 						<td><code>int</code><code class="parameterName">maxSize</code></td>
 						<td><span><p>the longest edge after this pass</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>the reduced image, or the source when it is already small enough</p></span></td>
 					</tr>
@@ -147,14 +147,14 @@ This is intended as a pre-pass before a high quality resampler. Running CATROM d
 times first leaves only a few hundred pixels for the final filter. The aspect ratio and any
 real transparency are preserved.
 </p></span></section>
-			<section class="CB" id="hasTransparency(java.awt.image.BufferedImage)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">hasTransparency</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">image</code>)</code><i class="O"><code>boolean</code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="hasTransparency(java.awt.image.BufferedImage)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">hasTransparency</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">image</code>)</code><i class="EB"><code>boolean</code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">image</code></td>
 						<td><span><p>the image</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code>boolean</code></td>
 						<td><span><p>true when the alpha channel actually carries transparency</p></span></td>
 					</tr>
@@ -162,14 +162,14 @@ real transparency are preserved.
 Decoders frequently return an ARGB image for an opaque source, so the presence of an alpha
 channel alone is not enough.
 </p></span></section>
-			<section class="CB" id="toOpaque(java.awt.image.BufferedImage)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">toOpaque</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="toOpaque(java.awt.image.BufferedImage)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">toOpaque</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>an image whose pixels are all opaque</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>an opaque RGB image</p></span></td>
 					</tr>
@@ -180,44 +180,44 @@ anti-aliasing setup that cannot change a single pixel. A source copy with <code>
 is the same blit without those hints. <code><a aria-label="freja.util.ImageTransforms" href="api/freja.util.ImageTransforms.html#hasTransparency(java.awt.image.BufferedImage)">#hasTransparency(BufferedImage)</a></code> does not have to
 be called first when the caller already knows the pixels are opaque.
 </p></span></section>
-			<section class="CB" id="flatten(java.awt.image.BufferedImage,int,java.awt.Color)">
-				<h2 class="u"><i class="STATIC PUBLIC"></i><code class="DB">flatten</code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">background</code>)</code><i class="O"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
-				<table class="b">
-					<tr class="Z">
+			<section class="M" id="flatten(java.awt.image.BufferedImage,int,java.awt.Color)">
+				<h2 class="s"><i class="PUBLIC STATIC"></i><code class="N">flatten</code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">background</code>)</code><i class="EB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></h2>
+				<table class="c">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code></td>
 						<td><span><p>the source image</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="w">
 						<td><code>int</code><code class="parameterName">maxSize</code></td>
 						<td><span><p>the maximum length of either edge, or 0 to keep the original size</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="w">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">background</code></td>
 						<td><span><p>the colour behind transparent pixels</p></span></td>
 					</tr>
-					<tr class="Y">
+					<tr class="y">
 						<td><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></td>
 						<td><span><p>an opaque RGB image</p></span></td>
 					</tr>
 				</table><span class="A"><p>Flattens an image onto an opaque background and optionally scales it down.</p></span></section>
 		</article>
-		<aside class="X">
-			<div class="r">
-				<h5 class="z">Static Methods</h5>
+		<aside class="q">
+			<div class="J">
+				<h5 class="p">Static Methods</h5>
 				<ul>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#orient(java.awt.image.BufferedImage,int)">orient</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">orientation</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#rotate(java.awt.image.BufferedImage,int)">rotate</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">degrees</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#flipHorizontal(java.awt.image.BufferedImage)">flipHorizontal</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#flipVertical(java.awt.image.BufferedImage)">flipVertical</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#scale(java.awt.image.BufferedImage,int)">scale</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#downscale(java.awt.image.BufferedImage,int)">downscale</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#hasTransparency(java.awt.image.BufferedImage)">hasTransparency</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">image</code>)</code><i class="N"><code>boolean</code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#toOpaque(java.awt.image.BufferedImage)">toOpaque</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
-					<li class="c"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.ImageTransforms.html#flatten(java.awt.image.BufferedImage,int,java.awt.Color)">flatten</a></code><code class="o">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">background</code>)</code><i class="N"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#orient(java.awt.image.BufferedImage,int)">orient</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">orientation</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#rotate(java.awt.image.BufferedImage,int)">rotate</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">degrees</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#flipHorizontal(java.awt.image.BufferedImage)">flipHorizontal</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#flipVertical(java.awt.image.BufferedImage)">flipVertical</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#scale(java.awt.image.BufferedImage,int)">scale</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#downscale(java.awt.image.BufferedImage,int)">downscale</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#hasTransparency(java.awt.image.BufferedImage)">hasTransparency</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">image</code>)</code><i class="CB"><code>boolean</code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#toOpaque(java.awt.image.BufferedImage)">toOpaque</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
+					<li class="Y"><i class="PUBLIC STATIC"></i><code><a href="api/freja.util.ImageTransforms.html#flatten(java.awt.image.BufferedImage,int,java.awt.Color)">flatten</a></code><code class="a">(<code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code><code class="parameterName">source</code>, <code>int</code><code class="parameterName">maxSize</code>, <code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">background</code>)</code><i class="CB"><code><a aria-label="java.awt.image.BufferedImage 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/image/BufferedImage.html">BufferedImage</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="V">
+		<footer class="O">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

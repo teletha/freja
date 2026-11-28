@@ -4,6 +4,8 @@ const root = {
 	"packages": [
 		"laevatain.util",
 		"laevatain",
+		"laevatain.composite",
+		"laevatain.component",
 		"laevatain.api",
 		"freja.util",
 		"freja.mpv",
@@ -29,94 +31,64 @@ const root = {
 			"type": "Record"
 		},
 		{
-			"name": "ARXCheckBox",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSettingsPane",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSettingsPane.Section",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSettingsPane.Block",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSettingsPane.Card",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSettingsPane.Row",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSettingsPane.Text",
-			"packageName": "laevatain",
-			"type": "Record"
-		},
-		{
-			"name": "ARXSearchField",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXPanel",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXRadioButtonMenuItem",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXMenuItem",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
 			"name": "ARXTextBinding",
 			"packageName": "laevatain",
 			"type": "Class"
 		},
 		{
-			"name": "ARXFileChooser",
-			"packageName": "laevatain",
+			"name": "ARXSettingsPane",
+			"packageName": "laevatain.composite",
 			"type": "Class"
 		},
 		{
-			"name": "ARXComboBox",
-			"packageName": "laevatain",
+			"name": "ARXSettingsPane.Section",
+			"packageName": "laevatain.composite",
 			"type": "Class"
 		},
 		{
-			"name": "ARXTable",
-			"packageName": "laevatain",
+			"name": "ARXSettingsPane.Block",
+			"packageName": "laevatain.composite",
 			"type": "Class"
+		},
+		{
+			"name": "ARXSettingsPane.Card",
+			"packageName": "laevatain.composite",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSettingsPane.Row",
+			"packageName": "laevatain.composite",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSettingsPane.Text",
+			"packageName": "laevatain.composite",
+			"type": "Record"
 		},
 		{
 			"name": "ARXSectionListPanel",
-			"packageName": "laevatain",
+			"packageName": "laevatain.composite",
 			"type": "Class"
 		},
 		{
 			"name": "ARXNavList",
-			"packageName": "laevatain",
+			"packageName": "laevatain.composite",
 			"type": "Class"
 		},
 		{
 			"name": "ARXNavList.Row",
-			"packageName": "laevatain",
+			"packageName": "laevatain.composite",
 			"type": "Class"
+		},
+		{
+			"name": "ARXSectionHeader",
+			"packageName": "laevatain.composite",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSectionHeader.Action",
+			"packageName": "laevatain.composite",
+			"type": "Record"
 		},
 		{
 			"name": "ChooserLocations",
@@ -124,8 +96,93 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "ARXCheckBox",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSearchField",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXPanel",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXRadioButtonMenuItem",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXMenuItem",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXFileChooser",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXComboBox",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXTable",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
 			"name": "ARXTextField",
-			"packageName": "laevatain",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXList",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXToggle",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXButton",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXButton.Variant",
+			"packageName": "laevatain.component",
+			"type": "Enum"
+		},
+		{
+			"name": "ARXWrapLabel",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXSplitPane",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXMenu",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXScrollPane",
+			"packageName": "laevatain.component",
+			"type": "Class"
+		},
+		{
+			"name": "ARXLabel",
+			"packageName": "laevatain.component",
 			"type": "Class"
 		},
 		{
@@ -182,61 +239,6 @@ const root = {
 			"name": "InteractionHelper",
 			"packageName": "laevatain.api",
 			"type": "Interface"
-		},
-		{
-			"name": "ARXList",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXToggle",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXButton",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXButton.Variant",
-			"packageName": "laevatain",
-			"type": "Enum"
-		},
-		{
-			"name": "ARXWrapLabel",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSplitPane",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSectionHeader",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXSectionHeader.Action",
-			"packageName": "laevatain",
-			"type": "Record"
-		},
-		{
-			"name": "ARXMenu",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXScrollPane",
-			"packageName": "laevatain",
-			"type": "Class"
-		},
-		{
-			"name": "ARXLabel",
-			"packageName": "laevatain",
-			"type": "Class"
 		},
 		{
 			"name": "PicasaTags",

@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="S">
-		<header class="T" date="2026-11-28">
-			<h1 class="e"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="K"><a href="api/main.html" id="API"><svg class="package">
+	<body class="DB">
+		<header class="j" date="2026-11-28">
+			<h1 class="k"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="l"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="x"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="W"></nav>
-		<article class="U" id="Article">
-			<div class="CB">
+		<nav class="f"></nav>
+		<article class="m" id="Article">
+			<div class="M">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -180,145 +180,145 @@ history and persistence as ordinary folders.</td>
 								<td>The localisation bridge for ARX components.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXCheckBox.html">ARXCheckBox</a></code></td>
-								<td>A check box whose caption can follow a Variable, so a translated option keeps its wording
-when the interface language changes.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></td>
-								<td>A Windows 11-style settings surface: an ARXNavList rail on the left and one continuous,
-scrollable document on the right. Every section registers a rail entry; choosing an entry glides
-the viewport to that section, scrolling keeps the rail in sync, and the search field in its own
-pane above the document narrows the whole page to the rows which answer to the query.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXSettingsPane.Section.html">ARXSettingsPane.Section</a></code></td>
-								<td>One anchored page of the document.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXSettingsPane.Block.html">ARXSettingsPane.Block</a></code></td>
-								<td>A block of a section which is not a card: a tile grid, a chart, anything with keywords.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXSettingsPane.Card.html">ARXSettingsPane.Card</a></code></td>
-								<td>A rounded card which re-lays itself around the rows a query leaves standing.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXSettingsPane.Row.html">ARXSettingsPane.Row</a></code></td>
-								<td>One searchable settings row.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></td>
-								<td>A reusable search field with a leading icon, placeholder, clear button and a debounced text
-callback. Fonts and colours come from the active FlatLaf theme.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXPanel.html">ARXPanel</a></code></td>
-								<td>A JPanel with the fluent ARX helper API. It is a drop-in replacement: no look or layout
-default is changed, so callers keep full control and can describe the panel in one constructor
-chain, e.g. new ARXPanel(new BorderLayout()).opaque(false).background(color).</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXRadioButtonMenuItem.html">ARXRadioButtonMenuItem</a></code></td>
-								<td>A radio menu item whose caption can follow a Variable, mirroring ARXMenuItem.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXMenuItem.html">ARXMenuItem</a></code></td>
-								<td>A menu item whose caption can follow a Variable. Menus are built on demand, so a late
-translation still reaches an item which is already on screen.</td>
-							</tr>
-							<tr>
 								<td><code><a href="api/laevatain.ARXTextBinding.html">ARXTextBinding</a></code></td>
 								<td>Keeps one live text subscription for a component. Rebinding disposes the previous observer, so a
 component can switch sources - for example when its language changes - without leaking or being
 written by two translations at once.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXFileChooser.html">ARXFileChooser</a></code></td>
-								<td>A FlatLaf system chooser which opens where its owner last left it and stores the new location when
-it closes. Each dialog passes its own key so the positions do not mix.</td>
+								<td><code><a href="api/laevatain.composite.ARXSettingsPane.html">ARXSettingsPane</a></code></td>
+								<td>A Windows 11-style settings surface: an ARXNavList rail on the left and one continuous,
+scrollable document on the right. Every section registers a rail entry; choosing an entry glides
+the viewport to that section, scrolling keeps the rail in sync, and the search field in its own
+pane above the document narrows the whole page to the rows which answer to the query.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXComboBox.html">ARXComboBox</a></code></td>
-								<td>A combo box whose items can follow live translations. Each source string passed to
-#setSources(String...) is translated through I#translate(String, Object...) and the
-displayed item is replaced whenever that translation changes, while the selected index stays put.</td>
+								<td><code><a href="api/laevatain.composite.ARXSettingsPane.Section.html">ARXSettingsPane.Section</a></code></td>
+								<td>One anchored page of the document.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXTable.html">ARXTable</a></code></td>
-								<td>A JTable with the fluent ARX helper API. Behaviour and painting are untouched, so a host
-can adopt it first and style the table through the helpers later.</td>
+								<td><code><a href="api/laevatain.composite.ARXSettingsPane.Block.html">ARXSettingsPane.Block</a></code></td>
+								<td>A block of a section which is not a card: a tile grid, a chart, anything with keywords.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXSectionListPanel.html">ARXSectionListPanel</a></code></td>
+								<td><code><a href="api/laevatain.composite.ARXSettingsPane.Card.html">ARXSettingsPane.Card</a></code></td>
+								<td>A rounded card which re-lays itself around the rows a query leaves standing.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.composite.ARXSettingsPane.Row.html">ARXSettingsPane.Row</a></code></td>
+								<td>One searchable settings row.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.composite.ARXSectionListPanel.html">ARXSectionListPanel</a></code></td>
 								<td>The shell around a sidebar list: a shared section heading above a caller-supplied scroll pane.
 The list itself stays specialised for each host (library folders or file manager tabs).</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXNavList.html">ARXNavList</a></code></td>
+								<td><code><a href="api/laevatain.composite.ARXNavList.html">ARXNavList</a></code></td>
 								<td>A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
 trailing annotation, hover feedback, arrow-key navigation and an optional context menu.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXNavList.Row.html">ARXNavList.Row</a></code></td>
+								<td><code><a href="api/laevatain.composite.ARXNavList.Row.html">ARXNavList.Row</a></code></td>
 								<td>One row of the list. Kept public so callers can annotate or extend it.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.composite.ARXSectionHeader.html">ARXSectionHeader</a></code></td>
+								<td>The section heading shared by the library sidebar and the file manager: a label on the left and
+flat icon actions on the right.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/laevatain.ChooserLocations.html">ChooserLocations</a></code></td>
 								<td>Remembers the last directory used by each file chooser, keyed by the dialog that owns it.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXTextField.html">ARXTextField</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXCheckBox.html">ARXCheckBox</a></code></td>
+								<td>A check box whose caption can follow a Variable, so a translated option keeps its wording
+when the interface language changes.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXSearchField.html">ARXSearchField</a></code></td>
+								<td>A reusable search field with a leading icon, placeholder, clear button and a debounced text
+callback. Fonts and colours come from the active FlatLaf theme.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXPanel.html">ARXPanel</a></code></td>
+								<td>A JPanel with the fluent ARX helper API. It is a drop-in replacement: no look or layout
+default is changed, so callers keep full control and can describe the panel in one constructor
+chain, e.g. new ARXPanel(new BorderLayout()).opaque(false).background(color).</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXRadioButtonMenuItem.html">ARXRadioButtonMenuItem</a></code></td>
+								<td>A radio menu item whose caption can follow a Variable, mirroring ARXMenuItem.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXMenuItem.html">ARXMenuItem</a></code></td>
+								<td>A menu item whose caption can follow a Variable. Menus are built on demand, so a late
+translation still reaches an item which is already on screen.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXFileChooser.html">ARXFileChooser</a></code></td>
+								<td>A FlatLaf system chooser which opens where its owner last left it and stores the new location when
+it closes. Each dialog passes its own key so the positions do not mix.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXComboBox.html">ARXComboBox</a></code></td>
+								<td>A combo box whose items can follow live translations. Each source string passed to
+#setSources(String...) is translated through I#translate(String, Object...) and the
+displayed item is replaced whenever that translation changes, while the selected index stays put.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXTable.html">ARXTable</a></code></td>
+								<td>A JTable with the fluent ARX helper API. Behaviour and painting are untouched, so a host
+can adopt it first and style the table through the helpers later.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.component.ARXTextField.html">ARXTextField</a></code></td>
 								<td>A text field whose contents can follow a Variable. Useful for values which are edited in
 place and also change elsewhere, such as the current name of a folder.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXList.html">ARXList</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXList.html">ARXList</a></code></td>
 								<td>A JList with the fluent ARX helper API. It keeps every Swing default, so hosts which paint
 their own rows can replace a plain list without changing its behaviour.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXToggle.html">ARXToggle</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXToggle.html">ARXToggle</a></code></td>
 								<td>A Windows-style on/off switch. The state is delegated to Swing&apos;s toggle button model, so
 pressing, releasing, keyboard focus and the active look and feel all drive it the way they do for
 any other button; the component only paints the Fluent pill and glides the knob between the two
 positions.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXButton.html">ARXButton</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXButton.html">ARXButton</a></code></td>
 								<td>A reusable FlatLaf button with a flat look, rounded corners and a hover style. All colours and
 the
 corner radius come from the active FlatLaf theme, so the button follows runtime theme changes.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXWrapLabel.html">ARXWrapLabel</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXWrapLabel.html">ARXWrapLabel</a></code></td>
 								<td>A label which breaks its text into lines instead of asking for as much width as the longest line
 needs. A plain JLabel never wraps, so a long sentence widens the whole column without
 limit.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXSplitPane.html">ARXSplitPane</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXSplitPane.html">ARXSplitPane</a></code></td>
 								<td>A JSplitPane with the fluent ARX helper API. Drop-in like the other ARX wrappers: callers
 set the divider and border through the helpers instead of scattered setters.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXSectionHeader.html">ARXSectionHeader</a></code></td>
-								<td>The section heading shared by the library sidebar and the file manager: a label on the left and
-flat icon actions on the right.</td>
-							</tr>
-							<tr>
-								<td><code><a href="api/laevatain.ARXMenu.html">ARXMenu</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXMenu.html">ARXMenu</a></code></td>
 								<td>A menu whose caption can follow a Variable, mirroring ARXMenuItem.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXScrollPane.html">ARXScrollPane</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXScrollPane.html">ARXScrollPane</a></code></td>
 								<td>The ARX scroll container: a borderless JScrollPane whose viewport follows the pane&apos;s own
 background and opacity. Plain Swing scroll panes regain a hairline border and an opaque default
 viewport on every look and feel change, which breaks the flat ARX surfaces; this component keeps
 the chrome flat across theme changes.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXLabel.html">ARXLabel</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXLabel.html">ARXLabel</a></code></td>
 								<td>A label whose caption can follow a Variable, e.g. the value returned by
 I#translate(String, Object...). Assigning a new variable replaces the previous
 subscription, so
@@ -510,7 +510,7 @@ duration reported by libmpv.</td>
 						<h4>🛠️ Enum</h4>
 						<table>
 							<tr>
-								<td><code><a href="api/laevatain.ARXButton.Variant.html">ARXButton.Variant</a></code></td>
+								<td><code><a href="api/laevatain.component.ARXButton.Variant.html">ARXButton.Variant</a></code></td>
 								<td>Predefined button roles, each mapped to FlatLaf UI defaults.</td>
 							</tr>
 							<tr>
@@ -546,12 +546,12 @@ variants for small sizes and HiDPI screens instead of shrinking a single 128px b
 								<td>A language the interface can be shown in.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXSettingsPane.Text.html">ARXSettingsPane.Text</a></code></td>
+								<td><code><a href="api/laevatain.composite.ARXSettingsPane.Text.html">ARXSettingsPane.Text</a></code></td>
 								<td>A caption with its English origin kept for search. The displayed wording follows a live
 translation, while the origin stays stable so a query finds a row in every language.</td>
 							</tr>
 							<tr>
-								<td><code><a href="api/laevatain.ARXSectionHeader.Action.html">ARXSectionHeader.Action</a></code></td>
+								<td><code><a href="api/laevatain.composite.ARXSectionHeader.Action.html">ARXSectionHeader.Action</a></code></td>
 								<td>One flat action shown at the right end of the heading.</td>
 							</tr>
 							<tr>
@@ -632,8 +632,8 @@ carry a short id, IntelliJ themes their look and feel class name.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="X"></aside>
-		<footer class="V">
+		<aside class="q"></aside>
+		<footer class="O">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
