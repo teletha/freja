@@ -46,4 +46,19 @@ public final class WindowSettings {
     public static void activity(String id) {
         PREFERENCES.put(ACTIVITY, id);
     }
+
+    private static final String UI_INSPECTOR = "debug.uiInspector";
+
+    /** Whether Ctrl+Shift+X may toggle the development UI inspectors. */
+    public static boolean uiInspectorEnabled() {
+        return PREFERENCES.getBoolean(UI_INSPECTOR, false);
+    }
+
+    public static void uiInspectorEnabled(boolean enabled) {
+        PREFERENCES.putBoolean(UI_INSPECTOR, enabled);
+        try {
+            PREFERENCES.flush();
+        } catch (Exception ignored) {
+        }
+    }
 }

@@ -11,6 +11,7 @@ package freja.setting.ui;
 
 import freja.setting.FileSettings;
 import freja.setting.SettingsBackup;
+import freja.setting.WindowSettings;
 import freja.AppIcon;
 import freja.Icons;
 import freja.Theme;
@@ -85,6 +86,10 @@ public final class SettingsPanel extends JPanel {
         }
         void onManageFolders();
 
+        /** Called when the development UI inspectors are switched on or off. */
+        default void onUiInspectorChanged(boolean enabled) {
+        }
+
         /** Called when the file manager's hidden-file filter changes. */
         default void onHiddenFilesChanged() {
         }
@@ -136,6 +141,7 @@ public final class SettingsPanel extends JPanel {
         systemSection();
         pane.show(APPEARANCE);
     }
+
     /** Two compact buttons beside the search field: write the whole profile out, or restore one. */
     private void backupActions() {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
@@ -506,6 +512,14 @@ public final class SettingsPanel extends JPanel {
     /** The system section: update controls, app information and restart. */
     private void systemSection() {
         ARXToggle startup = new ARXToggle(false);
+        ARXToggle inspector = new ARXToggle(WindowSettings.uiInspectorEnabled());
+        inspector.addActionListener(event -> {
+            boolean enabled = inspector.isSelected();
+            WindowSettings.uiInspectorEnabled(enabled);
+            if (!enabled) {
+                listener.onUiInspectorChanged(false);
+            }
+        });
         ARXLabel state = new ARXLabel(I.translate("Off"));
         state.setFont(Theme.font(Font.PLAIN, 12));
         state.setForeground(Theme.MUTED);
@@ -534,6 +548,9 @@ public final class SettingsPanel extends JPanel {
                         .row(ARXSettingsPane.Text.of("Check for updates"), ARXSettingsPane.Text
                                 .of("Compare against the latest release"), check)
                         .keywords("update", "updates", "version", "release"), ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("UIインスペクターを有効にする"), ARXSettingsPane.Text
+                        .of("Ctrl+Shift+X でコンポーネントとUIデフォルトのインスペクタを切り替えます。"), inspector)
+                .keywords("debug", "inspector", "shortcut", "ctrl", "shift", "x"), ARXSettingsPane
                                 .row(ARXSettingsPane.Text.of("Restart the application"), ARXSettingsPane.Text
                                         .of("Save your changes and restart Freja."), restart)
                                 .keywords("restart", "reboot", "reload"));

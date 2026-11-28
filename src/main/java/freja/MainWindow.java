@@ -9,6 +9,8 @@
  */
 package freja;
 
+import com.formdev.flatlaf.extras.FlatInspector;
+import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import freja.setting.ui.SettingsPanel;
 import freja.media.ui.ScanFoldersDialog;
 import freja.media.ui.TagPicker;
@@ -19,6 +21,7 @@ import freja.media.ui.PhotoViewer;
 import freja.media.ui.Sidebar;
 import freja.media.ui.TagManager;
 import freja.media.ui.ThumbnailCache;
+import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Cursor;
@@ -51,6 +54,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -131,6 +135,9 @@ public final class MainWindow extends JFrame {
     private SettingsPanel settingsPanel;
     private FileManagerPanel fileManager;
     private javax.swing.JSplitPane split;
+
+    /** Development inspector owned by this window, created on demand. */
+    private FlatInspector uiInspector;
     private javax.swing.JSplitPane sidebarSplit;
     /**
      * Read before the split pane fires initial layout events that would overwrite the preference.
@@ -217,6 +224,14 @@ public final class MainWindow extends JFrame {
                 shutdown();
             }
         });
+        KeyStroke inspectorKey = KeyStroke.getKeyStroke("control shift X");
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(inspectorKey, "toggleUiInspector");
+        getRootPane().getActionMap().put("toggleUiInspector", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                toggleUiInspector();
+            }
+        });
         applyState(scanner.state());
         // The first refresh is started by restoreViewSelection() once the saved mode and folder
         // are known, so the grid never shows the first folder before jumping to the last one.
@@ -298,6 +313,10 @@ public final class MainWindow extends JFrame {
                 }
             }
             @Override
+            public void onUiInspectorChanged(boolean enabled) {
+                applyUiInspector(enabled);
+            }
+            @Override
             public void onThemeChanged() {
                 applyThemeUi();
             }
@@ -334,6 +353,31 @@ public final class MainWindow extends JFrame {
         // inspector appear for one frame and then disappear once the scanner had started.
         setInspectorVisible(PREFERENCES.getBoolean(INSPECTOR_VISIBLE_PREFERENCE, true));
     }
+
+    /** Enables or disables both development inspectors for this window. */
+    private void applyUiInspector(boolean enabled) {
+        if (enabled) {
+            if (uiInspector == null) {
+                uiInspector = new FlatInspector(getRootPane());
+            }
+            uiInspector.setEnabled(true);
+            FlatUIDefaultsInspector.show();
+        } else {
+            if (uiInspector != null) {
+                uiInspector.setEnabled(false);
+            }
+            FlatUIDefaultsInspector.hide();
+        }
+    }
+
+    /** Ctrl+Shift+X works even while the inspector's glass pane swallows mouse events. */
+    private void toggleUiInspector() {
+        if (!WindowSettings.uiInspectorEnabled()) {
+            return;
+        }
+        applyUiInspector(uiInspector == null || !uiInspector.isEnabled());
+    }
+
     private final List<ActivityButton> activityButtons = new ArrayList<>();
     /** The VS Code-style strip on the far left which switches between the main panes. */
     private JComponent activityBar() {
