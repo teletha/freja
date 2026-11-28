@@ -148,11 +148,15 @@ public final class MainWindow extends JFrame {
 
     private final JSlider zoom = new JSlider(120, 220, 170);
 
-    private final JLabel statusMessage = new ARXLabel("準備完了");
+    private final JLabel statusMessage = new ARXLabel("準備完了")
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED);
 
-    private final JLabel statusCount = new ARXLabel();
+    private final JLabel statusCount = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED);
 
-    private final JLabel selectionInfo = new ARXLabel();
+    private final JLabel selectionInfo = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED)
+            .horizontalAlignment(javax.swing.SwingConstants.CENTER);
 
     private final JProgressBar progress = new JProgressBar();
 
@@ -160,7 +164,8 @@ public final class MainWindow extends JFrame {
 
     private final JPanel center = new ARXPanel(centerCards);
 
-    private final JLabel welcomePath = new ARXLabel();
+    private final JLabel welcomePath = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 10)).foreground(Theme.FAINT).alignmentX(CENTER_ALIGNMENT);
 
     private final JCheckBoxMenuItem darkModeItem = new JCheckBoxMenuItem("ダークモード", Theme.isDark());
 
@@ -585,15 +590,10 @@ public final class MainWindow extends JFrame {
         bar.setBackground(Theme.SURFACE);
         bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.BORDER), BorderFactory
                 .createEmptyBorder(6, 14, 6, 14)));
-        statusMessage.setFont(Theme.font(Font.PLAIN, 11));
-        statusMessage.setForeground(Theme.MUTED);
         JPanel left = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         left.setOpaque(false);
         left.add(statusMessage);
         bar.add(left, BorderLayout.WEST);
-        selectionInfo.setFont(Theme.font(Font.PLAIN, 11));
-        selectionInfo.setForeground(Theme.MUTED);
-        selectionInfo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         bar.add(selectionInfo, BorderLayout.CENTER);
         JPanel right = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         right.setOpaque(false);
@@ -601,8 +601,6 @@ public final class MainWindow extends JFrame {
         progress.setVisible(false);
         progress.setBorderPainted(false);
         right.add(progress);
-        statusCount.setFont(Theme.font(Font.PLAIN, 11));
-        statusCount.setForeground(Theme.MUTED);
         right.add(statusCount);
         bar.add(right, BorderLayout.EAST);
         return bar;
@@ -641,9 +639,6 @@ public final class MainWindow extends JFrame {
         add.setAlignmentX(CENTER_ALIGNMENT);
         card.add(add);
         card.add(Box.createVerticalStrut(22));
-        welcomePath.setFont(Theme.font(Font.PLAIN, 10));
-        welcomePath.setForeground(Theme.FAINT);
-        welcomePath.setAlignmentX(CENTER_ALIGNMENT);
         welcomePath.setText("ライブラリ: " + shortenPath(library.location().toString(), 78));
         card.add(welcomePath);
         card.add(Box.createVerticalStrut(8));

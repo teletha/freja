@@ -55,8 +55,10 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         void onRating(Photo photo, int rating);
         void onCaption(Photo photo, String caption);
     }
-    private final JLabel fileName = new ARXLabel();
-    private final JLabel folderName = new ARXLabel();
+    private final JLabel fileName = new ARXLabel()
+            .font(Theme.font(Font.BOLD, 16)).foreground(Theme.TEXT).alignmentX(LEFT_ALIGNMENT);
+    private final JLabel folderName = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED).alignmentX(LEFT_ALIGNMENT);
     private final JLabel dateValue = infoValue();
     private final JLabel dimensionsValue = infoValue();
     private final JLabel sizeValue = infoValue();
@@ -94,14 +96,8 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(Theme.SURFACE);
         body.setBorder(BorderFactory.createEmptyBorder(14, 16, 18, 16));
-        fileName.setFont(Theme.font(Font.BOLD, 16));
-        fileName.setForeground(Theme.TEXT);
-        fileName.setAlignmentX(LEFT_ALIGNMENT);
         body.add(fileName);
         body.add(Box.createVerticalStrut(4));
-        folderName.setFont(Theme.font(Font.PLAIN, 11));
-        folderName.setForeground(Theme.MUTED);
-        folderName.setAlignmentX(LEFT_ALIGNMENT);
         body.add(folderName);
         body.add(Box.createVerticalStrut(12));
         JPanel actions = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
@@ -380,10 +376,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         panel.add(value, right);
     }
     private static JLabel infoValue() {
-        JLabel label = new ARXLabel("—");
-        label.setFont(Theme.font(Font.PLAIN, 12));
-        label.setForeground(Theme.TEXT);
-        return label;
+        return new ARXLabel("—").font(Theme.font(Font.PLAIN, 12)).foreground(Theme.TEXT);
     }
     private static String html(String text, int width) {
         return "<html><body style='width:" + width + "px'>" + escape(text) + "</body></html>";

@@ -21,6 +21,19 @@ import javax.swing.JComponent;
  */
 public interface InteractionHelper<C extends JComponent> {
     /**
+     * Sets a client property, e.g. a FlatLaf styling key. Keeping this in the chain lets a field
+     * initializer describe all of its static settings in one expression.
+     *
+     * @param key the property key
+     * @param value the property value, or null to clear it
+     * @return this component
+     */
+    default C clientProperty(Object key, Object value) {
+        ((JComponent) this).putClientProperty(key, value);
+        return self();
+    }
+
+    /**
      * Sets the pointer shape. Null restores the parent's cursor.
      *
      * @param cursor the cursor to show over this component

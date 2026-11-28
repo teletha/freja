@@ -74,7 +74,8 @@ public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
     private final ARXNavList library = new ARXNavList();
     private final FolderList folders = new FolderList();
     private final JPanel folderCard = new ARXPanel(new CardLayout());
-    private final JLabel folderCount = new ARXLabel();
+    private final JLabel folderCount = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED);
     private Listener listener = new Listener() {
         @Override
         public void onSelect(Mode mode, long folderId) {
@@ -139,8 +140,6 @@ public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
         folders.setMenu(this::folderMenu);
         folders.setOnSelect(folder -> select(Mode.FOLDER, folder.id()));
         folders.setOnRemove(this::removeSelectedFolders);
-        folderCount.setFont(Theme.font(Font.PLAIN, 11));
-        folderCount.setForeground(Theme.MUTED);
         String title = I.translate("Folders").get();
         ARXSectionHeader.Action[] actions = {
                 new ARXSectionHeader.Action(I.translate("Tags").get(), Icons.tag(13, Theme.MUTED),

@@ -60,11 +60,12 @@ public final class ScanFoldersDialog extends JDialog {
         void onStartupScanChanged(boolean enabled);
         void onSweepChanged(boolean enabled);
     }
-    private final JCheckBox startupScan = new ARXCheckBox("起動時にスキャンする");
-    private final JCheckBox sweepScan = new ARXCheckBox("定期スキャンする（30分ごと）");
+    private final ARXCheckBox startupScan = new ARXCheckBox("起動時にスキャンする").opaque(false);
+    private final ARXCheckBox sweepScan = new ARXCheckBox("定期スキャンする（30分ごと）").opaque(false);
     private final DefaultListModel<Folder> registeredModel = new DefaultListModel<>();
     private final ARXList<Folder> registeredList = new ARXList<>(registeredModel);
-    private final JLabel emptyHint = new ARXLabel("登録されているフォルダはありません");
+    private final ARXLabel emptyHint = new ARXLabel("登録されているフォルダはありません")
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED);
     private final Map<String, Folder> registered = new HashMap<>();
     private Listener listener = new Listener() {
         @Override
@@ -156,9 +157,7 @@ public final class ScanFoldersDialog extends JDialog {
         registeredTitle.setToolTipText("✓ は監視中、× は監視から除外されたフォルダです");
         registeredTitle.setFont(Theme.font(Font.BOLD, 13));
         registeredTitle.setForeground(Theme.TEXT);
-        emptyHint.setFont(Theme.font(Font.PLAIN, 11));
-        emptyHint.setForeground(Theme.MUTED);
-        emptyHint.setVisible(false);
+        emptyHint.visible(false);
         JPanel registeredHeader = new ARXPanel(new BorderLayout(0, 4));
         registeredHeader.setOpaque(false);
         registeredHeader.add(registeredTitle, BorderLayout.NORTH);
@@ -168,10 +167,8 @@ public final class ScanFoldersDialog extends JDialog {
         add(registeredPanel, BorderLayout.CENTER);
         JPanel south = new ARXPanel(new BorderLayout(0, 8));
         south.setOpaque(false);
-        startupScan.setOpaque(false);
-        startupScan.addActionListener(event -> listener.onStartupScanChanged(startupScan.isSelected()));
-        sweepScan.setOpaque(false);
-        sweepScan.addActionListener(event -> listener.onSweepChanged(sweepScan.isSelected()));
+        startupScan.onAction(event -> listener.onStartupScanChanged(startupScan.isSelected()));
+        sweepScan.onAction(event -> listener.onSweepChanged(sweepScan.isSelected()));
         JPanel scanChecks = new ARXPanel();
         scanChecks.setOpaque(false);
         scanChecks.setLayout(new BoxLayout(scanChecks, BoxLayout.Y_AXIS));

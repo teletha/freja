@@ -164,8 +164,10 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     private final JButton forward = new JButton(Icons.chevron(15, Theme.MUTED, false));
     private final JButton up = new JButton(Icons.of("mdi:arrow-up", 15, Theme.MUTED));
     private final JButton reload = new JButton(Icons.refresh(15, Theme.MUTED));
-    private final JLabel pathLabel = new ARXLabel();
-    private final JLabel status = new ARXLabel();
+    private final JLabel pathLabel = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 12)).foreground(Theme.MUTED);
+    private final JLabel status = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED).padding(4, 10, 4, 10);
     private long request;
     private JDialog progressDialog;
     private JProgressBar progressBar;
@@ -342,8 +344,6 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         forward.addActionListener(event -> goForward());
         up.addActionListener(event -> goUp());
         reload.addActionListener(event -> refresh());
-        pathLabel.setFont(Theme.font(Font.PLAIN, 12));
-        pathLabel.setForeground(Theme.MUTED);
         for (JButton button : List.of(back, forward, up, reload)) {
             button.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 6, 4, 6));
             button.setContentAreaFilled(false);
@@ -429,9 +429,6 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
             int index = tileList.locationToIndex(event.getPoint());
             return index < 0 ? null : entryListModel.get(index);
         });
-        status.setFont(Theme.font(Font.PLAIN, 11));
-        status.setForeground(Theme.MUTED);
-        status.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 10, 4, 10));
         panel.add(bar, BorderLayout.NORTH);
         panel.add(listScroll, BorderLayout.CENTER);
         panel.add(status, BorderLayout.SOUTH);

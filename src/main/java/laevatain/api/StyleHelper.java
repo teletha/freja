@@ -63,6 +63,18 @@ public interface StyleHelper<C extends JComponent> {
     }
 
     /**
+     * Sets an exact font, e.g. one built by the host's theme with its own scale and family. Use this
+     * when {@link #fontFamily(String)} and {@link #fontSize(int)} cannot express the whole font.
+     *
+     * @param font the font to install
+     * @return this component
+     */
+    default C font(Font font) {
+        ((JComponent) this).setFont(font);
+        return self();
+    }
+
+    /**
      * Changes the font family while keeping the current style and size. Blank or null values leave
      * the font alone rather than installing an unusable family.
      *

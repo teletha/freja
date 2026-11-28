@@ -65,7 +65,13 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
     private final long folderId;
     private final Set<String> selected = new LinkedHashSet<>();
     private final List<Entry> entries = new ArrayList<>();
-    private final JTextField search = new ARXTextField();
+    private final JTextField search = new ARXTextField()
+            .clientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED))
+            .clientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true)
+            .clientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ラベルを検索・新規作成…")
+            .font(Theme.font(Font.PLAIN, 13))
+            .preferredSize(0, 38).maximumSize(Integer.MAX_VALUE, 38)
+            .padding(5, 0, 5, 0);
     private final JPanel list = new ARXPanel();
     private final JPanel createRow = new ARXPanel(new BorderLayout(8, 0));
     /** True while an input method is composing text, so its confirmation Enter is ignored. */
@@ -95,14 +101,6 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
         body.setOpaque(false);
         list.setOpaque(false);
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
-        search.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED));
-        search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        search.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ラベルを検索・新規作成…");
-        search.setFont(Theme.font(Font.PLAIN, 13));
-        search.setPreferredSize(new Dimension(0, 38));
-        search.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-        search.setBorder(BorderFactory.createCompoundBorder(search.getBorder(),
-                BorderFactory.createEmptyBorder(5, 0, 5, 0)));
         JScrollPane scroll = new ARXScrollPane(list);
         scroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
         scroll.getViewport().setBackground(Theme.SURFACE);

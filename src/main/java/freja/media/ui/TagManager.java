@@ -66,9 +66,16 @@ public final class TagManager extends JDialog {
     private final Runnable onChange;
     private final TagTableModel model = new TagTableModel();
     private final JTable table = new ARXTable(model);
-    private final JTextField search = new ARXTextField();
-    private final JTextField newTag = new ARXTextField();
-    private final JLabel status = new ARXLabel();
+    private final JTextField search = new ARXTextField()
+            .clientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED))
+            .clientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true)
+            .clientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "タグを検索")
+            .font(Theme.font(Font.PLAIN, 13)).maximumSize(Integer.MAX_VALUE, 34);
+    private final JTextField newTag = new ARXTextField()
+            .clientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "新しいタグ名")
+            .font(Theme.font(Font.PLAIN, 13));
+    private final JLabel status = new ARXLabel()
+            .font(Theme.font(Font.PLAIN, 11)).foreground(Theme.MUTED);
     public TagManager(Frame owner, LibraryTasks tasks, Runnable onChange) {
         super(owner, "タグを管理", true);
         this.tasks = tasks;
@@ -91,11 +98,6 @@ public final class TagManager extends JDialog {
         add(header, BorderLayout.NORTH);
         JPanel body = new ARXPanel(new BorderLayout(0, 12));
         body.setOpaque(false);
-        search.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED));
-        search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        search.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "タグを検索");
-        search.setFont(Theme.font(Font.PLAIN, 13));
-        search.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         search.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent event) {
@@ -115,8 +117,6 @@ public final class TagManager extends JDialog {
         });
         JPanel create = new ARXPanel(new BorderLayout(8, 0));
         create.setOpaque(false);
-        newTag.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "新しいタグ名");
-        newTag.setFont(Theme.font(Font.PLAIN, 13));
         newTag.addActionListener(event -> createTag());
         JButton add = primary("追加", Icons.plus(14, Color.WHITE), this::createTag);
         create.add(newTag, BorderLayout.CENTER);
@@ -156,8 +156,6 @@ public final class TagManager extends JDialog {
         add(body, BorderLayout.CENTER);
         JPanel footer = new ARXPanel(new BorderLayout());
         footer.setOpaque(false);
-        status.setFont(Theme.font(Font.PLAIN, 11));
-        status.setForeground(Theme.MUTED);
         JPanel buttons = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         buttons.setOpaque(false);
         JButton links = secondary("タグの結びつけ", Icons.tag(14, Theme.MUTED),
