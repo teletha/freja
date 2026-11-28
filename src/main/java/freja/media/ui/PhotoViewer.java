@@ -70,6 +70,9 @@ import freja.media.Photo;
 import freja.media.store.Archives;
 import freja.util.ImageTransforms;
 import imagify.Imagify;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXScrollPane;
 /**
  * A full-screen viewer with a video-site style overlay. The controls live in a separate translucent
  * window, so fading them in or out never changes the size of the photo or video underneath.
@@ -118,22 +121,22 @@ public final class PhotoViewer extends JDialog {
     private final Slider seek = new Slider(this::previewSeek, this::commitSeek);
     /** Chapters of the loaded video, used for the seek bar marks and chapter navigation. */
     private List<Mpv.Chapter> chapters = List.of();
-    private final JLabel videoTitle = new JLabel();
-    private final JLabel time = new JLabel("00:00 / 00:00");
+    private final JLabel videoTitle = new ARXLabel();
+    private final JLabel time = new ARXLabel("00:00 / 00:00");
     private final JButton slideshowPlay = button(Icons.play(15, Color.WHITE), "スライドショー再生");
     private final JButton slideshowStop = button(null, "スライドショー停止");
-    private final JLabel metadata = new JLabel();
-    private final JPanel imageBottom = new JPanel(new BorderLayout(16, 0));
+    private final JLabel metadata = new ARXLabel();
+    private final JPanel imageBottom = new ARXPanel(new BorderLayout(16, 0));
     /** A full-width transport strip under the video. */
-    private final JPanel videoControls = new JPanel(new BorderLayout(0, 6));
+    private final JPanel videoControls = new ARXPanel(new BorderLayout(0, 6));
     private JWindow controlsWindow;
-    private final JPanel controlsRoot = new JPanel(new BorderLayout());
+    private final JPanel controlsRoot = new ARXPanel(new BorderLayout());
     /**
      * A glass pane which only claims hits inside the seek bar. The bar itself stays transparent so
      * the video shows through; this catches clicks in its full height and lets every other click
      * reach the picture underneath.
      */
-    private final JPanel seekCatcher = new JPanel() {
+    private final JPanel seekCatcher = new ARXPanel() {
         @Override
         public boolean contains(int x, int y) {
             if (!controlsWindow.isVisible() || !videoControls.isVisible()) {
@@ -144,7 +147,7 @@ public final class PhotoViewer extends JDialog {
             return seekScreenBounds().contains(screen);
         }
     };
-    private final JLabel toast = new JLabel("", SwingConstants.CENTER) {
+    private final ARXLabel toast = new ARXLabel("", SwingConstants.CENTER) {
         @Override
         protected void paintComponent(Graphics graphics) {
             if (!isVisible() || getText().isEmpty()) {
@@ -164,10 +167,10 @@ public final class PhotoViewer extends JDialog {
         }
     };
     private final Timer toastTimer = new Timer(1200, event -> toast.setVisible(false));
-    private final JPanel helpPanel = new JPanel(new BorderLayout());
+    private final JPanel helpPanel = new ARXPanel(new BorderLayout());
     private JPanel topPanel;
     private JPanel bottomPanel;
-    private final JPanel toastHost = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0)) {
+    private final JPanel toastHost = new ARXPanel(new FlowLayout(FlowLayout.CENTER, 0, 0)) {
         @Override
         public boolean contains(int x, int y) {
             return false;
@@ -292,7 +295,7 @@ public final class PhotoViewer extends JDialog {
         controlsRoot.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         JButton close = circular(Icons.close(17, Color.WHITE), "閉じる");
         close.addActionListener(event -> dispose());
-        topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        topPanel = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         topPanel.setOpaque(false);
         topPanel.add(close);
         controlsRoot.add(topPanel, BorderLayout.NORTH);
@@ -304,7 +307,7 @@ public final class PhotoViewer extends JDialog {
             slideshowTimer.stop();
             updateSlideshowButtons(false);
         });
-        JPanel slideshow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        JPanel slideshow = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         slideshow.setOpaque(false);
         slideshow.add(slideshowPlay);
         slideshow.add(slideshowStop);
@@ -333,13 +336,13 @@ public final class PhotoViewer extends JDialog {
         volume.setRange(0, 100);
         volume.value(100);
         volume.setPreferredSize(new Dimension(110, 18));
-        JPanel rowLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        JPanel rowLeft = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         rowLeft.setOpaque(false);
         rowLeft.add(subtitle);
         rowLeft.add(mute);
         rowLeft.add(volume);
         rowLeft.add(time);
-        JPanel rowCentre = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
+        JPanel rowCentre = new ARXPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         rowCentre.setOpaque(false);
         rowCentre.add(prevSection);
         rowCentre.add(prevChapter);
@@ -349,16 +352,16 @@ public final class PhotoViewer extends JDialog {
         rowCentre.add(forward10);
         rowCentre.add(nextChapter);
         rowCentre.add(nextSection);
-        JPanel rowRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel rowRight = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         rowRight.setOpaque(false);
         rowRight.add(videoTitle);
-        JPanel buttons = new JPanel(new BorderLayout());
+        JPanel buttons = new ARXPanel(new BorderLayout());
         buttons.setOpaque(false);
         buttons.setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
         buttons.add(rowLeft, BorderLayout.WEST);
         buttons.add(rowCentre, BorderLayout.CENTER);
         buttons.add(rowRight, BorderLayout.EAST);
-        JPanel stack = new JPanel(new BorderLayout(0, 0));
+        JPanel stack = new ARXPanel(new BorderLayout(0, 0));
         stack.setOpaque(false);
         stack.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
         stack.add(seek, BorderLayout.NORTH);
@@ -380,7 +383,7 @@ public final class PhotoViewer extends JDialog {
         forward10.addActionListener(event -> jump(10));
         prevChapter.addActionListener(event -> jumpChapter(-1));
         nextChapter.addActionListener(event -> jumpChapter(1));
-        bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel = new ARXPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
         bottomPanel.add(imageBottom, BorderLayout.CENTER);
         bottomPanel.add(videoControls, BorderLayout.SOUTH);
@@ -401,7 +404,7 @@ public final class PhotoViewer extends JDialog {
         helpText.setOpaque(true);
         helpText.setBackground(new Color(32, 32, 32));
         helpText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-        JScrollPane helpScroll = new JScrollPane(helpText);
+        JScrollPane helpScroll = new ARXScrollPane(helpText);
         helpScroll.setBorder(BorderFactory.createEmptyBorder());
         helpScroll.getViewport().setOpaque(false);
         helpPanel.add(helpScroll, BorderLayout.CENTER);
@@ -412,12 +415,12 @@ public final class PhotoViewer extends JDialog {
         closeHelp.setBorderPainted(false);
         closeHelp.setFont(Theme.font(Font.PLAIN, 12));
         closeHelp.addActionListener(event -> toggleHelp());
-        JPanel helpFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPanel helpFooter = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         helpFooter.setOpaque(false);
         helpFooter.add(closeHelp);
         helpPanel.add(helpFooter, BorderLayout.SOUTH);
         helpPanel.setVisible(false);
-        JPanel centre = new JPanel();
+        JPanel centre = new ARXPanel();
         centre.setLayout(null);
         centre.setOpaque(false);
         centre.add(helpPanel);

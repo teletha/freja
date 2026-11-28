@@ -52,6 +52,11 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Tag;
 import freja.media.store.LibraryTasks;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXScrollPane;
+import laevatain.ARXTable;
+import laevatain.ARXTextField;
 /**
  * A dialog for creating, renaming and removing tags. Tags are colour-coded and searchable, names
  * can be edited in place, and selected rows can be renamed with a preview or removed together.
@@ -60,10 +65,10 @@ public final class TagManager extends JDialog {
     private final LibraryTasks tasks;
     private final Runnable onChange;
     private final TagTableModel model = new TagTableModel();
-    private final JTable table = new JTable(model);
-    private final JTextField search = new JTextField();
-    private final JTextField newTag = new JTextField();
-    private final JLabel status = new JLabel();
+    private final JTable table = new ARXTable(model);
+    private final JTextField search = new ARXTextField();
+    private final JTextField newTag = new ARXTextField();
+    private final JLabel status = new ARXLabel();
     public TagManager(Frame owner, LibraryTasks tasks, Runnable onChange) {
         super(owner, "タグを管理", true);
         this.tasks = tasks;
@@ -71,20 +76,20 @@ public final class TagManager extends JDialog {
         setBackground(Theme.SURFACE);
         ((JPanel) getContentPane()).setBackground(Theme.SURFACE);
         ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(20, 20, 16, 20));
-        JPanel header = new JPanel();
+        JPanel header = new ARXPanel();
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
-        JLabel title = new JLabel("タグ");
+        JLabel title = new ARXLabel("タグ");
         title.setFont(Theme.font(Font.BOLD, 20));
         title.setForeground(Theme.TEXT);
-        JLabel subtitle = new JLabel("フォルダに付けるラベルを作成・改名・削除できます。");
+        JLabel subtitle = new ARXLabel("フォルダに付けるラベルを作成・改名・削除できます。");
         subtitle.setFont(Theme.font(Font.PLAIN, 12));
         subtitle.setForeground(Theme.MUTED);
         subtitle.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
         header.add(title);
         header.add(subtitle);
         add(header, BorderLayout.NORTH);
-        JPanel body = new JPanel(new BorderLayout(0, 12));
+        JPanel body = new ARXPanel(new BorderLayout(0, 12));
         body.setOpaque(false);
         search.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, Icons.search(14, Theme.MUTED));
         search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
@@ -108,7 +113,7 @@ public final class TagManager extends JDialog {
                 updateStatus();
             }
         });
-        JPanel create = new JPanel(new BorderLayout(8, 0));
+        JPanel create = new ARXPanel(new BorderLayout(8, 0));
         create.setOpaque(false);
         newTag.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "新しいタグ名");
         newTag.setFont(Theme.font(Font.PLAIN, 13));
@@ -116,7 +121,7 @@ public final class TagManager extends JDialog {
         JButton add = primary("追加", Icons.plus(14, Color.WHITE), this::createTag);
         create.add(newTag, BorderLayout.CENTER);
         create.add(add, BorderLayout.EAST);
-        JPanel tools = new JPanel(new BorderLayout(12, 0));
+        JPanel tools = new ARXPanel(new BorderLayout(12, 0));
         tools.setOpaque(false);
         tools.add(search, BorderLayout.CENTER);
         tools.add(create, BorderLayout.EAST);
@@ -144,16 +149,16 @@ public final class TagManager extends JDialog {
                 deleteSelected();
             }
         });
-        JScrollPane scroll = new JScrollPane(table);
+        JScrollPane scroll = new ARXScrollPane(table);
         scroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
         scroll.getViewport().setBackground(Theme.SURFACE);
         body.add(scroll, BorderLayout.CENTER);
         add(body, BorderLayout.CENTER);
-        JPanel footer = new JPanel(new BorderLayout());
+        JPanel footer = new ARXPanel(new BorderLayout());
         footer.setOpaque(false);
         status.setFont(Theme.font(Font.PLAIN, 11));
         status.setForeground(Theme.MUTED);
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel buttons = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         buttons.setOpaque(false);
         JButton links = secondary("タグの結びつけ", Icons.tag(14, Theme.MUTED),
                 () -> new TagLinkEditor(this, tasks, this::changed).setVisible(true));
@@ -234,8 +239,8 @@ public final class TagManager extends JDialog {
             JOptionPane.showMessageDialog(this, "対象のタグをテーブルから選択してください", "一括改名", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        JTextField from = new JTextField();
-        JTextField to = new JTextField();
+        JTextField from = new ARXTextField();
+        JTextField to = new ARXTextField();
         JTextArea preview = new JTextArea(6, 34);
         preview.setEditable(false);
         preview.setFont(Theme.font(Font.PLAIN, 12));
@@ -258,13 +263,13 @@ public final class TagManager extends JDialog {
         from.getDocument().addDocumentListener(update);
         to.getDocument().addDocumentListener(update);
         preview.setText(buildPreview(selected, "", ""));
-        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 8));
+        JPanel panel = new ARXPanel(new GridLayout(3, 2, 10, 8));
         panel.add(label("置換する文字列"));
         panel.add(from);
         panel.add(label("置換後の文字列"));
         panel.add(to);
         panel.add(label("変更後の名前"));
-        JScrollPane previewScroll = new JScrollPane(preview);
+        JScrollPane previewScroll = new ARXScrollPane(preview);
         previewScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
         panel.add(previewScroll);
         int answer = JOptionPane.showConfirmDialog(this, panel,
@@ -317,7 +322,7 @@ public final class TagManager extends JDialog {
         return selected;
     }
     private JLabel label(String text) {
-        JLabel label = new JLabel(text);
+        JLabel label = new ARXLabel(text);
         label.setFont(Theme.font(Font.PLAIN, 12));
         label.setForeground(Theme.MUTED);
         return label;

@@ -12,6 +12,7 @@ package laevatain;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
@@ -21,12 +22,17 @@ import kiss.Variable;
 import laevatain.api.ComponentHelper;
 
 /**
- * A combo box whose items follow live translations. Each source string is translated through
- * {@link I#translate(String, Object...)} and the displayed item is replaced whenever that
- * translation changes,
- * while the selected index stays put.
+ * A combo box whose items can follow live translations. Each source string passed to
+ * {@link #setSources(String...)} is translated through {@link I#translate(String, Object...)} and the
+ * displayed item is replaced whenever that translation changes, while the selected index stays put.
+ * <p>
+ * The class is generic so it can replace a plain {@link JComboBox} of any item type; the
+ * translation helpers only make sense when {@code E} is {@link String}.
+ * </p>
+ *
+ * @param <E> the item type
  */
-public final class ARXComboBox extends JComboBox<String> implements ComponentHelper<ARXComboBox> {
+public final class ARXComboBox<E> extends JComboBox<E> implements ComponentHelper<ARXComboBox<E>> {
 
     private final List<Disposable> subscriptions = new ArrayList<>();
 
@@ -34,25 +40,39 @@ public final class ARXComboBox extends JComboBox<String> implements ComponentHel
         super();
     }
 
-    /** Replaces the items with live translations of the given source strings. */
+    public ARXComboBox(E[] items) {
+        super(items);
+    }
+
+    public ARXComboBox(ComboBoxModel<E> model) {
+        super(model);
+    }
+
+    /**
+     * Replaces the items with live translations of the given source strings. Only valid when the
+     * item type is String, since translated text cannot be inserted into another item type.
+     *
+     * @param sources the untranslated captions
+     */
+    @SuppressWarnings("unchecked")
     public void setSources(List<String> sources) {
         for (Disposable subscription : subscriptions) {
             subscription.dispose();
         }
         subscriptions.clear();
-        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) getModel();
+        DefaultComboBoxModel<E> model = (DefaultComboBoxModel<E>) getModel();
         model.removeAllElements();
         for (int index = 0; index < sources.size(); index++) {
             String source = sources.get(index);
             Variable<String> value = I.translate(source);
-            model.addElement(value.get());
+            model.addElement((E) value.get());
             int item = index;
             subscriptions.add(value.observing().to(ignored -> {
                 String shown = value.get();
                 if (!shown.equals(model.getElementAt(item))) {
                     int selected = getSelectedIndex();
                     model.removeElementAt(item);
-                    model.insertElementAt(shown, item);
+                    model.insertElementAt((E) shown, item);
                     if (selected >= 0 && selected < model.getSize()) {
                         setSelectedIndex(selected);
                     }

@@ -564,7 +564,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
         column.add(document);
         column.add(Box.createHorizontalGlue());
 
-        scroll = new TransparentScrollPane(column);
+        scroll = new ARXScrollPane(column).opaque(false).background(pageColor());
         scroll.getVerticalScrollBar().setUnitIncrement(32);
         scroll.getVerticalScrollBar().addAdjustmentListener(event -> {
             if (!animating) {
@@ -897,27 +897,4 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
         return new Font(family, style, size);
     }
 
-    /** A scroll pane which keeps its borderless, transparent chrome across UI updates. */
-    private static final class TransparentScrollPane extends JScrollPane implements ComponentHelper<TransparentScrollPane> {
-
-        TransparentScrollPane(Component view) {
-            super(view);
-            flatten();
-        }
-
-        @Override
-        public void updateUI() {
-            // Changing the theme reinstalls every UI, and the look and feel hands this scroll pane
-            // its default hairline border and an opaque viewport back. Restore the invisible chrome
-            // so the document keeps floating on the page background.
-            super.updateUI();
-            flatten();
-        }
-
-        private void flatten() {
-            border(null).opaque(false).background(pageColor());
-            getViewport().setOpaque(false);
-            getViewport().setBackground(pageColor());
-        }
-    }
 }

@@ -27,13 +27,18 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 import freja.Icons;
 import freja.Theme;
 import freja.media.Tag;
 import freja.media.store.LibraryTasks;
+
+import laevatain.ARXList;
+import laevatain.ARXScrollPane;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXCheckBox;
 /**
  * Edits one-way links between tags. Linking {@code 井上和彦 → 漫画} makes folders tagged with the
  * former show up in a search for the latter; the reverse is not implied.
@@ -42,22 +47,22 @@ final class TagLinkEditor extends JDialog {
     private final LibraryTasks tasks;
     private final Runnable onChange;
     private final DefaultListModel<Tag> sourceModel = new DefaultListModel<>();
-    private final JList<Tag> sources = new JList<>(sourceModel);
-    private final JPanel targetList = new JPanel();
+    private final ARXList<Tag> sources = new ARXList<>(sourceModel);
+    private final JPanel targetList = new ARXPanel();
     private final List<Entry> targets = new ArrayList<>();
-    private final JLabel reverse = new JLabel();
+    private final JLabel reverse = new ARXLabel();
     TagLinkEditor(Window owner, LibraryTasks tasks, Runnable onChange) {
         super(owner, "タグの結びつけ", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
         this.tasks = tasks;
         this.onChange = onChange;
         ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(18, 18, 14, 18));
-        JPanel header = new JPanel();
+        JPanel header = new ARXPanel();
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
-        JLabel title = new JLabel("タグの結びつけ");
+        JLabel title = new ARXLabel("タグの結びつけ");
         title.setFont(Theme.font(Font.BOLD, 18));
         title.setForeground(Theme.TEXT);
-        JLabel hint = new JLabel("<html>左のタグを右のタグに結びつけます。例えば「井上和彦」→「漫画」とすると、"
+        JLabel hint = new ARXLabel("<html>左のタグを右のタグに結びつけます。例えば「井上和彦」→「漫画」とすると、"
                 + "「漫画」で検索したときに井上和彦のフォルダも見つかります。結びつきは一方通行です。</html>");
         hint.setFont(Theme.font(Font.PLAIN, 11));
         hint.setForeground(Theme.MUTED);
@@ -86,23 +91,21 @@ final class TagLinkEditor extends JDialog {
                 loadTargets();
             }
         });
-        JScrollPane sourceScroll = new JScrollPane(sources);
-        sourceScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
-        sourceScroll.setPreferredSize(new Dimension(190, 320));
+        ARXScrollPane sourceScroll = new ARXScrollPane(sources)
+                .border(BorderFactory.createLineBorder(Theme.BORDER)).preferredSize(190, 320);
         targetList.setOpaque(false);
         targetList.setLayout(new BoxLayout(targetList, BoxLayout.Y_AXIS));
-        JScrollPane targetScroll = new JScrollPane(targetList);
-        targetScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
-        targetScroll.setPreferredSize(new Dimension(260, 320));
-        JPanel center = new JPanel(new java.awt.GridLayout(1, 2, 14, 0));
+        ARXScrollPane targetScroll = new ARXScrollPane(targetList)
+                .border(BorderFactory.createLineBorder(Theme.BORDER)).preferredSize(260, 320);
+        JPanel center = new ARXPanel(new java.awt.GridLayout(1, 2, 14, 0));
         center.setOpaque(false);
-        JPanel left = new JPanel(new BorderLayout(0, 6));
+        JPanel left = new ARXPanel(new BorderLayout(0, 6));
         left.setOpaque(false);
-        left.add(new JLabel("元になるタグ"), BorderLayout.NORTH);
+        left.add(new ARXLabel("元になるタグ"), BorderLayout.NORTH);
         left.add(sourceScroll, BorderLayout.CENTER);
-        JPanel right = new JPanel(new BorderLayout(0, 6));
+        JPanel right = new ARXPanel(new BorderLayout(0, 6));
         right.setOpaque(false);
-        right.add(new JLabel("結びつける先"), BorderLayout.NORTH);
+        right.add(new ARXLabel("結びつける先"), BorderLayout.NORTH);
         right.add(targetScroll, BorderLayout.CENTER);
         center.add(left);
         center.add(right);
@@ -124,10 +127,10 @@ final class TagLinkEditor extends JDialog {
         close.setContentAreaFilled(false);
         close.setFocusPainted(false);
         close.addActionListener(event -> dispose());
-        JPanel footer = new JPanel(new BorderLayout());
+        JPanel footer = new ARXPanel(new BorderLayout());
         footer.setOpaque(false);
         footer.add(reverse, BorderLayout.WEST);
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel actions = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         actions.setOpaque(false);
         actions.add(close);
         actions.add(save);
@@ -188,7 +191,7 @@ final class TagLinkEditor extends JDialog {
                 if (tag.id() == sourceId) {
                     continue;
                 }
-                JCheckBox box = new JCheckBox(tag.name(),
+                JCheckBox box = new ARXCheckBox(tag.name(),
                         data.linked().stream().anyMatch(item -> item.id() == tag.id()));
                 box.setOpaque(false);
                 box.setFont(Theme.font(Font.PLAIN, 12));

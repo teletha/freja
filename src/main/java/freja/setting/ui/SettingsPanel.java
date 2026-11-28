@@ -65,6 +65,7 @@ import laevatain.ChooserLocations;
 import laevatain.util.Language;
 
 import laevatain.api.ComponentHelper;
+import laevatain.ARXPanel;
 
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored
@@ -144,11 +145,11 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
 
     private JLabel themeCount;
 
-    private ARXComboBox themeScope;
+    private ARXComboBox<String> themeScope;
 
     private boolean expanded;
 
-    private ARXComboBox languages;
+    private ARXComboBox<String> languages;
 
     private JLabel localeValue;
 
@@ -172,7 +173,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
 
     /** Two compact buttons beside the search field: write the whole profile out, or restore one. */
     private void backupActions() {
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        JPanel actions = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         actions.setOpaque(false);
         actions.add(iconButton(Icons.exportSettings(15, Theme.MUTED), "Export settings", this::exportSettings));
         actions.add(iconButton(Icons.importSettings(15, Theme.MUTED), "Import settings", this::importSettings));
@@ -265,14 +266,14 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
         });
         moreButton.setFont(Theme.font(Font.PLAIN, 12));
         themeCount = ARXSettingsPane.value("");
-        JPanel morePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel morePanel = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         morePanel.setOpaque(false);
         morePanel.add(themeCount);
         morePanel.add(moreButton);
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("All themes"), ARXSettingsPane.Text.of("Show the representative palettes only"), morePanel)
                 .keywords("theme", "themes", "palette", "palettes"));
-        themeScope = new ARXComboBox();
+        themeScope = new ARXComboBox<>();
         themeScope.setSources(THEMES);
         themeScope.setFont(Theme.font(Font.PLAIN, 13));
         themeScope.setPreferredSize(new Dimension(160, 30));
@@ -280,7 +281,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Filter"), ARXSettingsPane.Text.of("Narrow the candidates by brightness"), themeScope)
                 .keywords("filter", "brightness", "light", "dark"));
-        themeGrid = new JPanel(new GridLayout(1, THEME_COLUMNS, 12, 12)) {
+        themeGrid = new ARXPanel(new GridLayout(1, THEME_COLUMNS, 12, 12)) {
             @Override
             public Dimension getPreferredSize() {
                 Dimension size = super.getPreferredSize();
@@ -303,7 +304,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
         showThemes();
         // The window icon is selected here and applied at once; the preview makes each design
         // recognisable even before it is chosen.
-        JComboBox<AppIcon> appIcons = new JComboBox<>(AppIcon.values());
+        ARXComboBox<AppIcon> appIcons = new ARXComboBox<>(AppIcon.values());
         appIcons.setSelectedItem(AppIcon.current());
         appIcons.setFont(Theme.font(Font.PLAIN, 13));
         appIcons.setPreferredSize(new Dimension(160, 30));
@@ -318,7 +319,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
                 return this;
             }
         });
-        JLabel iconPreview = new JLabel(AppIcon.current().thumbnail(40));
+        JLabel iconPreview = new ARXLabel(AppIcon.current().thumbnail(40));
         appIcons.addActionListener(event -> {
             if (appIcons.getSelectedItem() instanceof AppIcon chosen) {
                 AppIcon.select(chosen);
@@ -326,7 +327,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
                 listener.onAppIconChanged();
             }
         });
-        JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel iconPanel = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         iconPanel.setOpaque(false);
         iconPanel.add(iconPreview);
         iconPanel.add(appIcons);
@@ -435,7 +436,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
 
     /** The font section: family and size controls plus a live preview card. */
     private void fontSection() {
-        JComboBox<String> family = new JComboBox<>(Theme.availableFontFamilies());
+        ARXComboBox<String> family = new ARXComboBox<>(Theme.availableFontFamilies());
         family.setSelectedItem(Theme.fontFamily());
         family.setFont(Theme.font(Font.PLAIN, 13));
         family.setMinimumSize(new Dimension(240, 30));
@@ -472,10 +473,10 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
             Theme.setFileListRowHeight((Integer) rowHeight.getValue());
             listener.onFileListRowHeightChanged();
         });
-        preview = new JLabel("Aa Bb あいうえお カタカナ 0123456789 — Freja");
+        preview = new ARXLabel("Aa Bb あいうえお カタカナ 0123456789 — Freja");
         preview.setForeground(Theme.TEXT);
         preview.setHorizontalAlignment(SwingConstants.LEFT);
-        JPanel sample = new JPanel(new BorderLayout());
+        JPanel sample = new ARXPanel(new BorderLayout());
         sample.setOpaque(false);
         sample.setBorder(BorderFactory.createEmptyBorder(10, 16, 18, 16));
         sample.add(preview, BorderLayout.CENTER);
@@ -528,7 +529,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
      * result is cached, and bound captions - including this page's own - update as they arrive.
      */
     private void languageSection() {
-        languages = new ARXComboBox();
+        languages = new ARXComboBox<>();
         for (Language.Supported language : Language.SUPPORTS) {
             languages.addItem(language.name());
         }
@@ -574,7 +575,7 @@ public final class SettingsPanel extends JPanel implements ComponentHelper<Setti
             state.setText(I.translate(startup.isSelected() ? "On" : "Off"));
             state.repaint();
         });
-        JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel togglePanel = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         togglePanel.setOpaque(false);
         togglePanel.add(state);
         togglePanel.add(startup);

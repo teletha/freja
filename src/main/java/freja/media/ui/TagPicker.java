@@ -47,6 +47,10 @@ import freja.media.Tag;
 import freja.media.store.LibraryTasks;
 
 import laevatain.api.ComponentHelper;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXScrollPane;
+import laevatain.ARXTextField;
 
 /**
  * A GitHub-issue-style label picker shown as a popover instead of a modal dialog: a new-label field,
@@ -61,9 +65,9 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
     private final long folderId;
     private final Set<String> selected = new LinkedHashSet<>();
     private final List<Entry> entries = new ArrayList<>();
-    private final JTextField search = new JTextField();
-    private final JPanel list = new JPanel();
-    private final JPanel createRow = new JPanel(new BorderLayout(8, 0));
+    private final JTextField search = new ARXTextField();
+    private final JPanel list = new ARXPanel();
+    private final JPanel createRow = new ARXPanel(new BorderLayout(8, 0));
     /** True while an input method is composing text, so its confirmation Enter is ignored. */
     private boolean composing;
     private final Runnable onChange;
@@ -78,16 +82,16 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
                 .border(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Theme.BORDER),
                         BorderFactory.createEmptyBorder(12, 12, 10, 12)))
                 .preferredSize(280, 120 + ROW_HEIGHT * VISIBLE_ROWS);
-        JPanel header = new JPanel();
+        JPanel header = new ARXPanel();
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
-        JLabel title = new JLabel("タグを選択");
+        JLabel title = new ARXLabel("タグを選択");
         title.setFont(Theme.font(Font.BOLD, 14));
         title.setForeground(Theme.TEXT);
         header.add(title);
         header.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
         add(header, BorderLayout.NORTH);
-        JPanel body = new JPanel(new BorderLayout(0, 8));
+        JPanel body = new ARXPanel(new BorderLayout(0, 8));
         body.setOpaque(false);
         list.setOpaque(false);
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
@@ -99,14 +103,14 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
         search.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         search.setBorder(BorderFactory.createCompoundBorder(search.getBorder(),
                 BorderFactory.createEmptyBorder(5, 0, 5, 0)));
-        JScrollPane scroll = new JScrollPane(list);
+        JScrollPane scroll = new ARXScrollPane(list);
         scroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
         scroll.getViewport().setBackground(Theme.SURFACE);
         scroll.setPreferredSize(new Dimension(254, ROW_HEIGHT * VISIBLE_ROWS));
         scroll.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(ROW_HEIGHT);
-        JPanel top = new JPanel(new BorderLayout());
+        JPanel top = new ARXPanel(new BorderLayout());
         top.setOpaque(false);
         top.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
         top.add(search, BorderLayout.CENTER);
@@ -190,27 +194,27 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
             list.removeAll();
             for (TagView view : data.views()) {
                 Tag tag = view.tag();
-                JPanel row = new JPanel(new BorderLayout(6, 0));
+                JPanel row = new ARXPanel(new BorderLayout(6, 0));
                 row.setOpaque(true);
                 row.setBackground(Theme.SURFACE);
                 row.setMaximumSize(new Dimension(Integer.MAX_VALUE, ROW_HEIGHT));
                 row.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
                 row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                JPanel main = new JPanel(new BorderLayout(6, 0));
+                JPanel main = new ARXPanel(new BorderLayout(6, 0));
                 main.setOpaque(false);
-                JLabel label = new JLabel(tag.name());
+                JLabel label = new ARXLabel(tag.name());
                 label.setIcon(Icons.tag(12, TagColors.of(tag.name())));
                 label.setFont(Theme.font(Font.PLAIN, 12));
                 label.setForeground(Theme.TEXT);
                 main.add(label, BorderLayout.WEST);
                 List<String> linked = view.linked();
                 if (!linked.isEmpty()) {
-                    JLabel linkHint = new JLabel("→ " + String.join(", ", linked));
+                    JLabel linkHint = new ARXLabel("→ " + String.join(", ", linked));
                     linkHint.setFont(Theme.font(Font.PLAIN, 10));
                     linkHint.setForeground(Theme.MUTED);
                     main.add(linkHint, BorderLayout.CENTER);
                 }
-                JLabel check = new JLabel();
+                JLabel check = new ARXLabel();
                 check.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 2));
                 main.add(check, BorderLayout.EAST);
                 main.addMouseListener(new MouseAdapter() {
@@ -267,15 +271,15 @@ public final class TagPicker extends JPanel implements ComponentHelper<TagPicker
         }
         createRow.removeAll();
         if (!query.isEmpty() && !exact) {
-            JLabel name = new JLabel(query);
+            JLabel name = new ARXLabel(query);
             name.setFont(Theme.font(Font.PLAIN, 12));
             name.setForeground(Theme.TEXT);
             createRow.add(name, BorderLayout.WEST);
-            JLabel hint = new JLabel("  新しいラベルを作成");
+            JLabel hint = new ARXLabel("  新しいラベルを作成");
             hint.setFont(Theme.font(Font.PLAIN, 12));
             hint.setForeground(Theme.TEXT);
             createRow.add(hint, BorderLayout.CENTER);
-            createRow.add(new JLabel(Icons.plus(14, Theme.ACCENT)), BorderLayout.EAST);
+            createRow.add(new ARXLabel(Icons.plus(14, Theme.ACCENT)), BorderLayout.EAST);
             createRow.setVisible(true);
         } else {
             createRow.setVisible(false);

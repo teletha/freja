@@ -91,6 +91,10 @@ import freja.util.PathUtil;
 import imagify.Imagify;
 import laevatain.ARXButton;
 import laevatain.ARXSearchField;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXScrollPane;
+import laevatain.ARXCheckBox;
 /**
  * The main application window.
  */
@@ -121,13 +125,13 @@ public final class MainWindow extends JFrame {
      */
     private SortOrder viewSort = preferredSort();
     private final JSlider zoom = new JSlider(120, 220, 170);
-    private final JLabel statusMessage = new JLabel("準備完了");
-    private final JLabel statusCount = new JLabel();
-    private final JLabel selectionInfo = new JLabel();
+    private final JLabel statusMessage = new ARXLabel("準備完了");
+    private final JLabel statusCount = new ARXLabel();
+    private final JLabel selectionInfo = new ARXLabel();
     private final JProgressBar progress = new JProgressBar();
     private final CardLayout centerCards = new CardLayout();
-    private final JPanel center = new JPanel(centerCards);
-    private final JLabel welcomePath = new JLabel();
+    private final JPanel center = new ARXPanel(centerCards);
+    private final JLabel welcomePath = new ARXLabel();
     private final JCheckBoxMenuItem darkModeItem = new JCheckBoxMenuItem("ダークモード", Theme.isDark());
     private final JCheckBoxMenuItem inspectorItem = new JCheckBoxMenuItem("インスペクター", true);
     private ScanFoldersDialog scanFoldersDialog;
@@ -239,16 +243,16 @@ public final class MainWindow extends JFrame {
     }
     private void buildUi() {
         setLayout(new BorderLayout());
-        JPanel main = new JPanel(new BorderLayout());
+        JPanel main = new ARXPanel(new BorderLayout());
         main.add(toolbar(), BorderLayout.NORTH);
-        JScrollPane scroll = new JScrollPane(grid);
+        JScrollPane scroll = new ARXScrollPane(grid);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setBackground(Theme.BACKGROUND);
         scroll.getViewport().setBackground(Theme.BACKGROUND);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(42);
-        JPanel content = new JPanel(new BorderLayout());
+        JPanel content = new ARXPanel(new BorderLayout());
         content.add(scroll, BorderLayout.CENTER);
         center.add(content, "grid");
         center.add(welcome(), "welcome");
@@ -279,7 +283,7 @@ public final class MainWindow extends JFrame {
                 }
             }
         });
-        panes = new JPanel(new java.awt.CardLayout());
+        panes = new ARXPanel(new java.awt.CardLayout());
         panes.add(sidebarSplit, "viewer");
         SettingsPanel[] holder = new SettingsPanel[1];
         settingsPanel = new SettingsPanel(new SettingsPanel.Listener() {
@@ -381,7 +385,7 @@ public final class MainWindow extends JFrame {
     private final List<ActivityButton> activityButtons = new ArrayList<>();
     /** The VS Code-style strip on the far left which switches between the main panes. */
     private JComponent activityBar() {
-        JPanel bar = new JPanel();
+        JPanel bar = new ARXPanel();
         bar.setBackground(Theme.SIDEBAR);
         bar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Theme.BORDER));
         bar.setLayout(new BoxLayout(bar, BoxLayout.Y_AXIS));
@@ -417,7 +421,7 @@ public final class MainWindow extends JFrame {
             setMaximumSize(new Dimension(48, 48));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setToolTipText(tooltip);
-            add(new JLabel(icon), BorderLayout.CENTER);
+            add(new ARXLabel(icon), BorderLayout.CENTER);
             addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent event) {
@@ -500,13 +504,13 @@ public final class MainWindow extends JFrame {
         return bar;
     }
     private JComponent statusBar() {
-        JPanel bar = new JPanel(new BorderLayout(12, 0));
+        JPanel bar = new ARXPanel(new BorderLayout(12, 0));
         bar.setBackground(Theme.SURFACE);
         bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.BORDER), BorderFactory
                 .createEmptyBorder(6, 14, 6, 14)));
         statusMessage.setFont(Theme.font(Font.PLAIN, 11));
         statusMessage.setForeground(Theme.MUTED);
-        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel left = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         left.setOpaque(false);
         left.add(statusMessage);
         bar.add(left, BorderLayout.WEST);
@@ -514,7 +518,7 @@ public final class MainWindow extends JFrame {
         selectionInfo.setForeground(Theme.MUTED);
         selectionInfo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         bar.add(selectionInfo, BorderLayout.CENTER);
-        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        JPanel right = new ARXPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         right.setOpaque(false);
         progress.setPreferredSize(new Dimension(140, 10));
         progress.setVisible(false);
@@ -527,28 +531,28 @@ public final class MainWindow extends JFrame {
         return bar;
     }
     private JComponent welcome() {
-        JPanel outer = new JPanel(new GridBagLayout());
+        JPanel outer = new ARXPanel(new GridBagLayout());
         outer.setBackground(Theme.BACKGROUND);
-        JPanel card = new JPanel();
+        JPanel card = new ARXPanel();
         card.setOpaque(false);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        JLabel icon = new JLabel(Icons.image(72, Theme.ACCENT));
+        JLabel icon = new ARXLabel(Icons.image(72, Theme.ACCENT));
         icon.setAlignmentX(CENTER_ALIGNMENT);
         card.add(icon);
         card.add(Box.createVerticalStrut(26));
-        JLabel title = new JLabel("写真をまとめて、すぐに見つける");
+        JLabel title = new ARXLabel("写真をまとめて、すぐに見つける");
         title.setFont(Theme.font(Font.BOLD, 26));
         title.setForeground(Theme.TEXT);
         title.setAlignmentX(CENTER_ALIGNMENT);
         card.add(title);
         card.add(Box.createVerticalStrut(10));
-        JLabel description = new JLabel("フォルダを登録すると、サムネイルとメタデータを自動で作成し、");
+        JLabel description = new ARXLabel("フォルダを登録すると、サムネイルとメタデータを自動で作成し、");
         description.setFont(Theme.font(Font.PLAIN, 13));
         description.setForeground(Theme.MUTED);
         description.setAlignmentX(CENTER_ALIGNMENT);
         card.add(description);
-        JLabel description2 = new JLabel("その後の追加・変更・削除もバックグラウンドで追跡します。");
+        JLabel description2 = new ARXLabel("その後の追加・変更・削除もバックグラウンドで追跡します。");
         description2.setFont(Theme.font(Font.PLAIN, 13));
         description2.setForeground(Theme.MUTED);
         description2.setAlignmentX(CENTER_ALIGNMENT);
@@ -565,7 +569,7 @@ public final class MainWindow extends JFrame {
         welcomePath.setText("ライブラリ: " + shortenPath(library.location().toString(), 78));
         card.add(welcomePath);
         card.add(Box.createVerticalStrut(8));
-        JLabel local = new JLabel("写真は移動・変更されません。メタデータはこのコンピューターの SQLite に保存されます。");
+        JLabel local = new ARXLabel("写真は移動・変更されません。メタデータはこのコンピューターの SQLite に保存されます。");
         local.setFont(Theme.font(Font.PLAIN, 10));
         local.setForeground(Theme.FAINT);
         local.setAlignmentX(CENTER_ALIGNMENT);
@@ -1488,19 +1492,19 @@ public final class MainWindow extends JFrame {
     }
     private void showTagFilterPopup(List<freja.media.Tag> tags) {
         JPopupMenu popup = new JPopupMenu();
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        JPanel panel = new ARXPanel(new BorderLayout(10, 10));
         panel.setBackground(Theme.SURFACE);
         panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 10, 12));
         panel.setPreferredSize(new Dimension(300, 360));
         ARXSearchField filter = new ARXSearchField("タグを検索", Icons.search(14, Theme.MUTED));
         panel.add(filter, BorderLayout.NORTH);
-        JPanel list = new JPanel();
+        JPanel list = new ARXPanel();
         list.setOpaque(false);
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
         List<JPanel> rows = new ArrayList<>();
         List<freja.media.Tag> rowTags = new ArrayList<>();
         for (freja.media.Tag tag : tags) {
-            JCheckBox box = new JCheckBox(tag.name(), selectedTagIds.contains(tag.id()));
+            JCheckBox box = new ARXCheckBox(tag.name(), selectedTagIds.contains(tag.id()));
             box.setOpaque(false);
             box.setFont(Theme.font(Font.PLAIN, 13));
             box.setForeground(Theme.TEXT);
@@ -1513,11 +1517,11 @@ public final class MainWindow extends JFrame {
                 updateTagFilterButton();
                 refreshAll();
             });
-            JPanel row = new JPanel(new BorderLayout(8, 0));
+            JPanel row = new ARXPanel(new BorderLayout(8, 0));
             row.setOpaque(false);
             row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
             row.add(box, BorderLayout.CENTER);
-            JLabel count = new JLabel(tag.folderCount() + " フォルダ");
+            JLabel count = new ARXLabel(tag.folderCount() + " フォルダ");
             count.setFont(Theme.font(Font.PLAIN, 11));
             count.setForeground(Theme.MUTED);
             row.add(count, BorderLayout.EAST);
@@ -1526,7 +1530,7 @@ public final class MainWindow extends JFrame {
             list.add(row);
         }
         if (tags.isEmpty()) {
-            JLabel empty = new JLabel("タグはまだありません");
+            JLabel empty = new ARXLabel("タグはまだありません");
             empty.setFont(Theme.font(Font.PLAIN, 12));
             empty.setForeground(Theme.MUTED);
             empty.setBorder(BorderFactory.createEmptyBorder(12, 4, 12, 4));
@@ -1541,7 +1545,7 @@ public final class MainWindow extends JFrame {
             list.repaint();
         };
         filter.onTextChanged(applyFilter);
-        JScrollPane scroll = new JScrollPane(list);
+        JScrollPane scroll = new ARXScrollPane(list);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -1554,7 +1558,7 @@ public final class MainWindow extends JFrame {
         });
         clear.setFont(Theme.font(Font.PLAIN, 12));
         clear.setEnabled(!selectedTagIds.isEmpty());
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel footer = new ARXPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setOpaque(false);
         footer.add(clear);
         panel.add(footer, BorderLayout.SOUTH);

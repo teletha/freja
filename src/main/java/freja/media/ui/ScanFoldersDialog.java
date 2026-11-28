@@ -41,7 +41,12 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Folder;
 import laevatain.ARXFileChooser;
+import laevatain.ARXList;
 import freja.util.PathUtil;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXScrollPane;
+import laevatain.ARXCheckBox;
 /** Dialog for managing the folders the library watches and scans. */
 public final class ScanFoldersDialog extends JDialog {
     private static final String LOCATION_KEY = "scanFolders";
@@ -55,11 +60,11 @@ public final class ScanFoldersDialog extends JDialog {
         void onStartupScanChanged(boolean enabled);
         void onSweepChanged(boolean enabled);
     }
-    private final JCheckBox startupScan = new JCheckBox("起動時にスキャンする");
-    private final JCheckBox sweepScan = new JCheckBox("定期スキャンする（30分ごと）");
+    private final JCheckBox startupScan = new ARXCheckBox("起動時にスキャンする");
+    private final JCheckBox sweepScan = new ARXCheckBox("定期スキャンする（30分ごと）");
     private final DefaultListModel<Folder> registeredModel = new DefaultListModel<>();
-    private final JList<Folder> registeredList = new JList<>(registeredModel);
-    private final JLabel emptyHint = new JLabel("登録されているフォルダはありません");
+    private final ARXList<Folder> registeredList = new ARXList<>(registeredModel);
+    private final JLabel emptyHint = new ARXLabel("登録されているフォルダはありません");
     private final Map<String, Folder> registered = new HashMap<>();
     private Listener listener = new Listener() {
         @Override
@@ -143,36 +148,36 @@ public final class ScanFoldersDialog extends JDialog {
                 }
             }
         });
-        JScrollPane registeredScroll = new JScrollPane(registeredList);
+        JScrollPane registeredScroll = new ARXScrollPane(registeredList);
         registeredScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
-        JPanel registeredPanel = new JPanel(new BorderLayout(0, 6));
+        JPanel registeredPanel = new ARXPanel(new BorderLayout(0, 6));
         registeredPanel.setOpaque(false);
-        JLabel registeredTitle = new JLabel("監視フォルダ");
+        JLabel registeredTitle = new ARXLabel("監視フォルダ");
         registeredTitle.setToolTipText("✓ は監視中、× は監視から除外されたフォルダです");
         registeredTitle.setFont(Theme.font(Font.BOLD, 13));
         registeredTitle.setForeground(Theme.TEXT);
         emptyHint.setFont(Theme.font(Font.PLAIN, 11));
         emptyHint.setForeground(Theme.MUTED);
         emptyHint.setVisible(false);
-        JPanel registeredHeader = new JPanel(new BorderLayout(0, 4));
+        JPanel registeredHeader = new ARXPanel(new BorderLayout(0, 4));
         registeredHeader.setOpaque(false);
         registeredHeader.add(registeredTitle, BorderLayout.NORTH);
         registeredHeader.add(emptyHint, BorderLayout.SOUTH);
         registeredPanel.add(registeredHeader, BorderLayout.NORTH);
         registeredPanel.add(registeredScroll, BorderLayout.CENTER);
         add(registeredPanel, BorderLayout.CENTER);
-        JPanel south = new JPanel(new BorderLayout(0, 8));
+        JPanel south = new ARXPanel(new BorderLayout(0, 8));
         south.setOpaque(false);
         startupScan.setOpaque(false);
         startupScan.addActionListener(event -> listener.onStartupScanChanged(startupScan.isSelected()));
         sweepScan.setOpaque(false);
         sweepScan.addActionListener(event -> listener.onSweepChanged(sweepScan.isSelected()));
-        JPanel scanChecks = new JPanel();
+        JPanel scanChecks = new ARXPanel();
         scanChecks.setOpaque(false);
         scanChecks.setLayout(new BoxLayout(scanChecks, BoxLayout.Y_AXIS));
         scanChecks.add(startupScan);
         scanChecks.add(sweepScan);
-        JPanel buttons = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 6, 0));
+        JPanel buttons = new ARXPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 6, 0));
         buttons.setOpaque(false);
         JButton add = new JButton("フォルダを追加…", Icons.plus(14, Theme.MUTED));
         add.setFont(Theme.font(Font.PLAIN, 12));

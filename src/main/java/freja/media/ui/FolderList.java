@@ -49,7 +49,9 @@ import freja.Theme;
 import freja.media.Folder;
 import kiss.I;
 
+import laevatain.ARXScrollPane;
 import laevatain.api.ComponentHelper;
+import laevatain.ARXLabel;
 
 /**
  * The folder rail of the library, built on {@link JList} so only the rows inside the viewport are
@@ -71,8 +73,6 @@ public final class FolderList extends JList<Folder> implements ComponentHelper<F
      * {@link #getScrollableTracksViewportWidth()} returns true.
      */
     private static final int ROW_WIDTH = 1;
-    /** The number of pixels a wheel notch scrolls, matching the ARX navigation list. */
-    private static final int ROW_SCROLL = 28;
     private final Model model = new Model();
     private final Icon folderIcon = Icons.nav("folder", Theme.MUTED);
     private final Cell cell = new Cell();
@@ -318,17 +318,10 @@ public final class FolderList extends JList<Folder> implements ComponentHelper<F
      * folder name cannot push the count out of sight.
      */
     public JScrollPane scrolled() {
-        JScrollPane scroll = new JScrollPane(this);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setOpaque(true);
-        scroll.setBackground(Theme.SIDEBAR);
-        scroll.getViewport().setOpaque(true);
-        scroll.getViewport().setBackground(Theme.SIDEBAR);
-        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        ARXScrollPane scroll = new ARXScrollPane(this).background(Theme.SIDEBAR);
         // The rail keeps wheel scrolling (the scroll pane forwards wheel events to its viewport even
         // without a visible bar) but never shows a vertical thumb: the rows own the whole width.
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        scroll.getVerticalScrollBar().setUnitIncrement(ROW_SCROLL);
         // The wheel belongs to the scroll pane: a wheel listener on the list itself would stop
         // AWT from forwarding the event to its ancestor, which is what made the rail ignore the
         // wheel while its scroll bar still worked. Clearing the hover here keeps the highlight
@@ -433,9 +426,9 @@ public final class FolderList extends JList<Folder> implements ComponentHelper<F
     }
     /** The row cells are painted at the viewport width, so the count is never clipped. */
     private final class Cell extends JPanel implements ListCellRenderer<Folder> {
-        private final JLabel iconLabel = new JLabel();
-        private final JLabel title = new JLabel();
-        private final JLabel trailing = new JLabel();
+        private final JLabel iconLabel = new ARXLabel();
+        private final JLabel title = new ARXLabel();
+        private final JLabel trailing = new ARXLabel();
         private boolean selectedCell;
         private boolean hoverCell;
         Cell() {

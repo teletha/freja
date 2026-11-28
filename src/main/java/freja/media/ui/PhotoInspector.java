@@ -39,6 +39,9 @@ import freja.Theme;
 import freja.media.Photo;
 
 import laevatain.api.ComponentHelper;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
+import laevatain.ARXScrollPane;
 
 /**
  * The details panel shown next to the thumbnail grid.
@@ -52,8 +55,8 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         void onRating(Photo photo, int rating);
         void onCaption(Photo photo, String caption);
     }
-    private final JLabel fileName = new JLabel();
-    private final JLabel folderName = new JLabel();
+    private final JLabel fileName = new ARXLabel();
+    private final JLabel folderName = new ARXLabel();
     private final JLabel dateValue = infoValue();
     private final JLabel dimensionsValue = infoValue();
     private final JLabel sizeValue = infoValue();
@@ -87,7 +90,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
     public PhotoInspector() {
         layout(new BorderLayout()).background(Theme.SURFACE).preferredSize(308, 600)
                 .border(BorderFactory.createMatteBorder(0, 1, 0, 0, Theme.BORDER));
-        JPanel body = new JPanel();
+        JPanel body = new ARXPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(Theme.SURFACE);
         body.setBorder(BorderFactory.createEmptyBorder(14, 16, 18, 16));
@@ -101,7 +104,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         folderName.setAlignmentX(LEFT_ALIGNMENT);
         body.add(folderName);
         body.add(Box.createVerticalStrut(12));
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        JPanel actions = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         actions.setOpaque(false);
         actions.setAlignmentX(LEFT_ALIGNMENT);
         open.putClientProperty(FlatClientProperties.STYLE, "background:#2E6BE6; foreground:#FFFFFF; borderWidth:0; hoverBackground:#1F52B8; pressedBackground:#1A459B");
@@ -117,10 +120,10 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         actions.add(favorite);
         body.add(actions);
         body.add(Box.createVerticalStrut(10));
-        JPanel rating = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 0));
+        JPanel rating = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 1, 0));
         rating.setOpaque(false);
         rating.setAlignmentX(LEFT_ALIGNMENT);
-        JLabel ratingLabel = new JLabel("評価");
+        JLabel ratingLabel = new ARXLabel("評価");
         ratingLabel.setFont(Theme.font(Font.PLAIN, 11));
         ratingLabel.setForeground(Theme.MUTED);
         ratingLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 7));
@@ -138,7 +141,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         }
         body.add(rating);
         body.add(Box.createVerticalStrut(10));
-        JPanel info = new JPanel(new GridBagLayout());
+        JPanel info = new ARXPanel(new GridBagLayout());
         info.setOpaque(false);
         info.setAlignmentX(LEFT_ALIGNMENT);
         addInfo(info, "撮影日", dateValue);
@@ -149,7 +152,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         addInfo(info, "露出", exposureValue);
         body.add(info);
         body.add(Box.createVerticalStrut(12));
-        JLabel captionLabel = new JLabel("キャプション");
+        JLabel captionLabel = new ARXLabel("キャプション");
         captionLabel.setFont(Theme.font(Font.BOLD, 11));
         captionLabel.setForeground(Theme.MUTED);
         captionLabel.setAlignmentX(LEFT_ALIGNMENT);
@@ -187,7 +190,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         saveCaption.addActionListener(event -> commitCaption());
         body.add(saveCaption);
         body.add(Box.createVerticalStrut(12));
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel footer = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         footer.setOpaque(false);
         footer.setAlignmentX(LEFT_ALIGNMENT);
         JButton reveal = new JButton("エクスプローラーで表示");
@@ -203,7 +206,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         footer.add(reveal);
         body.add(footer);
         body.add(Box.createVerticalGlue());
-        JScrollPane scroll = new JScrollPane(body);
+        JScrollPane scroll = new ARXScrollPane(body);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(28);
@@ -362,7 +365,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         left.gridy = panel.getComponentCount() / 2;
         left.anchor = GridBagConstraints.NORTHWEST;
         left.insets = new Insets(0, 0, 6, 8);
-        JLabel name = new JLabel(label);
+        JLabel name = new ARXLabel(label);
         name.setFont(Theme.font(Font.PLAIN, 11));
         name.setForeground(Theme.MUTED);
         name.setPreferredSize(new Dimension(52, 17));
@@ -377,7 +380,7 @@ public final class PhotoInspector extends JPanel implements ComponentHelper<Phot
         panel.add(value, right);
     }
     private static JLabel infoValue() {
-        JLabel label = new JLabel("—");
+        JLabel label = new ARXLabel("—");
         label.setFont(Theme.font(Font.PLAIN, 12));
         label.setForeground(Theme.TEXT);
         return label;

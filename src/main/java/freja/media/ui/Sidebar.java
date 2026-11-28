@@ -25,11 +25,11 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import freja.Icons;
 import freja.Theme;
+import laevatain.ARXScrollPane;
 import laevatain.ARXSectionHeader;
 import laevatain.ARXSectionListPanel;
 import freja.media.Folder;
@@ -44,6 +44,7 @@ import laevatain.ARXRadioButtonMenuItem;
 import laevatain.ARXTextBinding;
 
 import laevatain.api.ComponentHelper;
+import laevatain.ARXPanel;
 
 /**
  * The navigation sidebar: a library list built from the reusable {@link ARXNavList} and the
@@ -72,8 +73,8 @@ public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
     }
     private final ARXNavList library = new ARXNavList();
     private final FolderList folders = new FolderList();
-    private final JPanel folderCard = new JPanel(new CardLayout());
-    private final JLabel folderCount = new JLabel();
+    private final JPanel folderCard = new ARXPanel(new CardLayout());
+    private final JLabel folderCount = new ARXLabel();
     private Listener listener = new Listener() {
         @Override
         public void onSelect(Mode mode, long folderId) {
@@ -115,7 +116,7 @@ public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
         layout(new BorderLayout()).background(Theme.SIDEBAR)
                 .preferredSize(246, 600)
                 .border(BorderFactory.createMatteBorder(0, 0, 0, 1, Theme.BORDER));
-        JPanel top = new JPanel();
+        JPanel top = new ARXPanel();
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setBorder(BorderFactory.createEmptyBorder(18, 16, 8, 16));
@@ -129,7 +130,7 @@ public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
         // A BoxLayout column hands a child only what it asked for and centres the sliver, so the
         // list goes into a stretching holder: the rows then span the sidebar instead of parking on
         // the right.
-        JPanel libraryHolder = new JPanel(new BorderLayout());
+        JPanel libraryHolder = new ARXPanel(new BorderLayout());
         libraryHolder.setOpaque(false);
         libraryHolder.add(library, BorderLayout.CENTER);
         top.add(libraryHolder);
@@ -154,7 +155,7 @@ public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
         folderCard.setOpaque(true);
         folderCard.setBackground(Theme.SIDEBAR);
         ARXSectionListPanel listPanel = new ARXSectionListPanel(title, folderCount, folders.scrolled(), actions);
-        ARXSectionListPanel emptyPanel = new ARXSectionListPanel(title, folderCount, new JScrollPane(empty), actions);
+        ARXSectionListPanel emptyPanel = new ARXSectionListPanel(title, folderCount, new ARXScrollPane(empty), actions);
         for (ARXSectionListPanel pane : new ARXSectionListPanel[] {listPanel, emptyPanel}) {
             pane.setBorder(BorderFactory.createEmptyBorder(0, 16, 8, 16));
         }

@@ -93,7 +93,14 @@ import freja.util.FileIcons;
 import freja.util.PathUtil;
 import psychopath.Progress;
 
+import laevatain.ARXComboBox;
+import laevatain.ARXList;
+import laevatain.ARXScrollPane;
+import laevatain.ARXSplitPane;
+import laevatain.ARXTable;
 import laevatain.api.ComponentHelper;
+import laevatain.ARXLabel;
+import laevatain.ARXPanel;
 
 /** A file manager with pinned folder tabs and a detailed file list, without a directory tree. */
 public final class FileManagerPanel extends JPanel implements ComponentHelper<FileManagerPanel> {
@@ -129,7 +136,7 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
             }
         }
     };
-    private final JTable table = new JTable(tableModel);
+    private final ARXTable table = new ARXTable(tableModel);
 
     /** The three explorer-style presentations of the same directory. */
     private enum View {
@@ -138,7 +145,7 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
 
     private View view = View.DETAILS;
 
-    private final JScrollPane listScroll = new JScrollPane(table);
+    private final ARXScrollPane listScroll = new ARXScrollPane(table);
 
     private JPanel homePanel;
 
@@ -150,16 +157,16 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
 
     private final DefaultListModel<FileBrowser.Entry> entryListModel = new DefaultListModel<>();
 
-    private final JList<FileBrowser.Entry> contentList = new JList<>(entryListModel);
+    private final ARXList<FileBrowser.Entry> contentList = new ARXList<>(entryListModel);
 
-    private final JList<FileBrowser.Entry> tileList = new JList<>(entryListModel);
+    private final ARXList<FileBrowser.Entry> tileList = new ARXList<>(entryListModel);
 
     private final JButton back = new JButton(Icons.chevron(15, Theme.MUTED, true));
     private final JButton forward = new JButton(Icons.chevron(15, Theme.MUTED, false));
     private final JButton up = new JButton(Icons.of("mdi:arrow-up", 15, Theme.MUTED));
     private final JButton reload = new JButton(Icons.refresh(15, Theme.MUTED));
-    private final JLabel pathLabel = new JLabel();
-    private final JLabel status = new JLabel();
+    private final JLabel pathLabel = new ARXLabel();
+    private final JLabel status = new ARXLabel();
     private long request;
     private JDialog progressDialog;
     private JProgressBar progressBar;
@@ -168,13 +175,11 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         this.listener = listener;
         this.tabs = new FileTabs(this::tabsChanged);
         layout(new BorderLayout()).background(Theme.BACKGROUND);
-        listScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-        listScroll.setBackground(Theme.BACKGROUND);
-        listScroll.getViewport().setBackground(Theme.BACKGROUND);
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabPane(), filePane());
+        listScroll.background(Theme.BACKGROUND);
+        ARXSplitPane split = new ARXSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabPane(), filePane());
         split.setDividerSize(5);
         split.setResizeWeight(0.0);
-        split.setBorder(null);
+        split.border(null);
         add(split, BorderLayout.CENTER);
         tabsChanged();
         installKeys();
@@ -327,9 +332,9 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     }
     /** The right side: navigation bar and the detailed file table. */
     private JPanel filePane() {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new ARXPanel(new BorderLayout());
         panel.setBackground(Theme.BACKGROUND);
-        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
+        JPanel bar = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
         bar.setBackground(Theme.SURFACE);
         back.setToolTipText("戻る (B)");
         forward.setToolTipText("進む (N)");
@@ -348,7 +353,7 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         }
         bar.add(pathLabel);
 
-        JComboBox<String> views = new JComboBox<>(new String[] {"詳細表示", "コンテンツ表示", "並べて表示"});
+        ARXComboBox<String> views = new ARXComboBox<>(new String[] {"詳細表示", "コンテンツ表示", "並べて表示"});
         views.setFont(Theme.font(Font.PLAIN, 11));
         views.setPreferredSize(new Dimension(112, 26));
         views.setFocusable(false);
@@ -774,9 +779,9 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     }
     private void begin(String title) {
         progressDialog = new JDialog(SwingUtilities.getWindowAncestor(this), title, java.awt.Dialog.ModalityType.MODELESS);
-        progressLabel = new JLabel("準備中...");
+        progressLabel = new ARXLabel("準備中...");
         progressBar = new JProgressBar(0, 100);
-        JPanel body = new JPanel(new BorderLayout(8, 8));
+        JPanel body = new ARXPanel(new BorderLayout(8, 8));
         body.setBorder(javax.swing.BorderFactory.createEmptyBorder(12, 12, 12, 12));
         body.add(progressLabel, BorderLayout.NORTH);
         body.add(progressBar, BorderLayout.CENTER);
@@ -883,9 +888,9 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     /** The virtual home: collapsible drive and network sections, styled like Files. */
     private JPanel homePane() {
         homeContent = new HomeContent();
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new ARXPanel(new BorderLayout());
         panel.setBackground(Theme.BACKGROUND);
-        JScrollPane scroll = new JScrollPane(homeContent);
+        JScrollPane scroll = new ARXScrollPane(homeContent);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         scroll.setBackground(Theme.BACKGROUND);
@@ -917,13 +922,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
 
     /** Folders the user added from a tab's context menu. */
     private void addFavoriteSection() {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        JPanel header = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        JLabel label = new JLabel("お気に入り");
+        JLabel label = new ARXLabel("お気に入り");
         label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(Icons.of("mdi:star", 16, Theme.MUTED)));
+        header.add(new ARXLabel(Icons.of("mdi:star", 16, Theme.MUTED)));
         header.add(label);
         homeContent.add(header);
 
@@ -932,7 +937,7 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         items.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 18, 6, 0));
         List<Path> favorites = FavoriteFolders.folders();
         if (favorites.isEmpty()) {
-            JLabel empty = new JLabel("お気に入りフォルダはありません");
+            JLabel empty = new ARXLabel("お気に入りフォルダはありません");
             empty.setFont(Theme.fileListFont());
             empty.setForeground(Theme.MUTED);
             items.add(empty);
@@ -997,13 +1002,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
 
     /** Standard shell folders, with the localized Japanese name as a fallback. */
     private void addPinnedSection() {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        JPanel header = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        JLabel label = new JLabel("システムフォルダ");
+        JLabel label = new ARXLabel("システムフォルダ");
         label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(Icons.folder(16, Theme.MUTED)));
+        header.add(new ARXLabel(Icons.folder(16, Theme.MUTED)));
         header.add(label);
         homeContent.add(header);
 
@@ -1039,13 +1044,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     }
 
     private void addSystemSection() {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        JPanel header = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        JLabel label = new JLabel("システムツール");
+        JLabel label = new ARXLabel("システムツール");
         label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(Icons.settings(16, Theme.MUTED)));
+        header.add(new ARXLabel(Icons.settings(16, Theme.MUTED)));
         header.add(label);
         homeContent.add(header);
 
@@ -1077,13 +1082,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         tile.setMinimumSize(size);
         tile.setMaximumSize(size);
         tile.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 8, 5, 8));
-        JLabel label = new JLabel(truncate(name, 24));
+        JLabel label = new ARXLabel(truncate(name, 24));
         label.setFont(Theme.font(Font.PLAIN, 12));
         label.setForeground(Theme.TEXT);
-        tile.add(new JLabel(icon), BorderLayout.WEST);
+        tile.add(new ARXLabel(icon), BorderLayout.WEST);
         tile.add(label, BorderLayout.CENTER);
         if (hint != null) {
-            JLabel key = new JLabel(hint);
+            JLabel key = new ARXLabel(hint);
             key.setFont(Theme.font(Font.BOLD, 11));
             key.setForeground(Theme.MUTED);
             tile.add(key, BorderLayout.EAST);
@@ -1118,13 +1123,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     }
 
     private void addHomeSection(String title, String section, Icon icon) {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        JPanel header = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         header.setOpaque(false);
         header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        JLabel label = new JLabel(title);
+        JLabel label = new ARXLabel(title);
         label.setFont(Theme.font(Font.BOLD, 13));
         label.setForeground(Theme.TEXT);
-        header.add(new JLabel(icon));
+        header.add(new ARXLabel(icon));
         header.add(label);
         homeContent.add(header);
 
@@ -1133,7 +1138,7 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         items.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 18, 6, 0));
         List<FileBrowser.Entry> found = entries.stream().filter(entry -> section.equals(entry.section())).toList();
         if (found.isEmpty()) {
-            JLabel empty = new JLabel(section.equals("ネットワーク")
+            JLabel empty = new ARXLabel(section.equals("ネットワーク")
                     ? "ネットワークの場所はありませんでした" : "ドライブはありませんでした");
             empty.setFont(Theme.fileListFont());
             empty.setForeground(Theme.MUTED);
@@ -1154,12 +1159,12 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
         tile.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 8, 5, 8));
         boolean network = "ネットワーク".equals(entry.section());
         Icon cardIcon = network ? nativeIcon(entry) : Icons.of("iconoir:hard-drive", 20, Theme.MUTED);
-        JLabel icon = new JLabel(cardIcon != null ? cardIcon : glyphIcon(network, 20));
+        JLabel icon = new ARXLabel(cardIcon != null ? cardIcon : glyphIcon(network, 20));
         tile.add(icon, BorderLayout.WEST);
-        JPanel text = new JPanel();
+        JPanel text = new ARXPanel();
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
         text.setOpaque(false);
-        JLabel name = new JLabel(truncate(entry.name(), 24));
+        JLabel name = new ARXLabel(truncate(entry.name(), 24));
         name.setFont(Theme.font(Font.PLAIN, 12));
         name.setForeground(Theme.TEXT);
         name.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -1171,13 +1176,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
             int percent = (int) Math.round(entry.free() * 100.0 / entry.total());
             int used = 100 - percent;
             Font detailFont = Theme.fileListFont();
-            JPanel detail = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            JPanel detail = new ARXPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
             detail.setOpaque(false);
             detail.setAlignmentX(Component.LEFT_ALIGNMENT);
-            JLabel sizes = new JLabel("残り " + humanSize(entry.free()) + " / " + humanSize(entry.total()) + " ");
+            JLabel sizes = new ARXLabel("残り " + humanSize(entry.free()) + " / " + humanSize(entry.total()) + " ");
             sizes.setFont(detailFont);
             sizes.setForeground(Theme.MUTED);
-            JLabel ratio = new JLabel("(" + percent + "%)");
+            JLabel ratio = new ARXLabel("(" + percent + "%)");
             ratio.setFont(detailFont);
             ratio.setForeground(used >= 90 ? Theme.DANGER : used >= 70 ? Theme.GOLD : Theme.MUTED);
             detail.add(sizes);
@@ -1429,13 +1434,13 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     /** Explorer-style content view: a large icon beside the name and its details. */
     private static final class ContentRenderer extends JPanel implements ListCellRenderer<FileBrowser.Entry> {
 
-        private final JLabel icon = new JLabel();
-        private final JLabel name = new JLabel();
-        private final JLabel info = new JLabel();
+        private final JLabel icon = new ARXLabel();
+        private final JLabel name = new ARXLabel();
+        private final JLabel info = new ARXLabel();
 
         ContentRenderer() {
             setLayout(new BorderLayout(12, 0));
-            JPanel text = new JPanel(new java.awt.GridLayout(2, 1));
+            JPanel text = new ARXPanel(new java.awt.GridLayout(2, 1));
             text.setOpaque(false);
             text.add(name);
             text.add(info);
@@ -1462,16 +1467,16 @@ public final class FileManagerPanel extends JPanel implements ComponentHelper<Fi
     /** Explorer-style tiles: a grid of large icons with a short caption. */
     private static final class TileRenderer extends JPanel implements ListCellRenderer<FileBrowser.Entry> {
 
-        private final JLabel icon = new JLabel();
-        private final JLabel name = new JLabel();
-        private final JLabel info = new JLabel();
+        private final JLabel icon = new ARXLabel();
+        private final JLabel name = new ARXLabel();
+        private final JLabel info = new ARXLabel();
 
         TileRenderer() {
             setLayout(new BorderLayout(4, 4));
             icon.setHorizontalAlignment(SwingConstants.CENTER);
             name.setHorizontalAlignment(SwingConstants.CENTER);
             info.setHorizontalAlignment(SwingConstants.CENTER);
-            JPanel caption = new JPanel(new java.awt.GridLayout(2, 1));
+            JPanel caption = new ARXPanel(new java.awt.GridLayout(2, 1));
             caption.setOpaque(false);
             caption.add(name);
             caption.add(info);

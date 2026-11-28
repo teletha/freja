@@ -603,15 +603,7 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
         holder.setOpaque(true);
         holder.setBackground(navBackground());
         holder.add(this, BorderLayout.NORTH);
-        JScrollPane scroll = new JScrollPane(holder);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setOpaque(true);
-        scroll.setBackground(navBackground());
-        scroll.getViewport().setOpaque(true);
-        scroll.getViewport().setBackground(navBackground());
-        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.getVerticalScrollBar().setUnitIncrement(28);
-        return scroll;
+        return new ARXScrollPane(holder).background(navBackground());
     }
 
     private void select(String key, boolean notify) {

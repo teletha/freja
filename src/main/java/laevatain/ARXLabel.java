@@ -24,7 +24,7 @@ import laevatain.api.LabelHelper;
  * subscription, so
  * the caption stays in sync when the interface language changes.
  */
-public final class ARXLabel extends JLabel implements ComponentHelper<ARXLabel>, LabelHelper<ARXLabel> {
+public class ARXLabel extends JLabel implements ComponentHelper<ARXLabel>, LabelHelper<ARXLabel> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 
