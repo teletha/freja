@@ -92,8 +92,11 @@ import freja.setting.WindowSettings;
 import freja.util.FileIcons;
 import freja.util.PathUtil;
 import psychopath.Progress;
+
+import laevatain.api.ComponentHelper;
+
 /** A file manager with pinned folder tabs and a detailed file list, without a directory tree. */
-public final class FileManagerPanel extends JPanel {
+public final class FileManagerPanel extends JPanel implements ComponentHelper<FileManagerPanel> {
     public interface Listener {
         /** Opens a supported image or video in Freja's own viewer. */
         void openMedia(Path path);
@@ -164,8 +167,7 @@ public final class FileManagerPanel extends JPanel {
     public FileManagerPanel(Listener listener) {
         this.listener = listener;
         this.tabs = new FileTabs(this::tabsChanged);
-        setLayout(new BorderLayout());
-        setBackground(Theme.BACKGROUND);
+        layout(new BorderLayout()).background(Theme.BACKGROUND);
         listScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         listScroll.setBackground(Theme.BACKGROUND);
         listScroll.getViewport().setBackground(Theme.BACKGROUND);

@@ -48,6 +48,9 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Folder;
 import kiss.I;
+
+import laevatain.api.ComponentHelper;
+
 /**
  * The folder rail of the library, built on {@link JList} so only the rows inside the viewport are
  * painted. A library which discovers ten thousand directories builds no components for the rows
@@ -58,7 +61,7 @@ import kiss.I;
  * icon, an ellipsised title and a right-aligned count.
  * </p>
  */
-public final class FolderList extends JList<Folder> {
+public final class FolderList extends JList<Folder> implements ComponentHelper<FolderList> {
     /** The height of a row, matching the ARX navigation list's touch target. */
     private static final int ROW_HEIGHT = 38;
     /**
@@ -92,16 +95,13 @@ public final class FolderList extends JList<Folder> {
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setFixedCellHeight(ROW_HEIGHT);
         setFixedCellWidth(ROW_WIDTH);
-        setBackground(Theme.SIDEBAR);
-        setForeground(Theme.TEXT);
-        setOpaque(true);
-        setFocusable(true);
-        setBorder(BorderFactory.createEmptyBorder());
+        background(Theme.SIDEBAR).foreground(Theme.TEXT).opaque(true).focusable(true)
+                .border(BorderFactory.createEmptyBorder());
         installInteraction();
         installed = true;
         // An empty tooltip registers the list with the tooltip manager; the per-row text arrives
         // from getToolTipText(MouseEvent) below.
-        setToolTipText("");
+        tooltip("");
         addListSelectionListener(event -> {
             if (syncing || event.getValueIsAdjusting()) {
                 return;
@@ -150,8 +150,7 @@ public final class FolderList extends JList<Folder> {
         setFixedCellHeight(ROW_HEIGHT);
         setFixedCellWidth(ROW_WIDTH);
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        setBackground(Theme.SIDEBAR);
-        setForeground(Theme.TEXT);
+        background(Theme.SIDEBAR).foreground(Theme.TEXT);
         installInteraction();
     }
     /** Replaces Swing's mouse handler with one which reports every press exactly once. */

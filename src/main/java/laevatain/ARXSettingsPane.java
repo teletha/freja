@@ -79,7 +79,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
     }
 
     /** One searchable settings row. */
-    public static final class Row extends JPanel {
+    public static final class Row extends JPanel implements ComponentHelper<Row> {
 
         private final ARXWrapLabel caption = new ARXWrapLabel();
 
@@ -89,18 +89,16 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
         private final Set<String> terms = new LinkedHashSet<>();
 
         private Row(Variable<String> title, Variable<String> hint, Component control) {
-            setOpaque(false);
-            setBorder(BorderFactory.createEmptyBorder(13, 16, 13, 16));
-            setLayout(new BorderLayout(16, 0));
-            setAlignmentX(Component.LEFT_ALIGNMENT);
+            opaque(false).border(BorderFactory.createEmptyBorder(13, 16, 13, 16))
+                    .layout(new BorderLayout(16, 0)).alignmentX(Component.LEFT_ALIGNMENT);
 
             JPanel text = new JPanel();
             text.setOpaque(false);
             text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
             caption.setFont(labelFont());
-            caption.setForeground(textColor());
+            caption.foreground(textColor());
             description.setFont(hintFont());
-            description.setForeground(mutedColor());
+            description.foreground(mutedColor());
             text.add(caption);
             text.add(description);
 
@@ -114,11 +112,11 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
                 hint.observing().to(value -> {
                     description.setSource(value);
                     // A row without a description stays on one line.
-                    description.setVisible(value != null && !value.isEmpty());
+                    description.visible(value != null && !value.isEmpty());
                     remember(value);
                 });
             } else {
-                description.setVisible(false);
+                description.visible(false);
             }
             add(text, BorderLayout.CENTER);
             // Anchoring the control EAST keeps it flush with the right edge while the extra cell
@@ -173,7 +171,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
     }
 
     /** A rounded card which re-lays itself around the rows a query leaves standing. */
-    public static final class Card extends JPanel {
+    public static final class Card extends JPanel implements ComponentHelper<Card> {
 
         private final List<Row> rows = new ArrayList<>();
 
@@ -190,11 +188,10 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
             for (int index = 1; index < entries.size(); index++) {
                 hairlines.add(divider());
             }
-            setOpaque(true);
-            setBackground(surfaceColor());
-            setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), hairlineColor(), 1, 8));
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            setAlignmentX(Component.LEFT_ALIGNMENT);
+            opaque(true).background(surfaceColor())
+                    .border(new FlatLineBorder(new Insets(1, 1, 1, 1), hairlineColor(), 1, 8))
+                    .layout(new BoxLayout(this, BoxLayout.Y_AXIS))
+                    .alignmentX(Component.LEFT_ALIGNMENT);
             layout(true);
         }
 
@@ -215,7 +212,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
             // along with it. Only do it when the content actually changed.
             if (same(wanted)) {
                 shown = !wanted.isEmpty();
-                setVisible(shown);
+                visible(shown);
                 return;
             }
             removeAll();
@@ -223,7 +220,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
                 add(component);
             }
             shown = !wanted.isEmpty();
-            setVisible(shown);
+            visible(shown);
             revalidate();
             repaint();
         }
@@ -258,14 +255,12 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
     }
 
     /** A block of a section which is not a card: a tile grid, a chart, anything with keywords. */
-    public static final class Block extends JPanel {
+    public static final class Block extends JPanel implements ComponentHelper<Block> {
 
         private final Set<String> terms = new LinkedHashSet<>();
 
         private Block(Component component, List<String> keywords, String origin) {
-            setOpaque(false);
-            setLayout(new BorderLayout());
-            setAlignmentX(Component.LEFT_ALIGNMENT);
+            opaque(false).layout(new BorderLayout()).alignmentX(Component.LEFT_ALIGNMENT);
             add(component, BorderLayout.CENTER);
             remember(origin);
             keywords.forEach(this::remember);
@@ -313,7 +308,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
     }
 
     /** One anchored page of the document. */
-    public static final class Section extends JPanel {
+    public static final class Section extends JPanel implements ComponentHelper<Section> {
 
         private final String id;
 
@@ -332,10 +327,8 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
 
         private Section(String id, Text title, Text subtitle) {
             this.id = id;
-            setName(id);
-            setOpaque(false);
-            setLayout(new GridBagLayout());
-            setAlignmentX(Component.LEFT_ALIGNMENT);
+            name(id);
+            opaque(false).layout(new GridBagLayout()).alignmentX(Component.LEFT_ALIGNMENT);
             heading.setFont(titleFont());
             heading.setForeground(textColor());
             hint.setFont(subtitleFont());
@@ -419,11 +412,11 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
                     // A block belongs to the page: it stays while a card next to it answers, so a
                     // search for "theme" keeps the tile grid with the theme rows above it.
                     boolean visible = named || anyCard || block.matches(needle);
-                    block.setVisible(visible);
+                    block.visible(visible);
                     any = any || visible;
                 }
             }
-            setVisible(any);
+            visible(any);
             revalidate();
             return any;
         }
@@ -539,21 +532,18 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
     }
 
     private ARXSettingsPane(Variable<String> railTitle, int railWidth) {
-        setLayout(new BorderLayout());
-        setOpaque(true);
-        setBackground(pageColor());
+        layout(new BorderLayout()).opaque(true).background(pageColor());
 
         rail.setSection(railTitle.get());
         railTitle.observing().to(rail::setSection);
         rail.setOnSelect(this::show);
         ARXSectionListPanel railPane = new ARXSectionListPanel(rail.scrolled());
-        railPane.setOpaque(true);
-        railPane.setBackground(navColor());
-        railPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, hairlineColor()), BorderFactory
-                .createEmptyBorder(20, 16, 16, 16)));
-        railPane.setMinimumSize(new Dimension(railWidth, 0));
-        railPane.setPreferredSize(new Dimension(railWidth, 0));
-        railPane.setMaximumSize(new Dimension(railWidth, Integer.MAX_VALUE));
+        railPane.opaque(true).background(navColor())
+                .border(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, hairlineColor()), BorderFactory
+                        .createEmptyBorder(20, 16, 16, 16)))
+                .minimumSize(new Dimension(railWidth, 0))
+                .preferredSize(new Dimension(railWidth, 0))
+                .maximumSize(new Dimension(railWidth, Integer.MAX_VALUE));
         add(railPane, BorderLayout.WEST);
 
         document.setOpaque(false);
@@ -911,7 +901,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
     }
 
     /** A scroll pane which keeps its borderless, transparent chrome across UI updates. */
-    private static final class TransparentScrollPane extends JScrollPane {
+    private static final class TransparentScrollPane extends JScrollPane implements ComponentHelper<TransparentScrollPane> {
 
         TransparentScrollPane(Component view) {
             super(view);
@@ -928,9 +918,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
         }
 
         private void flatten() {
-            setBorder(null);
-            setOpaque(false);
-            setBackground(pageColor());
+            border(null).opaque(false).background(pageColor());
             getViewport().setOpaque(false);
             getViewport().setBackground(pageColor());
         }

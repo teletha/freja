@@ -64,6 +64,8 @@ import laevatain.ARXToggle;
 import laevatain.ChooserLocations;
 import laevatain.util.Language;
 
+import laevatain.api.ComponentHelper;
+
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored
  * sections, glide scrolling and cards - filled with the application's appearance, font, language
@@ -71,7 +73,7 @@ import laevatain.util.Language;
  * {@link I#translate(String, Object...)},
  * so both the page and its search follow the language picked on the language section.
  */
-public final class SettingsPanel extends JPanel {
+public final class SettingsPanel extends JPanel implements ComponentHelper<SettingsPanel> {
     /** Notifications sent back to the owner after a setting changed. */
     public interface Listener {
         void onFontChanged(float ratio);
@@ -154,9 +156,7 @@ public final class SettingsPanel extends JPanel {
 
     public SettingsPanel(Listener listener) {
         this.listener = listener;
-        setLayout(new BorderLayout());
-        setOpaque(true);
-        setBackground(Theme.BACKGROUND);
+        layout(new BorderLayout()).opaque(true).background(Theme.BACKGROUND);
         add(pane, BorderLayout.CENTER);
         // The search box narrows the page to the rows which answer to it, in any language.
         pane.search(ARXSettingsPane.Text.of("Search settings"), ARXSettingsPane.Text.of("No settings match your search"));

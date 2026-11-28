@@ -61,6 +61,9 @@ import freja.Theme;
 import freja.media.Folder;
 import freja.media.Photo;
 import freja.media.PhotoFilter.SortOrder;
+
+import laevatain.api.ComponentHelper;
+
 /**
  * A virtualized, Picasa-like thumbnail grid.
  * <p>
@@ -69,7 +72,7 @@ import freja.media.PhotoFilter.SortOrder;
  * cost.
  * </p>
  */
-public final class PhotoGrid extends JComponent implements Scrollable {
+public final class PhotoGrid extends JComponent implements ComponentHelper<PhotoGrid>, Scrollable {
     /** How the visible photos are divided by headers. */
     public enum GroupMode {
         NONE, DATE, FOLDER
@@ -174,11 +177,8 @@ public final class PhotoGrid extends JComponent implements Scrollable {
     }
     public PhotoGrid(ThumbnailCache cache) {
         this.cache = cache;
-        setOpaque(true);
-        setBackground(Theme.BACKGROUND);
-        setFocusable(true);
-        setCursor(Cursor.getDefaultCursor());
-        setBorder(BorderFactory.createEmptyBorder());
+        opaque(true).background(Theme.BACKGROUND).focusable(true)
+                .cursor(Cursor.getDefaultCursor()).border(BorderFactory.createEmptyBorder());
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent event) {
@@ -652,7 +652,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
         }
         Rectangle old = cellRect(hoverIndex);
         hoverIndex = index;
-        setCursor(index < 0 ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        cursor(index < 0 ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         if (old != null) {
             repaint(old);
         }
@@ -1022,7 +1022,7 @@ public final class PhotoGrid extends JComponent implements Scrollable {
             y = addPhotoRows(y, 0, photos.size());
             totalHeight = y + 24;
         }
-        setPreferredSize(new Dimension(width, Math.max(totalHeight, 300)));
+        preferredSize(width, Math.max(totalHeight, 300));
         revalidate();
     }
     /** Lays out a band of photos with a fixed width and aspect-ratio-dependent heights. */

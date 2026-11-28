@@ -45,11 +45,14 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Tag;
 import freja.media.store.LibraryTasks;
+
+import laevatain.api.ComponentHelper;
+
 /**
  * A GitHub-issue-style label picker shown as a popover instead of a modal dialog: a new-label field,
  * a searchable list of coloured labels and the current selection in one compact dropdown.
  */
-public final class TagPicker extends JPanel {
+public final class TagPicker extends JPanel implements ComponentHelper<TagPicker> {
     /** The list shows at most this many rows before it starts scrolling. */
     private static final int ROW_HEIGHT = 32;
     private static final int VISIBLE_ROWS = 7;
@@ -71,10 +74,10 @@ public final class TagPicker extends JPanel {
         this.folderId = folderId;
         this.onChange = onChange;
         this.onClose = onClose;
-        setBackground(Theme.SURFACE);
-        setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Theme.BORDER),
-                BorderFactory.createEmptyBorder(12, 12, 10, 12)));
-        setPreferredSize(new Dimension(280, 120 + ROW_HEIGHT * VISIBLE_ROWS));
+        background(Theme.SURFACE)
+                .border(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Theme.BORDER),
+                        BorderFactory.createEmptyBorder(12, 12, 10, 12)))
+                .preferredSize(280, 120 + ROW_HEIGHT * VISIBLE_ROWS);
         JPanel header = new JPanel();
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));

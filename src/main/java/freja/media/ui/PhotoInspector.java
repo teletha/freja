@@ -37,10 +37,13 @@ import com.formdev.flatlaf.FlatClientProperties;
 import freja.Icons;
 import freja.Theme;
 import freja.media.Photo;
+
+import laevatain.api.ComponentHelper;
+
 /**
  * The details panel shown next to the thumbnail grid.
  */
-public final class PhotoInspector extends JPanel {
+public final class PhotoInspector extends JPanel implements ComponentHelper<PhotoInspector> {
     /** User actions initiated from the inspector. */
     public interface Listener {
         void onOpen(Photo photo);
@@ -82,10 +85,8 @@ public final class PhotoInspector extends JPanel {
     };
     private boolean updating;
     public PhotoInspector() {
-        setLayout(new BorderLayout());
-        setBackground(Theme.SURFACE);
-        setPreferredSize(new Dimension(308, 600));
-        setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, Theme.BORDER));
+        layout(new BorderLayout()).background(Theme.SURFACE).preferredSize(308, 600)
+                .border(BorderFactory.createMatteBorder(0, 1, 0, 0, Theme.BORDER));
         JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(Theme.SURFACE);

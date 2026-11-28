@@ -21,7 +21,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
+
 import laevatain.api.ComponentHelper;
+import laevatain.api.TextHelper;
 
 /**
  * A label which breaks its text into lines instead of asking for as much width as the longest line
@@ -34,7 +36,8 @@ import laevatain.api.ComponentHelper;
  * {@code BoxLayout} would otherwise stretch it across the leftover room in the row, and its caret
  * made deaf to the viewport, because a caret otherwise drags the scroll pane around.
  */
-public final class ARXWrapLabel extends JTextArea implements ComponentHelper<ARXWrapLabel> {
+public final class ARXWrapLabel extends JTextArea
+        implements ComponentHelper<ARXWrapLabel>, TextHelper<ARXWrapLabel> {
 
     /** The width asked for before the label knows how much room it will actually get. */
     private static final int CAPPED_WIDTH = 460;
@@ -62,19 +65,15 @@ public final class ARXWrapLabel extends JTextArea implements ComponentHelper<ARX
     }
 
     public ARXWrapLabel() {
-        setLineWrap(true);
-        setWrapStyleWord(true);
-        setEditable(false);
-        setFocusable(false);
-        setOpaque(false);
-        setBorder(BorderFactory.createEmptyBorder());
-        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        setAlignmentX(Component.LEFT_ALIGNMENT);
+        lineWrap(true).wrapStyleWord(true).editable(false).focusable(false).opaque(false)
+                .border(BorderFactory.createEmptyBorder())
+                .cursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+                .alignmentX(Component.LEFT_ALIGNMENT);
         DefaultCaret caret = new StillCaret();
         caret.setBlinkRate(0);
         caret.setVisible(false);
         caret.setSelectionVisible(false);
-        setCaret(caret);
+        caret(caret);
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent event) {

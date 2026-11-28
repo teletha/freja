@@ -10,6 +10,7 @@
 package laevatain.api;
 
 import java.awt.Color;
+import java.awt.LayoutManager;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
@@ -30,6 +31,18 @@ import javax.swing.border.Border;
  * @param <C> the concrete component type returned by every helper, so chains keep the caller's type
  */
 public interface LayoutHelper<C extends JComponent> {
+    /**
+     * Sets the layout manager. Included here because a constructor chain which sets spacing almost
+     * always sets the layout next; null restores the component's default manager.
+     *
+     * @param layout the layout manager, or null for the default
+     * @return this component
+     */
+    default C layout(LayoutManager layout) {
+        ((JComponent) this).setLayout(layout);
+        return self();
+    }
+
     /**
      * Applies the same margin on all four sides.
      *

@@ -82,13 +82,13 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
     }
 
     /** A title that shrinks with an ellipsis so the trailing annotation always stays in view. */
-    private static final class TruncatedLabel extends JLabel {
+    private static final class TruncatedLabel extends JLabel implements ComponentHelper<TruncatedLabel> {
 
         TruncatedLabel(String text) {
             super(text);
             setHorizontalAlignment(SwingConstants.LEFT);
             // Without this, a long label's minimum width pushes the annotation out of the row.
-            setMinimumSize(new Dimension(0, 0));
+            minimumSize(0, 0);
         }
 
         @Override
@@ -138,7 +138,7 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
     }
 
     /** One row of the list. Kept public so callers can annotate or extend it. */
-    public static final class Row extends JPanel {
+    public static final class Row extends JPanel implements ComponentHelper<Row> {
 
         private final String key;
 
@@ -158,13 +158,11 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
             this.key = key;
             // Opaque so a deselected row erases its own highlight; transparent rows left stale
             // accent paint behind when the selection moved quickly between rows.
-            setOpaque(true);
-            setBackground(navBackground());
-            setLayout(new BorderLayout(9, 0));
-            setBorder(BorderFactory.createEmptyBorder(9, 11, 9, 11));
-            setAlignmentX(Component.LEFT_ALIGNMENT);
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            setFocusable(true);
+            opaque(true).background(navBackground()).layout(new BorderLayout(9, 0))
+                    .border(BorderFactory.createEmptyBorder(9, 11, 9, 11))
+                    .alignmentX(Component.LEFT_ALIGNMENT)
+                    .cursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
+                    .focusable(true);
             if (icon != null) {
                 PassthroughLabel iconLabel = new PassthroughLabel(icon);
                 iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -222,7 +220,7 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
          * constructor, before this row's label exists.
          */
         public void setTitleColor(Color color) {
-            label.setForeground(color);
+            label.foreground(color);
         }
 
         @Override
@@ -292,9 +290,8 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
     private JPanel headerHolder;
 
     public ARXNavList() {
-        setOpaque(false);
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setAlignmentX(Component.LEFT_ALIGNMENT);
+        opaque(false).layout(new BoxLayout(this, BoxLayout.Y_AXIS))
+                .alignmentX(Component.LEFT_ALIGNMENT);
     }
 
     /**

@@ -10,8 +10,6 @@
 package laevatain;
 
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -20,6 +18,8 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
+
+import laevatain.api.ButtonHelper;
 import laevatain.api.ComponentHelper;
 
 /**
@@ -28,7 +28,8 @@ import laevatain.api.ComponentHelper;
  * any other button; the component only paints the Fluent pill and glides the knob between the two
  * positions.
  */
-public final class ARXToggle extends JToggleButton implements ComponentHelper<ARXToggle> {
+public final class ARXToggle extends JToggleButton
+        implements ComponentHelper<ARXToggle>, ButtonHelper<ARXToggle> {
 
     private static final int WIDTH = 40;
 
@@ -53,11 +54,8 @@ public final class ARXToggle extends JToggleButton implements ComponentHelper<AR
         super("", selected);
         position = selected ? 1f : 0f;
         animator = new Timer(FRAME_MS, event -> glide());
-        setRolloverEnabled(true);
-        setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setMinimumSize(new Dimension(WIDTH, HEIGHT));
-        setMaximumSize(new Dimension(WIDTH, HEIGHT));
-        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        rolloverEnabled(true).preferredSize(WIDTH, HEIGHT).minimumSize(WIDTH, HEIGHT)
+                .maximumSize(WIDTH, HEIGHT).handCursor();
         // Any state change (pointer, keyboard, or code) restarts the glide towards the model.
         addChangeListener(event -> {
             if (Math.abs((isSelected() ? 1f : 0f) - position) > 0.01f) {
@@ -85,11 +83,8 @@ public final class ARXToggle extends JToggleButton implements ComponentHelper<AR
     }
 
     private void flatten() {
-        setContentAreaFilled(false);
-        setBorderPainted(false);
-        setFocusPainted(false);
-        setOpaque(false);
-        setHorizontalAlignment(SwingConstants.CENTER);
+        contentAreaFilled(false).borderPainted(false).focusPainted(false).opaque(false)
+                .horizontalAlignment(SwingConstants.CENTER);
     }
 
     /** Advances the knob a fraction closer to its target and stops as soon as it lands. */

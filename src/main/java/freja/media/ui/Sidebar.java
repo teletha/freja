@@ -42,13 +42,16 @@ import laevatain.ARXMenuItem;
 import laevatain.ARXNavList;
 import laevatain.ARXRadioButtonMenuItem;
 import laevatain.ARXTextBinding;
+
+import laevatain.api.ComponentHelper;
+
 /**
  * The navigation sidebar: a library list built from the reusable {@link ARXNavList} and the
  * registered folders, which use the virtualized {@link FolderList} so a library with tens of
  * thousands of directories paints only what the viewport shows. Captions are bound to live
  * translations from {@link I#translate(String, Object...)}.
  */
-public final class Sidebar extends JPanel {
+public final class Sidebar extends JPanel implements ComponentHelper<Sidebar> {
     /** The selected library view. */
     public enum Mode {
         ALL, FAVORITES, RECENT, FOLDER
@@ -109,10 +112,9 @@ public final class Sidebar extends JPanel {
     private Mode mode = Mode.ALL;
     private long folderId = -1;
     public Sidebar() {
-        setLayout(new BorderLayout());
-        setBackground(Theme.SIDEBAR);
-        setPreferredSize(new Dimension(246, 600));
-        setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Theme.BORDER));
+        layout(new BorderLayout()).background(Theme.SIDEBAR)
+                .preferredSize(246, 600)
+                .border(BorderFactory.createMatteBorder(0, 0, 0, 1, Theme.BORDER));
         JPanel top = new JPanel();
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));

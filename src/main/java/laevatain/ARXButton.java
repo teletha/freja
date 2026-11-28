@@ -23,6 +23,8 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 
 import kiss.Disposable;
 import kiss.Variable;
+
+import laevatain.api.ButtonHelper;
 import laevatain.api.ComponentHelper;
 
 /**
@@ -30,7 +32,7 @@ import laevatain.api.ComponentHelper;
  * the
  * corner radius come from the active FlatLaf theme, so the button follows runtime theme changes.
  */
-public final class ARXButton extends JButton implements ComponentHelper<ARXButton> {
+public final class ARXButton extends JButton implements ComponentHelper<ARXButton>, ButtonHelper<ARXButton> {
 
     /** Predefined button roles, each mapped to FlatLaf UI defaults. */
     public enum Variant {
@@ -92,10 +94,7 @@ public final class ARXButton extends JButton implements ComponentHelper<ARXButto
         setText(text);
         this.variant = variant;
         this.blendWithParent = blendWithParent;
-        setFocusable(false);
-        setOpaque(true);
-        setContentAreaFilled(true);
-        setBorderPainted(true);
+        focusable(false).opaque(true).contentAreaFilled(true).borderPainted(true);
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent event) {
@@ -168,10 +167,9 @@ public final class ARXButton extends JButton implements ComponentHelper<ARXButto
     private void applyStyle() {
         Color background = background();
         Color foreground = foreground();
-        setBackground(background);
-        setForeground(foreground);
+        background(background).foreground(foreground);
         // A zero-width flat line border supplies the arc FlatLaf paints the background with.
-        setBorder(new FlatLineBorder(PADDING, background, 0, UIManager.getInt("Button.arc")));
+        border(new FlatLineBorder(PADDING, background, 0, UIManager.getInt("Button.arc")));
     }
 
     @Override

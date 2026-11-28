@@ -29,8 +29,7 @@ public final class ARXSectionListPanel extends JPanel implements ComponentHelper
 
     /** A panel without a separate heading, for lists whose ARXNavList carries its own section. */
     public ARXSectionListPanel(JScrollPane scroll) {
-        setLayout(new BorderLayout());
-        setOpaque(false);
+        layout(new BorderLayout()).opaque(false);
         this.scroll = scroll;
         this.scroll.setBorder(BorderFactory.createEmptyBorder());
         Object background = UIManager.get("ARX.navBackground");

@@ -47,8 +47,7 @@ public final class ARXSectionHeader extends JPanel implements ComponentHelper<AR
     }
 
     public ARXSectionHeader(String title, Component detail, Action... actions) {
-        setOpaque(false);
-        setLayout(new BorderLayout());
+        opaque(false).layout(new BorderLayout());
         JPanel heading = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         heading.setOpaque(false);
         JLabel label = new JLabel(title);
