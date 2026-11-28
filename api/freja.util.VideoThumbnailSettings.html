@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="IB">
-		<header class="p" date="2026-11-28">
-			<h1 class="X"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="b"><a href="api/main.html" id="API"><svg class="package">
+	<body class="g">
+		<header class="h" date="2026-11-28">
+			<h1 class="J"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Y"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,62 +35,62 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="DB"></nav>
-		<article class="d" id="Article">
-			<section class="Y"><code class="t">freja.util</code>
-				<h2 class="Class i"><code class="V">VideoThumbnailSettings</code></h2>
-				<div class="w"></div><span class="A"><p>The user&apos;s preference for the position from which a video&apos;s catalog thumbnail is taken.</p><p>
+		<nav class="i"></nav>
+		<article class="T" id="Article">
+			<section class="f"><code class="k">freja.util</code>
+				<h2 class="Class KB"><code class="x">VideoThumbnailSettings</code></h2>
+				<div class="e"></div><span class="A"><p>The user&apos;s preference for the position from which a video&apos;s catalog thumbnail is taken.</p><p>
 The value is a number of seconds from the start of the clip. Zero keeps the very first frame;
 any other value is clamped to the middle of shorter clips so the thumbnail never lands in the
 closing credits. The preference lives under <code>/freja</code>, so
 <code>freja.setting.SettingsBackup</code> includes it in exported profiles.
 </p></span></section>
-			<section class="Y" id="DEFAULT_SECONDS">
-				<h2 class="LB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="V">DEFAULT_SECONDS</code><i class="AB"><code class="return">int</code></i></h2><span class="A"><p>The thumbnail position used when the user has not chosen one: three minutes in.</p></span></section>
-			<section class="Y" id="MIN_SECONDS">
-				<h2 class="LB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="V">MIN_SECONDS</code><i class="AB"><code class="return">int</code></i></h2><span class="A"><p>The earliest position; zero asks for the first frame without seeking.</p></span></section>
-			<section class="Y" id="MAX_SECONDS">
-				<h2 class="LB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="V">MAX_SECONDS</code><i class="AB"><code class="return">int</code></i></h2><span class="A"><p>The latest position the settings control offers.</p></span></section>
-			<section class="Y" id="thumbnailSeconds()">
-				<h2 class="LB"><i class="STATIC PUBLIC"></i><code class="V">thumbnailSeconds</code><code class="a">()</code><i class="AB"><code>int</code></i></h2>
-				<table class="M">
-					<tr class="m">
+			<section class="f" id="DEFAULT_SECONDS">
+				<h2 class="c"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="x">DEFAULT_SECONDS</code><i class="n"><code class="return">int</code></i></h2><span class="A"><p>The thumbnail position used when the user has not chosen one: three minutes in.</p></span></section>
+			<section class="f" id="MIN_SECONDS">
+				<h2 class="c"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="x">MIN_SECONDS</code><i class="n"><code class="return">int</code></i></h2><span class="A"><p>The earliest position; zero asks for the first frame without seeking.</p></span></section>
+			<section class="f" id="MAX_SECONDS">
+				<h2 class="c"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="x">MAX_SECONDS</code><i class="n"><code class="return">int</code></i></h2><span class="A"><p>The latest position the settings control offers.</p></span></section>
+			<section class="f" id="thumbnailSeconds()">
+				<h2 class="c"><i class="STATIC PUBLIC"></i><code class="x">thumbnailSeconds</code><code class="DB">()</code><i class="n"><code>int</code></i></h2>
+				<table class="HB">
+					<tr class="d">
 						<td><code>int</code></td>
 						<td><span><p>seconds from the start of a video</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the configured position, clamped to the supported range.</p></span></section>
-			<section class="Y" id="thumbnailSeconds(int)">
-				<h2 class="LB"><i class="STATIC PUBLIC"></i><code class="V">thumbnailSeconds</code><code class="a">(<code>int</code><code class="parameterName">seconds</code>)</code><i class="AB"><code>void</code></i></h2>
-				<table class="M">
-					<tr class="CB">
+			<section class="f" id="thumbnailSeconds(int)">
+				<h2 class="c"><i class="STATIC PUBLIC"></i><code class="x">thumbnailSeconds</code><code class="DB">(<code>int</code><code class="parameterName">seconds</code>)</code><i class="n"><code>void</code></i></h2>
+				<table class="HB">
+					<tr class="M">
 						<td><code>int</code><code class="parameterName">seconds</code></td>
 						<td><span><p>seconds from the start of a video</p></span></td>
 					</tr>
 				</table><span class="A"><p>Remembers the configured position for this and future sessions.</p></span></section>
 		</article>
-		<aside class="r">
-			<div class="g">
-				<h5 class="GB">Static Fields</h5>
+		<aside class="j">
+			<div class="z">
+				<h5 class="JB">Static Fields</h5>
 				<ul>
-					<li class="EB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#DEFAULT_SECONDS">DEFAULT_SECONDS</a></code><i class="JB"><code class="return">int</code></i></li>
-					<li class="EB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#MIN_SECONDS">MIN_SECONDS</a></code><i class="JB"><code class="return">int</code></i></li>
-					<li class="EB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#MAX_SECONDS">MAX_SECONDS</a></code><i class="JB"><code class="return">int</code></i></li>
+					<li class="AB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#DEFAULT_SECONDS">DEFAULT_SECONDS</a></code><i class="K"><code class="return">int</code></i></li>
+					<li class="AB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#MIN_SECONDS">MIN_SECONDS</a></code><i class="K"><code class="return">int</code></i></li>
+					<li class="AB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.util.VideoThumbnailSettings.html#MAX_SECONDS">MAX_SECONDS</a></code><i class="K"><code class="return">int</code></i></li>
 				</ul>
-				<h5 class="GB">Static Methods</h5>
+				<h5 class="JB">Static Methods</h5>
 				<ul>
-					<li class="EB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.VideoThumbnailSettings.html#thumbnailSeconds()">thumbnailSeconds</a></code><code class="a">()</code><i class="JB"><code>int</code></i></li>
-					<li class="EB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.VideoThumbnailSettings.html#thumbnailSeconds(int)">thumbnailSeconds</a></code><code class="a">(<code>int</code><code class="parameterName">seconds</code>)</code><i class="JB"><code>void</code></i></li>
+					<li class="AB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.VideoThumbnailSettings.html#thumbnailSeconds()">thumbnailSeconds</a></code><code class="DB">()</code><i class="K"><code>int</code></i></li>
+					<li class="AB"><i class="STATIC PUBLIC"></i><code><a href="api/freja.util.VideoThumbnailSettings.html#thumbnailSeconds(int)">thumbnailSeconds</a></code><code class="DB">(<code>int</code><code class="parameterName">seconds</code>)</code><i class="K"><code>void</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="j">
+		<footer class="Z">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

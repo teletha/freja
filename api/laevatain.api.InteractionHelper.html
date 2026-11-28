@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="g">
+		<header class="h" date="2026-11-28">
+			<h1 class="J"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Y"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="i"></nav>
+		<article class="T" id="Article">
+			<section class="f"><code class="k">laevatain.api</code>
+				<h2 class="Interface KB"><code class="x">InteractionHelper</code><code class="DB">&lt;<code>C</code>&gt;</code></h2>
+				<div class="e">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></code><span><p>the concrete component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXButton" href="api/laevatain.ARXButton.html">ARXButton</a></code></li>
+						<li><code><a aria-label="laevatain.ARXCheckBox" href="api/laevatain.ARXCheckBox.html">ARXCheckBox</a></code></li>
+						<li><code><a aria-label="laevatain.ARXComboBox" href="api/laevatain.ARXComboBox.html">ARXComboBox</a></code></li>
+						<li><code><a aria-label="laevatain.ARXLabel" href="api/laevatain.ARXLabel.html">ARXLabel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXMenu" href="api/laevatain.ARXMenu.html">ARXMenu</a></code></li>
+						<li><code><a aria-label="laevatain.ARXMenuItem" href="api/laevatain.ARXMenuItem.html">ARXMenuItem</a></code></li>
+						<li><code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">ARXNavList</a></code></li>
+						<li><code><a aria-label="laevatain.ARXRadioButtonMenuItem" href="api/laevatain.ARXRadioButtonMenuItem.html">ARXRadioButtonMenuItem</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSearchField" href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSectionHeader" href="api/laevatain.ARXSectionHeader.html">ARXSectionHeader</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSectionListPanel" href="api/laevatain.ARXSectionListPanel.html">ARXSectionListPanel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane" href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></li>
+						<li><code><a aria-label="laevatain.ARXTextField" href="api/laevatain.ARXTextField.html">ARXTextField</a></code></li>
+						<li><code><a aria-label="laevatain.ARXToggle" href="api/laevatain.ARXToggle.html">ARXToggle</a></code></li>
+						<li><code><a aria-label="laevatain.ARXWrapLabel" href="api/laevatain.ARXWrapLabel.html">ARXWrapLabel</a></code></li>
+						<li><code><a aria-label="laevatain.api.ComponentHelper" href="api/laevatain.api.ComponentHelper.html">ComponentHelper</a><code class="parameters"><code>C</code></code></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent helpers for the small interaction settings every control needs: pointer shape, tooltip,
+keyboard focus and a component name. Keeping them in one interface lets a constructor describe a
+control in a single expression instead of scattering setters through the body.</p></span></section>
+			<section class="f" id="cursor(java.awt.Cursor)">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">cursor</code><code class="DB">(<code><a aria-label="java.awt.Cursor 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Cursor.html">Cursor</a></code><code class="parameterName">cursor</code>)</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="M">
+						<td><code><a aria-label="java.awt.Cursor 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Cursor.html">Cursor</a></code><code class="parameterName">cursor</code></td>
+						<td><span><p>the cursor to show over this component</p></span></td>
+					</tr>
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the pointer shape. Null restores the parent&apos;s cursor.</p></span></section>
+			<section class="f" id="handCursor()">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">handCursor</code><code class="DB">()</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Shows the hand pointer used by clickable rows and buttons.</p></span></section>
+			<section class="f" id="tooltip(java.lang.String)">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">tooltip</code><code class="DB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>)</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code></td>
+						<td><span><p>the tooltip, or null for none</p></span></td>
+					</tr>
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the tooltip text. Null removes the tooltip and unregisters its timer.</p></span></section>
+			<section class="f" id="focusable(boolean)">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">focusable</code><code class="DB">(<code>boolean</code><code class="parameterName">focusable</code>)</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">focusable</code></td>
+						<td><span><p>true to accept focus</p></span></td>
+					</tr>
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets whether the component can take the keyboard focus. Display-only labels and renderers
+should refuse it so Tab lands only on actionable controls.</p></span></section>
+			<section class="f" id="name(java.lang.String)">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">name</code><code class="DB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="M">
+						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code></td>
+						<td><span><p>the name, or null for none</p></span></td>
+					</tr>
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the component name used by accessibility tools and UI tests.</p></span></section>
+		</article>
+		<aside class="j">
+			<div class="z">
+				<h5 class="JB">Methods</h5>
+				<ul>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.InteractionHelper.html#cursor(java.awt.Cursor)">cursor</a></code><code class="DB">(<code><a aria-label="java.awt.Cursor 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Cursor.html">Cursor</a></code><code class="parameterName">cursor</code>)</code><i class="K"><code>C</code></i></li>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.InteractionHelper.html#handCursor()">handCursor</a></code><code class="DB">()</code><i class="K"><code>C</code></i></li>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.InteractionHelper.html#tooltip(java.lang.String)">tooltip</a></code><code class="DB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">text</code>)</code><i class="K"><code>C</code></i></li>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.InteractionHelper.html#focusable(boolean)">focusable</a></code><code class="DB">(<code>boolean</code><code class="parameterName">focusable</code>)</code><i class="K"><code>C</code></i></li>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.InteractionHelper.html#name(java.lang.String)">name</a></code><code class="DB">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">name</code>)</code><i class="K"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="Z">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

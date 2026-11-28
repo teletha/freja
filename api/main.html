@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="IB">
-		<header class="p" date="2026-11-28">
-			<h1 class="X"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="b"><a href="api/main.html" id="API"><svg class="package">
+	<body class="g">
+		<header class="h" date="2026-11-28">
+			<h1 class="J"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Y"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,16 +35,16 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="DB"></nav>
-		<article class="d" id="Article">
-			<div class="Y">
+		<nav class="i"></nav>
+		<article class="T" id="Article">
+			<div class="f">
 				<section class="A">
 					<h2>Freja API Overview</h2>
 					<p>This page provides a concise overview of the available APIs, including their purpose, key functionalities, and usage patterns. It serves as a starting point for developers to understand how to integrate and interact with the system effectively.</p>
@@ -52,9 +52,38 @@
 						<h4>🛠️ Interface</h4>
 						<table>
 							<tr>
+								<td><code><a href="api/laevatain.api.SizeHelper.html">SizeHelper</a></code></td>
+								<td>Fluent sizing helpers for the ARX components. They replace repeated setPreferredSize
+calls in constructor chains and make the intent of a fixed axis explicit.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.api.DisableHelper.html">DisableHelper</a></code></td>
+								<td>Fluent enabled-state helpers for the ARX components. They let a component take its initial state
+in the same chained expression which builds it, instead of exposing a mutable setter.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.api.ComponentHelper.html">ComponentHelper</a></code></td>
+								<td>A convenience bundle of every fluent component helper. A component which only needs a subset can
+implement the individual interfaces; this one is for controls built entirely in a constructor
+chain, where listing six interfaces would bury the actual layout code.</td>
+							</tr>
+							<tr>
 								<td><code><a href="api/laevatain.api.LayoutHelper.html">LayoutHelper</a></code></td>
-								<td>Fluent spacing helpers for the ARX panels. Implementing this interface lets a panel take its
-inset in the same chained expression which builds it, instead of exposing a mutable setter.</td>
+								<td>Fluent border helpers for the ARX components. Implementing this interface lets a component
+describe its spacing in the same chained expression which builds it, instead of exposing a
+mutable setter.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.api.StyleHelper.html">StyleHelper</a></code></td>
+								<td>Fluent style helpers for the ARX components. A component implements this alongside
+LayoutHelper so its colours, text and visibility can be set in the same chained expression
+which builds it.</td>
+							</tr>
+							<tr>
+								<td><code><a href="api/laevatain.api.InteractionHelper.html">InteractionHelper</a></code></td>
+								<td>Fluent helpers for the small interaction settings every control needs: pointer shape, tooltip,
+keyboard focus and a component name. Keeping them in one interface lets a constructor describe a
+control in a single expression instead of scattering setters through the body.</td>
 							</tr>
 							<tr>
 								<td><code><a href="api/freja.file.FileLocation.html">FileLocation</a></code></td>
@@ -546,8 +575,8 @@ carry a short id, IntelliJ themes their look and feel class name.</td>
 				</section>
 			</div>
 		</article>
-		<aside class="r"></aside>
-		<footer class="j">
+		<aside class="j"></aside>
+		<footer class="Z">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

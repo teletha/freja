@@ -119,7 +119,32 @@ const root = {
 			"type": "Class"
 		},
 		{
+			"name": "SizeHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
+			"name": "DisableHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
+			"name": "ComponentHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
 			"name": "LayoutHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
+			"name": "StyleHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
+			"name": "InteractionHelper",
 			"packageName": "laevatain.api",
 			"type": "Interface"
 		},

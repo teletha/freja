@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="g">
+		<header class="h" date="2026-11-28">
+			<h1 class="J"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Y"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="i"></nav>
+		<article class="T" id="Article">
+			<section class="f"><code class="k">laevatain.api</code>
+				<h2 class="Interface KB"><code class="x">DisableHelper</code><code class="DB">&lt;<code>C</code>&gt;</code></h2>
+				<div class="e">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></code><span><p>the concrete component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXButton" href="api/laevatain.ARXButton.html">ARXButton</a></code></li>
+						<li><code><a aria-label="laevatain.ARXCheckBox" href="api/laevatain.ARXCheckBox.html">ARXCheckBox</a></code></li>
+						<li><code><a aria-label="laevatain.ARXComboBox" href="api/laevatain.ARXComboBox.html">ARXComboBox</a></code></li>
+						<li><code><a aria-label="laevatain.ARXLabel" href="api/laevatain.ARXLabel.html">ARXLabel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXMenu" href="api/laevatain.ARXMenu.html">ARXMenu</a></code></li>
+						<li><code><a aria-label="laevatain.ARXMenuItem" href="api/laevatain.ARXMenuItem.html">ARXMenuItem</a></code></li>
+						<li><code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">ARXNavList</a></code></li>
+						<li><code><a aria-label="laevatain.ARXRadioButtonMenuItem" href="api/laevatain.ARXRadioButtonMenuItem.html">ARXRadioButtonMenuItem</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSearchField" href="api/laevatain.ARXSearchField.html">ARXSearchField</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSectionHeader" href="api/laevatain.ARXSectionHeader.html">ARXSectionHeader</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSectionListPanel" href="api/laevatain.ARXSectionListPanel.html">ARXSectionListPanel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane" href="api/laevatain.ARXSettingsPane.html">ARXSettingsPane</a></code></li>
+						<li><code><a aria-label="laevatain.ARXTextField" href="api/laevatain.ARXTextField.html">ARXTextField</a></code></li>
+						<li><code><a aria-label="laevatain.ARXToggle" href="api/laevatain.ARXToggle.html">ARXToggle</a></code></li>
+						<li><code><a aria-label="laevatain.ARXWrapLabel" href="api/laevatain.ARXWrapLabel.html">ARXWrapLabel</a></code></li>
+						<li><code><a aria-label="laevatain.api.ComponentHelper" href="api/laevatain.api.ComponentHelper.html">ComponentHelper</a><code class="parameters"><code>C</code></code></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent enabled-state helpers for the ARX components. They let a component take its initial state
+in the same chained expression which builds it, instead of exposing a mutable setter.</p><p>
+Disabling a Swing container does not clear the enabled flag of its children: they stop receiving
+input through the hierarchy but can still paint as enabled under some look and feels. This helper
+changes only the component it is called on; apply it to each child when the whole subtree must
+look disabled.
+</p></span></section>
+			<section class="f" id="disabled(boolean)">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">disabled</code><code class="DB">(<code>boolean</code><code class="parameterName">disabled</code>)</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">disabled</code></td>
+						<td><span><p>the disabled state</p></span></td>
+					</tr>
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the disabled state. True disables the component, false enables it.</p><p>
+The name deliberately avoids <code>disable()</code> and <code>enable()</code>: <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">java.awt.Component</a></code>
+already defines deprecated void methods with those names, and a fluent override with a
+different return type would not compile.
+</p></span></section>
+			<section class="f" id="enabled(boolean)">
+				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">enabled</code><code class="DB">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="n"><code>C</code></i></h2>
+				<table class="HB">
+					<tr class="M">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td><span><p>the enabled state</p></span></td>
+					</tr>
+					<tr class="d">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the enabled state directly; the canonical setter behind <code><a aria-label="laevatain.api.DisableHelper" href="api/laevatain.api.DisableHelper.html#disabled(boolean)">#disabled(boolean)</a></code>.</p></span></section>
+		</article>
+		<aside class="j">
+			<div class="z">
+				<h5 class="JB">Methods</h5>
+				<ul>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.DisableHelper.html#disabled(boolean)">disabled</a></code><code class="DB">(<code>boolean</code><code class="parameterName">disabled</code>)</code><i class="K"><code>C</code></i></li>
+					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.DisableHelper.html#enabled(boolean)">enabled</a></code><code class="DB">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="K"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="Z">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>
