@@ -48,6 +48,7 @@ import javax.swing.UIManager;
 import com.formdev.flatlaf.util.UIScale;
 
 import kiss.Variable;
+import laevatain.api.LayoutHelper;
 
 /**
  * A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
@@ -56,10 +57,11 @@ import kiss.Variable;
  * Colours and fonts come from the {@code ARX.*} UI defaults rather than from a concrete theme
  * class, so any host application can drive the look of the list by publishing those keys.
  */
-public final class ARXNavList extends JPanel {
+public final class ARXNavList extends JPanel implements LayoutHelper<ARXNavList> {
 
     /**
-     * A display-only label. It refuses to answer for the point under it, so the row keeps the mouse:
+     * A display-only label. It refuses to answer for the point under it, so the row keeps the
+     * mouse:
      * AWT hands an event to the single deepest component which contains the pointer, and a child
      * claiming the middle of a row made the row hear "you were left" and swallow the click there.
      */
@@ -425,7 +427,8 @@ public final class ARXNavList extends JPanel {
             }
         }
         // Rows live after the section label, the strut and the optional header. Without this base
-        // the first restored row is inserted at index 0, pushing the "Settings" label to the bottom.
+        // the first restored row is inserted at index 0, pushing the "Settings" label to the
+        // bottom.
         int base = firstRowIndex();
         for (int index = 0; index < want.size(); index++) {
             Row row = want.get(index);
@@ -489,7 +492,7 @@ public final class ARXNavList extends JPanel {
         if (key.equals(selected)) {
             selected = null;
         }
-        remove((Component) row);
+        remove(row);
         revalidate();
         repaint();
     }
@@ -532,7 +535,9 @@ public final class ARXNavList extends JPanel {
         menu = provider;
     }
 
-    /** Marks the row as selected without notifying the host, e.g. when the view changed elsewhere. */
+    /**
+     * Marks the row as selected without notifying the host, e.g. when the view changed elsewhere.
+     */
     public void setSelected(String key) {
         select(key, false);
     }

@@ -9,14 +9,6 @@
  */
 package freja.setting.ui;
 
-import freja.setting.FileSettings;
-import freja.setting.SettingsBackup;
-import freja.setting.WindowSettings;
-import freja.AppIcon;
-import freja.Icons;
-import freja.Theme;
-import freja.media.ui.TagManager;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -38,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
@@ -52,6 +45,13 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import freja.AppIcon;
+import freja.Icons;
+import freja.Theme;
+import freja.setting.FileSettings;
+import freja.setting.SettingsBackup;
+import freja.setting.WindowSettings;
 import freja.util.ArchiveSettings;
 import freja.util.VideoThumbnailSettings;
 import kiss.I;
@@ -63,6 +63,7 @@ import laevatain.ARXTextBinding;
 import laevatain.ARXToggle;
 import laevatain.ChooserLocations;
 import laevatain.util.Language;
+
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored
  * sections, glide scrolling and cards - filled with the application's appearance, font, language
@@ -74,16 +75,21 @@ public final class SettingsPanel extends JPanel {
     /** Notifications sent back to the owner after a setting changed. */
     public interface Listener {
         void onFontChanged(float ratio);
+
         /** Called when the file manager's list font size changes on its own. */
         default void onFileListFontChanged() {
         }
+
         /** Called when the file manager's row height changes on its own. */
         default void onFileListRowHeightChanged() {
         }
+
         void onThemeChanged();
+
         /** Called when the selected window icon changes; windows can refresh their icon here. */
         default void onAppIconChanged() {
         }
+
         void onManageFolders();
 
         /** Called when the development UI inspectors are switched on or off. */
@@ -94,36 +100,58 @@ public final class SettingsPanel extends JPanel {
         default void onHiddenFilesChanged() {
         }
     }
+
     private static final String APPEARANCE = "appearance";
+
     private static final String FILES = "files";
+
     private static final String FONTS = "fonts";
+
     private static final String LANGUAGE = "language";
+
     private static final String DATA_SCAN = "dataScan";
+
     private static final String SYSTEM = "system";
+
     /** The number of theme tiles across the appearance picker. */
     private static final int THEME_COLUMNS = 4;
+
     /**
      * The themes shown before the list is opened up: a spread of well known light and dark
      * palettes, chosen so the twelve tiles already cover most tastes.
      */
     private static final Set<String> RECOMMENDED = Set
             .of("Arc", "GitHub (Material)", "Solarized Light", "Light Owl (Material)", "Gray", "Dracula", "Nord", "Monokai Pro", "One Dark", "Cobalt 2");
+
     /** The scope of the tile grid: the picks, or everything. */
     private static final String[] THEMES = {"All themes", "Light themes", "Dark themes"};
+
     private final Listener listener;
+
     private final ARXSettingsPane pane = new ARXSettingsPane(I.translate("Settings"));
+
     /** The preview tiles by theme id, so choosing a theme can refresh every badge. */
     private final Map<String, ThemeTile> themeTiles = new LinkedHashMap<>();
+
     private JPanel themeGrid;
+
     /** Current number of tile rows, used to pin the grid's height against stale parent sizes. */
     private int themeRows = 1;
+
     private ARXButton moreButton;
+
     private JLabel themeCount;
+
     private ARXComboBox themeScope;
+
     private boolean expanded;
+
     private ARXComboBox languages;
+
     private JLabel localeValue;
+
     private JLabel preview;
+
     public SettingsPanel(Listener listener) {
         this.listener = listener;
         setLayout(new BorderLayout());
@@ -150,6 +178,7 @@ public final class SettingsPanel extends JPanel {
         actions.add(iconButton(Icons.importSettings(15, Theme.MUTED), "Import settings", this::importSettings));
         pane.searchAccessory(actions);
     }
+
     private ARXButton iconButton(Icon icon, String sentence, Runnable action) {
         ARXButton button = new ARXButton((String) null, icon, ARXButton.Variant.SECONDARY, action);
         // Translations arrive asynchronously (and may change with the language), so bind the live
@@ -158,6 +187,7 @@ public final class SettingsPanel extends JPanel {
         button.setPreferredSize(new Dimension(30, 30));
         return button;
     }
+
     /** Saves every application preference to a file chosen by the user. */
     private void exportSettings() {
         JFileChooser chooser = new JFileChooser(ChooserLocations.getOrNull("settingsBackup"));
@@ -175,14 +205,15 @@ public final class SettingsPanel extends JPanel {
         }
         try {
             SettingsBackup.exportTo(file);
-            JOptionPane.showMessageDialog(this, I.translate("Settings exported to %1$s", file).get(), I
-                    .translate("Export settings").get(), JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, I.translate("Settings exported to %1$s", file).get(), I.translate("Export settings")
+                    .get(), JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             I.error("freja", e);
-            JOptionPane.showMessageDialog(this, I.translate("Could not export the settings.").get(), I
-                    .translate("Export settings").get(), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, I.translate("Could not export the settings.").get(), I.translate("Export settings")
+                    .get(), JOptionPane.ERROR_MESSAGE);
         }
     }
+
     /** Replaces the current preferences with a previously exported file. */
     private void importSettings() {
         JFileChooser chooser = new JFileChooser(ChooserLocations.getOrNull("settingsBackup"));
@@ -193,8 +224,8 @@ public final class SettingsPanel extends JPanel {
         }
         File chosen = chooser.getSelectedFile();
         ChooserLocations.remember("settingsBackup", chosen.getParentFile());
-        int confirm = JOptionPane.showConfirmDialog(this, I
-                .translate("Replace all current settings with this backup?").get(), I.translate("Import settings").get(), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        int confirm = JOptionPane.showConfirmDialog(this, I.translate("Replace all current settings with this backup?")
+                .get(), I.translate("Import settings").get(), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
@@ -206,17 +237,18 @@ public final class SettingsPanel extends JPanel {
             Language.install();
             refreshTheme();
             listener.onThemeChanged();
-            int restart = JOptionPane.showConfirmDialog(this, I
-                    .translate("Settings imported. Restart Freja to apply every setting?").get(), I.translate("Import settings").get(), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            int restart = JOptionPane.showConfirmDialog(this, I.translate("Settings imported. Restart Freja to apply every setting?")
+                    .get(), I.translate("Import settings").get(), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (restart == JOptionPane.YES_OPTION) {
                 freja.Freja.restart();
             }
         } catch (IOException e) {
             I.error("freja", e);
-            JOptionPane.showMessageDialog(this, I.translate("Could not import the settings.").get(), I
-                    .translate("Import settings").get(), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, I.translate("Could not import the settings.").get(), I.translate("Import settings")
+                    .get(), JOptionPane.ERROR_MESSAGE);
         }
     }
+
     /** The appearance section: a dozen preview tiles, opening up to every theme on request. */
     private void appearanceSection() {
         for (Theme.ThemeInfo theme : Theme.availableThemes()) {
@@ -255,10 +287,12 @@ public final class SettingsPanel extends JPanel {
                 size.height = gridHeight();
                 return size;
             }
+
             @Override
             public Dimension getMinimumSize() {
                 return new Dimension(0, gridHeight());
             }
+
             @Override
             public Dimension getMaximumSize() {
                 return new Dimension(Integer.MAX_VALUE, gridHeight());
@@ -301,6 +335,7 @@ public final class SettingsPanel extends JPanel {
                         .of("Choose the icon shown in the window and taskbar."), iconPanel)
                 .keywords("app", "icon", "logo", "taskbar", "window"));
     }
+
     /** Rebuilds the tile grid from the current scope (picks or all) and the brightness filter. */
     private void showThemes() {
         String active = Theme.themeId();
@@ -337,10 +372,12 @@ public final class SettingsPanel extends JPanel {
             }
         }
     }
+
     /** Height the tile grid insists on, independent of whatever size the parent hands it. */
     private int gridHeight() {
         return themeRows * 112 + Math.max(0, themeRows - 1) * 12;
     }
+
     private void selectTheme(Theme.ThemeInfo theme) {
         if (theme.id().equals(Theme.themeId())) {
             return;
@@ -349,6 +386,7 @@ public final class SettingsPanel extends JPanel {
         refreshTheme();
         listener.onThemeChanged();
     }
+
     /**
      * Re-reads the active theme after it changed elsewhere - the toolbar's dark mode button or the
      * menu - so the badges, the visible picks and the system page all agree again.
@@ -357,12 +395,14 @@ public final class SettingsPanel extends JPanel {
         syncThemeTiles();
         showThemes();
     }
+
     /** Repaints the tiles so the badge follows the now active theme. */
     private void syncThemeTiles() {
         for (ThemeTile tile : themeTiles.values()) {
             tile.repaint();
         }
     }
+
     /** The data scan section: how the library finds and indexes images. */
     private void dataScanSection() {
         // A newly registered archive is indexed on the next scan; the choice is shared with the
@@ -372,27 +412,27 @@ public final class SettingsPanel extends JPanel {
         ARXButton manage = new ARXButton(I.translate("Manage watched folders"), Icons
                 .folder(15, Theme.MUTED), ARXButton.Variant.SECONDARY, listener::onManageFolders);
         manage.setFont(Theme.font(Font.PLAIN, 12));
-        JSpinner thumbnailSeconds = new JSpinner(new SpinnerNumberModel(
-                VideoThumbnailSettings.thumbnailSeconds(), VideoThumbnailSettings.MIN_SECONDS,
-                VideoThumbnailSettings.MAX_SECONDS, 1));
+        JSpinner thumbnailSeconds = new JSpinner(new SpinnerNumberModel(VideoThumbnailSettings
+                .thumbnailSeconds(), VideoThumbnailSettings.MIN_SECONDS, VideoThumbnailSettings.MAX_SECONDS, 1));
         thumbnailSeconds.setFont(Theme.font(Font.PLAIN, 13));
         thumbnailSeconds.setPreferredSize(new Dimension(110, 30));
-        // Only future scans use the new position; thumbnails already in the catalog stay as they are.
-        thumbnailSeconds.addChangeListener(event -> VideoThumbnailSettings
-                .thumbnailSeconds((Integer) thumbnailSeconds.getValue()));
+        // Only future scans use the new position; thumbnails already in the catalog stay as they
+        // are.
+        thumbnailSeconds.addChangeListener(event -> VideoThumbnailSettings.thumbnailSeconds((Integer) thumbnailSeconds.getValue()));
         ARXSettingsPane.Section section = pane.addSection(DATA_SCAN, ARXSettingsPane.Text.of("Data scan"), ARXSettingsPane.Text
                 .of("Choose how the library scans and indexes images."), Icons.nav("refresh", Theme.MUTED));
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Scan images inside compressed files"), ARXSettingsPane.Text
                         .of("Index photos stored in ZIP and 7z archives."), archives)
                 .keywords("zip", "7z", "archive", "compressed", "scan", "photo", "image"), ARXSettingsPane
-                .row(ARXSettingsPane.Text.of("Watched folders"), ARXSettingsPane.Text
-                        .of("Add or remove folders and rescan them."), manage)
-                .keywords("folder", "folders", "watch", "watched", "manage", "rescan"), ARXSettingsPane
-                .row(ARXSettingsPane.Text.of("Video thumbnail position"), ARXSettingsPane.Text
-                        .of("Seconds into a video where its thumbnail is taken; 0 keeps the first frame."), thumbnailSeconds)
-                .keywords("video", "thumbnail", "seconds", "frame", "position"));
+                        .row(ARXSettingsPane.Text.of("Watched folders"), ARXSettingsPane.Text
+                                .of("Add or remove folders and rescan them."), manage)
+                        .keywords("folder", "folders", "watch", "watched", "manage", "rescan"), ARXSettingsPane
+                                .row(ARXSettingsPane.Text.of("Video thumbnail position"), ARXSettingsPane.Text
+                                        .of("Seconds into a video where its thumbnail is taken; 0 keeps the first frame."), thumbnailSeconds)
+                                .keywords("video", "thumbnail", "seconds", "frame", "position"));
     }
+
     /** The font section: family and size controls plus a live preview card. */
     private void fontSection() {
         JComboBox<String> family = new JComboBox<>(Theme.availableFontFamilies());
@@ -449,13 +489,16 @@ public final class SettingsPanel extends JPanel {
                 .keywords("font", "typeface", "family"), ARXSettingsPane
                         .row(ARXSettingsPane.Text.of("Font size"), ARXSettingsPane.Text.of("Base size in points"), size)
                         .keywords("size", "points", "scale"), ARXSettingsPane
-                        .row(ARXSettingsPane.Text.of("File list font size"), ARXSettingsPane.Text.of("Size of the file manager list"), fileListSize)
-                        .keywords("file", "list", "table", "size", "points"), ARXSettingsPane
-                        .row(ARXSettingsPane.Text.of("File list row height"), ARXSettingsPane.Text.of("Height of one file manager row"), rowHeight)
-                        .keywords("file", "list", "row", "height", "density"));
+                                .row(ARXSettingsPane.Text.of("File list font size"), ARXSettingsPane.Text
+                                        .of("Size of the file manager list"), fileListSize)
+                                .keywords("file", "list", "table", "size", "points"), ARXSettingsPane
+                                        .row(ARXSettingsPane.Text.of("File list row height"), ARXSettingsPane.Text
+                                                .of("Height of one file manager row"), rowHeight)
+                                        .keywords("file", "list", "row", "height", "density"));
         section.addCard(previewRow);
         refreshPreview();
     }
+
     /** Re-renders the sample text with the configured family and size. */
     private void refreshPreview() {
         if (preview != null) {
@@ -463,6 +506,7 @@ public final class SettingsPanel extends JPanel {
             preview.repaint();
         }
     }
+
     /** The file manager section: controls what the folder list shows. */
     private void filesSection() {
         ARXToggle hidden = new ARXToggle(FileSettings.hideHidden());
@@ -472,8 +516,9 @@ public final class SettingsPanel extends JPanel {
         });
         ARXSettingsPane.Section section = pane.addSection(FILES, ARXSettingsPane.Text.of("Files"), ARXSettingsPane.Text
                 .of("Choose which items appear in the file manager list."), Icons.nav("folder", Theme.MUTED));
-        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Hide hidden files"), ARXSettingsPane.Text
-                .of("Exclude items with the hidden attribute from the file list."), hidden)
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Hide hidden files"), ARXSettingsPane.Text
+                        .of("Exclude items with the hidden attribute from the file list."), hidden)
                 .keywords("hidden", "files", "folders", "filter", "file manager"));
     }
 
@@ -502,13 +547,15 @@ public final class SettingsPanel extends JPanel {
         localeValue = ARXSettingsPane.value(Language.displayName());
         ARXSettingsPane.Section section = pane.addSection(LANGUAGE, ARXSettingsPane.Text.of("Language"), ARXSettingsPane.Text
                 .of("Pick the language of the interface."), Icons.navLetter("あ", Theme.MUTED));
-        section.addCard(ARXSettingsPane.row(ARXSettingsPane.Text.of("Display language"), ARXSettingsPane.Text
-                .of("Menus, buttons and messages are shown in the selected language."), languages)
+        section.addCard(ARXSettingsPane
+                .row(ARXSettingsPane.Text.of("Display language"), ARXSettingsPane.Text
+                        .of("Menus, buttons and messages are shown in the selected language."), languages)
                 .keywords("language", "locale", "translation", "translate"), ARXSettingsPane
                         .row(ARXSettingsPane.Text.of("Current locale"), ARXSettingsPane.Text
                                 .of("Dates and numbers follow the selected region."), localeValue)
                         .keywords("locale", "region", "date", "numbers", "sorting"));
     }
+
     /** The system section: update controls, app information and restart. */
     private void systemSection() {
         ARXToggle startup = new ARXToggle(false);
@@ -548,12 +595,12 @@ public final class SettingsPanel extends JPanel {
                         .row(ARXSettingsPane.Text.of("Check for updates"), ARXSettingsPane.Text
                                 .of("Compare against the latest release"), check)
                         .keywords("update", "updates", "version", "release"), ARXSettingsPane
-                .row(ARXSettingsPane.Text.of("UIインスペクターを有効にする"), ARXSettingsPane.Text
-                        .of("Ctrl+Shift+X でコンポーネントとUIデフォルトのインスペクタを切り替えます。"), inspector)
-                .keywords("debug", "inspector", "shortcut", "ctrl", "shift", "x"), ARXSettingsPane
-                                .row(ARXSettingsPane.Text.of("Restart the application"), ARXSettingsPane.Text
-                                        .of("Save your changes and restart Freja."), restart)
-                                .keywords("restart", "reboot", "reload"));
+                                .row(ARXSettingsPane.Text.of("UIインスペクターを有効にする"), ARXSettingsPane.Text
+                                        .of("Ctrl+Shift+X でコンポーネントとUIデフォルトのインスペクタを切り替えます。"), inspector)
+                                .keywords("debug", "inspector", "shortcut", "ctrl", "shift", "x"), ARXSettingsPane
+                                        .row(ARXSettingsPane.Text.of("Restart the application"), ARXSettingsPane.Text
+                                                .of("Save your changes and restart Freja."), restart)
+                                        .keywords("restart", "reboot", "reload"));
         section.addCard(ARXSettingsPane
                 .row(ARXSettingsPane.Text.of("Application"), "", ARXSettingsPane.value("Freja " + freja.Freja.VERSION + " (2026-11-24)"))
                 .keywords("version", "build", "about"), ARXSettingsPane
@@ -563,13 +610,19 @@ public final class SettingsPanel extends JPanel {
                                 .row(ARXSettingsPane.Text.of("Java runtime"), "", ARXSettingsPane.value(System.getProperty("java.version")))
                                 .keywords("java", "jvm", "runtime"));
     }
+
     /** A theme preview: a miniature window painted in the shades of the theme it offers. */
     private static final class ThemeTile extends JButton {
         private final Theme.ThemeInfo theme;
+
         private final Theme.Preview colors;
+
         private final ARXTextBinding textBinding = new ARXTextBinding();
+
         private final ARXTextBinding tipBinding = new ARXTextBinding();
+
         private boolean hovered;
+
         ThemeTile(Theme.ThemeInfo theme) {
             super(theme.name());
             this.theme = theme;
@@ -593,6 +646,7 @@ public final class SettingsPanel extends JPanel {
                     hovered = true;
                     repaint();
                 }
+
                 @Override
                 public void mouseExited(MouseEvent event) {
                     hovered = false;
@@ -600,14 +654,17 @@ public final class SettingsPanel extends JPanel {
                 }
             });
         }
+
         /** The theme this tile offers. */
         Theme.ThemeInfo theme() {
             return theme;
         }
+
         /** The tooltip repeats the caption with the brightness, both in the current language. */
         private void refreshTip(String brightness) {
             super.setToolTipText(getText() + "（" + brightness + "）");
         }
+
         @Override
         protected void paintComponent(Graphics graphics) {
             Graphics2D g = (Graphics2D) graphics.create();
@@ -640,6 +697,7 @@ public final class SettingsPanel extends JPanel {
                 g.dispose();
             }
         }
+
         /** A tiny window: navigation rail, toolbar strip and a content block. */
         private void paintMockWindow(Graphics2D g, int w, int h) {
             int x = 12;
@@ -663,6 +721,7 @@ public final class SettingsPanel extends JPanel {
             g.fillRoundRect(cx + 20, y + bar / 2 - 2, Math.max(10, cw / 3), 4, 2, 2);
             g.fillRoundRect(cx + 8, y + bar + 16, Math.max(10, cw / 4), 4, 2, 2);
         }
+
         /** Shortens the theme name with an ellipsis when the tile is too narrow for it. */
         private String shrink(Graphics2D g, String text, int available) {
             java.awt.FontMetrics metrics = g.getFontMetrics();

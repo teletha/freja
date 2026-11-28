@@ -326,6 +326,9 @@ public final class FolderList extends JList<Folder> {
         scroll.getViewport().setOpaque(true);
         scroll.getViewport().setBackground(Theme.SIDEBAR);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        // The rail keeps wheel scrolling (the scroll pane forwards wheel events to its viewport even
+        // without a visible bar) but never shows a vertical thumb: the rows own the whole width.
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(ROW_SCROLL);
         // The wheel belongs to the scroll pane: a wheel listener on the list itself would stop
         // AWT from forwarding the event to its ancestor, which is what made the rail ignore the
