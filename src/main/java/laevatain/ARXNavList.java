@@ -49,6 +49,7 @@ import com.formdev.flatlaf.util.UIScale;
 
 import kiss.Variable;
 import laevatain.api.ComponentHelper;
+import laevatain.api.LabelHelper;
 
 /**
  * A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional
@@ -82,11 +83,12 @@ public final class ARXNavList extends JPanel implements ComponentHelper<ARXNavLi
     }
 
     /** A title that shrinks with an ellipsis so the trailing annotation always stays in view. */
-    private static final class TruncatedLabel extends JLabel implements ComponentHelper<TruncatedLabel> {
+    private static final class TruncatedLabel extends JLabel
+            implements ComponentHelper<TruncatedLabel>, LabelHelper<TruncatedLabel> {
 
         TruncatedLabel(String text) {
             super(text);
-            setHorizontalAlignment(SwingConstants.LEFT);
+            horizontalAlignment(SwingConstants.LEFT);
             // Without this, a long label's minimum width pushes the annotation out of the row.
             minimumSize(0, 0);
         }

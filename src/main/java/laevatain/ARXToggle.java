@@ -57,7 +57,7 @@ public final class ARXToggle extends JToggleButton
         rolloverEnabled(true).preferredSize(WIDTH, HEIGHT).minimumSize(WIDTH, HEIGHT)
                 .maximumSize(WIDTH, HEIGHT).handCursor();
         // Any state change (pointer, keyboard, or code) restarts the glide towards the model.
-        addChangeListener(event -> {
+        onChange(event -> {
             if (Math.abs((isSelected() ? 1f : 0f) - position) > 0.01f) {
                 animator.restart();
             }

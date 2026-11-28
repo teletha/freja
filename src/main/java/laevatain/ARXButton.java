@@ -12,8 +12,6 @@ package laevatain;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -95,20 +93,15 @@ public final class ARXButton extends JButton implements ComponentHelper<ARXButto
         this.variant = variant;
         this.blendWithParent = blendWithParent;
         focusable(false).opaque(true).contentAreaFilled(true).borderPainted(true);
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent event) {
-                hovering = true;
-                applyStyle();
-            }
-
-            @Override
-            public void mouseExited(MouseEvent event) {
-                hovering = false;
-                applyStyle();
-            }
-        });
-        addActionListener(event -> action.run());
+        onAction(action)
+                .onEntered(event -> {
+                    hovering = true;
+                    applyStyle();
+                })
+                .onExited(event -> {
+                    hovering = false;
+                    applyStyle();
+                });
         applyStyle();
     }
 

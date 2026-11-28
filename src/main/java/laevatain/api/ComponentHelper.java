@@ -14,7 +14,7 @@ import javax.swing.JComponent;
 /**
  * A convenience bundle of every fluent component helper. A component which only needs a subset can
  * implement the individual interfaces; this one is for controls built entirely in a constructor
- * chain, where listing six interfaces would bury the actual layout code.
+ * chain, where listing eight interfaces would bury the actual layout code.
  * <p>
  * No method is redeclared here: all settings remain in their focused interfaces so each one keeps
  * its own documentation and can be reused on its own.
@@ -23,5 +23,5 @@ import javax.swing.JComponent;
  * @param <C> the concrete component type returned by every helper, so chains keep the caller's type
  */
 public interface ComponentHelper<C extends JComponent>
-        extends LayoutHelper<C>, StyleHelper<C>, DisableHelper<C>, SizeHelper<C>, InteractionHelper<C> {
+        extends LayoutHelper<C>, StyleHelper<C>, DisableHelper<C>, SizeHelper<C>, InteractionHelper<C>, ContainerHelper<C>, ActionHelper<C> {
 }

@@ -215,10 +215,7 @@ public final class ARXSettingsPane extends JPanel implements ComponentHelper<ARX
                 visible(shown);
                 return;
             }
-            removeAll();
-            for (Component component : wanted) {
-                add(component);
-            }
+            removeChildren().children(wanted.toArray(Component[]::new));
             shown = !wanted.isEmpty();
             visible(shown);
             revalidate();

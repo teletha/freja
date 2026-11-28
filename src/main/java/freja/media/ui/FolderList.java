@@ -102,7 +102,7 @@ public final class FolderList extends JList<Folder> implements ComponentHelper<F
         // An empty tooltip registers the list with the tooltip manager; the per-row text arrives
         // from getToolTipText(MouseEvent) below.
         tooltip("");
-        addListSelectionListener(event -> {
+        onSelection(event -> {
             if (syncing || event.getValueIsAdjusting()) {
                 return;
             }
