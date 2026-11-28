@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="IB">
+		<header class="p" date="2026-11-28">
+			<h1 class="X"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="b"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="DB"></nav>
+		<article class="d" id="Article">
+			<section class="Y"><code class="t">laevatain.api</code>
+				<h2 class="Interface i"><code class="V">LayoutHelper</code><code class="a">&lt;<code>C</code>&gt;</code></h2>
+				<div class="w">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></code><span><p>the concrete panel type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXNavList" href="api/laevatain.ARXNavList.html">ARXNavList</a></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent spacing helpers for the ARX panels. Implementing this interface lets a panel take its
+inset in the same chained expression which builds it, instead of exposing a mutable setter.</p><p>
+A margin is represented by an empty <code><a aria-label="javax.swing.border.Border 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/border/Border.html">javax.swing.border.Border</a></code>: Swing reserves the space
+inside the component, so the panel&apos;s background still extends behind it. Setting a margin
+replaces any border the panel already had; callers which need a visible border as well must
+install a compound border afterwards.
+</p></span></section>
+			<section class="Y" id="margin(int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="V">margin</code><code class="a">(<code>int</code><code class="parameterName">size</code>)</code><i class="AB"><code>C</code></i></h2>
+				<table class="M">
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">size</code></td>
+						<td><span><p>the inset in pixels</p></span></td>
+					</tr>
+					<tr class="m">
+						<td><code>C</code></td>
+						<td><span><p>this panel</p></span></td>
+					</tr>
+				</table><span class="A"><p>Applies the same inset on all four sides.</p></span></section>
+			<section class="Y" id="margin(int,int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="V">margin</code><code class="a">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="AB"><code>C</code></i></h2>
+				<table class="M">
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">vertical</code></td>
+						<td><span><p>the top and bottom inset in pixels</p></span></td>
+					</tr>
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">horizontal</code></td>
+						<td><span><p>the left and right inset in pixels</p></span></td>
+					</tr>
+					<tr class="m">
+						<td><code>C</code></td>
+						<td><span><p>this panel</p></span></td>
+					</tr>
+				</table><span class="A"><p>Applies one inset to the top and bottom and another to the left and right.</p></span></section>
+			<section class="Y" id="margin(int,int,int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="V">margin</code><code class="a">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="AB"><code>C</code></i></h2>
+				<table class="M">
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">top</code></td>
+						<td><span><p>the top inset in pixels</p></span></td>
+					</tr>
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">horizontal</code></td>
+						<td><span><p>the left and right inset in pixels</p></span></td>
+					</tr>
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">bottom</code></td>
+						<td><span><p>the bottom inset in pixels</p></span></td>
+					</tr>
+					<tr class="m">
+						<td><code>C</code></td>
+						<td><span><p>this panel</p></span></td>
+					</tr>
+				</table><span class="A"><p>Applies the side insets and lets the left and right share one value.</p></span></section>
+			<section class="Y" id="margin(int,int,int,int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="V">margin</code><code class="a">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="AB"><code>C</code></i></h2>
+				<table class="M">
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">top</code></td>
+						<td><span><p>the top inset in pixels</p></span></td>
+					</tr>
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">right</code></td>
+						<td><span><p>the right inset in pixels</p></span></td>
+					</tr>
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">bottom</code></td>
+						<td><span><p>the bottom inset in pixels</p></span></td>
+					</tr>
+					<tr class="CB">
+						<td><code>int</code><code class="parameterName">left</code></td>
+						<td><span><p>the left inset in pixels</p></span></td>
+					</tr>
+					<tr class="m">
+						<td><code>C</code></td>
+						<td><span><p>this panel</p></span></td>
+					</tr>
+				</table><span class="A"><p>Applies an independent inset to each side. This is the single method which touches the
+border; the shorter overloads only normalise their arguments and delegate here.</p><p>
+The order matches <code><a aria-label="java.awt.Insets 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Insets.html">java.awt.Insets</a></code> (top, right, bottom, left), whereas
+<code><a aria-label="javax.swing.BorderFactory 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/BorderFactory.html#createEmptyBorder(int,int,int,int)">BorderFactory#createEmptyBorder(int, int, int, int)</a></code> takes top, left, bottom, right;
+the two middle values are swapped below.
+</p></span></section>
+		</article>
+		<aside class="r">
+			<div class="g">
+				<h5 class="GB">Methods</h5>
+				<ul>
+					<li class="EB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int)">margin</a></code><code class="a">(<code>int</code><code class="parameterName">size</code>)</code><i class="JB"><code>C</code></i></li>
+					<li class="EB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int)">margin</a></code><code class="a">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="JB"><code>C</code></i></li>
+					<li class="EB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int,int)">margin</a></code><code class="a">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="JB"><code>C</code></i></li>
+					<li class="EB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int,int,int)">margin</a></code><code class="a">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="JB"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="j">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

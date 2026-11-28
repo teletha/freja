@@ -4,6 +4,7 @@ const root = {
 	"packages": [
 		"laevatain.util",
 		"laevatain",
+		"laevatain.api",
 		"freja.util",
 		"freja.mpv",
 		"freja",
@@ -116,6 +117,11 @@ const root = {
 			"name": "ARXTextField",
 			"packageName": "laevatain",
 			"type": "Class"
+		},
+		{
+			"name": "LayoutHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
 		},
 		{
 			"name": "ARXToggle",
