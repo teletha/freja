@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="DB">
-		<header class="j" date="2026-11-28">
-			<h1 class="k"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="l"><a href="api/main.html" id="API"><svg class="package">
+	<body class="u">
+		<header class="O" date="2026-11-28">
+			<h1 class="P"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Q"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="R"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="f"></nav>
-		<article class="m" id="Article">
-			<section class="M"><code class="Z">laevatain.api</code>
-				<h2 class="Interface BB"><code class="N">SizeHelper</code><code class="a">&lt;<code>C</code>&gt;</code></h2>
-				<div class="g">
+		<nav class="w"></nav>
+		<article class="f" id="Article">
+			<section class="m"><code class="M">laevatain.api</code>
+				<h2 class="Interface JB"><code class="T">SizeHelper</code><code class="k">&lt;<code>C</code>&gt;</code></h2>
+				<div class="S">
 					<ul class="E F">
 						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></code><span><p>the concrete component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
 					</ul>
@@ -91,158 +91,158 @@ preferred size, so <code><a aria-label="laevatain.api.SizeHelper" href="api/laev
 Passing null to a size helper restores the look and feel&apos;s default. Dimensions are copied on the
 way in, so a caller cannot change a component later by mutating its own <code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code>.
 </p></span></section>
-			<section class="M" id="preferredSize(int,int)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">preferredSize</code><code class="a">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="preferredSize(int,int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">preferredSize</code><code class="k">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">width</code></td>
 						<td><span><p>the preferred width in pixels</p></span></td>
 					</tr>
-					<tr class="w">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">height</code></td>
 						<td><span><p>the preferred height in pixels</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the preferred size.</p></span></section>
-			<section class="M" id="preferredSize(java.awt.Dimension)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">preferredSize</code><code class="a">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="preferredSize(java.awt.Dimension)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">preferredSize</code><code class="k">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code></td>
 						<td><span><p>the preferred size, or null to restore the default</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the preferred size, copying the supplied dimension.</p></span></section>
-			<section class="M" id="minimumSize(int,int)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">minimumSize</code><code class="a">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="minimumSize(int,int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">minimumSize</code><code class="k">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">width</code></td>
 						<td><span><p>the minimum width in pixels</p></span></td>
 					</tr>
-					<tr class="w">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">height</code></td>
 						<td><span><p>the minimum height in pixels</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the minimum size.</p></span></section>
-			<section class="M" id="minimumSize(java.awt.Dimension)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">minimumSize</code><code class="a">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="minimumSize(java.awt.Dimension)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">minimumSize</code><code class="k">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code></td>
 						<td><span><p>the minimum size, or null to restore the default</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the minimum size, copying the supplied dimension.</p></span></section>
-			<section class="M" id="maximumSize(int,int)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">maximumSize</code><code class="a">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="maximumSize(int,int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">maximumSize</code><code class="k">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">width</code></td>
 						<td><span><p>the maximum width in pixels</p></span></td>
 					</tr>
-					<tr class="w">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">height</code></td>
 						<td><span><p>the maximum height in pixels</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the maximum size.</p></span></section>
-			<section class="M" id="maximumSize(java.awt.Dimension)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">maximumSize</code><code class="a">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="maximumSize(java.awt.Dimension)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">maximumSize</code><code class="k">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code></td>
 						<td><span><p>the maximum size, or null to restore the default</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the maximum size, copying the supplied dimension.</p></span></section>
-			<section class="M" id="fixedWidth(int)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">fixedWidth</code><code class="a">(<code>int</code><code class="parameterName">width</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="fixedWidth(int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">fixedWidth</code><code class="k">(<code>int</code><code class="parameterName">width</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">width</code></td>
 						<td><span><p>the fixed width in pixels</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Pins the width to one value while keeping the current preferred height. A layout can then
 grow or shrink the component vertically but never horizontally.</p></span></section>
-			<section class="M" id="fixedHeight(int)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">fixedHeight</code><code class="a">(<code>int</code><code class="parameterName">height</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="fixedHeight(int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">fixedHeight</code><code class="k">(<code>int</code><code class="parameterName">height</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">height</code></td>
 						<td><span><p>the fixed height in pixels</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Pins the height to one value while keeping the current preferred width.</p></span></section>
-			<section class="M" id="alignmentX(float)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">alignmentX</code><code class="a">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="alignmentX(float)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">alignmentX</code><code class="k">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>float</code><code class="parameterName">alignment</code></td>
 						<td><span><p>the alignment, e.g. <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html#LEFT_ALIGNMENT">java.awt.Component#LEFT_ALIGNMENT</a></code></p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the horizontal alignment used by <code><a aria-label="javax.swing.BoxLayout 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/BoxLayout.html">javax.swing.BoxLayout</a></code> and similar managers.</p></span></section>
-			<section class="M" id="alignmentY(float)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">alignmentY</code><code class="a">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="alignmentY(float)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">alignmentY</code><code class="k">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>float</code><code class="parameterName">alignment</code></td>
 						<td><span><p>the alignment, e.g. <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html#TOP_ALIGNMENT">java.awt.Component#TOP_ALIGNMENT</a></code></p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the vertical alignment used by <code><a aria-label="javax.swing.BoxLayout 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/BoxLayout.html">javax.swing.BoxLayout</a></code> and similar managers.</p></span></section>
 		</article>
-		<aside class="q">
-			<div class="J">
-				<h5 class="p">Methods</h5>
+		<aside class="p">
+			<div class="FB">
+				<h5 class="BB">Methods</h5>
 				<ul>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#preferredSize(int,int)">preferredSize</a></code><code class="a">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#preferredSize(java.awt.Dimension)">preferredSize</a></code><code class="a">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#minimumSize(int,int)">minimumSize</a></code><code class="a">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#minimumSize(java.awt.Dimension)">minimumSize</a></code><code class="a">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#maximumSize(int,int)">maximumSize</a></code><code class="a">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#maximumSize(java.awt.Dimension)">maximumSize</a></code><code class="a">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#fixedWidth(int)">fixedWidth</a></code><code class="a">(<code>int</code><code class="parameterName">width</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#fixedHeight(int)">fixedHeight</a></code><code class="a">(<code>int</code><code class="parameterName">height</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#alignmentX(float)">alignmentX</a></code><code class="a">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#alignmentY(float)">alignmentY</a></code><code class="a">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="CB"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#preferredSize(int,int)">preferredSize</a></code><code class="k">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#preferredSize(java.awt.Dimension)">preferredSize</a></code><code class="k">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#minimumSize(int,int)">minimumSize</a></code><code class="k">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#minimumSize(java.awt.Dimension)">minimumSize</a></code><code class="k">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#maximumSize(int,int)">maximumSize</a></code><code class="k">(<code>int</code><code class="parameterName">width</code>, <code>int</code><code class="parameterName">height</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#maximumSize(java.awt.Dimension)">maximumSize</a></code><code class="k">(<code><a aria-label="java.awt.Dimension 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Dimension.html">Dimension</a></code><code class="parameterName">size</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#fixedWidth(int)">fixedWidth</a></code><code class="k">(<code>int</code><code class="parameterName">width</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#fixedHeight(int)">fixedHeight</a></code><code class="k">(<code>int</code><code class="parameterName">height</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#alignmentX(float)">alignmentX</a></code><code class="k">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.SizeHelper.html#alignmentY(float)">alignmentY</a></code><code class="k">(<code>float</code><code class="parameterName">alignment</code>)</code><i class="h"><code>C</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="O">
+		<footer class="v">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

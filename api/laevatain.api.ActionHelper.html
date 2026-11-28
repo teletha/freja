@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="DB">
-		<header class="j" date="2026-11-28">
-			<h1 class="k"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="l"><a href="api/main.html" id="API"><svg class="package">
+	<body class="u">
+		<header class="O" date="2026-11-28">
+			<h1 class="P"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Q"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="R"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="f"></nav>
-		<article class="m" id="Article">
-			<section class="M"><code class="Z">laevatain.api</code>
-				<h2 class="Interface BB"><code class="N">ActionHelper</code><code class="a">&lt;<code>C</code>&gt;</code></h2>
-				<div class="g">
+		<nav class="w"></nav>
+		<article class="f" id="Article">
+			<section class="m"><code class="M">laevatain.api</code>
+				<h2 class="Interface JB"><code class="T">ActionHelper</code><code class="k">&lt;<code>C</code>&gt;</code></h2>
+				<div class="S">
 					<ul class="E F">
 						<li><code>C</code><code class="extends"><code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code></code><span><p>the concrete component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
 					</ul>
@@ -90,227 +90,227 @@ interface default with the same signature; the helpers therefore use <code>onXxx
 Listeners which only some components support are guarded by type checks and are no-ops on
 unsupported components, so one interface can be shared by every component.
 </p></span></section>
-			<section class="M" id="onAction(java.lang.Runnable)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onAction</code><code class="a">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onAction(java.lang.Runnable)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onAction</code><code class="k">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code></td>
 						<td><span><p>the action to run</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers an action which ignores the event. Supported on buttons, text fields and combo boxes;
 other components ignore it.</p></span></section>
-			<section class="M" id="onAction(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onAction</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.ActionEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ActionEvent.html">ActionEvent</a></code></code></code><code class="parameterName">action</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onAction(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onAction</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.ActionEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ActionEvent.html">ActionEvent</a></code></code></code><code class="parameterName">action</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.ActionEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ActionEvent.html">ActionEvent</a></code></code></code><code class="parameterName">action</code></td>
 						<td><span><p>the action to run</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers an action which receives the event. Supported on the same components as
 <code><a aria-label="laevatain.api.ActionHelper" href="api/laevatain.api.ActionHelper.html#onAction(java.lang.Runnable)">#onAction(Runnable)</a></code>.</p></span></section>
-			<section class="M" id="onMouse(java.awt.event.MouseListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onMouse</code><code class="a">(<code><a aria-label="java.awt.event.MouseListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseListener.html">MouseListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onMouse(java.awt.event.MouseListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onMouse</code><code class="k">(<code><a aria-label="java.awt.event.MouseListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseListener.html">MouseListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.event.MouseListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseListener.html">MouseListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a raw mouse listener, declared by <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code>.</p></span></section>
-			<section class="M" id="onMouseMotion(java.awt.event.MouseMotionListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onMouseMotion</code><code class="a">(<code><a aria-label="java.awt.event.MouseMotionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseMotionListener.html">MouseMotionListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onMouseMotion(java.awt.event.MouseMotionListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onMouseMotion</code><code class="k">(<code><a aria-label="java.awt.event.MouseMotionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseMotionListener.html">MouseMotionListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.event.MouseMotionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseMotionListener.html">MouseMotionListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a raw mouse-motion listener, declared by <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code>.</p></span></section>
-			<section class="M" id="onClick(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onClick</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onClick(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onClick</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler when the component is clicked.</p></span></section>
-			<section class="M" id="onPressed(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onPressed</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onPressed(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onPressed</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler on every press, e.g. to report navigation on the press instead of a synthetic
 click which a dragged pointer would swallow.</p></span></section>
-			<section class="M" id="onReleased(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onReleased</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onReleased(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onReleased</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler on every release.</p></span></section>
-			<section class="M" id="onEntered(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onEntered</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onEntered(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onEntered</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler when the pointer enters the component.</p></span></section>
-			<section class="M" id="onExited(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onExited</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onExited(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onExited</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler when the pointer leaves the component.</p></span></section>
-			<section class="M" id="onKeyPressed(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onKeyPressed</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onKeyPressed(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onKeyPressed</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler when a key goes down.</p></span></section>
-			<section class="M" id="onKeyReleased(java.util.function.Consumer)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onKeyReleased</code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onKeyReleased(java.util.function.Consumer)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onKeyReleased</code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code></td>
 						<td><span><p>the handler</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Runs a handler when a key goes up.</p></span></section>
-			<section class="M" id="onKey(java.awt.event.KeyListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onKey</code><code class="a">(<code><a aria-label="java.awt.event.KeyListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyListener.html">KeyListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onKey(java.awt.event.KeyListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onKey</code><code class="k">(<code><a aria-label="java.awt.event.KeyListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyListener.html">KeyListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.event.KeyListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyListener.html">KeyListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a raw key listener, declared by <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code>.</p></span></section>
-			<section class="M" id="onFocus(java.awt.event.FocusListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onFocus</code><code class="a">(<code><a aria-label="java.awt.event.FocusListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/FocusListener.html">FocusListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onFocus(java.awt.event.FocusListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onFocus</code><code class="k">(<code><a aria-label="java.awt.event.FocusListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/FocusListener.html">FocusListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.event.FocusListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/FocusListener.html">FocusListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a raw focus listener, declared by <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code>.</p></span></section>
-			<section class="M" id="onComponent(java.awt.event.ComponentListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onComponent</code><code class="a">(<code><a aria-label="java.awt.event.ComponentListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ComponentListener.html">ComponentListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onComponent(java.awt.event.ComponentListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onComponent</code><code class="k">(<code><a aria-label="java.awt.event.ComponentListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ComponentListener.html">ComponentListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.event.ComponentListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ComponentListener.html">ComponentListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a raw component listener, declared by <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code>.</p></span></section>
-			<section class="M" id="onChange(javax.swing.event.ChangeListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onChange</code><code class="a">(<code><a aria-label="javax.swing.event.ChangeListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ChangeListener.html">ChangeListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onChange(javax.swing.event.ChangeListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onChange</code><code class="k">(<code><a aria-label="javax.swing.event.ChangeListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ChangeListener.html">ChangeListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="javax.swing.event.ChangeListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ChangeListener.html">ChangeListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a change listener on the components which support one. A change listener belongs to
 buttons, sliders, tabbed panes and spinners rather than to <code><a aria-label="java.awt.Component 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Component.html">Component</a></code> itself.</p></span></section>
-			<section class="M" id="onSelection(javax.swing.event.ListSelectionListener)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">onSelection</code><code class="a">(<code><a aria-label="javax.swing.event.ListSelectionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ListSelectionListener.html">ListSelectionListener</a></code><code class="parameterName">listener</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="onSelection(javax.swing.event.ListSelectionListener)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">onSelection</code><code class="k">(<code><a aria-label="javax.swing.event.ListSelectionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ListSelectionListener.html">ListSelectionListener</a></code><code class="parameterName">listener</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="javax.swing.event.ListSelectionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ListSelectionListener.html">ListSelectionListener</a></code><code class="parameterName">listener</code></td>
 						<td><span><p>the listener</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Registers a list-selection listener on a <code><a aria-label="javax.swing.JList 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JList.html">JList</a></code>; a no-op on other components.</p></span></section>
 		</article>
-		<aside class="q">
-			<div class="J">
-				<h5 class="p">Methods</h5>
+		<aside class="p">
+			<div class="FB">
+				<h5 class="BB">Methods</h5>
 				<ul>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onAction(java.lang.Runnable)">onAction</a></code><code class="a">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onAction(java.util.function.Consumer)">onAction</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.ActionEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ActionEvent.html">ActionEvent</a></code></code></code><code class="parameterName">action</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onMouse(java.awt.event.MouseListener)">onMouse</a></code><code class="a">(<code><a aria-label="java.awt.event.MouseListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseListener.html">MouseListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onMouseMotion(java.awt.event.MouseMotionListener)">onMouseMotion</a></code><code class="a">(<code><a aria-label="java.awt.event.MouseMotionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseMotionListener.html">MouseMotionListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onClick(java.util.function.Consumer)">onClick</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onPressed(java.util.function.Consumer)">onPressed</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onReleased(java.util.function.Consumer)">onReleased</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onEntered(java.util.function.Consumer)">onEntered</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onExited(java.util.function.Consumer)">onExited</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onKeyPressed(java.util.function.Consumer)">onKeyPressed</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onKeyReleased(java.util.function.Consumer)">onKeyReleased</a></code><code class="a">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onKey(java.awt.event.KeyListener)">onKey</a></code><code class="a">(<code><a aria-label="java.awt.event.KeyListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyListener.html">KeyListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onFocus(java.awt.event.FocusListener)">onFocus</a></code><code class="a">(<code><a aria-label="java.awt.event.FocusListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/FocusListener.html">FocusListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onComponent(java.awt.event.ComponentListener)">onComponent</a></code><code class="a">(<code><a aria-label="java.awt.event.ComponentListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ComponentListener.html">ComponentListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onChange(javax.swing.event.ChangeListener)">onChange</a></code><code class="a">(<code><a aria-label="javax.swing.event.ChangeListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ChangeListener.html">ChangeListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onSelection(javax.swing.event.ListSelectionListener)">onSelection</a></code><code class="a">(<code><a aria-label="javax.swing.event.ListSelectionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ListSelectionListener.html">ListSelectionListener</a></code><code class="parameterName">listener</code>)</code><i class="CB"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onAction(java.lang.Runnable)">onAction</a></code><code class="k">(<code><a aria-label="java.lang.Runnable 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Runnable.html">Runnable</a></code><code class="parameterName">action</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onAction(java.util.function.Consumer)">onAction</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.ActionEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ActionEvent.html">ActionEvent</a></code></code></code><code class="parameterName">action</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onMouse(java.awt.event.MouseListener)">onMouse</a></code><code class="k">(<code><a aria-label="java.awt.event.MouseListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseListener.html">MouseListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onMouseMotion(java.awt.event.MouseMotionListener)">onMouseMotion</a></code><code class="k">(<code><a aria-label="java.awt.event.MouseMotionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseMotionListener.html">MouseMotionListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onClick(java.util.function.Consumer)">onClick</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onPressed(java.util.function.Consumer)">onPressed</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onReleased(java.util.function.Consumer)">onReleased</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onEntered(java.util.function.Consumer)">onEntered</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onExited(java.util.function.Consumer)">onExited</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.MouseEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/MouseEvent.html">MouseEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onKeyPressed(java.util.function.Consumer)">onKeyPressed</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onKeyReleased(java.util.function.Consumer)">onKeyReleased</a></code><code class="k">(<code><a aria-label="java.util.function.Consumer 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><code class="parameters"><code><a aria-label="java.awt.event.KeyEvent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyEvent.html">KeyEvent</a></code></code></code><code class="parameterName">handler</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onKey(java.awt.event.KeyListener)">onKey</a></code><code class="k">(<code><a aria-label="java.awt.event.KeyListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/KeyListener.html">KeyListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onFocus(java.awt.event.FocusListener)">onFocus</a></code><code class="k">(<code><a aria-label="java.awt.event.FocusListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/FocusListener.html">FocusListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onComponent(java.awt.event.ComponentListener)">onComponent</a></code><code class="k">(<code><a aria-label="java.awt.event.ComponentListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/event/ComponentListener.html">ComponentListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onChange(javax.swing.event.ChangeListener)">onChange</a></code><code class="k">(<code><a aria-label="javax.swing.event.ChangeListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ChangeListener.html">ChangeListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ActionHelper.html#onSelection(javax.swing.event.ListSelectionListener)">onSelection</a></code><code class="k">(<code><a aria-label="javax.swing.event.ListSelectionListener 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/event/ListSelectionListener.html">ListSelectionListener</a></code><code class="parameterName">listener</code>)</code><i class="h"><code>C</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="O">
+		<footer class="v">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

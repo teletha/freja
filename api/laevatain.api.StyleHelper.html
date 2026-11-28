@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="DB">
-		<header class="j" date="2026-11-28">
-			<h1 class="k"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="l"><a href="api/main.html" id="API"><svg class="package">
+	<body class="u">
+		<header class="O" date="2026-11-28">
+			<h1 class="P"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="Q"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="T"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="R"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="f"></nav>
-		<article class="m" id="Article">
-			<section class="M"><code class="Z">laevatain.api</code>
-				<h2 class="Interface BB"><code class="N">StyleHelper</code><code class="a">&lt;<code>C</code>&gt;</code></h2>
-				<div class="g">
+		<nav class="w"></nav>
+		<article class="f" id="Article">
+			<section class="m"><code class="M">laevatain.api</code>
+				<h2 class="Interface JB"><code class="T">StyleHelper</code><code class="k">&lt;<code>C</code>&gt;</code></h2>
+				<div class="S">
 					<ul class="E F">
 						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></code><span><p>the concrete component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
 					</ul>
@@ -92,111 +92,125 @@ size, and setting the size keeps the current family and style. The size is used 
 which supports a user-selected scale should scale the value before calling <code><a aria-label="laevatain.api.StyleHelper" href="api/laevatain.api.StyleHelper.html#fontSize(int)">#fontSize(int)</a></code>.
 Visibility is a style concern here, while the enabled state lives in <code><a aria-label="laevatain.api.DisableHelper" href="api/laevatain.api.DisableHelper.html">DisableHelper</a></code>.
 </p></span></section>
-			<section class="M" id="background(java.awt.Color)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">background</code><code class="a">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="background(java.awt.Color)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">background</code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td><span><p>the background colour</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the background colour. Null restores the look and feel&apos;s default painting.</p></span></section>
-			<section class="M" id="foreground(java.awt.Color)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">foreground</code><code class="a">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="foreground(java.awt.Color)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">foreground</code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td><span><p>the font colour</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the foreground colour, which is the colour Swing labels use for their text.</p></span></section>
-			<section class="M" id="fontColor(java.awt.Color)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">fontColor</code><code class="a">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="fontColor(java.awt.Color)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">fontColor</code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td><span><p>the font colour</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>An alias for <code><a aria-label="laevatain.api.StyleHelper" href="api/laevatain.api.StyleHelper.html#foreground(java.awt.Color)">#foreground(Color)</a></code> for callers which think in terms of text colour.</p></span></section>
-			<section class="M" id="fontFamily(java.lang.String)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">fontFamily</code><code class="a">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">family</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="font(java.awt.Font)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">font</code><code class="k">(<code><a aria-label="java.awt.Font 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Font.html">Font</a></code><code class="parameterName">font</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
+						<td><code><a aria-label="java.awt.Font 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Font.html">Font</a></code><code class="parameterName">font</code></td>
+						<td><span><p>the font to install</p></span></td>
+					</tr>
+					<tr class="c">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets an exact font, e.g. one built by the host&apos;s theme with its own scale and family. Use this
+when <code><a aria-label="laevatain.api.StyleHelper" href="api/laevatain.api.StyleHelper.html#fontFamily(java.lang.String)">#fontFamily(String)</a></code> and <code><a aria-label="laevatain.api.StyleHelper" href="api/laevatain.api.StyleHelper.html#fontSize(int)">#fontSize(int)</a></code> cannot express the whole font.</p></span></section>
+			<section class="m" id="fontFamily(java.lang.String)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">fontFamily</code><code class="k">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">family</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">family</code></td>
 						<td><span><p>the font family name, e.g. one from
 <code><a aria-label="java.awt.GraphicsEnvironment 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/GraphicsEnvironment.html#getAvailableFontFamilyNames()">java.awt.GraphicsEnvironment#getAvailableFontFamilyNames()</a></code></p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Changes the font family while keeping the current style and size. Blank or null values leave
 the font alone rather than installing an unusable family.</p></span></section>
-			<section class="M" id="fontSize(int)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">fontSize</code><code class="a">(<code>int</code><code class="parameterName">size</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="fontSize(int)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">fontSize</code><code class="k">(<code>int</code><code class="parameterName">size</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td><span><p>the font size in points</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Changes the font size while keeping the current family and style. Values below one are raised
 to one, since a non-positive size cannot produce a font.</p></span></section>
-			<section class="M" id="visible(boolean)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">visible</code><code class="a">(<code>boolean</code><code class="parameterName">visible</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="visible(boolean)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">visible</code><code class="k">(<code>boolean</code><code class="parameterName">visible</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>boolean</code><code class="parameterName">visible</code></td>
 						<td><span><p>true to show</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Shows or hides the component. A hidden component keeps its validation state and its enabled
 flag, so showing it again does not rebuild its layout or its interaction state.</p></span></section>
-			<section class="M" id="opaque(boolean)">
-				<h2 class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="N">opaque</code><code class="a">(<code>boolean</code><code class="parameterName">opaque</code>)</code><i class="EB"><code>C</code></i></h2>
-				<table class="c">
-					<tr class="w">
+			<section class="m" id="opaque(boolean)">
+				<h2 class="LB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="T">opaque</code><code class="k">(<code>boolean</code><code class="parameterName">opaque</code>)</code><i class="y"><code>C</code></i></h2>
+				<table class="K">
+					<tr class="g">
 						<td><code>boolean</code><code class="parameterName">opaque</code></td>
 						<td><span><p>true to paint the background</p></span></td>
 					</tr>
-					<tr class="y">
+					<tr class="c">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets whether the component paints its own background. Transparent children let a parent&apos;s
 background show through, which is needed inside tinted cards and rounded panels.</p></span></section>
 		</article>
-		<aside class="q">
-			<div class="J">
-				<h5 class="p">Methods</h5>
+		<aside class="p">
+			<div class="FB">
+				<h5 class="BB">Methods</h5>
 				<ul>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#background(java.awt.Color)">background</a></code><code class="a">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#foreground(java.awt.Color)">foreground</a></code><code class="a">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#fontColor(java.awt.Color)">fontColor</a></code><code class="a">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#fontFamily(java.lang.String)">fontFamily</a></code><code class="a">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">family</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#fontSize(int)">fontSize</a></code><code class="a">(<code>int</code><code class="parameterName">size</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#visible(boolean)">visible</a></code><code class="a">(<code>boolean</code><code class="parameterName">visible</code>)</code><i class="CB"><code>C</code></i></li>
-					<li class="Y"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#opaque(boolean)">opaque</a></code><code class="a">(<code>boolean</code><code class="parameterName">opaque</code>)</code><i class="CB"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#background(java.awt.Color)">background</a></code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#foreground(java.awt.Color)">foreground</a></code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#fontColor(java.awt.Color)">fontColor</a></code><code class="k">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#font(java.awt.Font)">font</a></code><code class="k">(<code><a aria-label="java.awt.Font 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Font.html">Font</a></code><code class="parameterName">font</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#fontFamily(java.lang.String)">fontFamily</a></code><code class="k">(<code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">family</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#fontSize(int)">fontSize</a></code><code class="k">(<code>int</code><code class="parameterName">size</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#visible(boolean)">visible</a></code><code class="k">(<code>boolean</code><code class="parameterName">visible</code>)</code><i class="h"><code>C</code></i></li>
+					<li class="HB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.StyleHelper.html#opaque(boolean)">opaque</a></code><code class="k">(<code>boolean</code><code class="parameterName">opaque</code>)</code><i class="h"><code>C</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="O">
+		<footer class="v">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
