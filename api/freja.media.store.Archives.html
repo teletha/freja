@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="b">
-		<header class="c" date="2026-11-28">
+	<body class="t">
+		<header class="a" date="2026-11-28">
 			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="U"><a href="api/main.html" id="API"><svg class="package">
+			<nav class="b"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,160 +35,160 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="p"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="c"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="R"></nav>
-		<article class="O" id="Article">
-			<section class="r"><code class="W">freja.media.store</code>
-				<h2 class="Class BB"><code class="X">Archives</code></h2>
-				<div class="JB"></div><span class="A"><p>Reads images inside ZIP and 7z archives without extracting them.</p><p>
+		<nav class="v"></nav>
+		<article class="d" id="Article">
+			<section class="m"><code class="k">freja.media.store</code>
+				<h2 class="Class DB"><code class="s">Archives</code></h2>
+				<div class="y"></div><span class="A"><p>Reads images inside ZIP and 7z archives without extracting them.</p><p>
 An archive is a container, not a photo. Its entries are indexed as virtual photos whose
 <code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html#path()">Photo#path()</a></code> is a synthetic path below the archive, so all reads of the original bytes
 have to go through <code><a aria-label="freja.media.store.Archives" href="api/freja.media.store.Archives.html#read(freja.media.Photo)">#read(Photo)</a></code>. The identity of an entry is its cleaned name, which
 keeps the catalog stable even when the archive was created on a machine with a different path
 separator.
 </p></span></section>
-			<section class="r" id="ZIP">
-				<h2 class="g"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="X">ZIP</code><i class="Y"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The type marker stored for ZIP entries.</p></span></section>
-			<section class="r" id="SEVEN_Z">
-				<h2 class="g"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="X">SEVEN_Z</code><i class="Y"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The type marker stored for 7z entries.</p></span></section>
-			<section class="r" id="type(java.nio.file.Path)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">type</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="Y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="ZIP">
+				<h2 class="EB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="s">ZIP</code><i class="T"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The type marker stored for ZIP entries.</p></span></section>
+			<section class="m" id="SEVEN_Z">
+				<h2 class="EB"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code class="s">SEVEN_Z</code><i class="T"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2><span class="A"><p>The type marker stored for 7z entries.</p></span></section>
+			<section class="m" id="type(java.nio.file.Path)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">type</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="T"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><code><a aria-label="freja.media.store.Archives" href="api/freja.media.store.Archives.html#ZIP">#ZIP</a></code>, <code><a aria-label="freja.media.store.Archives" href="api/freja.media.store.Archives.html#SEVEN_Z">#SEVEN_Z</a></code>, or null</span></td>
 					</tr>
 				</table><span class="A"><p>Returns the marker for an archive file, or null for any other path.</p></span></section>
-			<section class="r" id="isArchive(java.nio.file.Path)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">isArchive</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="Y"><code>boolean</code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="isArchive(java.nio.file.Path)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">isArchive</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="T"><code>boolean</code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a file</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code>boolean</code></td>
 						<td><span><p>true for ZIP and 7z</p></span></td>
 					</tr>
 				</table><span class="A"><p>Tests whether a path is an archive this application can read.</p></span></section>
-			<section class="r" id="displayName(java.nio.file.Path)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">displayName</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="Y"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="displayName(java.nio.file.Path)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">displayName</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="T"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code></td>
 						<td><span><p>a directory or archive file</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></td>
 						<td><span><p>the last path element, without the archive extension</p></span></td>
 					</tr>
 				</table><span class="A"><p>Returns the name under which a folder path should be shown. An archive is registered as a
 folder of its own, but the container suffix is a format detail rather than part of the name.</p></span></section>
-			<section class="r" id="entries(java.nio.file.Path)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">entries</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>)</code><i class="Y"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Archives.Entry" href="api/freja.media.store.Archives.Entry.html">Entry</a></code></code></code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="entries(java.nio.file.Path)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">entries</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>)</code><i class="T"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Archives.Entry" href="api/freja.media.store.Archives.Entry.html">Entry</a></code></code></code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code></td>
 						<td><span><p>the archive file</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Archives.Entry" href="api/freja.media.store.Archives.Entry.html">Entry</a></code></code></code></td>
 						<td><span><p>the image entries, in archive order</p></span></td>
 					</tr>
-					<tr class="LB">
+					<tr class="n">
 						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Lists the image entries of an archive. Directories, hidden metadata entries and entries whose
 name does not carry a supported image extension are skipped.</p></span></section>
-			<section class="r" id="read(java.nio.file.Path,java.lang.String,java.lang.String)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">read</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">type</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="Y"><code array="fix">byte</code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="read(java.nio.file.Path,java.lang.String,java.lang.String)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">read</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">type</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="T"><code array="fix">byte</code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code></td>
 						<td><span><p>the archive file</p></span></td>
 					</tr>
-					<tr class="P">
+					<tr class="l">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">type</code></td>
 						<td><span><p>the marker returned by <code><a aria-label="freja.media.store.Archives" href="api/freja.media.store.Archives.html#type(java.nio.file.Path)">#type(Path)</a></code></p></span></td>
 					</tr>
-					<tr class="P">
+					<tr class="l">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code></td>
 						<td><span><p>the cleaned entry name</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code array="fix">byte</code></td>
 						<td><span><p>the uncompressed bytes</p></span></td>
 					</tr>
-					<tr class="LB">
+					<tr class="n">
 						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Reads one entry as bytes.</p></span></section>
-			<section class="r" id="read(freja.media.Photo)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">read</code><code class="M">(<code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code><code class="parameterName">photo</code>)</code><i class="Y"><code array="fix">byte</code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="read(freja.media.Photo)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">read</code><code class="HB">(<code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code><code class="parameterName">photo</code>)</code><i class="T"><code array="fix">byte</code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code><code class="parameterName">photo</code></td>
 						<td><span><p>a photo, possibly an archive entry</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code array="fix">byte</code></td>
 						<td><span><p>the original bytes</p></span></td>
 					</tr>
-					<tr class="LB">
+					<tr class="n">
 						<td><code><a aria-label="java.io.IOException 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/io/IOException.html">IOException</a></code></td>
 						<td></td>
 					</tr>
 				</table><span class="A"><p>Reads the entry a virtual photo was indexed from.</p></span></section>
-			<section class="r" id="entryPath(java.nio.file.Path,java.lang.String)">
-				<h2 class="g"><i class="STATIC PUBLIC"></i><code class="X">entryPath</code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="Y"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
-				<table class="s">
-					<tr class="P">
+			<section class="m" id="entryPath(java.nio.file.Path,java.lang.String)">
+				<h2 class="EB"><i class="STATIC PUBLIC"></i><code class="s">entryPath</code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="T"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></h2>
+				<table class="L">
+					<tr class="l">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code></td>
 						<td><span><p>the archive file</p></span></td>
 					</tr>
-					<tr class="P">
+					<tr class="l">
 						<td><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code></td>
 						<td><span><p>the cleaned entry name</p></span></td>
 					</tr>
-					<tr class="Z">
+					<tr class="LB">
 						<td><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></td>
 						<td><span><p>the synthetic path</p></span></td>
 					</tr>
 				</table><span class="A"><p>Builds the synthetic path stored for an entry. The path is never opened on the file system;
 its only jobs are to give the row a stable unique key and a readable name.</p></span></section>
 		</article>
-		<aside class="d">
-			<div class="u">
-				<h5 class="J">Static Fields</h5>
+		<aside class="w">
+			<div class="R">
+				<h5 class="CB">Static Fields</h5>
 				<ul>
-					<li class="L"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.store.Archives.html#ZIP">ZIP</a></code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="L"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.store.Archives.html#SEVEN_Z">SEVEN_Z</a></code><i class="V"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.store.Archives.html#ZIP">ZIP</a></code><i class="z"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="FINAL"><i class="STATIC PUBLIC"></i></i><code><a href="api/freja.media.store.Archives.html#SEVEN_Z">SEVEN_Z</a></code><i class="z"><code class="return"><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
 				</ul>
-				<h5 class="J">Static Methods</h5>
+				<h5 class="CB">Static Methods</h5>
 				<ul>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#type(java.nio.file.Path)">type</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#isArchive(java.nio.file.Path)">isArchive</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code>boolean</code></i></li>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#displayName(java.nio.file.Path)">displayName</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="V"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#entries(java.nio.file.Path)">entries</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>)</code><i class="V"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Archives.Entry" href="api/freja.media.store.Archives.Entry.html">Entry</a></code></code></code></i></li>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#read(java.nio.file.Path,java.lang.String,java.lang.String)">read</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">type</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="V"><code array="fix">byte</code></i></li>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#read(freja.media.Photo)">read</a></code><code class="M">(<code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code><code class="parameterName">photo</code>)</code><i class="V"><code array="fix">byte</code></i></li>
-					<li class="L"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#entryPath(java.nio.file.Path,java.lang.String)">entryPath</a></code><code class="M">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="V"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#type(java.nio.file.Path)">type</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="z"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#isArchive(java.nio.file.Path)">isArchive</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="z"><code>boolean</code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#displayName(java.nio.file.Path)">displayName</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">path</code>)</code><i class="z"><code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#entries(java.nio.file.Path)">entries</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>)</code><i class="z"><code><a aria-label="java.util.List 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/List.html">List</a><code class="parameters"><code><a aria-label="freja.media.store.Archives.Entry" href="api/freja.media.store.Archives.Entry.html">Entry</a></code></code></code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#read(java.nio.file.Path,java.lang.String,java.lang.String)">read</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">type</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="z"><code array="fix">byte</code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#read(freja.media.Photo)">read</a></code><code class="HB">(<code><a aria-label="freja.media.Photo" href="api/freja.media.Photo.html">Photo</a></code><code class="parameterName">photo</code>)</code><i class="z"><code array="fix">byte</code></i></li>
+					<li class="P"><i class="STATIC PUBLIC"></i><code><a href="api/freja.media.store.Archives.html#entryPath(java.nio.file.Path,java.lang.String)">entryPath</a></code><code class="HB">(<code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code><code class="parameterName">archive</code>, <code><a aria-label="java.lang.String 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/String.html">String</a></code><code class="parameterName">entryName</code>)</code><i class="z"><code><a aria-label="java.nio.file.Path 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/file/Path.html">Path</a></code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="S">
+		<footer class="u">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>
