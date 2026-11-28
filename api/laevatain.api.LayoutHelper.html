@@ -19,10 +19,10 @@
 		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
 		<link href="main.css" rel="stylesheet"/>
 	</head>
-	<body class="g">
-		<header class="h" date="2026-11-28">
-			<h1 class="J"><a href="index.html"><code>Freja</code></a></h1>
-			<nav class="Y"><a href="api/main.html" id="API"><svg class="package">
+	<body class="t">
+		<header class="Z" date="2026-11-28">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="a"><a href="api/main.html" id="API"><svg class="package">
 						<use href="main.svg#package"/>
 					</svg>
 				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
@@ -35,18 +35,18 @@
 						<use href="main.svg#github"/>
 					</svg>
 				</a></nav>
-			<div class="N"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+			<div class="b"><a aria-label="Change color scheme" id="theme"><svg class="sun">
 						<use href="main.svg#sun"/>
 					</svg><svg class="moon">
 						<use href="main.svg#moon"/>
 					</svg>
 				</a></div>
 		</header>
-		<nav class="i"></nav>
-		<article class="T" id="Article">
-			<section class="f"><code class="k">laevatain.api</code>
-				<h2 class="Interface KB"><code class="x">LayoutHelper</code><code class="DB">&lt;<code>C</code>&gt;</code></h2>
-				<div class="e">
+		<nav class="v"></nav>
+		<article class="L" id="Article">
+			<section class="LB"><code class="O">laevatain.api</code>
+				<h2 class="Interface DB"><code class="w">LayoutHelper</code><code class="e">&lt;<code>C</code>&gt;</code></h2>
+				<div class="M">
 					<ul class="E F">
 						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.JComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JComponent.html">JComponent</a></code></code><span><p>the concrete component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
 					</ul>
@@ -66,7 +66,18 @@
 						<li><code><a aria-label="laevatain.ARXTextField" href="api/laevatain.ARXTextField.html">ARXTextField</a></code></li>
 						<li><code><a aria-label="laevatain.ARXToggle" href="api/laevatain.ARXToggle.html">ARXToggle</a></code></li>
 						<li><code><a aria-label="laevatain.ARXWrapLabel" href="api/laevatain.ARXWrapLabel.html">ARXWrapLabel</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Block" href="api/laevatain.ARXSettingsPane.Block.html">Block</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Card" href="api/laevatain.ARXSettingsPane.Card.html">Card</a></code></li>
 						<li><code><a aria-label="laevatain.api.ComponentHelper" href="api/laevatain.api.ComponentHelper.html">ComponentHelper</a><code class="parameters"><code>C</code></code></code></li>
+						<li><code><a aria-label="freja.file.ui.FileManagerPanel" href="api/freja.file.ui.FileManagerPanel.html">FileManagerPanel</a></code></li>
+						<li><code><a aria-label="freja.media.ui.FolderList" href="api/freja.media.ui.FolderList.html">FolderList</a></code></li>
+						<li><code><a aria-label="freja.media.ui.PhotoGrid" href="api/freja.media.ui.PhotoGrid.html">PhotoGrid</a></code></li>
+						<li><code><a aria-label="freja.media.ui.PhotoInspector" href="api/freja.media.ui.PhotoInspector.html">PhotoInspector</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Row" href="api/laevatain.ARXSettingsPane.Row.html">Row</a></code></li>
+						<li><code><a aria-label="laevatain.ARXSettingsPane.Section" href="api/laevatain.ARXSettingsPane.Section.html">Section</a></code></li>
+						<li><code><a aria-label="freja.setting.ui.SettingsPanel" href="api/freja.setting.ui.SettingsPanel.html">SettingsPanel</a></code></li>
+						<li><code><a aria-label="freja.media.ui.Sidebar" href="api/freja.media.ui.Sidebar.html">Sidebar</a></code></li>
+						<li><code><a aria-label="freja.media.ui.TagPicker" href="api/freja.media.ui.TagPicker.html">TagPicker</a></code></li>
 					</ul>
 				</div><span class="A"><p>Fluent border helpers for the ARX components. Implementing this interface lets a component
 describe its spacing in the same chained expression which builds it, instead of exposing a
@@ -78,74 +89,87 @@ inside the component; the background therefore reaches out behind them. Call
 those two keep whatever border is already installed. A later <code>border</code> call replaces the
 whole composition.
 </p></span></section>
-			<section class="f" id="margin(int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">margin</code><code class="DB">(<code>int</code><code class="parameterName">size</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="layout(java.awt.LayoutManager)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">layout</code><code class="e">(<code><a aria-label="java.awt.LayoutManager 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/LayoutManager.html">LayoutManager</a></code><code class="parameterName">layout</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code><a aria-label="java.awt.LayoutManager 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/LayoutManager.html">LayoutManager</a></code><code class="parameterName">layout</code></td>
+						<td><span><p>the layout manager, or null for the default</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the layout manager. Included here because a constructor chain which sets spacing almost
+always sets the layout next; null restores the component&apos;s default manager.</p></span></section>
+			<section class="LB" id="margin(int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">margin</code><code class="e">(<code>int</code><code class="parameterName">size</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td><span><p>the margin in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies the same margin on all four sides.</p></span></section>
-			<section class="f" id="margin(int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">margin</code><code class="DB">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="margin(int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">margin</code><code class="e">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">vertical</code></td>
 						<td><span><p>the top and bottom margin in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">horizontal</code></td>
 						<td><span><p>the left and right margin in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies one margin to the top and bottom and another to the left and right.</p></span></section>
-			<section class="f" id="margin(int,int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">margin</code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="margin(int,int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">margin</code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">top</code></td>
 						<td><span><p>the top margin in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">horizontal</code></td>
 						<td><span><p>the left and right margin in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">bottom</code></td>
 						<td><span><p>the bottom margin in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies the side margins and lets the left and right share one value.</p></span></section>
-			<section class="f" id="margin(int,int,int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">margin</code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="margin(int,int,int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">margin</code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">top</code></td>
 						<td><span><p>the top margin in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">right</code></td>
 						<td><span><p>the right margin in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">bottom</code></td>
 						<td><span><p>the bottom margin in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">left</code></td>
 						<td><span><p>the left margin in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
@@ -155,132 +179,132 @@ The order matches <code><a aria-label="java.awt.Insets 🚀" href="https://docs.
 <code><a aria-label="javax.swing.BorderFactory 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/BorderFactory.html#createEmptyBorder(int,int,int,int)">BorderFactory#createEmptyBorder(int, int, int, int)</a></code> takes top, left, bottom, right;
 the two middle values are swapped below.
 </p></span></section>
-			<section class="f" id="padding(int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">padding</code><code class="DB">(<code>int</code><code class="parameterName">size</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="padding(int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">padding</code><code class="e">(<code>int</code><code class="parameterName">size</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">size</code></td>
 						<td><span><p>the padding in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies the same padding on all four sides.</p></span></section>
-			<section class="f" id="padding(int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">padding</code><code class="DB">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="padding(int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">padding</code><code class="e">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">vertical</code></td>
 						<td><span><p>the top and bottom padding in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">horizontal</code></td>
 						<td><span><p>the left and right padding in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies one padding to the top and bottom and another to the left and right.</p></span></section>
-			<section class="f" id="padding(int,int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">padding</code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="padding(int,int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">padding</code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">top</code></td>
 						<td><span><p>the top padding in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">horizontal</code></td>
 						<td><span><p>the left and right padding in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">bottom</code></td>
 						<td><span><p>the bottom padding in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies the side padding and lets the left and right share one value.</p></span></section>
-			<section class="f" id="padding(int,int,int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">padding</code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="padding(int,int,int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">padding</code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">top</code></td>
 						<td><span><p>the top padding in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">right</code></td>
 						<td><span><p>the right padding in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">bottom</code></td>
 						<td><span><p>the bottom padding in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">left</code></td>
 						<td><span><p>the left padding in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Applies an independent padding to each side. The empty border is placed inside the border
 already installed, so a visible border is painted outside the space reserved here.</p></span></section>
-			<section class="f" id="border(javax.swing.border.Border)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">border</code><code class="DB">(<code><a aria-label="javax.swing.border.Border 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/border/Border.html">Border</a></code><code class="parameterName">border</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="border(javax.swing.border.Border)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">border</code><code class="e">(<code><a aria-label="javax.swing.border.Border 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/border/Border.html">Border</a></code><code class="parameterName">border</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code><a aria-label="javax.swing.border.Border 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/border/Border.html">Border</a></code><code class="parameterName">border</code></td>
 						<td><span><p>the border to paint, or null for no border</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets the visible border, replacing any previously composed margin and padding. Call this
 before <code><a aria-label="laevatain.api.LayoutHelper" href="api/laevatain.api.LayoutHelper.html#margin(int)">#margin(int)</a></code> and <code><a aria-label="laevatain.api.LayoutHelper" href="api/laevatain.api.LayoutHelper.html#padding(int)">#padding(int)</a></code> to keep all three layers.</p></span></section>
-			<section class="f" id="border(java.awt.Color,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">border</code><code class="DB">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">thickness</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="border(java.awt.Color,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">border</code><code class="e">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">thickness</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td><span><p>the line colour</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">thickness</code></td>
 						<td><span><p>the line width in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
 				</table><span class="A"><p>Sets a plain line border of the same width on all four sides.</p></span></section>
-			<section class="f" id="border(java.awt.Color,int,int,int,int)">
-				<h2 class="c"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="x">border</code><code class="DB">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="n"><code>C</code></i></h2>
-				<table class="HB">
-					<tr class="M">
+			<section class="LB" id="border(java.awt.Color,int,int,int,int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">border</code><code class="e">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
 						<td><code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code></td>
 						<td><span><p>the line colour</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">top</code></td>
 						<td><span><p>the top width in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">right</code></td>
 						<td><span><p>the right width in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">bottom</code></td>
 						<td><span><p>the bottom width in pixels</p></span></td>
 					</tr>
-					<tr class="M">
+					<tr class="n">
 						<td><code>int</code><code class="parameterName">left</code></td>
 						<td><span><p>the left width in pixels</p></span></td>
 					</tr>
-					<tr class="d">
+					<tr class="AB">
 						<td><code>C</code></td>
 						<td><span><p>this component</p></span></td>
 					</tr>
@@ -289,25 +313,26 @@ left edge. The widths follow <code><a aria-label="java.awt.Insets 🚀" href="ht
 zero width suppresses that side. Like <code><a aria-label="laevatain.api.LayoutHelper" href="api/laevatain.api.LayoutHelper.html#border(javax.swing.border.Border)">#border(Border)</a></code>, this replaces any previously
 composed margin and padding, so call it before those helpers.</p></span></section>
 		</article>
-		<aside class="j">
-			<div class="z">
-				<h5 class="JB">Methods</h5>
+		<aside class="o">
+			<div class="J">
+				<h5 class="BB">Methods</h5>
 				<ul>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int)">margin</a></code><code class="DB">(<code>int</code><code class="parameterName">size</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int)">margin</a></code><code class="DB">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int,int)">margin</a></code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int,int,int)">margin</a></code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int)">padding</a></code><code class="DB">(<code>int</code><code class="parameterName">size</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int,int)">padding</a></code><code class="DB">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int,int,int)">padding</a></code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int,int,int,int)">padding</a></code><code class="DB">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#border(javax.swing.border.Border)">border</a></code><code class="DB">(<code><a aria-label="javax.swing.border.Border 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/border/Border.html">Border</a></code><code class="parameterName">border</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#border(java.awt.Color,int)">border</a></code><code class="DB">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">thickness</code>)</code><i class="K"><code>C</code></i></li>
-					<li class="AB"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#border(java.awt.Color,int,int,int,int)">border</a></code><code class="DB">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="K"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#layout(java.awt.LayoutManager)">layout</a></code><code class="e">(<code><a aria-label="java.awt.LayoutManager 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/LayoutManager.html">LayoutManager</a></code><code class="parameterName">layout</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int)">margin</a></code><code class="e">(<code>int</code><code class="parameterName">size</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int)">margin</a></code><code class="e">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int,int)">margin</a></code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#margin(int,int,int,int)">margin</a></code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int)">padding</a></code><code class="e">(<code>int</code><code class="parameterName">size</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int,int)">padding</a></code><code class="e">(<code>int</code><code class="parameterName">vertical</code>, <code>int</code><code class="parameterName">horizontal</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int,int,int)">padding</a></code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">horizontal</code>, <code>int</code><code class="parameterName">bottom</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#padding(int,int,int,int)">padding</a></code><code class="e">(<code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#border(javax.swing.border.Border)">border</a></code><code class="e">(<code><a aria-label="javax.swing.border.Border 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/border/Border.html">Border</a></code><code class="parameterName">border</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#border(java.awt.Color,int)">border</a></code><code class="e">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">thickness</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.LayoutHelper.html#border(java.awt.Color,int,int,int,int)">border</a></code><code class="e">(<code><a aria-label="java.awt.Color 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/java/awt/Color.html">Color</a></code><code class="parameterName">color</code>, <code>int</code><code class="parameterName">top</code>, <code>int</code><code class="parameterName">right</code>, <code>int</code><code class="parameterName">bottom</code>, <code>int</code><code class="parameterName">left</code>)</code><i class="k"><code>C</code></i></li>
 				</ul>
 			</div>
 		</aside>
-		<footer class="Z">
+		<footer class="u">
 			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
 		</footer>
 	</body>

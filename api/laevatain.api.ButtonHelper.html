@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="t">
+		<header class="Z" date="2026-11-28">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="a"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="b"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="v"></nav>
+		<article class="L" id="Article">
+			<section class="LB"><code class="O">laevatain.api</code>
+				<h2 class="Interface DB"><code class="w">ButtonHelper</code><code class="e">&lt;<code>C</code>&gt;</code></h2>
+				<div class="M">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.AbstractButton 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/AbstractButton.html">AbstractButton</a></code></code><span><p>the concrete button type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXButton" href="api/laevatain.ARXButton.html">ARXButton</a></code></li>
+						<li><code><a aria-label="laevatain.ARXToggle" href="api/laevatain.ARXToggle.html">ARXToggle</a></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent helpers for the button-only flags which the general helpers do not cover: painted chrome,
+rollover feedback and alignment. A button implements this alongside <code><a aria-label="laevatain.api.ComponentHelper" href="api/laevatain.api.ComponentHelper.html">ComponentHelper</a></code> so its
+whole setup can stay in one constructor chain.</p></span></section>
+			<section class="LB" id="contentAreaFilled(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">contentAreaFilled</code><code class="e">(<code>boolean</code><code class="parameterName">filled</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">filled</code></td>
+						<td><span><p>true to let the look and feel fill the content area</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets whether the button paints its own content area. Flat custom buttons turn this off and
+paint their background themselves.</p></span></section>
+			<section class="LB" id="borderPainted(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">borderPainted</code><code class="e">(<code>boolean</code><code class="parameterName">painted</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">painted</code></td>
+						<td><span><p>true to paint the border</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets whether the border is painted. Custom buttons which draw their own rounded outline turn
+this off.</p></span></section>
+			<section class="LB" id="focusPainted(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">focusPainted</code><code class="e">(<code>boolean</code><code class="parameterName">painted</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">painted</code></td>
+						<td><span><p>true to paint the focus ring</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets whether the focus indicator is painted by the look and feel.</p></span></section>
+			<section class="LB" id="rolloverEnabled(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">rolloverEnabled</code><code class="e">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">enabled</code></td>
+						<td><span><p>true to track the pointer</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets whether the button reacts to a pointer resting over it.</p></span></section>
+			<section class="LB" id="horizontalAlignment(int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">horizontalAlignment</code><code class="e">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>int</code><code class="parameterName">alignment</code></td>
+						<td><span><p>a <code>SwingConstants</code> alignment</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the horizontal alignment of the icon and text.</p></span></section>
+			<section class="LB" id="verticalAlignment(int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">verticalAlignment</code><code class="e">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>int</code><code class="parameterName">alignment</code></td>
+						<td><span><p>a <code>SwingConstants</code> alignment</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the vertical alignment of the icon and text.</p></span></section>
+			<section class="LB" id="horizontalTextPosition(int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">horizontalTextPosition</code><code class="e">(<code>int</code><code class="parameterName">position</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>int</code><code class="parameterName">position</code></td>
+						<td><span><p>a <code>SwingConstants</code> position</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the position of the text relative to the icon.</p></span></section>
+			<section class="LB" id="verticalTextPosition(int)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">verticalTextPosition</code><code class="e">(<code>int</code><code class="parameterName">position</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>int</code><code class="parameterName">position</code></td>
+						<td><span><p>a <code>SwingConstants</code> position</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this button</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets the vertical position of the text relative to the icon.</p></span></section>
+		</article>
+		<aside class="o">
+			<div class="J">
+				<h5 class="BB">Methods</h5>
+				<ul>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#contentAreaFilled(boolean)">contentAreaFilled</a></code><code class="e">(<code>boolean</code><code class="parameterName">filled</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#borderPainted(boolean)">borderPainted</a></code><code class="e">(<code>boolean</code><code class="parameterName">painted</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#focusPainted(boolean)">focusPainted</a></code><code class="e">(<code>boolean</code><code class="parameterName">painted</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#rolloverEnabled(boolean)">rolloverEnabled</a></code><code class="e">(<code>boolean</code><code class="parameterName">enabled</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#horizontalAlignment(int)">horizontalAlignment</a></code><code class="e">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#verticalAlignment(int)">verticalAlignment</a></code><code class="e">(<code>int</code><code class="parameterName">alignment</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#horizontalTextPosition(int)">horizontalTextPosition</a></code><code class="e">(<code>int</code><code class="parameterName">position</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.ButtonHelper.html#verticalTextPosition(int)">verticalTextPosition</a></code><code class="e">(<code>int</code><code class="parameterName">position</code>)</code><i class="k"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="u">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

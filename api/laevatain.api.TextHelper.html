@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta content="width=device-width, initial-scale=1" name="viewport"/>
+		<meta content="Explains how to use Freja and its API. " name="description"/>
+		<link href="https://cdn.jsdelivr.net" rel="preconnect"/>
+		<link href="https://fonts.googleapis.com" rel="preconnect"/>
+		<link crossorigin="null" href="https://fonts.gstatic.com" rel="preconnect"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Material+Icons" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<link as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" rel="preload"/>
+		<link href="https://fonts.googleapis.com/css2?display=swap&amp;family=Vollkorn" media="print" onload="this.media=&apos;all&apos;" rel="stylesheet"/>
+		<title>Freja API</title>
+		<base href="../"/>
+		<script src="mimic.js" type="module"></script>
+		<link href="https://cdn.jsdelivr.net/npm/ress@4.0.0/dist/ress.min.css" rel="stylesheet"/>
+		<link href="main.css" rel="stylesheet"/>
+	</head>
+	<body class="t">
+		<header class="Z" date="2026-11-28">
+			<h1 class="N"><a href="index.html"><code>Freja</code></a></h1>
+			<nav class="a"><a href="api/main.html" id="API"><svg class="package">
+						<use href="main.svg#package"/>
+					</svg>
+				</a><a href="doc/changelog.html" id="Activity"><svg class="activity">
+						<use href="main.svg#activity"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja/discussions" id="Community" target="_blank"><svg class="user">
+						<use href="main.svg#user"/>
+					</svg>
+				</a><a href="https://github.com/teletha/freja" id="Repository" target="_blank"><svg class="github">
+						<use href="main.svg#github"/>
+					</svg>
+				</a></nav>
+			<div class="b"><a aria-label="Change color scheme" id="theme"><svg class="sun">
+						<use href="main.svg#sun"/>
+					</svg><svg class="moon">
+						<use href="main.svg#moon"/>
+					</svg>
+				</a></div>
+		</header>
+		<nav class="v"></nav>
+		<article class="L" id="Article">
+			<section class="LB"><code class="O">laevatain.api</code>
+				<h2 class="Interface DB"><code class="w">TextHelper</code><code class="e">&lt;<code>C</code>&gt;</code></h2>
+				<div class="M">
+					<ul class="E F">
+						<li><code>C</code><code class="extends"><code><a aria-label="javax.swing.text.JTextComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/JTextComponent.html">JTextComponent</a></code></code><span><p>the concrete text component type returned by every helper, so chains keep the caller&apos;s type</p></span></li>
+					</ul>
+					<ul class="E I">
+						<li><code><a aria-label="laevatain.ARXWrapLabel" href="api/laevatain.ARXWrapLabel.html">ARXWrapLabel</a></code></li>
+					</ul>
+				</div><span class="A"><p>Fluent helpers for text components: editing, the caret and the wrapping flags of a text area. The
+text-area-only settings check the component type and are no-ops on a plain text field, so every
+<code><a aria-label="javax.swing.text.JTextComponent 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/JTextComponent.html">JTextComponent</a></code> can share this interface.</p></span></section>
+			<section class="LB" id="editable(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">editable</code><code class="e">(<code>boolean</code><code class="parameterName">editable</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">editable</code></td>
+						<td><span><p>true to allow editing</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Sets whether the text can be edited. Read-only labels and viewers turn this off.</p></span></section>
+			<section class="LB" id="caret(javax.swing.text.Caret)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">caret</code><code class="e">(<code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code></td>
+						<td><span><p>the caret to install, or null for none</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Replaces the caret. A read-only component can install a caret which never scrolls the viewport.</p></span></section>
+			<section class="LB" id="lineWrap(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">lineWrap</code><code class="e">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">wrap</code></td>
+						<td><span><p>true to wrap lines</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Enables word wrapping, but only on a <code><a aria-label="javax.swing.JTextArea 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JTextArea.html">JTextArea</a></code>; other text components ignore it.</p></span></section>
+			<section class="LB" id="wrapStyleWord(boolean)">
+				<h2 class="Q"><i class="DEFAULT"><i class="PUBLIC"></i></i><code class="w">wrapStyleWord</code><code class="e">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="z"><code>C</code></i></h2>
+				<table class="i">
+					<tr class="n">
+						<td><code>boolean</code><code class="parameterName">wrap</code></td>
+						<td><span><p>true to wrap at words</p></span></td>
+					</tr>
+					<tr class="AB">
+						<td><code>C</code></td>
+						<td><span><p>this component</p></span></td>
+					</tr>
+				</table><span class="A"><p>Wraps at word boundaries instead of mid-word, but only on a <code><a aria-label="javax.swing.JTextArea 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/JTextArea.html">JTextArea</a></code>.</p></span></section>
+		</article>
+		<aside class="o">
+			<div class="J">
+				<h5 class="BB">Methods</h5>
+				<ul>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#editable(boolean)">editable</a></code><code class="e">(<code>boolean</code><code class="parameterName">editable</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#caret(javax.swing.text.Caret)">caret</a></code><code class="e">(<code><a aria-label="javax.swing.text.Caret 🚀" href="https://docs.oracle.com/en/java/javase/24/docs/api/java.desktop/javax/swing/text/Caret.html">Caret</a></code><code class="parameterName">caret</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#lineWrap(boolean)">lineWrap</a></code><code class="e">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="k"><code>C</code></i></li>
+					<li class="s"><i class="DEFAULT"><i class="PUBLIC"></i></i><code><a href="api/laevatain.api.TextHelper.html#wrapStyleWord(boolean)">wrapStyleWord</a></code><code class="e">(<code>boolean</code><code class="parameterName">wrap</code>)</code><i class="k"><code>C</code></i></li>
+				</ul>
+			</div>
+		</aside>
+		<footer class="u">
+			<p>Powered by <a href="https://github.com/teletha/evergarden" target="_">Evergarden</a></p>
+		</footer>
+	</body>
+	<script src="root.js"></script>
+	<script src="main.js" type="module"></script>
+</html>

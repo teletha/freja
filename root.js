@@ -124,7 +124,17 @@ const root = {
 			"type": "Interface"
 		},
 		{
+			"name": "TextHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
 			"name": "DisableHelper",
+			"packageName": "laevatain.api",
+			"type": "Interface"
+		},
+		{
+			"name": "ButtonHelper",
 			"packageName": "laevatain.api",
 			"type": "Interface"
 		},
