@@ -7,57 +7,51 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import javax.swing.Icon;
-import javax.swing.JCheckBox;
+import javax.swing.JRadioButtonMenuItem;
 
 import kiss.Variable;
+import laevatain.ARXTextBinding;
 import laevatain.api.ComponentHelper;
 
-/**
- * A check box whose caption can follow a {@link Variable}, so a translated option keeps its wording
- * when the interface language changes.
- */
-public final class ARXCheckBox extends JCheckBox implements ComponentHelper<ARXCheckBox> {
+/** A radio menu item whose caption can follow a {@link Variable}, mirroring {@link ARXMenuItem}. */
+public final class ARXRadioButtonMenuItem extends JRadioButtonMenuItem implements ComponentHelper<ARXRadioButtonMenuItem> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 
-    public ARXCheckBox() {
+    public ARXRadioButtonMenuItem() {
         this((String) null);
     }
 
-    public ARXCheckBox(String text) {
+    public ARXRadioButtonMenuItem(String text) {
         super(text);
     }
 
-    public ARXCheckBox(Variable<String> text) {
+    public ARXRadioButtonMenuItem(Variable<String> text) {
         super(ARXTextBinding.get(text));
         setText(text);
     }
 
-    public ARXCheckBox(String text, boolean selected) {
+    public ARXRadioButtonMenuItem(String text, boolean selected) {
         super(text, selected);
     }
 
-    public ARXCheckBox(Variable<String> text, boolean selected) {
+    public ARXRadioButtonMenuItem(Variable<String> text, boolean selected) {
         super(ARXTextBinding.get(text), selected);
         setText(text);
     }
 
-    public ARXCheckBox(Icon icon) {
+    public ARXRadioButtonMenuItem(Icon icon) {
         super(icon);
     }
 
-    public ARXCheckBox(Icon icon, boolean selected) {
-        super(icon, selected);
-    }
-
-    public ARXCheckBox(String text, Icon icon, boolean selected) {
+    public ARXRadioButtonMenuItem(String text, Icon icon, boolean selected) {
         super(text, icon, selected);
     }
 
-    public ARXCheckBox(Variable<String> text, Icon icon, boolean selected) {
+    public ARXRadioButtonMenuItem(Variable<String> text, Icon icon, boolean selected) {
         super(ARXTextBinding.get(text), icon, selected);
         setText(text);
     }

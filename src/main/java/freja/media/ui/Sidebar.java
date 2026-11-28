@@ -29,22 +29,22 @@ import javax.swing.SwingUtilities;
 
 import freja.Icons;
 import freja.Theme;
-import laevatain.ARXScrollPane;
-import laevatain.ARXSectionHeader;
-import laevatain.ARXSectionListPanel;
 import freja.media.Folder;
 import freja.media.LibraryStats;
 import freja.media.PhotoFilter.SortOrder;
 import kiss.I;
-import laevatain.ARXLabel;
-import laevatain.ARXMenu;
-import laevatain.ARXMenuItem;
-import laevatain.ARXNavList;
-import laevatain.ARXRadioButtonMenuItem;
 import laevatain.ARXTextBinding;
 
 import laevatain.api.ComponentHelper;
-import laevatain.ARXPanel;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXMenu;
+import laevatain.component.ARXMenuItem;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXRadioButtonMenuItem;
+import laevatain.component.ARXScrollPane;
+import laevatain.composite.ARXNavList;
+import laevatain.composite.ARXSectionHeader;
+import laevatain.composite.ARXSectionListPanel;
 
 /**
  * The navigation sidebar: a library list built from the reusable {@link ARXNavList} and the

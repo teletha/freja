@@ -33,12 +33,11 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Tag;
 import freja.media.store.LibraryTasks;
-
-import laevatain.ARXList;
-import laevatain.ARXScrollPane;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXCheckBox;
+import laevatain.component.ARXCheckBox;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXList;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
 /**
  * Edits one-way links between tags. Linking {@code 井上和彦 → 漫画} makes folders tagged with the
  * former show up in a search for the latter; the reverse is not implied.

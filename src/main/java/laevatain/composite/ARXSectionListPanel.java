@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.composite;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

@@ -7,7 +7,7 @@
  *
  *          http://opensource.org/licenses/mit-license.php
  */
-package laevatain;
+package laevatain.component;
 
 import java.awt.LayoutManager;
 import javax.swing.JPanel;

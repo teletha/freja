@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 
 import kiss.I;
 import kiss.Variable;
+import laevatain.ARXTextBinding;
 import laevatain.api.ComponentHelper;
 import laevatain.api.LabelHelper;
 

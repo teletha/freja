@@ -89,12 +89,12 @@ import freja.media.store.Library;
 import freja.media.store.LibraryTasks;
 import freja.util.PathUtil;
 import imagify.Imagify;
-import laevatain.ARXButton;
-import laevatain.ARXSearchField;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXScrollPane;
-import laevatain.ARXCheckBox;
+import laevatain.component.ARXButton;
+import laevatain.component.ARXCheckBox;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
+import laevatain.component.ARXSearchField;
 /**
  * The main application window.
  */

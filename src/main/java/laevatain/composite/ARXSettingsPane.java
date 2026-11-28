@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.composite;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,6 +46,9 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import kiss.I;
 import kiss.Variable;
 import laevatain.api.ComponentHelper;
+import laevatain.component.ARXScrollPane;
+import laevatain.component.ARXSearchField;
+import laevatain.component.ARXWrapLabel;
 
 /**
  * A Windows 11-style settings surface: an {@link ARXNavList} rail on the left and one continuous,

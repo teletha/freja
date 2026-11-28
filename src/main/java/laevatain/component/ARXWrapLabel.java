@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import java.awt.Component;
 import java.awt.Cursor;

@@ -7,7 +7,7 @@
  *
  *          http://opensource.org/licenses/mit-license.php
  */
-package laevatain;
+package laevatain.component;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -15,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 
 import laevatain.api.ComponentHelper;
+import laevatain.composite.ARXNavList;
 
 /**
  * The ARX scroll container: a borderless {@link JScrollPane} whose viewport follows the pane's own

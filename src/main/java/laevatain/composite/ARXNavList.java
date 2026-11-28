@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.composite;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -48,8 +48,11 @@ import javax.swing.UIManager;
 import com.formdev.flatlaf.util.UIScale;
 
 import kiss.Variable;
+import laevatain.ARXTextBinding;
 import laevatain.api.ComponentHelper;
 import laevatain.api.LabelHelper;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXScrollPane;
 
 /**
  * A Windows 11-style navigation list: icon rows with a rounded selection wash, an optional

@@ -48,10 +48,9 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Folder;
 import kiss.I;
-
-import laevatain.ARXScrollPane;
 import laevatain.api.ComponentHelper;
-import laevatain.ARXLabel;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXScrollPane;
 
 /**
  * The folder rail of the library, built on {@link JList} so only the rows inside the viewport are
@@ -59,7 +58,7 @@ import laevatain.ARXLabel;
  * which are scrolled away: the model keeps plain {@link Folder} records and the renderer is one
  * shared cell.
  * <p>
- * The visuals mirror {@link laevatain.ARXNavList}: a rounded selection wash, hover feedback, an
+ * The visuals mirror {@link laevatain.composite.ARXNavList}: a rounded selection wash, hover feedback, an
  * icon, an ellipsised title and a right-aligned count.
  * </p>
  */

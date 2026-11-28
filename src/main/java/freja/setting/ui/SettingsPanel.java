@@ -55,17 +55,17 @@ import freja.setting.WindowSettings;
 import freja.util.ArchiveSettings;
 import freja.util.VideoThumbnailSettings;
 import kiss.I;
-import laevatain.ARXButton;
-import laevatain.ARXComboBox;
-import laevatain.ARXLabel;
-import laevatain.ARXSettingsPane;
 import laevatain.ARXTextBinding;
-import laevatain.ARXToggle;
 import laevatain.ChooserLocations;
 import laevatain.util.Language;
 
 import laevatain.api.ComponentHelper;
-import laevatain.ARXPanel;
+import laevatain.component.ARXButton;
+import laevatain.component.ARXComboBox;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXToggle;
+import laevatain.composite.ARXSettingsPane;
 
 /**
  * Freja's settings page: the reusable {@link ARXSettingsPane} scaffold - searchable rail, anchored

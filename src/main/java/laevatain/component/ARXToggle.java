@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import java.awt.Color;
 import java.awt.Graphics;

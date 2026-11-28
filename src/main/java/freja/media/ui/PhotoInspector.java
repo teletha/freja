@@ -39,9 +39,9 @@ import freja.Theme;
 import freja.media.Photo;
 
 import laevatain.api.ComponentHelper;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXScrollPane;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
 
 /**
  * The details panel shown next to the thumbnail grid.

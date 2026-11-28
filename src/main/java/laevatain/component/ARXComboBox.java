@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import java.util.ArrayList;
 import java.util.List;

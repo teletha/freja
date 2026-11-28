@@ -7,39 +7,46 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
-import javax.swing.JMenu;
+import javax.swing.Icon;
+import javax.swing.JMenuItem;
 
 import kiss.Variable;
+import laevatain.ARXTextBinding;
 import laevatain.api.ComponentHelper;
 
 /**
- * A menu whose caption can follow a {@link Variable}, mirroring {@link ARXMenuItem}.
+ * A menu item whose caption can follow a {@link Variable}. Menus are built on demand, so a late
+ * translation still reaches an item which is already on screen.
  */
-public final class ARXMenu extends JMenu implements ComponentHelper<ARXMenu> {
+public final class ARXMenuItem extends JMenuItem implements ComponentHelper<ARXMenuItem> {
 
     private final ARXTextBinding textBinding = new ARXTextBinding();
 
-    public ARXMenu() {
+    public ARXMenuItem() {
         this((String) null);
     }
 
-    public ARXMenu(String text) {
+    public ARXMenuItem(String text) {
         super(text);
     }
 
-    public ARXMenu(Variable<String> text) {
+    public ARXMenuItem(Variable<String> text) {
         super(ARXTextBinding.get(text));
         setText(text);
     }
 
-    public ARXMenu(String text, boolean tearOff) {
-        super(text, tearOff);
+    public ARXMenuItem(Icon icon) {
+        super(icon);
     }
 
-    public ARXMenu(Variable<String> text, boolean tearOff) {
-        super(ARXTextBinding.get(text), tearOff);
+    public ARXMenuItem(String text, Icon icon) {
+        super(text, icon);
+    }
+
+    public ARXMenuItem(Variable<String> text, Icon icon) {
+        super(ARXTextBinding.get(text), icon);
         setText(text);
     }
 

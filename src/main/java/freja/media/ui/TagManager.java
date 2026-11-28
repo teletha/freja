@@ -52,11 +52,11 @@ import freja.Icons;
 import freja.Theme;
 import freja.media.Tag;
 import freja.media.store.LibraryTasks;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXScrollPane;
-import laevatain.ARXTable;
-import laevatain.ARXTextField;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
+import laevatain.component.ARXTable;
+import laevatain.component.ARXTextField;
 /**
  * A dialog for creating, renaming and removing tags. Tags are colour-coded and searchable, names
  * can be edited in place, and selected rows can be renamed with a preview or removed together.

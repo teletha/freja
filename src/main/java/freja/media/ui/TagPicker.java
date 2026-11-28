@@ -47,10 +47,10 @@ import freja.media.Tag;
 import freja.media.store.LibraryTasks;
 
 import laevatain.api.ComponentHelper;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXScrollPane;
-import laevatain.ARXTextField;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
+import laevatain.component.ARXTextField;
 
 /**
  * A GitHub-issue-style label picker shown as a popover instead of a modal dialog: a new-label field,

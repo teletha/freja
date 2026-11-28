@@ -7,7 +7,7 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -34,6 +34,7 @@ import javax.swing.text.StyleConstants;
 import com.formdev.flatlaf.FlatClientProperties;
 
 import kiss.Variable;
+import laevatain.ARXTextBinding;
 import laevatain.api.ComponentHelper;
 
 /**

@@ -40,13 +40,13 @@ import com.formdev.flatlaf.util.SystemFileChooser;
 import freja.Icons;
 import freja.Theme;
 import freja.media.Folder;
-import laevatain.ARXFileChooser;
-import laevatain.ARXList;
 import freja.util.PathUtil;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXScrollPane;
-import laevatain.ARXCheckBox;
+import laevatain.component.ARXCheckBox;
+import laevatain.component.ARXFileChooser;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXList;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
 /** Dialog for managing the folders the library watches and scans. */
 public final class ScanFoldersDialog extends JDialog {
     private static final String LOCATION_KEY = "scanFolders";

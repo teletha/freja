@@ -11,9 +11,6 @@ package freja.file.ui;
 
 import freja.Icons;
 import freja.Theme;
-import laevatain.ARXNavList;
-import laevatain.ARXSectionHeader;
-import laevatain.ARXSectionListPanel;
 import freja.file.FileBrowser;
 import freja.file.FileLocation;
 import freja.file.FileOperations;
@@ -92,15 +89,17 @@ import freja.setting.WindowSettings;
 import freja.util.FileIcons;
 import freja.util.PathUtil;
 import psychopath.Progress;
-
-import laevatain.ARXComboBox;
-import laevatain.ARXList;
-import laevatain.ARXScrollPane;
-import laevatain.ARXSplitPane;
-import laevatain.ARXTable;
 import laevatain.api.ComponentHelper;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
+import laevatain.component.ARXComboBox;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXList;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
+import laevatain.component.ARXSplitPane;
+import laevatain.component.ARXTable;
+import laevatain.composite.ARXNavList;
+import laevatain.composite.ARXSectionHeader;
+import laevatain.composite.ARXSectionListPanel;
 
 /** A file manager with pinned folder tabs and a detailed file list, without a directory tree. */
 public final class FileManagerPanel extends JPanel implements ComponentHelper<FileManagerPanel> {

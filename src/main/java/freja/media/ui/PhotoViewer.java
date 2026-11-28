@@ -70,9 +70,9 @@ import freja.media.Photo;
 import freja.media.store.Archives;
 import freja.util.ImageTransforms;
 import imagify.Imagify;
-import laevatain.ARXLabel;
-import laevatain.ARXPanel;
-import laevatain.ARXScrollPane;
+import laevatain.component.ARXLabel;
+import laevatain.component.ARXPanel;
+import laevatain.component.ARXScrollPane;
 /**
  * A full-screen viewer with a video-site style overlay. The controls live in a separate translucent
  * window, so fading them in or out never changes the size of the photo or video underneath.

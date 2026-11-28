@@ -7,12 +7,14 @@
  *
  *          https://opensource.org/licenses/MIT
  */
-package laevatain;
+package laevatain.component;
 
 import java.awt.Component;
 import java.io.File;
 
 import com.formdev.flatlaf.util.SystemFileChooser;
+
+import laevatain.ChooserLocations;
 
 /**
  * A FlatLaf system chooser which opens where its owner last left it and stores the new location when
